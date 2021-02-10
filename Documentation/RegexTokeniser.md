@@ -118,7 +118,7 @@ RegexTokeniser(Regex @break, Func<String?, String?>? transform = null, RegexOpti
 
 #### Remarks
 
-Calling this constructor is essentially the same (performance aside) as calling ```RegexTokeniser.RegexTokeniser(breakPattern: @break.ToString(), transform: transform, options: alterOptions ?? @break.Options)```.
+Calling this constructor is essentially the same (performance aside) as calling [```RegexTokeniser.RegexTokeniser(breakPattern: @break.ToString(), transform: transform, options: alterOptions ?? @break.Options)``` constructor](#regextokeniserstring-funcstring-string--null-boolean--false-regexoptions--regexoptionsnone).
 
 ## Methods
 
