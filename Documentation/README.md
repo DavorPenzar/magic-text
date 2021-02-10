@@ -13,7 +13,7 @@ Tokenisation of input texts is called *shattering* the text (into tokens) throug
 ### Classes
 
 1.  [```ShatteringOptions```](ShatteringOptions.md) &ndash; Options for [```ITokeniser.Shatter(StreamReader, ShatteringOptions?)```](ITokeniser.md#shatterstreamreader-shatteringoptions--null) and [```ITokeniser.ShatterAsync(StreamReader, ShatteringOptions?)```](ITokeniser.md#shatterasyncstreamreader-shatteringoptions--null) methods.
-2.  [```Tokeniser```](Tokeniser.md) &ndash; Static class with convenient extension methods for instances of [```ITokeniser``` interface](#ITokeniser.md)).
+2.  [```Tokeniser```](Tokeniser.md) &ndash; Static class with convenient extension methods for instances of [```ITokeniser``` interface](#ITokeniser.md).
 3.  [```CharTokeniser```](SharTokeniser.md) &ndash; Tokeniser which shatters text at each character.
 4.  [```RegexTokeniser```](RegexTokeniser.md) &ndash; Tokeniser which shatters text at specific regular expression pattern matches.
 
