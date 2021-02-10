@@ -2,9 +2,14 @@
 
 Interface for tokenising (*shattering* into tokens) input texts.
 
+Known implementing subclasses:
+
+*   [```CharTokeniser```](CharTokeniser.md)
+*   [```RegexTokeniser```](RegexTokeniser.md)
+
 ## Methods
 
-### Shatter(StreamReader, [ShatteringOptions? = null])
+### Shatter(StreamReader[, ShatteringOptions? = null])
 
 Shatter text read from ```input``` into tokens synchronously.
 
@@ -18,7 +23,7 @@ IEnumerable<String?> Shatter(StreamReader input, ShatteringOptions? options = nu
 #### Parameters
 
 1.  ```input```: ```StreamReader``` &ndash; Stream for reading the input text.
-2.  ```options```: ```ShatteringOptions```, optional &ndash; Shattering options. If ```null```, defaults are used.
+2.  ```options```: [```ShatteringOptions```](ShatteringOptions.md), optional &ndash; Shattering options. If ```null```, defaults are used.
 
 #### Returns
 
@@ -28,7 +33,7 @@ IEnumerable<String?> Shatter(StreamReader input, ShatteringOptions? options = nu
 
 The method should ultimately return the same results as ```ShatterAsync(StreamReader, ShatteringOptions?)``` called with the same parameters.
 
-### ShatterAsync(StreamReader, [ShatteringOptions? = null])
+### ShatterAsync(StreamReader[, ShatteringOptions? = null])
 
 Shatter text read from ```input``` into tokens asynchronously.
 
@@ -42,7 +47,7 @@ Task<IEnumerable<String?>> ShatterAsync(StreamReader input, ShatteringOptions? o
 #### Parameters
 
 1.  ```input```: ```StreamReader``` &ndash; Stream for reading the input text.
-2.  ```options```: ```ShatteringOptions```, optional &ndash; Shattering options. If ```null```, defaults are used.
+2.  ```options```: [```ShatteringOptions```](ShatteringOptions.md), optional &ndash; Shattering options. If ```null```, defaults are used.
 
 #### Returns
 
