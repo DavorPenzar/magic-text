@@ -43,6 +43,11 @@ Pen(IEnumerable<String?> tokens, StringComparer comparer, String? endToken = nul
 2.  ```comparer```: ```StringComparer``` &ndash; String comparer. Equality of tokens shall be checked with ```comparer```.
 3.  ```endToken```: ```String```, optional &ndash; Ending token.
 
+#### Exceptions
+
+*   ```ArgumentException```
+    *   If ```tokens``` is empty.
+
 ### Pen(IEnumerable<String?>[, String? = null])
 
 Create a ```Pen``` with provided values.
@@ -60,6 +65,11 @@ Pen(IEnumerable<String?> tokens, String? endToken = null)
 
 1.  ```tokens```: ```IEnumerable<String?>``` &ndash; Input tokens. Random text will be generated based on input tokens: both by picking only from the input tokens and by using the order of the input tokens.
 2.  ```endToken```: ```String```, optional &ndash; Ending token.
+
+#### Exceptions
+
+*   ```ArgumentException```
+    *   If ```tokens``` is empty.
 
 ## Methods
 
