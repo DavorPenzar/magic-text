@@ -21,7 +21,7 @@ CharTokeniser()
 
 ## Methods
 
-### Shatter(StreamReader, [ShatteringOptions? = null])
+### Shatter(StreamReader[, ShatteringOptions? = null])
 
 Shatter text read from ```input``` into tokens synchronously.
 
@@ -45,7 +45,7 @@ IEnumerable<String?> Shatter(StreamReader input, ShatteringOptions? options = nu
 
 Empty tokens are considered those characters that yield ```true``` when converted to strings via ```Char.ToString()``` method and checked via ```String.IsNullOrEmpty(String)``` method.
 
-### ShatterAsync(StreamReader, [ShatteringOptions? = null])
+### ShatterAsync(StreamReader[, ShatteringOptions? = null])
 
 Shatter text read from ```input``` into tokens asynchronously.
 
