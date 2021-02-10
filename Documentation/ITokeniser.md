@@ -31,7 +31,7 @@ IEnumerable<String?> Shatter(StreamReader input, ShatteringOptions? options = nu
 
 #### Remarks
 
-The method should ultimately return the same results as ```ShatterAsync(StreamReader, ShatteringOptions?)``` called with the same parameters.
+The method should return the same enumerable as [```ShatterAsync(StreamReader, ShatteringOptions?)``` method](#shatterasyncstreamreader-shatteringoptions--null) called with the same parameters.
 
 ### ShatterAsync(StreamReader[, ShatteringOptions? = null])
 
@@ -55,7 +55,7 @@ Task<IEnumerable<String?>> ShatterAsync(StreamReader input, ShatteringOptions? o
 
 #### Remarks
 
-The method should ultimately return the same results as ```ShatterAsync(StreamReader, ShatteringOptions?)``` called with the same parameters.
+The method should ultimately return the same enumerable as [```Shatter(StreamReader, ShatteringOptions?)``` method](#shatterstreamreader-shatteringoptions--null) called with the same parameters.
 
 ## Remarks
 
