@@ -25,7 +25,7 @@ The pattern matches all non-empty continuous white space groups, punctuation sym
 
 ## Static Methods
 
-### CreateReplacementTransformationFunction(String, String, [Boolean = false, Boolean = false, RegexOptions = RegexOptions.None])
+### CreateReplacementTransformationFunction(String, String[, Boolean = false, Boolean = false, RegexOptions = RegexOptions.None])
 
 Create a transformation function of regular expression based replacement.
 
@@ -54,7 +54,7 @@ Function that returns ```null``` when passed a ```null```, otherwise performs th
 
 ```String``` &ndash; Regular expression break pattern used by the tokeniser.
 
-Shattering a line of text ```line```, without transformation, filtering and replacement of empty lines and line ends, by the tokeniser is equivalent to calling ```Regex.Split(line, BreakPattern)```.
+Shattering a line of text ```line``` by the tokeniser, without transformation, filtering and replacement of empty lines and line ends, is equivalent to calling ```Regex.Split(line, BreakPattern)```.
 
 ### Transform
 
@@ -81,9 +81,9 @@ RegexTokeniser()
 
 [```DefaultBreakPattern```](#defaultbreakpattern) is used as the regular expression break pattern ([```BreakPattern```](#breakpattern)) and no transformation function ([```Transform```](#transform)) is used.
 
-### RegexTokeniser(String, [Func<String?, String?>? = null, Boolean = false, RegexOptions = RegexOptions.None])
+### RegexTokeniser(String[, Func<String?, String?>? = null, Boolean = false, RegexOptions = RegexOptions.None])
 
-Create a ```RegexTokeniser``` with desired options.
+Create a ```RegexTokeniser``` with provided options.
 
 Signature:
 
@@ -99,9 +99,9 @@ RegexTokeniser(String breakPattern, Func<String?, String?>? transform = null, Bo
 3.  ```escape```: ```Boolean```, optional &ndash; If ```true```, ```breakPattern``` is escaped via ```Regex.Escape(String)``` method before usage.
 4.  ```options```: ```RegexOptions```, optional &ndash; Options passed to ```Regex.Regex(String, RegexOptions)``` constructor.
 
-### RegexTokeniser(Regex, [Func<String?, String?>? = null, RegexOptions? = null])
+### RegexTokeniser(Regex[, Func<String?, String?>? = null, RegexOptions? = null])
 
-Create a ```RegexTokeniser``` with desired options.
+Create a ```RegexTokeniser``` with provided options.
 
 Signature:
 
@@ -116,9 +116,13 @@ RegexTokeniser(Regex @break, Func<String?, String?>? transform = null, RegexOpti
 2.  ```transform```: ```Func<String?, String?>```, optional &ndash; Optional transformation function. If ```null```, no transformation function is used.
 4.  ```alterOptions```: ```RegexOptions```, optional &ndash; If ```null```, ```break```'s options are used (no new ```Regex``` is constructed); otherwise options passed to ```Regex.Regex(String, RegexOptions)``` constructor.
 
+#### Remarks
+
+Calling this constructor is essentially the same (performance aside) as calling ```RegexTokeniser.RegexTokeniser(breakPattern: @break.ToString(), transform: transform, options: alterOptions ?? @break.Options)```.
+
 ## Methods
 
-### Shatter(StreamReader, [ShatteringOptions? = null])
+### Shatter(StreamReader[, ShatteringOptions? = null])
 
 Shatter text read from ```input``` into tokens synchronously.
 
@@ -144,7 +148,7 @@ Each line from the input is split into *raw* tokens via ```Regex.Split(String)``
 
 Empty tokens are considered those tokens that yield ```true``` when checked via ```String.IsNullOrEmpty(String)```.
 
-### ShatterAsync(StreamReader, [ShatteringOptions? = null])
+### ShatterAsync(StreamReader[, ShatteringOptions? = null])
 
 Shatter text read from ```input``` into tokens asynchronously.
 
