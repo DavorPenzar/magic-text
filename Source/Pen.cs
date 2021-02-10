@@ -94,13 +94,13 @@ namespace RandomText
                         return 0;
                     }
 
-                    while (i < _tokens.Count && j < _tokens.Count)
+                    while (i < Tokens.Count && j < Tokens.Count)
                     {
-                        var t1 = _tokens[i];
-                        var t2 = _tokens[j];
+                        var t1 = Tokens[i];
+                        var t2 = Tokens[j];
 
                         {
-                            var ends = new Boolean[] { _comparer.Equals(t1, endToken), _comparer.Equals(t2, endToken) };
+                            var ends = new Boolean[] { Comparer.Equals(t1, EndToken), Comparer.Equals(t2, EndToken) };
                             if (ends.All(f => f))
                             {
                                 return 0;
@@ -126,7 +126,7 @@ namespace RandomText
                     }
 
                     {
-                        var counts = new Boolean[] { i == _tokens.Count, j == _tokens.Count };
+                        var counts = new Boolean[] { i == Tokens.Count, j == Tokens.Count };
                         if (counts.All(f => f))
                         {
                             return 0;
@@ -150,7 +150,7 @@ namespace RandomText
 
             if (!Tokens.Any())
             {
-                throw new ArgumentException(EmptyTokensErrorMessage, nameof(tokens))
+                throw new ArgumentException(EmptyTokensErrorMessage, nameof(tokens));
             }
         }
 
