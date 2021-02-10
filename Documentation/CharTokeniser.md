@@ -68,3 +68,7 @@ Task<IEnumerable<String?>> ShatterAsync(StreamReader input, ShatteringOptions? o
 #### Remarks
 
 Empty tokens are considered those characters that yield ```true``` when converted to strings via ```Char.ToString()``` method and checked via ```String.IsNullOrEmpty(String)``` method.
+
+## Remarks
+
+Shattering methods read and process text line-by-line with all CR, LF and CRLF line breaks treated the same.
