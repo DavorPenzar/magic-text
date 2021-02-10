@@ -96,4 +96,4 @@ Decoding is done by calling ```Encoding.Default.GetBytes(String)``` method with 
 
 ## Remarks
 
-See [*Remarks* of ```ITokeniser``` interface](ITokeniser.md#remarks).
+See [*Remarks* of ```ITokeniser``` interface](ITokeniser.md#remarks-2).
