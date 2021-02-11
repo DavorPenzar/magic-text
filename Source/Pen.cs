@@ -93,7 +93,7 @@ namespace RandomText
         ///     </para>
         ///
         ///     <para>
-        ///         If <c>i &lt; j</c>, then <c>Comparer.Compare(Tokens[Positions[i]], Tokens[Positions[j]]) &lt;= 0</c>.
+        ///         If <c>i &lt; j</c>, then <c>Comparer.Compare(Tokens[Positions[i]], Tokens[Positions[j]]) &lt;= 0</c> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
         ///     </para>
         /// </summary>
         /// <seealso cref="Tokens" />
