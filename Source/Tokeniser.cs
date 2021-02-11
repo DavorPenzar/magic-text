@@ -1,31 +1,65 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace RandomText
 {
+    /// <summary>
+    ///     <para>
+    ///         Static class with convenient extension methods for instances of <see cref="ITokeniser" /> interface.
+    ///     </para>
+    /// </summary>
     public static class Tokeniser
     {
-        public static IEnumerable<String?> Shatter(this ITokeniser tokeniser, string text, Encoding encoding, ShatteringOptions? options = null)
+        /// <summary>
+        ///     <para>
+        ///         Shatter <paramref name="text" /> into tokens synchronously.
+        ///     </para>
+        /// </summary>
+        /// <param name="tokeniser">Tokeniser used for shattering.</param>
+        /// <param name="text">Input text.</param>
+        /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
+        /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="text" />.</returns>
+        public static IEnumerable<String?> Shatter(this ITokeniser tokeniser, string text, ShatteringOptions? options = null)
         {
-            using var stream = new MemoryStream(encoding.GetBytes(text));
-            using var reader = new StreamReader(stream);
-            return tokeniser.Shatter(reader, options);
+            List<String?> tokens;
+
+            using (var textStream = new MemoryStream(Encoding.Default.GetBytes(text)))
+            using (var textReader = new StreamReader(textStream, Encoding.Default))
+            {
+                tokens = tokeniser.Shatter(textReader, options).ToList();
+            }
+
+            tokens.TrimExcess();
+
+            return tokens;
         }
 
-        public static IEnumerable<String?> Shatter(this ITokeniser tokeniser, string text, ShatteringOptions? options = null) =>
-            tokeniser.Shatter(text, Encoding.Default, options);
-
-        public static async Task<IEnumerable<String?>> ShatterAsync(this ITokeniser tokeniser, string text, Encoding encoding, ShatteringOptions? options = null)
+        /// <summary>
+        ///     <para>
+        ///         Shatter <paramref name="text" /> into tokens asynchronously.
+        ///     </para>
+        /// </summary>
+        /// <param name="tokeniser">Tokeniser used for shattering.</param>
+        /// <param name="text">Input text.</param>
+        /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
+        /// <returns>Task whose result is enumerable of tokens (in the order they were read) read from <paramref name="text" />.</returns>
+        public static async Task<IEnumerable<String?>> ShatterAsync(this ITokeniser tokeniser, string text, ShatteringOptions? options = null)
         {
-            using var stream = new MemoryStream(encoding.GetBytes(text));
-            using var reader = new StreamReader(stream);
-            return await tokeniser.ShatterAsync(reader, options);
-        }
+            List<String?> tokens;
 
-        public static async Task<IEnumerable<String?>> ShatterAsync(this ITokeniser tokeniser, string text, ShatteringOptions? options = null) =>
-            await tokeniser.ShatterAsync(text, Encoding.Default, options);
+            using (var textStream = new MemoryStream(Encoding.Default.GetBytes(text)))
+            using (var textReader = new StreamReader(textStream, Encoding.Default))
+            {
+                tokens = (await tokeniser.ShatterAsync(textReader, options)).ToList();
+            }
+
+            tokens.TrimExcess();
+
+            return tokens;
+        }
     }
 }
