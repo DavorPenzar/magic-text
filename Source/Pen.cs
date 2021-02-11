@@ -89,43 +89,29 @@ namespace RandomText
 
         /// <summary>
         ///     <para>
-        ///         Sorting positions of entries in <see cref="Tokens" />.
-        ///     </para>
-        ///
-        ///     <para>
         ///         If <c>i &lt; j</c>, then <c>Comparer.Compare(Tokens[Positions[i]], Tokens[Positions[j]]) &lt;= 0</c> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
         ///     </para>
         /// </summary>
+        /// <value>Sorting positions of entries in <see cref="Tokens" />.</value>
         /// <seealso cref="Tokens" />
         /// <seealso cref="Comparer" />
         protected IReadOnlyCollection<Int32> Positions => _positions;
 
-        /// <summary>
-        ///     <para>
-        ///         String comparer used by the pen for comparing tokens.
-        ///     </para>
-        /// </summary>
+        /// <value>String comparer used by the pen for comparing tokens.</value>
         public StringComparer Comparer => _comparer;
 
-        /// <summary>
-        ///     <para>
-        ///         Unsorted tokens of the pen. The order of tokens is kept as provided in the constructor.
-        ///     </para>
-        /// </summary>
+        /// <value>Unsorted tokens of the pen. The order of tokens is kept as provided in the constructor.</value>
         public IReadOnlyCollection<String?> Tokens => _tokens;
 
         /// <summary>
         ///     <para>
-        ///         Ending token of the pen. This token (or any other comparing equal to it by <see cref="Comparer" />) shall never be rendered.
+        ///         This token (or any other comparing equal to it by <see cref="Comparer" />) shall never be rendered.
         ///     </para>
         /// </summary>
+        /// <value>Ending token of the pen.</value>
         public String? EndToken => _endToken;
 
-        /// <summary>
-        ///     <para>
-        ///         Indicator of all tokens in <see cref="Tokens" /> being equal to <see cref="EndToken" /> as compared by <see cref="Comparer" />.
-        ///     </para>
-        /// </summary>
+        /// <value>Indicator of all tokens in <see cref="Tokens" /> being equal to <see cref="EndToken" /> as compared by <see cref="Comparer" />.</value>
         /// <remarks>
         ///     <para>
         ///         If <see cref="Tokens" /> is empty, <see cref="AllEnds" /> will be <c>true</c>. This coincides with mathematical logic of empty sets.
@@ -234,7 +220,7 @@ namespace RandomText
 
         /// <summary>
         ///     <para>
-        ///         Render (generate) a block of text.
+        ///         Render (generate) a block of text from <see cref="Tokens" />.
         ///     </para>
         ///
         ///     <para>
@@ -263,14 +249,37 @@ namespace RandomText
         ///     </para>
         ///
         ///     <list type="number">
+        ///         <listheader>
+        ///             <term>
+        ///                 case
+        ///             </term>
+        ///             <description>
+        ///                 description
+        ///             </description>
+        ///         </listheader>
         ///         <item>
-        ///             the pen was constructed with an empty enumerable of tokens,
+        ///             <term>
+        ///                 no tokens
+        ///             </term>
+        ///             <description>
+        ///                 the pen was constructed with an empty enumerable of tokens,
+        ///             </description>
         ///         </item>
         ///         <item>
-        ///             the pen was constructed with an enumerable consisting only of ending tokens (mathematically speaking, this is a <em>subcase</em> of the first case),
+        ///             <term>
+        ///                 all ending tokens
+        ///             </term>
+        ///             <description>
+        ///                 the pen was constructed with an enumerable consisting only of ending tokens (mathematically speaking, this is a <em>subcase</em> of the first case),
+        ///             </description>
         ///         </item>
         ///         <item>
-        ///             a <em>successor</em> of the last token or an ending token is picked first.
+        ///             <term>
+        ///                 by choice
+        ///             </term>
+        ///             <description>
+        ///                 a <em>successor</em> of the last token or an ending token is picked first.
+        ///             </description>
         ///         </item>
         ///     </list>
         /// </remarks>
@@ -396,7 +405,7 @@ namespace RandomText
 
         /// <summary>
         ///     <para>
-        ///         Render (generate) a block of text.
+        ///         Render (generate) a block of text from <see cref="Tokens" />.
         ///     </para>
         ///
         ///     <para>
@@ -425,14 +434,37 @@ namespace RandomText
         ///     </para>
         ///
         ///     <list type="number">
+        ///         <listheader>
+        ///             <term>
+        ///                 case
+        ///             </term>
+        ///             <description>
+        ///                 description
+        ///             </description>
+        ///         </listheader>
         ///         <item>
-        ///             the pen was constructed with an empty enumerable of tokens,
+        ///             <term>
+        ///                 no tokens
+        ///             </term>
+        ///             <description>
+        ///                 the pen was constructed with an empty enumerable of tokens,
+        ///             </description>
         ///         </item>
         ///         <item>
-        ///             the pen was constructed with an enumerable consisting only of ending tokens (mathematically speaking, this is a <em>subcase</em> of the first case),
+        ///             <term>
+        ///                 all ending tokens
+        ///             </term>
+        ///             <description>
+        ///                 the pen was constructed with an enumerable consisting only of ending tokens (mathematically speaking, this is a <em>subcase</em> of the first case),
+        ///             </description>
         ///         </item>
         ///         <item>
-        ///             a <em>successor</em> of the last token or an ending token is picked first.
+        ///             <term>
+        ///                 by choice
+        ///             </term>
+        ///             <description>
+        ///                 a <em>successor</em> of the last token or an ending token is picked first.
+        ///             </description>
         ///         </item>
         ///     </list>
         /// </remarks>

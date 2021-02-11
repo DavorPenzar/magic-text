@@ -31,21 +31,14 @@ namespace RandomText
     {
         /// <summary>
         ///     <para>
-        ///         Default regular expression break pattern.
-        ///     </para>
-        ///
-        ///     <para>
         ///         The pattern matches all non-empty continuous white space groups, punctuation symbol groups (periods, exclamation marks, question marks, colons, semicolons, brackets and dashes are included, but quotation marks are not) and the horizontal ellipsis. The pattern is enclosed in (round) brackets to be captured by <see cref="Regex.Split(String)" /> method.
         ///     </para>
         /// </summary>
+        /// <value>Default regular expression break pattern.</value>
         public const string DefaultBreakPattern = @"(\s+|[\.!\?‽¡¿⸘,:;\(\)\[\]\{\}\-—–]+|…)";
 
-        /// <summary>
-        ///     <para>
-        ///         Default regular expression breaker.
-        ///     </para>
-        /// </summary>
-        protected static readonly Regex DefaultBreak = new Regex(DefaultBreakPattern, RegexOptions.Compiled);
+        /// <value>Default regular expression breaker.</value>
+        protected static Regex DefaultBreak { get; } = new Regex(DefaultBreakPattern, RegexOptions.Compiled);
 
         /// <summary>
         ///     <para>
@@ -72,33 +65,27 @@ namespace RandomText
         private readonly Regex _break;
         private readonly Func<String?, String?>? _transform;
 
-        /// <summary>
-        ///     <para>
-        ///         Regular expression breaker used by the tokeniser.
-        ///     </para>
-        /// </summary>
+        /// <value>Regular expression breaker used by the tokeniser.</value>
         protected Regex Break => _break;
 
         /// <summary>
         ///     <para>
-        ///         Regular expression break pattern used by the tokeniser.
-        ///     </para>
-        ///
-        ///     <para>
         ///         Shattering a line of text <c>line</c> by the tokeniser, without transformation, filtering and replacement of empty lines and line ends, is equivalent (performance aside) to calling <see cref="Regex.Split(String, String)" /> with <c>line</c> as the first argument and <see cref="BreakPattern" /> as the second.
         ///     </para>
         /// </summary>
+        /// <value>Regular expression break pattern used by the tokeniser.</value>
         public String BreakPattern => _break.ToString();
 
         /// <summary>
         ///     <para>
-        ///         Transformation function used by the tokeniser. A <c>null</c> reference means no transformation function is used.
+        ///         A <c>null</c> reference means no transformation function is used.
         ///     </para>
         ///
         ///     <para>
         ///         Transformation is done on raw regular expression pattern matches, before (potential) filtering of empty tokens.
         ///     </para>
         /// </summary>
+        /// <value>Transformation function used by the tokeniser.</value>
         public Func<String?, String?>? Transform => _transform;
 
         /// <summary>
