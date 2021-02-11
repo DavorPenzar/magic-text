@@ -99,7 +99,7 @@ using (var fileReader = new StreamReader(fileStream))
 
 var pen = new Pen(tokens);
 
-foreach (var token in pen.Render(2, new Random(2021)).Take(32))
+foreach (var token in pen.Render(2, new Random(999)).Take(300))
 {
     Console.Write(token);
 }
