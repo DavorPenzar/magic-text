@@ -30,15 +30,41 @@ namespace RandomText
 
         /// <summary>
         ///     <para>
-        ///         Find first position of <paramref name="t" /> in <paramref name="tokens" /> sorted by <paramref name="positions" />.
+        ///         Retrieve the index of a position.
+        ///     </para>
+        /// </summary>
+        /// <param name="positions">Sorted positions.</param>
+        /// <param name="p">Position to find.</param>
+        /// <returns>Index <c>i</c> such that <c>positions[i] == p</c>, or <c>-1</c> if <paramref name="p" /> is not found amongst <paramref name="positions" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).</returns>
+        private static int IndexOf(IEnumerable<Int32> positions, int p)
+        {
+            for (var (en, i) = ValueTuple.Create(positions.GetEnumerator(), 0); en.MoveNext(); ++i)
+            {
+                if (en.Current == p)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        ///     <para>
+        ///         Find first position index of <paramref name="t" /> in <paramref name="tokens" /> sorted by <paramref name="positions" />.
         ///     </para>
         /// </summary>
         /// <param name="comparer">String comparer used for lexicographic ordering of <paramref name="tokens" />.</param>
         /// <param name="tokens">List of tokens amongst which <paramref name="t" /> should be found.</param>
-        /// <param name="positions">Positional ordering of <paramref name="tokens" /> in respect of <paramref name="comparer" />.</param>
+        /// <param name="positions">Sorted positions, or positional ordering of <paramref name="tokens" /> in respect of <paramref name="comparer" />.</param>
         /// <param name="t">Token to find in <paramref name="tokens" />.</param>
         /// <returns>Index <c>i</c> such that <c>comparer.Equal(tokens[positions[i]], t)</c>, but <c>!comparer.Equal(tokens[positions[j]], t)</c> for each <c>j &lt; i</c> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).</returns>
-        private static int FindPosition(StringComparer comparer, IReadOnlyCollection<String?> tokens, IReadOnlyCollection<Int32> positions, String? t)
+        /// <remarks>
+        ///     <para>
+        ///         The implementation of the method assumes <paramref name="t" /> actually exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" /> and that <paramref name="positions" /> indeed sort <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />. If the former is not true, the returned index will point to the position at which <paramref name="t" />'s position should be inserted to retain the sorted order; if the latter is not true, the behaviour of the method is undefined.
+        ///     </para>
+        /// </remarks>
+        private static int FindPositionIndex(StringComparer comparer, IReadOnlyCollection<String?> tokens, IReadOnlyCollection<Int32> positions, String? t)
         {
             // Binary search...
 
@@ -48,7 +74,7 @@ namespace RandomText
             int m;
 
             // Loop until found.
-            while (true)
+            do
             {
                 // Extract the middle token.
                 m = (l + h) >> 1;
@@ -71,6 +97,7 @@ namespace RandomText
                     h = m;
                 }
             }
+            while (l < h);
 
             // Find the minimal index `m` of the position of a token equal to `t`.
             while (m > 0 && comparer.Equals(tokens.ElementAt(positions.ElementAt(m - 1)), t))
@@ -101,12 +128,12 @@ namespace RandomText
         /// <seealso cref="Comparer" />
         protected IReadOnlyCollection<Int32> Positions => _positions;
 
-        /// <summary>
-        ///     <para>
-        ///         If <c>Positions[i] &lt; Positions[FirstPosition]</c>, then <c>Comparer.Equals(Context[Positions[i]], EndToken)</c>, but <c>!Comparer.Equals(Context[Positions[FirstPosition]], EndToken)</c> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
-        ///     </para>
-        /// </summary>
         /// <value>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is <see cref="IReadOnlyCollection{T}.Count" /> of <see cref="Context" />.</value>
+        /// <remarks>
+        ///     <para>
+        ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{Positions[FirstPosition], Positions[FirstPosition] + 1, Positions[FirstPosition] + 2, ...}</c> enumerates <see cref="Context" /> from the beginning (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
+        ///     </para>
+        /// </remarks>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
         /// <seealso cref="EndToken" />
@@ -240,19 +267,19 @@ namespace RandomText
             // Lazily find the position of the first (non-ending) token.
             _lazyFirstPosition = new Lazy<Int32>(
                 () =>
-                {
-                    foreach (var token in Context)
-                    {
-                        if (Comparer.Equals(token, EndToken))
+                    Context.Select(
+                        (t, p) =>
                         {
-                            continue;
+                            if (Comparer.Equals(t, EndToken))
+                            {
+                                return null;
+                            }
+
+                            int i = IndexOf(Positions, p);
+
+                            return i == -1 ? null : (Int32?)i;
                         }
-
-                        return FindPosition(comparer, Context, Positions, token);
-                    }
-
-                    return Context.Count;
-                }
+                    ).Where(i => !(i is null)).FirstOrDefault() ?? Context.Count
             );
 
             // Lazily check if all tokens are ending tokens.
@@ -280,12 +307,12 @@ namespace RandomText
         ///     </para>
         ///
         ///     <para>
-        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first token is chosen internally; otherwise it is chosen by calling <see cref="picker" /> function. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <paramref name="picker" /> function. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
+        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen internally; otherwise they are chosen by calling <see cref="picker" /> function. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <paramref name="picker" /> function. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
         ///     </para>
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
         /// <param name="picker">Random number generator. When passed an integer <c>n</c> (<c>&gt;= 0</c>) as the argument, it should return an integer from range [0, max(<c>n</c>, 1)), i. e. greater than or equal to 0 but (strictly) less than max(<c>n</c>, 1).</param>
-        /// <param name="fromBeginning">If <c>true</c>, <paramref name="picker" /> function is not called to choose the first token, but the first non-ending token from the pen's context; otherwise the first token is chosen by calling <paramref name="picker" /> function.</param>
+        /// <param name="fromBeginning">If <c>true</c>, <paramref name="picker" /> function is not called to choose the first max(<paramref name="relevantTokens" />, 1) tokens, but the beginning of the pen's context is chosen instead; otherwise the first token is chosen by immediately calling <paramref name="picker" /> function.</param>
         /// <returns>A query for rendering tokens.</returns>
         /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative. If <paramref name="picker" /> returns a value outside of the legal range.</exception>
         /// <remarks>
@@ -298,7 +325,7 @@ namespace RandomText
         ///     </para>
         ///
         ///     <para>
-        ///         It is advisable to manually set the upper bound of tokens to render if they are to be stored in a container, such as a <see cref="List{T}" />, or concatenated together into a string to avoid memory errors. This can be done by calling <see cref="Enumerable.Take{TSource}(IEnumerable{TSource}, Int32)" /> extension method or by iterating a loop with a counter.
+        ///         It is advisable to manually set the upper bound of tokens to render if they are to be stored in a container, such as a <see cref="List{T}" />, or concatenated together into a string to avoid memory errors. This may be done by calling <see cref="Enumerable.Take{TSource}(IEnumerable{TSource}, Int32)" /> extension method or by iterating a loop with a counter.
         ///     </para>
         ///
         ///     <para>
@@ -351,17 +378,13 @@ namespace RandomText
             var text = new List<String?>(Math.Max(relevantTokens, 1));
             int c = 0;
 
-            // Render the first token.
+            // Render the first token, or the first `relevantTokens` if needed.
+            if (fromBeginning)
             {
-                while (!text.Any())
-                {
-                    int pick = fromBeginning ? FirstPosition : picker(Context.Count + 1);
-                    if (pick < 0 || pick > Context.Count)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
-                    }
+                var first = FirstPosition == Context.Count ? Context.Count : Positions.ElementAt(FirstPosition);
 
-                    int first = pick == Context.Count ? Context.Count : Positions.ElementAt(pick);
+                for (int i = 0; i < text.Capacity; ++i)
+                {
                     var firstToken = first < Context.Count ? Context.ElementAt(first) : EndToken;
                     if (Comparer.Equals(firstToken, EndToken))
                     {
@@ -369,8 +392,28 @@ namespace RandomText
                     }
 
                     text.Add(firstToken);
-                    yield return text[0];
+                    yield return text[i];
+
+                    ++first;
                 }
+            }
+            else
+            {
+                int pick = fromBeginning ? FirstPosition : picker(Context.Count + 1);
+                if (pick < 0 || pick > Context.Count)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
+                }
+
+                int first = pick == Context.Count ? Context.Count : Positions.ElementAt(pick);
+                var firstToken = first < Context.Count ? Context.ElementAt(first) : EndToken;
+                if (Comparer.Equals(firstToken, EndToken))
+                {
+                    yield break;
+                }
+
+                text.Add(firstToken);
+                yield return text[0];
             }
 
             // Loop rendering until over.
@@ -393,7 +436,7 @@ namespace RandomText
                 {
                     // Extract the first relevant token, find its first position `p` and initialise `n` to 0.
                     var t = text[c];
-                    p = FindPosition(Comparer, Context, Positions, t);
+                    p = FindPositionIndex(Comparer, Context, Positions, t);
                     n = 0;
 
                     // Find the actual value of index `p` and number `n`.
@@ -466,12 +509,12 @@ namespace RandomText
         ///     </para>
         ///
         ///     <para>
-        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first token is chosen internally; otherwise it is chosen by calling <see cref="Random.Next(Int32)" /> method of <paramref name="random" />. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="Random.Next(Int32)" /> method of <paramref name="random" />. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
+        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen internally; otherwise they are chosen by calling <see cref="Random.Next(Int32)" /> method of <paramref name="random" />. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="Random.Next(Int32)" /> method of <paramref name="random" />. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
         ///     </para>
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
         /// <param name="random">(Pseudo-)Random number generator.</param>
-        /// <param name="fromBeginning">If <c>true</c>, <paramref name="picker" /> function is not called to choose the first token, but the first non-ending token from the pen's context; otherwise the first token is chosen by calling <paramref name="picker" /> function.</param>
+        /// <param name="fromBeginning">If <c>true</c>, <paramref name="picker" /> function is not called to choose the first max(<paramref name="relevantTokens" />, 1) tokens, but the beginning of the pen's context is chosen instead; otherwise the first token is chosen by immediately calling <paramref name="picker" /> function.</param>
         /// <returns>A query for rendering tokens.</returns>
         /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative.</exception>
         /// <remarks>
@@ -484,7 +527,7 @@ namespace RandomText
         ///     </para>
         ///
         ///     <para>
-        ///         It is advisable to manually set the upper bound of tokens to render if they are to be stored in a container, such as a <see cref="List{T}" />, or concatenated together into a string to avoid memory errors. This can be done by calling <see cref="Enumerable.Take{TSource}(IEnumerable{TSource}, Int32)" /> extension method or by iterating a loop with a counter.
+        ///         It is advisable to manually set the upper bound of tokens to render if they are to be stored in a container, such as a <see cref="List{T}" />, or concatenated together into a string to avoid memory errors. This may be done by calling <see cref="Enumerable.Take{TSource}(IEnumerable{TSource}, Int32)" /> extension method or by iterating a loop with a counter.
         ///     </para>
         ///
         ///     <para>
