@@ -67,9 +67,9 @@ namespace RandomText
         ///     </para>
         /// </summary>
         /// <param name="isEmptyToken">Function to check if a token is empty.</param>
-        protected LineByLineTokeniser(Func<String?, Boolean> isEmptyToken)
+        protected LineByLineTokeniser(Func<String?, Boolean>? isEmptyToken)
         {
-            this.isEmptyToken = isEmptyToken;
+            this.isEmptyToken = isEmptyToken ?? IsEmptyTokenAlwaysFalse;
         }
 
         /// <summary>
