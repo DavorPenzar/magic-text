@@ -14,6 +14,10 @@ namespace RandomText
     /// </summary>
     /// <remarks>
     ///     <para>
+    ///         By default, empty tokens are considered those tokens that yield <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> method. Derived classes may override this behaviour.
+    ///     </para>
+    ///
+    ///     <para>
     ///         Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same.
     ///     </para>
     /// </remarks>
@@ -21,7 +25,7 @@ namespace RandomText
     {
         /// <summary>
         ///     <para>
-        ///         Always say the token is not empty.
+        ///         Always indicate the token as non-empty.
         ///     </para>
         /// </summary>
         /// <param name="token">Token to check.</param>
@@ -33,14 +37,10 @@ namespace RandomText
 
         /// <summary>
         ///     <para>
-        ///         Returns <c>true</c> if the token to check is empty.
-        ///     </para>
-        ///
-        ///     <para>
         ///         This function is used in <see cref="Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> methods to filter out empty tokens if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>.
         ///     </para>
         /// </summary>
-        /// <value>Function to check if a token is empty. Default is <see cref="String.IsNullOrEmpty(String)" />.</value>
+        /// <value>Function to check if a token is empty: it returns <c>true</c> if the token to check is empty. Default is <see cref="String.IsNullOrEmpty(String)" />.</value>
         [AllowNull]
         protected Func<String?, Boolean> IsEmptyToken
         {

@@ -65,6 +65,11 @@ namespace RandomText
         private readonly Regex _break;
         private readonly Func<String?, String?>? _transform;
 
+        /// <summary>
+        ///     <para>
+        ///         In <see cref="ShatterLine(String)" /> method, <see cref="Regex.Split(String)" /> method is invoked on <see cref="Break" /> to extract raw tokens from <c>line</c>.
+        ///     </para>
+        /// </summary>
         /// <value>Regular expression breaker used by the tokeniser.</value>
         protected Regex Break => _break;
 
@@ -78,14 +83,10 @@ namespace RandomText
 
         /// <summary>
         ///     <para>
-        ///         A <c>null</c> reference means no transformation function is used.
-        ///     </para>
-        ///
-        ///     <para>
         ///         Transformation is done on raw regular expression pattern matches, before (potential) filtering of empty tokens.
         ///     </para>
         /// </summary>
-        /// <value>Transformation function used by the tokeniser.</value>
+        /// <value>Transformation function used by the tokeniser. A <c>null</c> reference means no transformation function is used.</value>
         public Func<String?, String?>? Transform => _transform;
 
         /// <summary>

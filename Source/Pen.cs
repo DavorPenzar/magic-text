@@ -16,7 +16,7 @@ namespace RandomText
     ///     </para>
     ///
     ///     <para>
-    ///         A complete deep copy of enumerable <c>context</c> (passed to the constructor) is created and stored by the pen; however, it is simplified by removing unnecessary ending tokens (<see cref="EndToken" />) from the beginning, the end or consecutive duplicates (and other <em>tuplicates</em>). Memory errors may occur if the number of tokens in the enumerable is too large.
+    ///         A complete deep copy of enumerable <c>context</c> (passed to the constructor) is created and stored by the pen; however, it is simplified by removing unnecessary ending tokens (<see cref="EndToken" />) from the beginning and the end and by substituting consecutive duplicates (and other <em>tuplicates</em>) by a single ending token. Memory errors may occur if the number of tokens in the enumerable is too large.
     ///     </para>
     ///
     ///     <para>
@@ -116,12 +116,12 @@ namespace RandomText
         /// <value>Unsorted tokens of the pen. The order of tokens is kept as provided in the constructor.</value>
         public IReadOnlyCollection<String?> Context => _context;
 
-        /// <summary>
+        /// <value>Ending token of the pen.</value>
+        /// <remarks>
         ///     <para>
         ///         This token (or any other comparing equal to it by <see cref="Comparer" />) shall never be rendered.
         ///     </para>
-        /// </summary>
-        /// <value>Ending token of the pen.</value>
+        /// </remarks>
         public String? EndToken => _endToken;
 
         /// <value>Indicator of all tokens in <see cref="Context" /> being equal to <see cref="EndToken" /> as compared by <see cref="Comparer" />.</value>
