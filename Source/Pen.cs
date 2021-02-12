@@ -103,10 +103,10 @@ namespace RandomText
 
         /// <summary>
         ///     <para>
-        ///         If <c>0 &lt; i &lt; FirstPosition</c>, then <c>Comparer.Equals(Context[Positions[i]], EndToken)</c> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
+        ///         If <c>Positions[i] &lt; Positions[FirstPosition]</c>, then <c>Comparer.Equals(Context[Positions[i]], EndToken)</c>, but <c>!Comparer.Equals(Context[Positions[FirstPosition]], EndToken)</c> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
         ///     </para>
         /// </summary>
-        /// <value>Position (index of <see cref="Positions" />) of the first non-ending token in <see cref="Context" />. If such a token does not exist, the value is <see cref="IReadOnlyCollection{T}.Count" /> of <see cref="Context" />.</value>
+        /// <value>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is <see cref="IReadOnlyCollection{T}.Count" /> of <see cref="Context" />.</value>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
         /// <seealso cref="EndToken" />
