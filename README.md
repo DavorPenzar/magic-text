@@ -69,7 +69,7 @@ For example, if the context is acquired by slicing the string *aaaabaaac* at eac
 
 The steps explained above produce *aabaaac* as the output. Although this is indeed shorter than the input text and also a substring of it, this is not necessarily the case.
 
-##  Example
+##  Code Example
 
 Suppose a file *Firework.txt* exists in the working directory, with the contents:
 
@@ -101,7 +101,7 @@ using (var fileReader = new StreamReader(fileStream))
 
 var pen = new Pen(tokens);
 
-foreach (var token in pen.Render(2, new Random(999)).Take(300))
+foreach (var token in pen.Render(4, new Random(999)).Take(300))
 {
     Console.Write(token);
 }
