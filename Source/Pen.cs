@@ -265,12 +265,12 @@ namespace RandomText
         ///     </para>
         ///
         ///     <para>
-        ///         Tokens shall be compared by <see cref="StringComparer.InvariantCulture" />.
+        ///         Tokens shall be compared by <see cref="StringComparer.Ordinal" />.
         ///     </para>
         /// </summary>
         /// <param name="context">Input tokens. Random text will be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
-        public Pen(IEnumerable<String?> context, String? endToken = null) : this(context, StringComparer.InvariantCulture, endToken)
+        public Pen(IEnumerable<String?> context, String? endToken = null) : this(context, StringComparer.Ordinal, endToken)
         {
         }
 
