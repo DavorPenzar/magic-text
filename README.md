@@ -143,3 +143,11 @@ Do you know that there's a spark in you?
 Do you know that there's a spark in
 
 ```
+
+##  Remarks
+
+This library should not be used when working with large corpora of context tokens. Objects of class ```Pen``` store complete context in an in-memory container, rather than reading from external memory. The implemented approach is much simpler and faster to use, but lacks possibility to work with a large number of tokens. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storage of tokens in external memory.
+
+##  References
+
+The complete library is customly written by a single author&mdash;me&mdash;but the logic behind it is something widely known and used in many applications (at least I have come accross it a few times throughout my student days). As I consider the logic as general knowledge in the field, I did not use any sources to implement it.
