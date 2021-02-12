@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,26 +21,74 @@ namespace RandomText
     {
         /// <summary>
         ///     <para>
+        ///         Always say the token is not empty.
+        ///     </para>
+        /// </summary>
+        /// <param name="token">Token to check.</param>
+        /// <returns><c>false</c></returns>
+        private static bool IsEmptyTokenAlwaysFalse(String? token) =>
+            false;
+
+        private Func<String?, Boolean> isEmptyToken;
+
+        /// <summary>
+        ///     <para>
+        ///         Returns <c>true</c> if the token to check is empty.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         This function is used in <see cref="Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> methods to filter out empty tokens if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>.
+        ///     </para>
+        /// </summary>
+        /// <value>Function to check if a token is empty. Default is <see cref="String.IsNullOrEmpty(String)" />.</value>
+        [AllowNull]
+        protected Func<String?, Boolean> IsEmptyToken
+        {
+            get => isEmptyToken;
+            set
+            {
+                isEmptyToken = value ?? IsEmptyTokenAlwaysFalse;
+            }
+        }
+
+        /// <summary>
+        ///     <para>
         ///         Initialise a tokeniser.
         ///     </para>
         /// </summary>
         public LineByLineTokeniser()
         {
+            isEmptyToken = String.IsNullOrEmpty;
+        }
+
+        /// <summary>
+        ///     <para>
+        ///         Initialise a tokeniser with provided options.
+        ///     </para>
+        /// </summary>
+        /// <param name="isEmptyToken">Function to check if a token is empty.</param>
+        protected LineByLineTokeniser(Func<String?, Boolean> isEmptyToken)
+        {
+            this.isEmptyToken = isEmptyToken;
         }
 
         /// <summary>
         ///     <para>
         ///         Shatter a single line into tokens.
         ///     </para>
+        /// </summary>
+        /// <param name="line">Line of text to shatter.</param>
+        /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="line" />.</returns>
+        /// <remarks>
+        ///     <para>
+        ///         It is guaranteed that, when called from <see cref="LineByLineTokeniser" />, <paramref name="line" /> will be a string not containing any line end (CR, LF or CRLF). Nonetheless, when calling from a subclass, its programmer may call the method however they wish, but this is beyond the original programmer's responsibility.
+        ///     </para>
         ///
         ///     <para>
-        ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is <c>false</c> and <paramref name="tokens" /> is non-empty, <see cref="ShatteringOptions.LineEndToken" /> should be added to <paramref name="tokens" /> before any token extracted from <paramref name="line" />. However, <see cref="ShatteringOptions.LineEndToken" /> should not be added after <paramref name="line" />'s tokens.
+        ///         The method <strong>should not</strong> produce <see cref="ShatteringOptions.EmptyLineToken" />s nor <see cref="ShatteringOptions.LineEndToken" />s to represent empty lines and line ends. Also, the method <strong>should not</strong> manually filter out empty tokens. Hence no <see cref="ShatteringOptions" /> are available to the method. The result of an empty line (even without possible filtering out of empty tokens) should be an empty enumerable, while empty tokens, empty lines and line ends are treated within the scope of <see cref="LineByLineTokeniser" /> parent class and its methods.
         ///     </para>
-        /// </summary>
-        /// <param name="tokens">List of tokens</param>
-        /// <param name="line"></param>
-        /// <param name="options"></param>
-        protected abstract void ShatterLine(ref List<String?> tokens, String line, ShatteringOptions options);
+        /// </remarks>
+        protected abstract IEnumerable<String?> ShatterLine(String line);
 
         /// <summary>
         ///     <para>
@@ -64,22 +113,48 @@ namespace RandomText
             // Initialise tokens.
             var tokens = new List<String?>();
 
+            // Declare:
+            var addLineEnd = false; // indicator that a line end should be added
+
             // Shatter text from `input` line-by-line.
             while (true)
             {
+                // Add `options.LineEndToken` to `tokens` if necessary.
+                if (!options.IgnoreLineEnds && addLineEnd)
+                {
+                    tokens.Add(options.LineEndToken);
+                }
+
+                // Read and shatter next line.
+
                 var line = input.ReadLine();
                 if (line is null)
                 {
                     break;
                 }
 
-                ShatterLine(ref tokens, line, options);
-            }
+                var lineTokens = ShatterLine(line);
+                if (options.IgnoreEmptyTokens)
+                {
+                    lineTokens = lineTokens.Where(t => !IsEmptyToken(t));
+                }
+                lineTokens = lineTokens.ToList();
 
-            // Add `options.LineEndToken` to `tokens` if necessary.
-            if (!options.IgnoreLineEnds && tokens.Any())
-            {
-                tokens.Add(options.LineEndToken);
+                // Add line's tokens to `tokens` if necessary. Update `addLineEnd`.
+                if (lineTokens.Any())
+                {
+                    tokens.AddRange(lineTokens);
+                    addLineEnd = true;
+                }
+                else if (options.IgnoreEmptyLines)
+                {
+                    addLineEnd = false;
+                }
+                else // `!options.IgnoreEmptyLines`
+                {
+                    tokens.Add(options.EmptyLineToken);
+                    addLineEnd = true;
+                }
             }
 
             // Finalise tokens and return.
@@ -112,22 +187,48 @@ namespace RandomText
             // Initialise tokens.
             var tokens = new List<String?>();
 
+            // Declare:
+            var addLineEnd = false; // indicator that a line end should be added
+
             // Shatter text from `input` line-by-line.
             while (true)
             {
+                // Add `options.LineEndToken` to `tokens` if necessary.
+                if (!options.IgnoreLineEnds && addLineEnd)
+                {
+                    tokens.Add(options.LineEndToken);
+                }
+
+                // Read and shatter next line.
+
                 var line = await input.ReadLineAsync();
                 if (line is null)
                 {
                     break;
                 }
 
-                ShatterLine(ref tokens, line, options);
-            }
+                var lineTokens = ShatterLine(line);
+                if (options.IgnoreEmptyTokens)
+                {
+                    lineTokens = lineTokens.Where(t => !IsEmptyToken(t));
+                }
+                lineTokens = lineTokens.ToList();
 
-            // Add `options.LineEndToken` to `tokens` if necessary.
-            if (!options.IgnoreLineEnds && tokens.Any())
-            {
-                tokens.Add(options.LineEndToken);
+                // Add line's tokens to `tokens` if necessary. Update `addLineEnd`.
+                if (lineTokens.Any())
+                {
+                    tokens.AddRange(lineTokens);
+                    addLineEnd = true;
+                }
+                else if (options.IgnoreEmptyLines)
+                {
+                    addLineEnd = false;
+                }
+                else // `!options.IgnoreEmptyLines`
+                {
+                    tokens.Add(options.EmptyLineToken);
+                    addLineEnd = true;
+                }
             }
 
             // Finalise tokens and return.

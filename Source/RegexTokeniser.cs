@@ -143,41 +143,26 @@ namespace RandomText
         ///     </para>
         ///
         ///     <para>
-        ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is <c>false</c> and <paramref name="tokens" /> is non-empty, <see cref="ShatteringOptions.LineEndToken" /> is added to <paramref name="tokens" /> before any token extracted from <paramref name="line" />. However, <see cref="ShatteringOptions.LineEndToken" /> is not added after <paramref name="line" />'s tokens.
+        ///         After splitting <paramref name="line" /> using the internal regular expression breaker (<see cref="Break" />), the transformation of tokens is done if a transformation function (<see cref="Transform" />) is set.
         ///     </para>
         /// </summary>
-        /// <param name="tokens">List of tokens</param>
-        /// <param name="line"></param>
-        /// <param name="options"></param>
-        override protected void ShatterLine(ref List<String?> tokens, String line, ShatteringOptions options)
+        /// <param name="line">Line of text to shatter.</param>
+        /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="line" />.</returns>
+        /// <remarks>
+        ///     <para>
+        ///         The returned enumerable is merely a query. If multiple enumerations over it should be performed, it is advisable to convert it to a fully built container beforehand, such as a <see cref="List{T}" /> via <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.
+        ///     </para>
+        /// </remarks>
+        override protected IEnumerable<String?> ShatterLine(String line)
         {
-            // Add `options.LineEndToken` if necessary.
-            if (!options.IgnoreLineEnds && tokens.Any())
-            {
-                tokens.Add(options.LineEndToken);
-            }
-
-            // Shatter `line`, perform transformation if necessary and filter out empty tokens.
             IEnumerable<String?> lineTokens = Break.Split(line);
+
             if (!(Transform is null))
             {
                 lineTokens = lineTokens.Select(t => Transform(t));
             }
-            if (options.IgnoreEmptyTokens)
-            {
-                lineTokens = lineTokens.Where(t => !String.IsNullOrEmpty(t));
-            }
-            lineTokens = lineTokens.ToList();
 
-            // Add tokens to `tokens` if necessary.
-            if (lineTokens.Any())
-            {
-                tokens.AddRange(lineTokens);
-            }
-            else if (!options.IgnoreEmptyLines)
-            {
-                tokens.Add(options.EmptyLineToken);
-            }
+            return lineTokens;
         }
     }
 }

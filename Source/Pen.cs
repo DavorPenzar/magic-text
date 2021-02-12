@@ -12,15 +12,15 @@ namespace RandomText
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         If the pen should choose from tokens from multiple sources, the tokens should be concatenated into a single enumerable <c>tokens</c> passed to the constructor. To prevent overflowing from one source to another (e. g. if the last token from the first source is not a contextual predecessor of the first token from the second source), an ending token (<see cref="EndToken" />) should be put between the sources' tokens in the final enumerable <c>tokens</c>. Choosing the ending token in <see cref="Render(Int32, Func{Int32, Int32})" /> or <see cref="Render(Int32, Random)" /> methods will cause the rendering to stop—the same as when a successor of the last entry in tokens is chosen.
+    ///         If the pen should choose from tokens from multiple sources, the tokens should be concatenated into a single enumerable <c>context</c> passed to the constructor. To prevent overflowing from one source to another (e. g. if the last token from the first source is not a contextual predecessor of the first token from the second source), an ending token (<see cref="EndToken" />) should be put between the sources' tokens in the final enumerable <c>tokens</c>. Choosing the ending token in <see cref="Render(Int32, Func{Int32, Int32})" /> or <see cref="Render(Int32, Random)" /> methods will cause the rendering to stop—the same as when a successor of the last entry in tokens is chosen.
     ///     </para>
     ///
     ///     <para>
-    ///         A complete deep copy of enumerable <c>tokens</c> (passed to the constructor) is created and stored by the pen. Memory errors may occur if the number of tokens in the enumerable is too large.
+    ///         A complete deep copy of enumerable <c>context</c> (passed to the constructor) is created and stored by the pen; however, it is simplified by removing unnecessary ending tokens (<see cref="EndToken" />) from the beginning, the end or consecutive duplicates (and other <em>tuplicates</em>). Memory errors may occur if the number of tokens in the enumerable is too large.
     ///     </para>
     ///
     ///     <para>
-    ///         Changing any of the properties—public or protected—will break the functionality of the pen. This includes, but is not limited to, manually changing the contents or their order in collections <see cref="Tokens" /> and <see cref="Positions" />. By doing so, behaviour of <see cref="Render(Int32, Func{Int32, Int32})" /> and <see cref="Render(Int32, Random)" /> methods is unexpected and no longer guaranteed.
+    ///         Changing any of the properties—public or protected—will break the functionality of the pen. This includes, but is not limited to, manually changing the behaviour of string comparer <see cref="Comparer" />. By doing so, behaviour of <see cref="Render(Int32, Func{Int32, Int32})" /> and <see cref="Render(Int32, Random)" /> methods is unexpected and no longer guaranteed.
     ///     </para>
     /// </remarks>
     public class Pen
@@ -82,26 +82,39 @@ namespace RandomText
         }
 
         private readonly StringComparer _comparer;
-        private readonly ReadOnlyCollection<String?> _tokens;
+        private readonly ReadOnlyCollection<String?> _context;
         private readonly ReadOnlyCollection<Int32> _positions;
         private readonly String? _endToken;
+        private readonly Lazy<Int32> _lazyFirstPosition;
         private readonly Lazy<Boolean> _lazyAllEnds;
+
+        /// <value>String comparer used by the pen for comparing tokens.</value>
+        protected StringComparer Comparer => _comparer;
 
         /// <summary>
         ///     <para>
-        ///         If <c>i &lt; j</c>, then <c>Comparer.Compare(Tokens[Positions[i]], Tokens[Positions[j]]) &lt;= 0</c> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
+        ///         If <c>i &lt; j</c>, then <c>Comparer.Compare(Context[Positions[i]], Context[Positions[j]]) &lt;= 0</c> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
         ///     </para>
         /// </summary>
-        /// <value>Sorting positions of entries in <see cref="Tokens" />.</value>
-        /// <seealso cref="Tokens" />
+        /// <value>Sorting positions of entries in <see cref="Context" />.</value>
+        /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
         protected IReadOnlyCollection<Int32> Positions => _positions;
 
-        /// <value>String comparer used by the pen for comparing tokens.</value>
-        public StringComparer Comparer => _comparer;
+        /// <summary>
+        ///     <para>
+        ///         If <c>0 &lt; i &lt; FirstPosition</c>, then <c>Comparer.Equals(Context[Positions[i]], EndToken)</c> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
+        ///     </para>
+        /// </summary>
+        /// <value>Position (index of <see cref="Positions" />) of the first non-ending token in <see cref="Context" />. If such a token does not exist, the value is <see cref="IReadOnlyCollection{T}.Count" /> of <see cref="Context" />.</value>
+        /// <seealso cref="Context" />
+        /// <seealso cref="Comparer" />
+        /// <seealso cref="EndToken" />
+        /// <seealso cref="Positions" />
+        protected Int32 FirstPosition => _lazyFirstPosition.Value;
 
         /// <value>Unsorted tokens of the pen. The order of tokens is kept as provided in the constructor.</value>
-        public IReadOnlyCollection<String?> Tokens => _tokens;
+        public IReadOnlyCollection<String?> Context => _context;
 
         /// <summary>
         ///     <para>
@@ -111,13 +124,13 @@ namespace RandomText
         /// <value>Ending token of the pen.</value>
         public String? EndToken => _endToken;
 
-        /// <value>Indicator of all tokens in <see cref="Tokens" /> being equal to <see cref="EndToken" /> as compared by <see cref="Comparer" />.</value>
+        /// <value>Indicator of all tokens in <see cref="Context" /> being equal to <see cref="EndToken" /> as compared by <see cref="Comparer" />.</value>
         /// <remarks>
         ///     <para>
-        ///         If <see cref="Tokens" /> is empty, <see cref="AllEnds" /> will be <c>true</c>. This coincides with mathematical logic of empty sets.
+        ///         If <see cref="Context" /> is empty, <see cref="AllEnds" /> will be <c>true</c>. This coincides with mathematical logic of empty sets.
         ///     </para>
         /// </remarks>
-        /// <seealso cref="Tokens" />
+        /// <seealso cref="Context" />
         /// <seealso cref="EndToken" />
         /// <seealso cref="Comparer" />
         public Boolean AllEnds => _lazyAllEnds.Value;
@@ -127,26 +140,51 @@ namespace RandomText
         ///         Create a pen with provided values.
         ///     </para>
         /// </summary>
-        /// <param name="tokens">Input tokens. Random text will be generated based on <paramref name="tokens" />: both by picking only from <paramref name="tokens" /> and by using the order of <paramref name="tokens" />.</param>
+        /// <param name="context">Input tokens. Random text will be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
         /// <param name="comparer">String comparer. Tokens shall be compared by <paramref name="comparer" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
-        public Pen(IEnumerable<String?> tokens, StringComparer comparer, String? endToken = null)
+        public Pen(IEnumerable<String?> context, StringComparer comparer, String? endToken = null)
         {
             // Copy comparer and ending token.
             _comparer = comparer;
             _endToken = endToken;
 
-            // Copy tokens.
+            // Copy context.
             {
-                var tokensList = new List<String?>(tokens);
-                tokensList.TrimExcess();
-                _tokens = tokensList.AsReadOnly();
+                {
+                    bool includeEndToken = false;
+                    context = context.Where(
+                        t =>
+                        {
+                            if (Comparer.Equals(t, EndToken))
+                            {
+                                var includeThis = includeEndToken;
+                                includeEndToken = false;
+
+                                return includeThis;
+                            }
+                            else
+                            {
+                                includeEndToken = true;
+                            }
+
+                            return true;
+                        }
+                    );
+                }
+                var contextList = context.ToList();
+                while (contextList.Any() && Comparer.Equals(contextList[^1], EndToken))
+                {
+                    contextList.RemoveAt(contextList.Count - 1);
+                }
+                contextList.TrimExcess();
+                _context = contextList.AsReadOnly();
             }
 
 
-            // Find sorting positions of tokens.
+            // Find sorting positions of tokens in context.
             {
-                var positionsList = Enumerable.Range(0, Tokens.Count).ToList();
+                var positionsList = Enumerable.Range(0, Context.Count).ToList();
                 positionsList.Sort(
                     (i, j) =>
                     {
@@ -157,11 +195,11 @@ namespace RandomText
                         }
 
                         // Lexicographically check.
-                        while (i < Tokens.Count && j < Tokens.Count)
+                        while (i < Context.Count && j < Context.Count)
                         {
                             // Extract current tokens.
-                            var t1 = Tokens.ElementAt(i);
-                            var t2 = Tokens.ElementAt(j);
+                            var t1 = Context.ElementAt(i);
+                            var t2 = Context.ElementAt(j);
 
                             // Compare tokens. If not equal, return the result.
                             int c = _comparer.Compare(t1, t2);
@@ -177,7 +215,7 @@ namespace RandomText
 
                         // The token that first reached the end is less by lexicographic order.
                         {
-                            var counts = new Boolean[] { i == Tokens.Count, j == Tokens.Count };
+                            var counts = new Boolean[] { i == Context.Count, j == Context.Count };
                             if (counts.All(f => f))
                             {
                                 return 0;
@@ -199,8 +237,26 @@ namespace RandomText
                 _positions = positionsList.AsReadOnly();
             }
 
+            // Lazily find the position of the first (non-ending) token.
+            _lazyFirstPosition = new Lazy<Int32>(
+                () =>
+                {
+                    foreach (var token in Context)
+                    {
+                        if (Comparer.Equals(token, EndToken))
+                        {
+                            continue;
+                        }
+
+                        return FindPosition(comparer, Context, Positions, token);
+                    }
+
+                    return Context.Count;
+                }
+            );
+
             // Lazily check if all tokens are ending tokens.
-            _lazyAllEnds = new Lazy<Boolean>(() => !Tokens.Any() || Tokens.All(t => Comparer.Equals(t, EndToken)));
+            _lazyAllEnds = new Lazy<Boolean>(() => FirstPosition == Context.Count);
         }
 
         /// <summary>
@@ -212,23 +268,24 @@ namespace RandomText
         ///         Tokens shall be compared by <see cref="StringComparer.InvariantCulture" />.
         ///     </para>
         /// </summary>
-        /// <param name="tokens">Input tokens. Random text will be generated based on <paramref name="tokens" />: both by picking only from <paramref name="tokens" /> and by using the order of <paramref name="tokens" />.</param>
+        /// <param name="context">Input tokens. Random text will be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
-        public Pen(IEnumerable<String?> tokens, String? endToken = null) : this(tokens, StringComparer.InvariantCulture, endToken)
+        public Pen(IEnumerable<String?> context, String? endToken = null) : this(context, StringComparer.InvariantCulture, endToken)
         {
         }
 
         /// <summary>
         ///     <para>
-        ///         Render (generate) a block of text from <see cref="Tokens" />.
+        ///         Render (generate) a block of text from <see cref="Context" />.
         ///     </para>
         ///
         ///     <para>
-        ///         The first token is chosen by calling <see cref="picker" /> function. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <paramref name="picker" /> function. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
+        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first token is chosen internally; otherwise it is chosen by calling <see cref="picker" /> function. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <paramref name="picker" /> function. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
         ///     </para>
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
         /// <param name="picker">Random number generator. When passed an integer <c>n</c> (<c>&gt;= 0</c>) as the argument, it should return an integer from range [0, max(<c>n</c>, 1)), i. e. greater than or equal to 0 but (strictly) less than max(<c>n</c>, 1).</param>
+        /// <param name="fromBeginning">If <c>true</c>, <paramref name="picker" /> function is not called to choose the first token, but the first non-ending token from the pen's context; otherwise the first token is chosen by calling <paramref name="picker" /> function.</param>
         /// <returns>A query for rendering tokens.</returns>
         /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative. If <paramref name="picker" /> returns a value outside of the legal range.</exception>
         /// <remarks>
@@ -283,7 +340,7 @@ namespace RandomText
         ///         </item>
         ///     </list>
         /// </remarks>
-        public IEnumerable<String?> Render(int relevantTokens, Func<Int32, Int32> picker)
+        public IEnumerable<String?> Render(int relevantTokens, Func<Int32, Int32> picker, bool fromBeginning = false)
         {
             if (relevantTokens < 0)
             {
@@ -298,14 +355,14 @@ namespace RandomText
             {
                 while (!text.Any())
                 {
-                    int pick = picker(Tokens.Count + 1);
-                    if (pick < 0 || pick > Tokens.Count)
+                    int pick = fromBeginning ? FirstPosition : picker(Context.Count + 1);
+                    if (pick < 0 || pick > Context.Count)
                     {
                         throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
                     }
 
-                    int first = pick == Tokens.Count ? Tokens.Count : Positions.ElementAt(pick);
-                    var firstToken = first < Tokens.Count ? Tokens.ElementAt(first) : EndToken;
+                    int first = pick == Context.Count ? Context.Count : Positions.ElementAt(pick);
+                    var firstToken = first < Context.Count ? Context.ElementAt(first) : EndToken;
                     if (Comparer.Equals(firstToken, EndToken))
                     {
                         yield break;
@@ -329,27 +386,27 @@ namespace RandomText
                 if (relevantTokens == 0)
                 {
                     p = 0;
-                    n = Tokens.Count + 1;
+                    n = Context.Count + 1;
                     d = 0;
                 }
                 else
                 {
                     // Extract the first relevant token, find its first position `p` and initialise `n` to 0.
                     var t = text[c];
-                    p = FindPosition(Comparer, Tokens, Positions, t);
+                    p = FindPosition(Comparer, Context, Positions, t);
                     n = 0;
 
                     // Find the actual value of index `p` and number `n`.
-                    while (p + n < Tokens.Count)
+                    while (p + n < Context.Count)
                     {
                         // Extract the current position.
                         int i = Positions.ElementAt(p + n);
 
                         // Count the number of tokens equal to tokens in `text`, starting from `i` in `Tokens` until the end.
                         int k;
-                        for (k = 0; i + k < Tokens.Count && k < text.Count; ++k)
+                        for (k = 0; i + k < Context.Count && k < text.Count; ++k)
                         {
-                            if (!Comparer.Equals(Tokens.ElementAt(i + k), text[(c + k) % text.Count])) // <-- cyclicity of list `text`
+                            if (!Comparer.Equals(Context.ElementAt(i + k), text[(c + k) % text.Count])) // <-- cyclicity of list `text`
                             {
                                 break;
                             }
@@ -383,7 +440,7 @@ namespace RandomText
                 }
 
                 int next = Positions.ElementAt(p + pick) + d;
-                var nextToken = next < Tokens.Count ? Tokens.ElementAt(next) : EndToken;
+                var nextToken = next < Context.Count ? Context.ElementAt(next) : EndToken;
                 if (Comparer.Equals(nextToken, EndToken))
                 {
                     yield break;
@@ -405,15 +462,16 @@ namespace RandomText
 
         /// <summary>
         ///     <para>
-        ///         Render (generate) a block of text from <see cref="Tokens" />.
+        ///         Render (generate) a block of text from <see cref="Context" />.
         ///     </para>
         ///
         ///     <para>
-        ///         The first token is chosen by calling <see cref="Random.Next(Int32)" /> method of <paramref name="random" />. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="Random.Next(Int32)" /> method of <paramref name="random" />. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
+        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first token is chosen internally; otherwise it is chosen by calling <see cref="Random.Next(Int32)" /> method of <paramref name="random" />. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="Random.Next(Int32)" /> method of <paramref name="random" />. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
         ///     </para>
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
         /// <param name="random">(Pseudo-)Random number generator.</param>
+        /// <param name="fromBeginning">If <c>true</c>, <paramref name="picker" /> function is not called to choose the first token, but the first non-ending token from the pen's context; otherwise the first token is chosen by calling <paramref name="picker" /> function.</param>
         /// <returns>A query for rendering tokens.</returns>
         /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative.</exception>
         /// <remarks>
@@ -468,7 +526,7 @@ namespace RandomText
         ///         </item>
         ///     </list>
         /// </remarks>
-        public IEnumerable<String?> Render(int relevantTokens, Random random) =>
-            Render(relevantTokens, n => random.Next(n));
+        public IEnumerable<String?> Render(int relevantTokens, Random random, bool fromBeginning = false) =>
+            Render(relevantTokens, n => random.Next(n), fromBeginning);
     }
 }
