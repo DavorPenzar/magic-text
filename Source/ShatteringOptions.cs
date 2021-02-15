@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace RandomText
+namespace MagicText
 {
     /// <summary>
     ///     <para>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace RandomText
+namespace MagicText
 {
     /// <summary>
     ///     <para>
@@ -16,7 +16,11 @@ namespace RandomText
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         Empty tokens are considered those tokens that yield <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> method.
+    ///         If the default regular expression break pattern should be used, a better performance is achieved when using <see cref="RegexTokeniser.RegexTokeniser" /> or <see cref="RegexTokeniser.RegexTokeniser(Func{String?, Boolean}?)" /> constructors.
+    ///     </para>
+    ///
+    ///     <para>
+    ///         By default, empty tokens are considered those tokens that yield <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> method.
     ///     </para>
     ///
     ///     <para>
@@ -105,11 +109,24 @@ namespace RandomText
         ///         Create a tokeniser with provided options.
         ///     </para>
         /// </summary>
+        /// <param name="isEmptyToken">Function to check if a token is empty.</param>
+        public RegexTokeniser(Func<String?, Boolean>? isEmptyToken) : base(isEmptyToken)
+        {
+            _break = DefaultBreak;
+            _transform = null;
+        }
+
+        /// <summary>
+        ///     <para>
+        ///         Create a tokeniser with provided options.
+        ///     </para>
+        /// </summary>
+        /// <param name="isEmptyToken">Function to check if a token is empty.</param>
         /// <param name="breakPattern">Regular expression break pattern to use.</param>
         /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <param name="escape">If <c>true</c>, <paramref name="breakPattern" /> is escaped via <see cref="Regex.Escape(String)" /> method before usage.</param>
         /// <param name="options">Options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
-        public RegexTokeniser(String breakPattern, Func<String?, String?>? transform = null, bool escape = false, RegexOptions options = RegexOptions.None) : base()
+        public RegexTokeniser(Func<String?, Boolean>? isEmptyToken, String breakPattern, Func<String?, String?>? transform = null, bool escape = false, RegexOptions options = RegexOptions.None) : base(isEmptyToken)
         {
             _break = new Regex(escape ? Regex.Escape(breakPattern) : breakPattern, options);
             _transform = transform;
@@ -120,19 +137,20 @@ namespace RandomText
         ///         Create a tokeniser with provided options.
         ///     </para>
         /// </summary>
+        /// <param name="isEmptyToken">Function to check if a token is empty.</param>
         /// <param name="break">Regular expression breaker to use.</param>
         /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <param name="alterOptions">If <c>null</c>, <paramref name="break" />'s options (<see cref="Regex.Options" />) are used (actually, no new <see cref="Regex" /> is constructed); otherwise options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
         /// <remarks>
         ///     <para>
-        ///         Calling this constructor is essentially the same (performance aside) as calling <see cref="RegexTokeniser.RegexTokeniser(String, Func{String?, String?}?, bool, RegexOptions)" /> constructor as:
+        ///         Calling this constructor is essentially the same (performance aside) as calling <see cref="RegexTokeniser.RegexTokeniser(Func{String?, Boolean}?, String, Func{String?, String?}?, bool, RegexOptions)" /> constructor as:
         ///     </para>
         ///
         ///     <code>
-        ///         RegexTokeniser.RegexTokeniser(breakPattern: @break.ToString(), transform: transform, options: alterOptions ?? @break.Options)
+        ///         RegexTokeniser.RegexTokeniser(isEmptyString: isEmptyString, breakPattern: @break.ToString(), transform: transform, options: alterOptions ?? @break.Options)
         ///     </code>
         /// </remarks>
-        public RegexTokeniser(Regex @break, Func<String?, String?>? transform = null, RegexOptions? alterOptions = null) : base()
+        public RegexTokeniser(Func<String?, Boolean>? isEmptyToken, Regex @break, Func<String?, String?>? transform = null, RegexOptions? alterOptions = null) : base(isEmptyToken)
         {
             _break = alterOptions is null ? @break : new Regex(@break.ToString(), (RegexOptions)alterOptions!);
             _transform = transform;

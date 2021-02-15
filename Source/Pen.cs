@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace RandomText
+namespace MagicText
 {
     /// <summary>
     ///     <para>
@@ -16,11 +16,11 @@ namespace RandomText
     ///     </para>
     ///
     ///     <para>
-    ///         A complete deep copy of enumerable <c>context</c> (passed to the constructor) is created and stored by the pen; however, it is simplified by removing unnecessary ending tokens (<see cref="EndToken" />) from the beginning and the end and by substituting consecutive duplicates (and other <em>tuplicates</em>) by a single ending token. Memory errors may occur if the number of tokens in the enumerable is too large.
+    ///         A complete deep copy of enumerable <c>context</c> (passed to the constructor) is created and stored by the pen. Memory errors may occur if the number of tokens in the enumerable is too large.
     ///     </para>
     ///
     ///     <para>
-    ///         Changing any of the properties—public or protected—will break the functionality of the pen. This includes, but is not limited to, manually changing the behaviour of string comparer <see cref="Comparer" />. By doing so, behaviour of <see cref="Render(Int32, Func{Int32, Int32})" /> and <see cref="Render(Int32, Random)" /> methods is unexpected and no longer guaranteed.
+    ///         Changing any of the properties—public or protected—breaks the functionality of the pen. This includes, but is not limited to, manually changing the behaviour of string comparer <see cref="Comparer" />. By doing so, behaviour of <see cref="Render(Int32, Func{Int32, Int32})" /> and <see cref="Render(Int32, Random)" /> methods is unexpected and no longer guaranteed.
     ///     </para>
     /// </remarks>
     public class Pen
@@ -51,39 +51,76 @@ namespace RandomText
 
         /// <summary>
         ///     <para>
-        ///         Find first position index of <paramref name="t" /> in <paramref name="tokens" /> sorted by <paramref name="positions" />.
+        ///         Compare a subrange of <paramref name="tokens" /> with a sample of tokens <paramref name="sample" /> in respect of <paramref name="comparer" />.
         ///     </para>
         /// </summary>
-        /// <param name="comparer">String comparer used for lexicographic ordering of <paramref name="tokens" />.</param>
-        /// <param name="tokens">List of tokens amongst which <paramref name="t" /> should be found.</param>
-        /// <param name="positions">Sorted positions, or positional ordering of <paramref name="tokens" /> in respect of <paramref name="comparer" />.</param>
-        /// <param name="t">Token to find in <paramref name="tokens" />.</param>
-        /// <returns>Index <c>i</c> such that <c>comparer.Equal(tokens[positions[i]], t)</c>, but <c>!comparer.Equal(tokens[positions[j]], t)</c> for each <c>j &lt; i</c> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).</returns>
+        /// <param name="comparer">String comparer used for comparing.</param>
+        /// <param name="tokens">List of tokens whose subrange is compared to <paramref name="sample" />.</param>
+        /// <param name="sample">Cyclical sample list of tokens. The list represents range <c>{ sample[cycleStart], sample[cycleStart + 1], ..., sample[^1], sample[0], ..., sample[cycleStart - 1] }</c>.</param>
+        /// <param name="i">Starting index of the subrange from <paramref name="tokens" /> to compare. The subrange <c>{ tokens[i], tokens[i + 1], ..., tokens[Math.Min(i + sample.Count - 1, tokens.Count - 1)] }</c> is used (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).</param>
+        /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
+        /// <returns>A signed integer that indicates the relative values of subrange from <paramref name="tokens" /> starting from <paramref name="i" /> and cyclical sample <paramref name="sample" />.</returns>
         /// <remarks>
         ///     <para>
-        ///         The implementation of the method assumes <paramref name="t" /> actually exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" /> and that <paramref name="positions" /> indeed sort <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />. If the former is not true, the returned index will point to the position at which <paramref name="t" />'s position should be inserted to retain the sorted order; if the latter is not true, the behaviour of the method is undefined.
+        ///         Values from the subrange of <paramref name="tokens" /> and <paramref name="sample" /> are compared in order by calling <see cref="StringComparer.Compare(String, String)" /> method on <paramref name="comparer" />. If a comparison yields a non-zero value, it is returned. If the subrange from <paramref name="tokens" /> is shorter (in the number of tokens) than <paramref name="sample" /> but all of its tokens compare equal to tokens from the beginning of <paramref name="sample" />, a negative number is returned. If all tokens compare equal and the subrange from <paramref name="tokens" /> is the same length (in the number of tokens) as <paramref name="sample" />, <c>0</c> is returned.
         ///     </para>
         /// </remarks>
-        private static int FindPositionIndex(StringComparer comparer, IReadOnlyCollection<String?> tokens, IReadOnlyCollection<Int32> positions, String? t)
+        private static int CompareRange(StringComparer comparer, IReadOnlyCollection<String?> tokens, IList<String?> sample, int i, int cycleStart)
+        {
+            int c = 0;
+
+            int j;
+
+            for ( /* `i` is set in function call */ j = 0; i < tokens.Count && j < sample.Count; ++i, ++j)
+            {
+                c = comparer.Compare(tokens.ElementAt(i), sample[(cycleStart + j) % sample.Count]);
+
+                if (c != 0)
+                {
+                    break;
+                }
+            }
+
+            if (c == 0 && i == tokens.Count && j < sample.Count)
+            {
+                c = -1;
+            }
+
+            return c;
+        }
+
+        /// <summary>
+        ///     <para>
+        ///         Find the first position index and the number of occurances of <paramref name="sample" /> in <paramref name="tokens" /> sorted by <paramref name="positions" />.
+        ///     </para>
+        /// </summary>
+        /// <param name="comparer">String comparer used for comparing.</param>
+        /// <param name="tokens">List of tokens amongst which <paramref name="sample" /> should be found.</param>
+        /// <param name="positions">Sorted positions, or positional ordering of <paramref name="tokens" /> in respect of <paramref name="comparer" />.</param>
+        /// <param name="sample">Cyclical sample list of tokens. The list represents range <c>{ sample[cycleStart], sample[cycleStart + 1], ..., sample[^1], sample[0], ..., sample[cycleStart - 1] }</c>.</param>
+        /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
+        /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sample" /> begins at <c>tokens[positions[i]]</c> and the total number of occurances amongst <paramref name="tokens" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).</returns>
+        /// <remarks>
+        ///     <para>
+        ///         The implementation of the method assumes <paramref name="sample" /> actually exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" /> and that <paramref name="positions" /> indeed sort <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />. If the former is not true, the returned index shall point to the position at which <paramref name="t" />'s position should be inserted to retain the sorted order and the number of occurances shall be 0; if the latter is not true, the behaviour of the method is undefined.
+        ///     </para>
+        /// </remarks>
+        private static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, IReadOnlyCollection<String?> tokens, IReadOnlyCollection<Int32> positions, IList<String?> sample, int cycleStart)
         {
             // Binary search...
 
             // Initialise lower, upper and middle positions.
             int l = 0;
             int h = tokens.Count;
-            int m;
+            int m = h >> 1;
 
             // Loop until found.
-            do
+            while (l < h)
             {
-                // Extract the middle token.
-                m = (l + h) >> 1;
-                var t2 = tokens.ElementAt(positions.ElementAt(m));
+                // Compare ranges.
+                int c = CompareRange(comparer, tokens, sample, positions.ElementAt(m), cycleStart);
 
-                // Compare tokens.
-                int c = comparer.Compare(t2, t);
-
-                // Break the loop or update bounds.
+                // Break the loop or update positions.
                 if (c == 0)
                 {
                     break;
@@ -96,16 +133,24 @@ namespace RandomText
                 {
                     h = m;
                 }
+                m = (l + h) >> 1;
             }
-            while (l < h);
 
-            // Find the minimal index `m` of the position of a token equal to `t`.
-            while (m > 0 && comparer.Equals(tokens.ElementAt(positions.ElementAt(m - 1)), t))
+            l = m;
+            h = m;
+
+            // Find the minimal position index `l` and the maximal index `h` of occurances of `sample` amongst `tokens`.
+            while (l > 0 && CompareRange(comparer, tokens, sample, positions.ElementAt(l - 1), cycleStart) == 0)
             {
-                --m;
+                --l;
+            }
+            while (h < tokens.Count && CompareRange(comparer, tokens, sample, positions.ElementAt(h), cycleStart) == 0)
+            {
+                ++h;
             }
 
-            return m;
+            // Return the computed values.
+            return ValueTuple.Create(l, h - l);
         }
 
         private readonly StringComparer _comparer;
@@ -131,7 +176,7 @@ namespace RandomText
         /// <value>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is <see cref="IReadOnlyCollection{T}.Count" /> of <see cref="Context" />.</value>
         /// <remarks>
         ///     <para>
-        ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{Positions[FirstPosition], Positions[FirstPosition] + 1, Positions[FirstPosition] + 2, ...}</c> enumerates <see cref="Context" /> from the beginning (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
+        ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ Positions[FirstPosition], Positions[FirstPosition] + 1, Positions[FirstPosition] + 2, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
         ///     </para>
         /// </remarks>
         /// <seealso cref="Context" />
@@ -154,7 +199,7 @@ namespace RandomText
         /// <value>Indicator of all tokens in <see cref="Context" /> being equal to <see cref="EndToken" /> as compared by <see cref="Comparer" />.</value>
         /// <remarks>
         ///     <para>
-        ///         If <see cref="Context" /> is empty, <see cref="AllEnds" /> will be <c>true</c>. This coincides with mathematical logic of empty sets.
+        ///         If <see cref="Context" /> is empty, <see cref="AllEnds" /> is <c>true</c>. This coincides with mathematical logic of empty sets.
         ///     </para>
         /// </remarks>
         /// <seealso cref="Context" />
@@ -167,7 +212,7 @@ namespace RandomText
         ///         Create a pen with provided values.
         ///     </para>
         /// </summary>
-        /// <param name="context">Input tokens. Random text will be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
+        /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
         /// <param name="comparer">String comparer. Tokens shall be compared by <paramref name="comparer" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
         public Pen(IEnumerable<String?> context, StringComparer comparer, String? endToken = null)
@@ -178,32 +223,7 @@ namespace RandomText
 
             // Copy context.
             {
-                {
-                    bool includeEndToken = false;
-                    context = context.Where(
-                        t =>
-                        {
-                            if (Comparer.Equals(t, EndToken))
-                            {
-                                var includeThis = includeEndToken;
-                                includeEndToken = false;
-
-                                return includeThis;
-                            }
-                            else
-                            {
-                                includeEndToken = true;
-                            }
-
-                            return true;
-                        }
-                    );
-                }
                 var contextList = context.ToList();
-                while (contextList.Any() && Comparer.Equals(contextList[^1], EndToken))
-                {
-                    contextList.RemoveAt(contextList.Count - 1);
-                }
                 contextList.TrimExcess();
                 _context = contextList.AsReadOnly();
             }
@@ -266,20 +286,19 @@ namespace RandomText
 
             // Lazily find the position of the first (non-ending) token.
             _lazyFirstPosition = new Lazy<Int32>(
-                () =>
-                    Context.Select(
-                        (t, p) =>
+                () => Context.Select(
+                    (t, p) =>
+                    {
+                        if (Comparer.Equals(t, EndToken))
                         {
-                            if (Comparer.Equals(t, EndToken))
-                            {
-                                return null;
-                            }
-
-                            int i = IndexOf(Positions, p);
-
-                            return i == -1 ? null : (Int32?)i;
+                            return null;
                         }
-                    ).Where(i => !(i is null)).FirstOrDefault() ?? Context.Count
+
+                        int i = IndexOf(Positions, p);
+
+                        return i == -1 ? null : (Int32?)i;
+                    }
+                ).Where(i => !(i is null)).FirstOrDefault() ?? Context.Count
             );
 
             // Lazily check if all tokens are ending tokens.
@@ -295,7 +314,7 @@ namespace RandomText
         ///         Tokens shall be compared by <see cref="StringComparer.Ordinal" />.
         ///     </para>
         /// </summary>
-        /// <param name="context">Input tokens. Random text will be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
+        /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
         public Pen(IEnumerable<String?> context, String? endToken = null) : this(context, StringComparer.Ordinal, endToken)
         {
@@ -329,7 +348,7 @@ namespace RandomText
         ///     </para>
         ///
         ///     <para>
-        ///         The query will immediately stop, without rendering any tokens, if:
+        ///         The query shall immediately stop, without rendering any tokens, if:
         ///     </para>
         ///
         ///     <list type="number">
@@ -381,9 +400,7 @@ namespace RandomText
             // Render the first token, or the first `relevantTokens` if needed.
             if (fromBeginning)
             {
-                var first = FirstPosition == Context.Count ? Context.Count : Positions.ElementAt(FirstPosition);
-
-                for (int i = 0; i < text.Capacity; ++i)
+                for (var (first, i) = ValueTuple.Create(AllEnds ? Context.Count : Positions.ElementAt(FirstPosition), 0); i < text.Capacity; ++first, ++i)
                 {
                     var firstToken = first < Context.Count ? Context.ElementAt(first) : EndToken;
                     if (Comparer.Equals(firstToken, EndToken))
@@ -423,7 +440,7 @@ namespace RandomText
                 int p; // the first position (index of `Positions`) of the most recent `relevantTokens` tokens rendered;                 0 if `relevantTokens == 0`
                 int n; // the number of the most recent `relevantTokens` tokens rendered occurances in `Tokens`;                         `Tokens.Count` + 1 if `relevantTokens == 0`
                 int d; // the distance (in number of tokens) between the first relevant token and the next to render (`relevantTokens`); 0 if `relevantTokens == 0`
-                    // when `relevantTokens` tokens have not yet been rendered, `text.Count` is used as the number of relevant tokens, i. e. all rendered tokens are relevant
+                    // until `relevantTokens` tokens have not yet been rendered, `text.Count` is used as the number of relevant tokens, i. e. all rendered tokens are relevant
 
                 // Find the values according to `relevantTokens`.
                 if (relevantTokens == 0)
@@ -434,44 +451,8 @@ namespace RandomText
                 }
                 else
                 {
-                    // Extract the first relevant token, find its first position `p` and initialise `n` to 0.
-                    var t = text[c];
-                    p = FindPositionIndex(Comparer, Context, Positions, t);
-                    n = 0;
-
-                    // Find the actual value of index `p` and number `n`.
-                    while (p + n < Context.Count)
-                    {
-                        // Extract the current position.
-                        int i = Positions.ElementAt(p + n);
-
-                        // Count the number of tokens equal to tokens in `text`, starting from `i` in `Tokens` until the end.
-                        int k;
-                        for (k = 0; i + k < Context.Count && k < text.Count; ++k)
-                        {
-                            if (!Comparer.Equals(Context.ElementAt(i + k), text[(c + k) % text.Count])) // <-- cyclicity of list `text`
-                            {
-                                break;
-                            }
-                        }
-
-                        // Update values accordingly:
-                        if (k == text.Count) // all `text.Count` (`relevantTokens`) are equal, meaning another occurance is found (increment `n`)
-                        {
-                            ++n;
-                        }
-                        else if (n == 0)     // no occurance is found, including the current index `i`, therefore proceed to the next candidate (increment `p`)
-                        {
-                            ++p;
-                        }
-                        else                 // after some occurances have been found, a mismatch is reached; as `Tokens` are sorted by `Positions`, no other occurance will be found
-                        {
-                            break;
-                        }
-                    }
-
-                    // Set the value of `d` (note that `text` will never hold more than `relevantTokens` tokens).
-                    d = text.Count;
+                    (p, n) = FindPositionIndexAndCount(Comparer, Context, Positions, text, c);
+                    d = text.Count; // note that `text` shall never hold more than `relevantTokens` tokens
                 }
 
                 // Render the next token.
@@ -531,7 +512,7 @@ namespace RandomText
         ///     </para>
         ///
         ///     <para>
-        ///         The query will immediately stop, without rendering any tokens, if:
+        ///         The query shall immediately stop, without rendering any tokens, if:
         ///     </para>
         ///
         ///     <list type="number">

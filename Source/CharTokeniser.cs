@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RandomText
+namespace MagicText
 {
     /// <summary>
     ///     <para>
@@ -11,7 +11,7 @@ namespace RandomText
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         Empty tokens are considered those characters that yield <c>true</c> when converted to strings via <see cref="Char.ToString()" /> method and checked via <see cref="String.IsNullOrEmpty(String)" /> method.
+    ///         By default, empty tokens are considered those characters that yield <c>true</c> when converted to strings via <see cref="Char.ToString()" /> method and checked via <see cref="String.IsNullOrEmpty(String)" /> method.
     ///     </para>
     ///
     ///     <para>
@@ -22,10 +22,20 @@ namespace RandomText
     {
         /// <summary>
         ///     <para>
-        ///         Instantiate a tokeniser.
+        ///         Create a default tokeniser.
         ///     </para>
         /// </summary>
         public CharTokeniser() : base()
+        {
+        }
+
+        /// <summary>
+        ///     <para>
+        ///         Create a tokeniser with provided options.
+        ///     </para>
+        /// </summary>
+        /// <param name="isEmptyToken">Function to check if a token is empty.</param>
+        public CharTokeniser(Func<String?, Boolean>? isEmptyToken) : base(isEmptyToken)
         {
         }
 

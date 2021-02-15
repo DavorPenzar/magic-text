@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace RandomText
+namespace MagicText
 {
     /// <summary>
     ///     <para>
@@ -40,9 +40,9 @@ namespace RandomText
         ///         This function is used in <see cref="Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> methods to filter out empty tokens if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>.
         ///     </para>
         /// </summary>
-        /// <value>Function to check if a token is empty: it returns <c>true</c> if the token to check is empty. Default is <see cref="String.IsNullOrEmpty(String)" />.</value>
+        /// <value>Function to check if a token is empty: it returns <c>true</c> if the token to check is empty. If set to <c>null</c>, no token shall be considered empty, i. e. the function shall always return <c>false</c>. Default is <see cref="String.IsNullOrEmpty(String)" />.</value>
         [AllowNull]
-        protected Func<String?, Boolean> IsEmptyToken
+        public Func<String?, Boolean> IsEmptyToken
         {
             get => isEmptyToken;
             set
@@ -67,7 +67,7 @@ namespace RandomText
         ///     </para>
         /// </summary>
         /// <param name="isEmptyToken">Function to check if a token is empty.</param>
-        protected LineByLineTokeniser(Func<String?, Boolean>? isEmptyToken)
+        public LineByLineTokeniser(Func<String?, Boolean>? isEmptyToken)
         {
             this.isEmptyToken = isEmptyToken ?? IsEmptyTokenAlwaysFalse;
         }
@@ -81,7 +81,7 @@ namespace RandomText
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="line" />.</returns>
         /// <remarks>
         ///     <para>
-        ///         It is guaranteed that, when called from <see cref="LineByLineTokeniser" />, <paramref name="line" /> will be a string not containing any line end (CR, LF or CRLF). Nonetheless, when calling from a subclass, its programmer may call the method however they wish, but this is beyond the original programmer's responsibility.
+        ///         It is guaranteed that, when called from <see cref="LineByLineTokeniser" />, <paramref name="line" /> shall be a string not containing any line end (CR, LF or CRLF). Nonetheless, when calling from a subclass, its programmer may call the method however they wish, but this is beyond the original programmer's responsibility.
         ///     </para>
         ///
         ///     <para>
