@@ -1,4 +1,4 @@
-#   RandomText
+#   MagicText
 
 [*.NET Standard*](http://docs.microsoft.com/en-us/dotnet/standard/net-standard) library for generating random text.
 
