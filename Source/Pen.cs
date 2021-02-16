@@ -115,29 +115,31 @@ namespace MagicText
             int m = h >> 1;
 
             // Loop until found.
-            while (l < h)
             {
-                // Compare ranges.
-                int c = CompareRange(comparer, tokens, sample, positions.ElementAt(m), cycleStart);
+                while (l < h)
+                {
+                    // Compare ranges.
+                    int c = CompareRange(comparer, tokens, sample, positions.ElementAt(m), cycleStart);
 
-                // Break the loop or update positions.
-                if (c == 0)
-                {
-                    break;
+                    // Break the loop or update positions.
+                    if (c == 0)
+                    {
+                        l = m;
+                        h = m + 1;
+
+                        break;
+                    }
+                    else if (c < 0)
+                    {
+                        l = m;
+                    }
+                    else if (c > 0)
+                    {
+                        h = m;
+                    }
+                    m = (l + h) >> 1;
                 }
-                else if (c < 0)
-                {
-                    l = m;
-                }
-                else if (c > 0)
-                {
-                    h = m;
-                }
-                m = (l + h) >> 1;
             }
-
-            l = m;
-            h = m;
 
             // Find the minimal position index `l` and the maximal index `h` of occurances of `sample` amongst `tokens`.
             while (l > 0 && CompareRange(comparer, tokens, sample, positions.ElementAt(l - 1), cycleStart) == 0)
@@ -157,8 +159,8 @@ namespace MagicText
         private readonly ReadOnlyCollection<String?> _context;
         private readonly ReadOnlyCollection<Int32> _positions;
         private readonly String? _endToken;
-        private readonly Lazy<Int32> _lazyFirstPosition;
-        private readonly Lazy<Boolean> _lazyAllEnds;
+        private readonly Int32 _firstPosition;
+        private readonly Boolean _allEnds;
 
         /// <value>String comparer used by the pen for comparing tokens.</value>
         protected StringComparer Comparer => _comparer;
@@ -183,7 +185,7 @@ namespace MagicText
         /// <seealso cref="Comparer" />
         /// <seealso cref="EndToken" />
         /// <seealso cref="Positions" />
-        protected Int32 FirstPosition => _lazyFirstPosition.Value;
+        protected Int32 FirstPosition => _firstPosition;
 
         /// <value>Unsorted tokens of the pen. The order of tokens is kept as provided in the constructor.</value>
         public IReadOnlyCollection<String?> Context => _context;
@@ -205,7 +207,7 @@ namespace MagicText
         /// <seealso cref="Context" />
         /// <seealso cref="EndToken" />
         /// <seealso cref="Comparer" />
-        public Boolean AllEnds => _lazyAllEnds.Value;
+        public Boolean AllEnds => _allEnds;
 
         /// <summary>
         ///     <para>
@@ -249,7 +251,7 @@ namespace MagicText
                             var t2 = Context.ElementAt(j);
 
                             // Compare tokens. If not equal, return the result.
-                            int c = _comparer.Compare(t1, t2);
+                            int c = Comparer.Compare(t1, t2);
                             if (c != 0)
                             {
                                 return c;
@@ -284,25 +286,23 @@ namespace MagicText
                 _positions = positionsList.AsReadOnly();
             }
 
-            // Lazily find the position of the first (non-ending) token.
-            _lazyFirstPosition = new Lazy<Int32>(
-                () => Context.Select(
-                    (t, p) =>
+            // Find the position of the first (non-ending) token.
+            _firstPosition = Context.Select(
+                (t, p) =>
+                {
+                    if (Comparer.Equals(t, EndToken))
                     {
-                        if (Comparer.Equals(t, EndToken))
-                        {
-                            return null;
-                        }
-
-                        int i = IndexOf(Positions, p);
-
-                        return i == -1 ? null : (Int32?)i;
+                        return null;
                     }
-                ).Where(i => !(i is null)).FirstOrDefault() ?? Context.Count
-            );
 
-            // Lazily check if all tokens are ending tokens.
-            _lazyAllEnds = new Lazy<Boolean>(() => FirstPosition == Context.Count);
+                    int i = IndexOf(Positions, p);
+
+                    return i == -1 ? null : (Int32?)i;
+                }
+            ).Where(i => !(i is null)).FirstOrDefault() ?? Context.Count;
+
+            // Check if all tokens are ending tokens.
+            _allEnds = (FirstPosition == Context.Count);
         }
 
         /// <summary>

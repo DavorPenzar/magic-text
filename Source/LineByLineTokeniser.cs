@@ -81,11 +81,11 @@ namespace MagicText
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="line" />.</returns>
         /// <remarks>
         ///     <para>
-        ///         It is guaranteed that, when called from <see cref="LineByLineTokeniser" />, <paramref name="line" /> shall be a string not containing any line end (CR, LF or CRLF). Nonetheless, when calling from a subclass, its programmer may call the method however they wish, but this is beyond the original programmer's responsibility.
+        ///         The method <strong>should not</strong> produce <see cref="ShatteringOptions.EmptyLineToken" />s nor <see cref="ShatteringOptions.LineEndToken" />s to represent empty lines and line ends. Also, the method <strong>should not</strong> manually filter out empty tokens. Hence no <see cref="ShatteringOptions" /> are available to the method. The result of an empty line (even without possible filtering out of empty tokens) should be an empty enumerable, while empty tokens, empty lines and line ends are treated within the scope of <see cref="LineByLineTokeniser" /> parent class and its methods.
         ///     </para>
         ///
         ///     <para>
-        ///         The method <strong>should not</strong> produce <see cref="ShatteringOptions.EmptyLineToken" />s nor <see cref="ShatteringOptions.LineEndToken" />s to represent empty lines and line ends. Also, the method <strong>should not</strong> manually filter out empty tokens. Hence no <see cref="ShatteringOptions" /> are available to the method. The result of an empty line (even without possible filtering out of empty tokens) should be an empty enumerable, while empty tokens, empty lines and line ends are treated within the scope of <see cref="LineByLineTokeniser" /> parent class and its methods.
+        ///         It is guaranteed that, when called from <see cref="LineByLineTokeniser" />, <paramref name="line" /> shall be a string not containing any line end (CR, LF or CRLF). Nonetheless, when calling from a subclass, its programmer may call the method however they wish, but this is beyond the original programmer's scope.
         ///     </para>
         /// </remarks>
         protected abstract IEnumerable<String?> ShatterLine(String line);
@@ -101,6 +101,10 @@ namespace MagicText
         /// <remarks>
         ///     <para>
         ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is false and the resulting enumerable of tokens is (otherwise) non-empty, <see cref="ShatteringOptions.LineEndToken" /> is added to the end of the resulting tokens.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         It is guaranteed that the returned enumerable is a fully built container, such as <see cref="List{T}" />, and not just an enumeration query.
         ///     </para>
         /// </remarks>
         public IEnumerable<String?> Shatter(StreamReader input, ShatteringOptions? options = null)
@@ -175,6 +179,10 @@ namespace MagicText
         /// <remarks>
         ///     <para>
         ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is false and the resulting enumerable of tokens is (otherwise) non-empty, <see cref="ShatteringOptions.LineEndToken" /> is added to the end of the resulting tokens.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         It is guaranteed that the returned enumerable is a fully built container, such as <see cref="List{T}" />, and not just an enumeration query.
         ///     </para>
         /// </remarks>
         public async Task<IEnumerable<String?>> ShatterAsync(StreamReader input, ShatteringOptions? options = null)
