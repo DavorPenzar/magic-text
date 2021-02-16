@@ -1,10 +1,12 @@
 #   MagicText
 
-[*.NET Standard*](http://docs.microsoft.com/en-us/dotnet/standard/net-standard) library for generating random text.
+[*.NET Standard*](http://docs.microsoft.com/en-gb/dotnet/standard/net-standard) library written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) useful for generating random text.
+
+**Author**: Davor Penzar
 
 ##  Quick Info
 
-The library provides simple interfaces and classes for tokenising existing text blocks and generating new ones upon the extracted tokens. The library is written compliant with [*.NET Standard 2.1*](http://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.1.md), without the need for any additional [*NuGet* packages](http://nuget.org/).
+The library provides simple interfaces and classes for tokenising existing text blocks and generating new ones upon the extracted tokens. The library is written in [*C# version 8*](http://docs.microsoft.com/en-gb/dotnet/csharp/whats-new/csharp-8) compliant with [*.NET Standard 2.1*](http://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.1.md), without the need for any additional [*NuGet* packages](http://nuget.org/).
 
 Tokens extracted from a text block are usually words + punctuation + white spaces, or single characters. It should not be considered a good practice to mix *apples and oranges*, i. e. to have some tokens in form of complete words, while others as single characters. Both tokenisation policies mentioned are implemented in the librabry, while additional policies may be obtained by:
 
@@ -146,8 +148,10 @@ Do you know that there's a spark in
 
 ##  Remarks
 
-This library should not be used when working with large corpora of context tokens. Objects of class ```Pen``` store complete context in an in-memory container, rather than reading from external memory. The implemented approach is much simpler and faster to use, but lacks possibility to work with a large number of tokens. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storage of tokens in external memory.
+This library should not be used when working with large corpora of context tokens. Objects of class ```Pen``` store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks a possibility to work with a large number of tokens. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle retrieval of tokens from external sources.
+
+Apart from functionality, the focus was set on simplicity when implementing the library. Hence no class is thread-safe, although this only affects ```LineByLineTokeniser``` class and all of its subclasses (because of the thread-unsafe property ```LineByLineTokeniser.IsTokenEmpty```), and ```RegexTokeniser``` class in particular (not only is it a subclass of ```LineByLineTokeniser```, but it has its own thread-unsafe property ```RegexTokeniser.Transform```).
 
 ##  References
 
-The complete library is customly written by a single author&mdash;me&mdash;but the logic behind it is something widely known and used in many applications (at least I have come accross it a few times throughout my student days). As I consider the logic as general knowledge in the field, I did not use any sources to implement it.
+The complete library is customly written by a single author&mdash;me&mdash;but the logic behind it is widely known and used in many applications (at least I have come accross it a few times throughout my student days). As I consider the logic as general knowledge in the field, I did not use any sources to implement it and therefore do not feel a moral or any other obligation to mention external references.
