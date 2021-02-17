@@ -21,7 +21,7 @@ Once extracted, the collection of tokens (in the order as read from input) is ca
 The (non-deterministic) *algorithm* for generating text blocks implemented by the library is the following:
 
 1.  A **context** of tokens is set.
-2.  Input: the *number of relevant tokens* ```n >= 0```.
+2.  Input: *number of relevant tokens* ```n >= 0```.
 3.  Do:
     1.  Randomly choose a token from the context.
     2.  Repeat:
@@ -148,9 +148,9 @@ Do you know that there's a spark in
 
 ##  Remarks
 
-This library should not be used when working with large corpora of context tokens. Objects of class ```Pen``` store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks a possibility to work with a large number of tokens. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle retrieval of tokens from external sources.
+This library should not be used when working with large corpora of context tokens. Objects of class ```Pen``` store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks a possibility to work with a large number of tokens. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storing tokens externally.
 
-Apart from functionality, the focus was set on simplicity when implementing the library. Hence no class is thread-safe, although this only affects ```LineByLineTokeniser``` class and all of its subclasses (because of the thread-unsafe property ```LineByLineTokeniser.IsTokenEmpty```), and ```RegexTokeniser``` class in particular (not only is it a subclass of ```LineByLineTokeniser```, but it has its own thread-unsafe property ```RegexTokeniser.Transform```).
+Apart from functionality, the focus was set on simplicity while implementing the library. Hence no class is thread-safe, although this only affects ```LineByLineTokeniser``` class and all of its subclasses (because of the thread-unsafe property ```LineByLineTokeniser.IsTokenEmpty```), and ```RegexTokeniser``` class in particular (not only is it a subclass of ```LineByLineTokeniser```, but it has its own thread-unsafe property ```RegexTokeniser.Transform```).
 
 ##  References
 
