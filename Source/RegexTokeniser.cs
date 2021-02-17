@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -30,6 +31,10 @@ namespace MagicText
     ///
     ///     <para>
     ///         Each line from the input is split into raw tokens via <see cref="Regex.Split(String)" /> method (using the internal regular expression breaker (<see cref="Break" />) defined on construction of the tokeniser). If a transformation function (<see cref="Transform" />) is set, it is then used to transform each raw token. The filtering of empty tokens is done <strong>after</strong> the transformation.
+    ///     </para>
+    ///
+    ///     <para>
+    ///         The tokeniser is not thread-safe. Make sure <see cref="Transform" /> and <see cref="LineByLineTokeniser.IsEmptyToken" /> functions are not changed while they may be in use by another thread, such as through <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(StreamReader, ShatteringOptions?)" /> and/or <see cref="LineByLineTokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> methods.
     ///     </para>
     /// </remarks>
     public class RegexTokeniser : LineByLineTokeniser

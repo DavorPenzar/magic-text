@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace MagicText
@@ -16,6 +17,10 @@ namespace MagicText
     ///
     ///     <para>
     ///         Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same.
+    ///     </para>
+    ///
+    ///     <para>
+    ///         The tokeniser is not thread-safe. Make sure <see cref="LineByLineTokeniser.IsEmptyToken" /> function is not changed while it may be in use by another thread, such as through <see cref="LineByLineTokeniser.Shatter(StreamReader, ShatteringOptions?)" /> or <see cref="LineByLineTokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> methods.
     ///     </para>
     /// </remarks>
     public class CharTokeniser : LineByLineTokeniser

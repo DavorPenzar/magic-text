@@ -20,6 +20,10 @@ namespace MagicText
     ///     <para>
     ///         Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same.
     ///     </para>
+    ///
+    ///     <para>
+    ///         The tokeniser is not thread-safe. Make sure <see cref="IsEmptyToken" /> function is not changed while it may be in use by another thread, such as through <see cref="Shatter(StreamReader, ShatteringOptions?)" /> or <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> methods.
+    ///     </para>
     /// </remarks>
     public abstract class LineByLineTokeniser : ITokeniser
     {
@@ -34,6 +38,7 @@ namespace MagicText
             false;
 
         private Func<String?, Boolean> isEmptyToken;
+
 
         /// <summary>
         ///     <para>
