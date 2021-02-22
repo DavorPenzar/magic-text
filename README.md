@@ -6,7 +6,7 @@
 
 ##  Quick Info
 
-The library provides simple interfaces and classes for tokenising existing text blocks and generating new ones upon the extracted tokens. The library is written in [*C# version 8*](http://docs.microsoft.com/en-gb/dotnet/csharp/whats-new/csharp-8) compliant with [*.NET Standard 2.1*](http://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.1.md), without the need for any additional [*NuGet* packages](http://nuget.org/).
+The library provides simple interfaces and classes for tokenising existing text blocks and generating new ones upon the extracted tokens. The library is written in [*C# version 8*](http://docs.microsoft.com/en-gb/dotnet/csharp/whats-new/csharp-8) compliant with [*.NET Standard 2.0*](http://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.0.md), without the need for any additional [*NuGet* packages](http://nuget.org/).
 
 Tokens extracted from a text block are usually words + punctuation + white spaces, or single characters. It should not be considered a good practice to mix *apples and oranges*, i. e. to have some tokens in form of complete words, while others as single characters. Both tokenisation policies mentioned are implemented in the librabry, while additional policies may be obtained by:
 
@@ -97,15 +97,15 @@ IEnumerable<String?> tokens;
 using (var fileStream = File.OpenRead("Firework.txt"))
 using (var fileReader = new StreamReader(fileStream))
 {
-    var tokeniser = new RegexTokeniser();
-    tokens = tokeniser.Shatter(fileReader).Where(t => !String.IsNullOrEmpty(t)); // remove the empty line from the end of the file
+	var tokeniser = new RegexTokeniser();
+	tokens = tokeniser.Shatter(fileReader, new ShatteringOptions { IgnoreEmptyLines = true });
 }
 
 var pen = new Pen(tokens);
 
 foreach (var token in pen.Render(4, new Random(1000)).Take(300))
 {
-    Console.Write(token);
+	Console.Write(token);
 }
 Console.WriteLine();
 
@@ -114,43 +114,39 @@ Console.WriteLine();
 The code above outputs:
 
 ```
- deep?
-Six feet under screams, but no one seems to hear a thing
-Do you ever feel like a plastic bag
-Drifting through the wind, wanting to start again?
+ through the wind, wanting to start again?
 Do you ever feel already buried deep?
 Six feet under screams, but no one seems to hear a thing
-Do you ever feel like a plastic bag
-Drifting through the wind, wanting to start again?
 Do you ever feel, feel so paper thin
 Like a house of cards, one blow from cavin' in?
 Do you ever feel already buried deep?
 Six feet under screams, but no one seems to hear a thing
-Do you know that there's still a chance for you?
-'Cause there's a spark in you
+Do you ever feel, feel so paper thin
+Like a house of cards, one blow from cavin' in?
+Do you ever feel like a plastic bag
+Drifting through the wind, wanting to start again?
+Do you ever feel already buried deep?
+Six feet under screams, but no one seems to hear a thing
+Do you ever feel like a plastic bag
+Drifting through the wind, wanting to start again?
 
 ```
 
 Alternatively, if ```CharTokeniser``` is used instead of ```RegexTokeniser```, the code outputs:
 
 ```
- deep?
-Six feet under screams, but no one blow from cavin' in?
-Do you?
-'Cause of cards, one seems to start again?
-Do you ever feel, feel like a plastic bag
-Drifting to hear a thing
-Do you know that there's a spark in you?
-'Cause of cards, one blow from cavin' in?
-Do you know that there's a spark in
+ thin
+Like a house of cards, one seems to start again?
+Do you ever feel already buried deep?
+Six feel, feel so paper thing
+Do you ever feet under screams, but no one seems to start again?
+Do you
 
 ```
 
 ##  Remarks
 
 This library should not be used when working with large corpora of context tokens. Objects of class ```Pen``` store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks a possibility to work with a large number of tokens. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storing tokens externally.
-
-Apart from functionality, the focus was set on simplicity while implementing the library. Hence no class is thread-safe, even though ```ITokeniser``` interface includes the asynchronous method ```ITokeniser.ShatterAsync(System.IO.StreamReader, ShatteringOptions?)```. If a [```System.Threading.Mutex``` object](http://docs.microsoft.com/en-gb/dotnet/api/system.threading.mutex) was included in the classes implementing the interface, it would be expected of them to also implement [```System.IDisposable``` interface](http://docs.microsoft.com/en-gb/dotnet/api/system.idisposable) (since [```System.Threading.Mutex``` class](http://docs.microsoft.com/en-gb/dotnet/api/system.threading.mutex) implements it). This would in turn make the usage of tokenisers unnecessarily complicated since the main purpose of tokenisers in the library is to create a context for ```Pen``` objects out of existing text resources. If one needs to dynamically change properties of tokenisers while simultaneously using them across multiple threads, they should manually synchronise resource usage.
 
 ##  References
 
