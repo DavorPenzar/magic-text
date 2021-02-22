@@ -144,6 +144,8 @@ Do you
 
 ```
 
+**Nota bene.** The results above were obtained by running the code on a 64 bit version ([*x64*](http://en.wikipedia.org/wiki/X86-64)) of the [*.NET 5.0*](http://github.com/dotnet/core/blob/master/release-notes/5.0/README.md) framework. Running the code in a different environment may show different results&mdash;this has not been tested.
+
 ##  Remarks
 
 This library should not be used when working with large corpora of context tokens. Objects of class ```Pen``` store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks a possibility to work with a large number of tokens. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storing tokens externally.
