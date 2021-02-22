@@ -30,17 +30,17 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Retrieve the index of a position.
+        ///         Retrieve the index of a value.
         ///     </para>
         /// </summary>
-        /// <param name="positions">Sorted positions.</param>
-        /// <param name="p">Position to find.</param>
-        /// <returns>Index <c>i</c> such that <c>positions[i] == p</c>, or <c>-1</c> if <paramref name="p" /> is not found amongst <paramref name="positions" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).</returns>
-        private static int IndexOf(IEnumerable<Int32> positions, int p)
+        /// <param name="values">List of values amongst which <paramref name="x" /> should be found.</param>
+        /// <param name="x">Value to find.</param>
+        /// <returns>Minimal index <c>i</c> such that <c>values[i] == x</c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).</returns>
+        protected static int IndexOf(IEnumerable<Int32> values, int x)
         {
-            for (var (en, i) = ValueTuple.Create(positions.GetEnumerator(), 0); en.MoveNext(); ++i)
+            for (var (en, i) = ValueTuple.Create(values.GetEnumerator(), 0); en.MoveNext(); ++i)
             {
-                if (en.Current == p)
+                if (en.Current == x)
                 {
                     return i;
                 }
@@ -71,7 +71,7 @@ namespace MagicText
 
             int j;
 
-            for ( /* `i` is set in function call */ j = 0; i < tokens.Count && j < sample.Count; ++i, ++j)
+            for ( /* [`i` is set in function call], */ j = 0; i < tokens.Count && j < sample.Count; ++i, ++j)
             {
                 c = comparer.Compare(tokens.ElementAt(i), sample[(cycleStart + j) % sample.Count]);
 
@@ -97,7 +97,7 @@ namespace MagicText
         /// <param name="comparer">String comparer used for comparing.</param>
         /// <param name="tokens">List of tokens amongst which <paramref name="sample" /> should be found.</param>
         /// <param name="positions">Sorted positions, or positional ordering of <paramref name="tokens" /> in respect of <paramref name="comparer" />.</param>
-        /// <param name="sample">Cyclical sample list of tokens. The list represents range <c>{ sample[cycleStart], sample[cycleStart + 1], ..., sample[^1], sample[0], ..., sample[cycleStart - 1] }</c>.</param>
+        /// <param name="sample">Cyclical sample list of tokens to find. The list represents range <c>{ sample[cycleStart], sample[cycleStart + 1], ..., sample[^1], sample[0], ..., sample[cycleStart - 1] }</c>.</param>
         /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
         /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sample" /> begins at <c>tokens[positions[i]]</c> and the total number of occurances amongst <paramref name="tokens" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).</returns>
         /// <remarks>
@@ -400,18 +400,18 @@ namespace MagicText
             // Render the first token, or the first `relevantTokens` if needed.
             if (fromBeginning)
             {
-                for (var (first, i) = ValueTuple.Create(AllEnds ? Context.Count : Positions.ElementAt(FirstPosition), 0); i < text.Capacity; ++first, ++i)
+                for (var (next, i) = ValueTuple.Create(AllEnds ? Context.Count : Positions.ElementAt(FirstPosition), 0); i < text.Capacity; ++next, ++i)
                 {
-                    var firstToken = first < Context.Count ? Context.ElementAt(first) : EndToken;
-                    if (Comparer.Equals(firstToken, EndToken))
+                    var nextToken = next < Context.Count ? Context.ElementAt(next) : EndToken;
+                    if (Comparer.Equals(nextToken, EndToken))
                     {
                         yield break;
                     }
 
-                    text.Add(firstToken);
-                    yield return text[i];
+                    yield return nextToken;
+                    text.Add(nextToken);
 
-                    ++first;
+                    ++next;
                 }
             }
             else
@@ -429,8 +429,8 @@ namespace MagicText
                     yield break;
                 }
 
+                yield return firstToken;
                 text.Add(firstToken);
-                yield return text[0];
             }
 
             // Loop rendering until over.
@@ -472,13 +472,13 @@ namespace MagicText
 
                 if (text.Count < text.Capacity)
                 {
-                    text.Add(nextToken);
-                    yield return text[^1];
+                    yield return nextToken;
+                    text.Add(nextToken); 
                 }
                 else
                 {
+                    yield return nextToken;
                     text[c] = nextToken;
-                    yield return text[c];
                     c = (c + 1) % text.Count; // <-- cyclicity of list `text`
                 }
             }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -18,11 +17,11 @@ namespace MagicText
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         If the default regular expression break pattern (<see cref="DefaultBreakPattern" />) should be used without special <see cref="RegexOptions" />, better performance is achieved when using <see cref="RegexTokeniser.RegexTokeniser" /> or <see cref="RegexTokeniser.RegexTokeniser(Func{String?, Boolean}?)" /> constructors, in which case a pre-built <see cref="Regex" /> object is used constructed with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" />.
+    ///         If the default regular expression break pattern (<see cref="DefaultBreakPattern" />) should be used without special <see cref="RegexOptions" />, better performance is achieved when using <see cref="RegexTokeniser.RegexTokeniser" /> constructor, in which case a pre-built <see cref="Regex" /> object is used constructed with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" />.
     ///     </para>
     ///
     ///     <para>
-    ///         By default, empty tokens are considered those tokens that yield <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> method.
+    ///         Empty tokens are considered those tokens that yield <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> method.
     ///     </para>
     ///
     ///     <para>
@@ -31,10 +30,6 @@ namespace MagicText
     ///
     ///     <para>
     ///         Each line from the input is split into raw tokens via <see cref="Regex.Split(String)" /> method (using the internal regular expression breaker (<see cref="Break" />) defined on construction of the tokeniser). If a transformation function (<see cref="Transform" />) is set, it is then used to transform each raw token. The filtering of empty tokens is done <strong>after</strong> the transformation.
-    ///     </para>
-    ///
-    ///     <para>
-    ///         The tokeniser is not thread-safe. Make sure <see cref="Transform" /> and <see cref="LineByLineTokeniser.IsEmptyToken" /> functions are not changed while they may be in use by another thread, such as through <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(StreamReader, ShatteringOptions?)" /> and/or <see cref="LineByLineTokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> methods.
     ///     </para>
     /// </remarks>
     public class RegexTokeniser : LineByLineTokeniser
@@ -45,6 +40,11 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <value>Default regular expression break pattern.</value>
+        /// <remarks>
+        ///     <para>
+        ///         As the pattern captures both punctuation symbol groups and white space groups, and the latter usually follow the former, shattering inputs using the pattern may cause empty tokens. For instance, shattering the string <c>"Lorem. Ipsum."</c> shall result in enumerable of tokens <c>{ "Lorem", ".", "", " ", "Ipsum", "." }</c> (note the empty string between the first period (<c>'.'</c>) and the white space (<c>' '</c>)). The empty tokens may be ignored by providing corresponding <see cref="ShatteringOptions" /> to <see cref="LineByLineTokeniser.Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> methods.
+        ///     </para>
+        /// </remarks>
         public const string DefaultBreakPattern = @"(\s+|[\.!\?‽¡¿⸘,:;\(\)\[\]\{\}\-—–]+|…)";
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace MagicText
         /// </summary>
         /// <param name="token">Token to transform.</param>
         /// <returns><paramref name="token" /></returns>
-        private static String? IdentityTransform(String? token) =>
+        protected static String? IdentityTransform(String? token) =>
             token;
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace MagicText
         }
 
         private readonly Regex _break;
-        private Func<String?, String?> transform;
+        private readonly Func<String?, String?>? _transform;
 
         /// <summary>
         ///     <para>
@@ -111,26 +111,18 @@ namespace MagicText
         ///         Transformation is done on raw regular expression pattern matches, before (potential) filtering of empty tokens.
         ///     </para>
         /// </summary>
-        /// <value>Transformation function used by the tokeniser. If set to <c>null</c>, the transformation shall be the <em>identity function</em> (transformation will return input parameter unchanged).</value>
-        [AllowNull]
-        public Func<String?, String?> Transform
-        {
-            get => transform;
-            set
-            {
-                transform = value ?? IdentityTransform;
-            }
-        }
+        /// <value>Transformation function used by the tokeniser. If set to <c>null</c>, no transformation function is used.</value>
+
+        public Func<String?, String?>? Transform => _transform;
 
         /// <summary>
         ///     <para>
         ///         Create a default tokeniser.
         ///     </para>
         /// </summary>
-        public RegexTokeniser() : base()
+        public RegexTokeniser() : this(DefaultBreak)
         {
             _break = DefaultBreak;
-            transform = IdentityTransform;
         }
 
         /// <summary>
@@ -138,27 +130,12 @@ namespace MagicText
         ///         Create a tokeniser with provided options.
         ///     </para>
         /// </summary>
-        /// <param name="isEmptyToken">Function to check if a token is empty.</param>
-        public RegexTokeniser(Func<String?, Boolean>? isEmptyToken) : base(isEmptyToken)
-        {
-            _break = DefaultBreak;
-            transform = IdentityTransform;
-        }
-
-        /// <summary>
-        ///     <para>
-        ///         Create a tokeniser with provided options.
-        ///     </para>
-        /// </summary>
-        /// <param name="isEmptyToken">Function to check if a token is empty.</param>
         /// <param name="breakPattern">Regular expression break pattern to use.</param>
         /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <param name="escape">If <c>true</c>, <paramref name="breakPattern" /> is escaped via <see cref="Regex.Escape(String)" /> method before usage.</param>
         /// <param name="options">Options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
-        public RegexTokeniser(Func<String?, Boolean>? isEmptyToken, String breakPattern, Func<String?, String?>? transform = null, bool escape = false, RegexOptions options = RegexOptions.None) : base(isEmptyToken)
+        public RegexTokeniser(String breakPattern, Func<String?, String?>? transform = null, bool escape = false, RegexOptions options = RegexOptions.None) : this(new Regex(escape ? Regex.Escape(breakPattern) : breakPattern, options), transform)
         {
-            _break = new Regex(escape ? Regex.Escape(breakPattern) : breakPattern, options);
-            this.transform = transform ?? IdentityTransform;
         }
 
         /// <summary>
@@ -179,10 +156,10 @@ namespace MagicText
         ///         RegexTokeniser.RegexTokeniser(isEmptyString: isEmptyString, breakPattern: @break.ToString(), transform: transform, options: alterOptions ?? @break.Options)
         ///     </code>
         /// </remarks>
-        public RegexTokeniser(Func<String?, Boolean>? isEmptyToken, Regex @break, Func<String?, String?>? transform = null, RegexOptions? alterOptions = null) : base(isEmptyToken)
+        public RegexTokeniser(Regex @break, Func<String?, String?>? transform = null, RegexOptions? alterOptions = null) : base()
         {
             _break = alterOptions is null ? @break : new Regex(@break.ToString(), (RegexOptions)alterOptions!);
-            this.transform = transform ?? IdentityTransform;
+            _transform = transform ?? IdentityTransform;
         }
 
         /// <summary>
@@ -191,7 +168,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         After splitting <paramref name="line" /> using the internal regular expression breaker (<see cref="Break" />), the transformation of tokens is done using the transformation function (<see cref="Transform" />).
+        ///         After splitting <paramref name="line" /> using the internal regular expression breaker (<see cref="Break" />), the transformation of tokens is done using the transformation function (<see cref="Transform" />) if it is set.
         ///     </para>
         /// </summary>
         /// <param name="line">Line of text to shatter.</param>
@@ -201,7 +178,15 @@ namespace MagicText
         ///         The returned enumerable is merely a query. If multiple enumerations over it should be performed, it is advisable to convert it to a fully built container beforehand, such as a <see cref="List{T}" /> via <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.
         ///     </para>
         /// </remarks>
-        override protected IEnumerable<String?> ShatterLine(String line) =>
-            Break.Split(line).Select(t => Transform(t));
+        override protected IEnumerable<String?> ShatterLine(String line)
+        {
+            IEnumerable<String?> tokens = Break.Split(line);
+            if (!(Transform is null))
+            {
+                tokens = tokens.Select(t => Transform(t));
+            }
+
+            return tokens;
+        }
     }
 }

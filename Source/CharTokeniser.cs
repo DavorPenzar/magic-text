@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace MagicText
@@ -12,15 +11,11 @@ namespace MagicText
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         By default, empty tokens are considered those characters that yield <c>true</c> when converted to strings via <see cref="Char.ToString()" /> method and checked via <see cref="String.IsNullOrEmpty(String)" /> method.
+    ///         Empty tokens are considered those characters that yield <c>true</c> when converted to strings via <see cref="Char.ToString()" /> method and checked via <see cref="String.IsNullOrEmpty(String)" /> method.
     ///     </para>
     ///
     ///     <para>
     ///         Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same.
-    ///     </para>
-    ///
-    ///     <para>
-    ///         The tokeniser is not thread-safe. Make sure <see cref="LineByLineTokeniser.IsEmptyToken" /> function is not changed while it may be in use by another thread, such as through <see cref="LineByLineTokeniser.Shatter(StreamReader, ShatteringOptions?)" /> or <see cref="LineByLineTokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> methods.
     ///     </para>
     /// </remarks>
     public class CharTokeniser : LineByLineTokeniser
@@ -31,16 +26,6 @@ namespace MagicText
         ///     </para>
         /// </summary>
         public CharTokeniser() : base()
-        {
-        }
-
-        /// <summary>
-        ///     <para>
-        ///         Create a tokeniser with provided options.
-        ///     </para>
-        /// </summary>
-        /// <param name="isEmptyToken">Function to check if a token is empty.</param>
-        public CharTokeniser(Func<String?, Boolean>? isEmptyToken) : base(isEmptyToken)
         {
         }
 

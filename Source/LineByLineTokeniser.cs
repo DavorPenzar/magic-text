@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,10 +33,10 @@ namespace MagicText
         /// </summary>
         /// <param name="token">Token to check.</param>
         /// <returns><c>false</c></returns>
-        private static bool IsEmptyTokenAlwaysFalse(String? token) =>
+        protected static bool IsEmptyTokenAlwaysFalse(String? token) =>
             false;
 
-        private Func<String?, Boolean> isEmptyToken;
+        private readonly Func<String?, Boolean> _isEmptyToken;
 
 
         /// <summary>
@@ -45,16 +44,8 @@ namespace MagicText
         ///         This function is used in <see cref="Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> methods to filter out empty tokens if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>.
         ///     </para>
         /// </summary>
-        /// <value>Function to check if a token is empty: it returns <c>true</c> if the token to check is empty. If set to <c>null</c>, no token shall be considered empty, i. e. the function shall always return <c>false</c>. Default is <see cref="String.IsNullOrEmpty(String)" />.</value>
-        [AllowNull]
-        public Func<String?, Boolean> IsEmptyToken
-        {
-            get => isEmptyToken;
-            set
-            {
-                isEmptyToken = value ?? IsEmptyTokenAlwaysFalse;
-            }
-        }
+        /// <value>Function to check if a token is empty: it returns <c>true</c> if the token to check is empty. Default is <see cref="String.IsNullOrEmpty(String)" />.</value>
+        public Func<String?, Boolean> IsEmptyToken => _isEmptyToken;
 
         /// <summary>
         ///     <para>
@@ -63,7 +54,7 @@ namespace MagicText
         /// </summary>
         public LineByLineTokeniser()
         {
-            isEmptyToken = String.IsNullOrEmpty;
+            _isEmptyToken = String.IsNullOrEmpty;
         }
 
         /// <summary>
@@ -72,9 +63,9 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <param name="isEmptyToken">Function to check if a token is empty.</param>
-        public LineByLineTokeniser(Func<String?, Boolean>? isEmptyToken)
+        protected LineByLineTokeniser(Func<String?, Boolean> isEmptyToken)
         {
-            this.isEmptyToken = isEmptyToken ?? IsEmptyTokenAlwaysFalse;
+            _isEmptyToken = isEmptyToken;
         }
 
         /// <summary>
@@ -105,7 +96,7 @@ namespace MagicText
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <remarks>
         ///     <para>
-        ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is false and the resulting enumerable of tokens is (otherwise) non-empty, <see cref="ShatteringOptions.LineEndToken" /> is added to the end of the resulting tokens.
+        ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is false and the final line was non-empty, <see cref="ShatteringOptions.LineEndToken" /> is added to the end of the resulting tokens.
         ///     </para>
         ///
         ///     <para>
@@ -183,7 +174,7 @@ namespace MagicText
         /// <returns>Task whose result is enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <remarks>
         ///     <para>
-        ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is false and the resulting enumerable of tokens is (otherwise) non-empty, <see cref="ShatteringOptions.LineEndToken" /> is added to the end of the resulting tokens.
+        ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is false and the final line was non-empty, <see cref="ShatteringOptions.LineEndToken" /> is added to the end of the resulting tokens.
         ///     </para>
         ///
         ///     <para>
