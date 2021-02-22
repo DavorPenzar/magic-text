@@ -13,7 +13,7 @@ namespace MagicText
         /// <value>Indicator if empty tokens should be ignore. Default is <c>false</c>.</value>
         /// <remarks>
         ///     <para>
-        ///         Exact implementations may define what exactly an <em>empty</em> token means, but usually this would be a <c>null</c> or a string yielding <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> or <see cref="String.IsNullOrWhiteSpace(String)" /> method.
+        ///         Actual implementations of <see cref="ITokeniser" /> interface may define what exactly an <em>empty</em> token means, but usually this would be a <c>null</c> or a string yielding <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> or <see cref="String.IsNullOrWhiteSpace(String)" /> method.
         ///     </para>
         /// </remarks>
         public Boolean IgnoreEmptyTokens { get; set; } = false;
