@@ -98,7 +98,7 @@ using (var fileStream = File.OpenRead("Firework.txt"))
 using (var fileReader = new StreamReader(fileStream))
 {
 	var tokeniser = new RegexTokeniser();
-	tokens = tokeniser.Shatter(fileReader, new ShatteringOptions { IgnoreEmptyLines = true });
+	tokens = tokeniser.Shatter(fileReader, new ShatteringOptions { IgnoreEmptyTokens = true });
 }
 
 var pen = new Pen(tokens);
@@ -114,33 +114,35 @@ Console.WriteLine();
 The code above outputs:
 
 ```
- through the wind, wanting to start again?
-Do you ever feel already buried deep?
+ deep?
 Six feet under screams, but no one seems to hear a thing
-Do you ever feel, feel so paper thin
-Like a house of cards, one blow from cavin' in?
-Do you ever feel already buried deep?
-Six feet under screams, but no one seems to hear a thing
-Do you ever feel, feel so paper thin
-Like a house of cards, one blow from cavin' in?
 Do you ever feel like a plastic bag
 Drifting through the wind, wanting to start again?
 Do you ever feel already buried deep?
 Six feet under screams, but no one seems to hear a thing
 Do you ever feel like a plastic bag
 Drifting through the wind, wanting to start again?
+Do you ever feel, feel so paper thin
+Like a house of cards, one blow from cavin' in?
+Do you ever feel already buried deep?
+Six feet under screams, but no one seems to hear a thing
+Do you know that there's still a chance for you?
+'Cause there's a spark in you
 
 ```
 
 Alternatively, if ```CharTokeniser``` is used instead of ```RegexTokeniser```, the code outputs:
 
 ```
- thin
-Like a house of cards, one seems to start again?
-Do you ever feel already buried deep?
-Six feel, feel so paper thing
-Do you ever feet under screams, but no one seems to start again?
-Do you
+ deep?
+Six feet under screams, but no one blow from cavin' in?
+Do you?
+'Cause of cards, one seems to start again?
+Do you ever feel, feel like a plastic bag
+Drifting to hear a thing
+Do you know that there's a spark in you?
+'Cause of cards, one blow from cavin' in?
+Do you know that there's a spark in
 
 ```
 
