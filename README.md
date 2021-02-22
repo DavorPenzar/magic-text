@@ -2,7 +2,7 @@
 
 [*.NET Standard*](http://docs.microsoft.com/en-gb/dotnet/standard/net-standard) library written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) for generating random text.
 
-**Author**: Davor Penzar
+**Author**: Davor Penzar (February 2021)
 
 ##  Quick Info
 
