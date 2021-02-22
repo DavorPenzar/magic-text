@@ -167,15 +167,18 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         If <c>i &lt; j</c>, then <c>Comparer.Compare(Context[Positions[i]], Context[Positions[j]]) &lt;= 0</c> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
+        ///         Sorting positions of entries in <see cref="Context" />. If <c>i &lt; j</c>, then <c>Comparer.Compare(Context[Positions[i]], Context[Positions[j]]) &lt;= 0</c> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
         ///     </para>
         /// </summary>
-        /// <value>Sorting positions of entries in <see cref="Context" />.</value>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
         protected IReadOnlyCollection<Int32> Positions => _positions;
 
-        /// <value>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is <see cref="IReadOnlyCollection{T}.Count" /> of <see cref="Context" />.</value>
+        /// <summary>
+        ///     <para>
+        ///         Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is <see cref="IReadOnlyCollection{T}.Count" /> of <see cref="Context" />.
+        ///     </para>
+        /// </summary>
         /// <remarks>
         ///     <para>
         ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ Positions[FirstPosition], Positions[FirstPosition] + 1, Positions[FirstPosition] + 2, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
@@ -187,10 +190,18 @@ namespace MagicText
         /// <seealso cref="Positions" />
         protected Int32 FirstPosition => _firstPosition;
 
-        /// <value>Unsorted tokens of the pen. The order of tokens is kept as provided in the constructor.</value>
+        /// <summary>
+        ///     <para>
+        ///         Unsorted tokens of the pen. The order of tokens is kept as provided in the constructor.
+        ///     </para>
+        /// </summary>
         public IReadOnlyCollection<String?> Context => _context;
 
-        /// <value>Ending token of the pen.</value>
+        /// <summary>
+        ///     <para>
+        ///         Ending token of the pen.
+        ///     </para>
+        /// </summary>
         /// <remarks>
         ///     <para>
         ///         This token (or any other comparing equal to it by <see cref="Comparer" />) shall never be rendered.
@@ -198,7 +209,11 @@ namespace MagicText
         /// </remarks>
         public String? EndToken => _endToken;
 
-        /// <value>Indicator of all tokens in <see cref="Context" /> being equal to <see cref="EndToken" /> as compared by <see cref="Comparer" />.</value>
+        /// <summary>
+        ///     <para>
+        ///         Indicator of all tokens in <see cref="Context" /> being equal to <see cref="EndToken" /> (as compared by <see cref="Comparer" />).
+        ///     </para>
+        /// </summary>
         /// <remarks>
         ///     <para>
         ///         If <see cref="Context" /> is empty, <see cref="AllEnds" /> is <c>true</c>. This coincides with mathematical logic of empty sets.

@@ -36,10 +36,13 @@ namespace MagicText
     {
         /// <summary>
         ///     <para>
+        ///         Default regular expression break pattern.
+        ///     </para>
+        ///
+        ///     <para>
         ///         The pattern matches all non-empty continuous white space groups, punctuation symbol groups (periods, exclamation marks, question marks, colons, semicolons, brackets and dashes are included, but quotation marks are not) and the horizontal ellipsis. The pattern is enclosed in (round) brackets to be captured by <see cref="Regex.Split(String)" /> method.
         ///     </para>
         /// </summary>
-        /// <value>Default regular expression break pattern.</value>
         /// <remarks>
         ///     <para>
         ///         As the pattern captures both punctuation symbol groups and white space groups, and the latter usually follow the former, shattering inputs using the pattern may cause empty tokens. For instance, shattering the string <c>"Lorem. Ipsum."</c> shall result in enumerable of tokens <c>{ "Lorem", ".", "", " ", "Ipsum", "." }</c> (note the empty string between the first period (<c>'.'</c>) and the white space (<c>' '</c>)). The empty tokens may be ignored by providing corresponding <see cref="ShatteringOptions" /> to <see cref="LineByLineTokeniser.Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> methods.
@@ -47,13 +50,28 @@ namespace MagicText
         /// </remarks>
         public const string DefaultBreakPattern = @"(\s+|[\.!\?‽¡¿⸘,:;\(\)\[\]\{\}\-—–]+|…)";
 
+        private static readonly Regex _DefaultBreak;
+
         /// <summary>
+        ///     <para>
+        ///         Default regular expression breaker.
+        ///     </para>
+        ///
         ///     <para>
         ///         The regular expression breaker is constructed using the default regular expression break pattern (<see cref="DefaultBreakPattern" />) and with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" />.
         ///     </para>
         /// </summary>
-        /// <value>Default regular expression breaker.</value>
-        protected static Regex DefaultBreak { get; } = new Regex(DefaultBreakPattern, RegexOptions.Compiled);
+        protected static Regex DefaultBreak => _DefaultBreak;
+
+        /// <summary>
+        ///     <para>
+        ///         Initialise static fields.
+        ///     </para>
+        /// </summary>
+        static RegexTokeniser()
+        {
+            _DefaultBreak = new Regex(DefaultBreakPattern, RegexOptions.Compiled);
+        }
 
         /// <summary>
         ///     <para>
@@ -92,26 +110,35 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
+        ///         Regular expression breaker used by the tokeniser.
+        ///     </para>
+        ///
+        ///     <para>
         ///         In <see cref="ShatterLine(String)" /> method, <see cref="Regex.Split(String)" /> method is invoked on <see cref="Break" /> to extract raw tokens from <c>line</c>.
         ///     </para>
         /// </summary>
-        /// <value>Regular expression breaker used by the tokeniser.</value>
         protected Regex Break => _break;
 
         /// <summary>
         ///     <para>
+        ///         Regular expression break pattern used by the tokeniser.
+        ///     </para>
+        ///
+        ///     <para>
         ///         Shattering a line of text <c>line</c> by the tokeniser, without transformation, filtering and replacement of empty lines and line ends, is equivalent (performance aside) to calling <see cref="Regex.Split(String, String)" /> with <c>line</c> as the first argument and <see cref="BreakPattern" /> as the second.
         ///     </para>
         /// </summary>
-        /// <value>Regular expression break pattern used by the tokeniser.</value>
-        public String BreakPattern => _break.ToString();
+        public String BreakPattern => Break.ToString();
 
         /// <summary>
+        ///     <para>
+        ///         Transformation function used by the tokeniser. If <c>null</c>, no transformation function is used.
+        ///     </para>
+        ///
         ///     <para>
         ///         Transformation is done on raw regular expression pattern matches, before (potential) filtering of empty tokens.
         ///     </para>
         /// </summary>
-        /// <value>Transformation function used by the tokeniser. If set to <c>null</c>, no transformation function is used.</value>
 
         public Func<String?, String?>? Transform => _transform;
 
