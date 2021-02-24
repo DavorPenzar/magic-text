@@ -92,6 +92,14 @@ These are the lyrics (only the first verse) to the song called *Firework* by the
 To generate alternative lyrics, one may use the following code:
 
 ```csharp
+using MagicText; // <-- namespace of the library
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+// ...
+
 IEnumerable<String?> tokens;
 
 using (var fileStream = File.OpenRead("Firework.txt"))
