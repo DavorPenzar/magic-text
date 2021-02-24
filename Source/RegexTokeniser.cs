@@ -87,6 +87,10 @@ namespace MagicText
         ///     <para>
         ///         Create a transformation function of regular expression based replacement.
         ///     </para>
+        ///
+        ///     <para>
+        ///         This method is useful for creating <see cref="RegexTokeniser" />s' regular expression based transformation functions (<see cref="RegexTokeniser.Transform" />).
+        ///     </para>
         /// </summary>
         /// <param name="matchPattern">Regular expression pattern to match.</param>
         /// <param name="replacementPattern">Regular expression pattern for replacement of matches captured by <paramref name="matchPattern" />.</param>
@@ -94,6 +98,7 @@ namespace MagicText
         /// <param name="escapeReplacement">If <c>true</c>, <paramref name="replacementPattern" /> is escaped via <see cref="Regex.Escape(String)" /> method before usage.</param>
         /// <param name="options">Options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
         /// <returns>Function that returns <c>null</c> when passed a <c>null</c>, otherwise performs the regular expression based replacement defined.</returns>
+        /// <seealso cref="RegexTokeniser.Transform" />
         public static Func<String?, String?> CreateReplacementTransformationFunction(string matchPattern, string replacementPattern, bool escapeMatch = false, bool escapeReplacement = false, RegexOptions options = RegexOptions.None)
         {
             var replace = new Regex(escapeMatch ? Regex.Escape(matchPattern) : matchPattern, options);
@@ -176,13 +181,14 @@ namespace MagicText
         /// <param name="alterOptions">If <c>null</c>, <paramref name="break" />'s options (<see cref="Regex.Options" />) are used (actually, no new <see cref="Regex" /> is constructed); otherwise options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
         /// <remarks>
         ///     <para>
-        ///         Calling this constructor is essentially the same (performance aside) as calling <see cref="RegexTokeniser.RegexTokeniser(Func{String?, Boolean}?, String, Func{String?, String?}?, bool, RegexOptions)" /> constructor as:
+        ///         Calling this constructor is essentially the same (performance aside) as calling <see cref="RegexTokeniser.RegexTokeniser(String, Func{String?, String?}?, Boolean, RegexOptions)" /> constructor as:
         ///     </para>
         ///
         ///     <code>
         ///         RegexTokeniser.RegexTokeniser(isEmptyString: isEmptyString, breakPattern: @break.ToString(), transform: transform, options: alterOptions ?? @break.Options)
         ///     </code>
         /// </remarks>
+        /// <seealso cref="RegexTokeniser.RegexTokeniser(String, Func{String?, String?}?, Boolean, RegexOptions)"/>
         public RegexTokeniser(Regex @break, Func<String?, String?>? transform = null, RegexOptions? alterOptions = null) : base()
         {
             _break = alterOptions is null ? @break : new Regex(@break.ToString(), (RegexOptions)alterOptions!);

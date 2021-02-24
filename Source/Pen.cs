@@ -28,6 +28,28 @@ namespace MagicText
         private const string RelevantTokensOutOfRangeErrorMessage = "Number of relevant tokens must be non-negative (greater than or equal to 0).";
         private const string PickOutOfRangeErrorMessage = "Picker function must return an integer from [0, n) union {0}.";
 
+        private static readonly Random _Random;
+
+        /// <summary>
+        ///     <para>
+        ///         Internal (pseudo-)random number generator.
+        ///     </para>
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         The number generator is constructed at the beginning of the runtime, seeded by arithmetically transformed current time. If two processes started at approximately the same time, their number generators may be seeded by the same value. Therefore the main purpose of the number generator is to provide a virtually unpredictable (to an unconcerned human user) implementation of <see cref="Render(Int32, Boolean)" /> without having to provide a custom number generator (a <see cref="Func{T, TResult}" /> delegate or a <see cref="System.Random" /> object); no other properties are guaranteed.
+        ///     </para>
+        /// </remarks>
+        protected static System.Random Random => _Random;
+
+        static Pen()
+        {
+            unchecked
+            {
+                _Random = new System.Random(Math.Max((Int32)((1073741827L * DateTime.UtcNow.Ticks + 1073741789L) & (Int64)Int32.MaxValue), 1));
+            }
+        }
+
         /// <summary>
         ///     <para>
         ///         Retrieve the index of a value.
@@ -401,6 +423,8 @@ namespace MagicText
         ///         </item>
         ///     </list>
         /// </remarks>
+        /// <seealso cref="Render(Int32, Random, Boolean)" />
+        /// <seealso cref="Render(Int32, Boolean)" />
         public IEnumerable<String?> Render(int relevantTokens, Func<Int32, Int32> picker, bool fromBeginning = false)
         {
             if (relevantTokens < 0)
@@ -505,7 +529,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen internally; otherwise they are chosen by calling <see cref="Random.Next(Int32)" /> method of <paramref name="random" />. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="Random.Next(Int32)" /> method of <paramref name="random" />. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
+        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen internally; otherwise they are chosen by calling <see cref="System.Random.Next(Int32)" /> method of <paramref name="random" />. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="System.Random.Next(Int32)" /> method of <paramref name="random" />. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
         ///     </para>
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
@@ -519,7 +543,11 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         The query returned is not run until enumerating it (via explicit calls to <see cref="IEnumerable{T}.GetEnumerator" /> method, a <c>foreach</c> loop, a call to <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method etc.). Since the point of <see cref="Random" /> class is to provide a (pseudo-)random number generator, two distinct enumerators over the query may return different results.
+        ///         If no specific <see cref="System.Random" /> object or seed should be used, <see cref="Render(Int32, Boolean)" /> method may be invoked instead.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         The query returned is not run until enumerating it (via explicit calls to <see cref="IEnumerable{T}.GetEnumerator" /> method, a <c>foreach</c> loop, a call to <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method etc.). Since the point of <see cref="System.Random" /> class is to provide a (pseudo-)random number generator, two distinct enumerators over the query may return different results.
         ///     </para>
         ///
         ///     <para>
@@ -565,7 +593,85 @@ namespace MagicText
         ///         </item>
         ///     </list>
         /// </remarks>
-        public IEnumerable<String?> Render(int relevantTokens, Random random, bool fromBeginning = false) =>
+        /// <seealso cref="Render(Int32, Func{int, int}, Boolean)" />
+        /// <seealso cref="Render(Int32, Boolean)" />
+        public IEnumerable<String?> Render(int relevantTokens, System.Random random, bool fromBeginning = false) =>
             Render(relevantTokens, n => random.Next(n), fromBeginning);
+
+        /// <summary>
+        ///     <para>
+        ///         Render (generate) a block of text from <see cref="Context" />.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen internally; otherwise they are chosen by calling <see cref="System.Random.Next(Int32)" /> method of an internal <see cref="System.Random" /> object (<see cref="Random" />). Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="System.Random.Next(Int32)" /> method of the internal <see cref="System.Random" /> object. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
+        ///     </para>
+        ///
+        ///     
+        /// </summary>
+        /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
+        /// <param name="fromBeginning">If <c>true</c>, <paramref name="picker" /> function is not called to choose the first max(<paramref name="relevantTokens" />, 1) tokens, but the beginning of the pen's context is chosen instead; otherwise the first token is chosen by immediately calling <paramref name="picker" /> function.</param>
+        /// <returns>A query for rendering tokens.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative.</exception>
+        /// <remarks>
+        ///     <para>
+        ///         An extra copy of <paramref name="relevantTokens"/> tokens is kept when generating new tokens. Memory errors may occur if <paramref name="relevantTokens"/> is too large.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         Calling this method is essentially the same (reproducibility aside) as calling <see cref="Render(Int32, Random, Boolean)" /> by providing an internal <see cref="System.Random" /> object (<see cref="Random" />) as the parameter <c>random</c>. If no specific <see cref="System.Random" /> object or seed should be used, this method will suffice.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         The query returned is not run until enumerating it (via explicit calls to <see cref="IEnumerable{T}.GetEnumerator" /> method, a <c>foreach</c> loop, a call to <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method etc.). Since the point of <see cref="System.Random" /> class is to provide a (pseudo-)random number generator, two distinct enumerators over the query may return different results.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         It is advisable to manually set the upper bound of tokens to render if they are to be stored in a container, such as a <see cref="List{T}" />, or concatenated together into a string to avoid memory errors. This may be done by calling <see cref="Enumerable.Take{TSource}(IEnumerable{TSource}, Int32)" /> extension method or by iterating a loop with a counter.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         The query shall immediately stop, without rendering any tokens, if:
+        ///     </para>
+        ///
+        ///     <list type="number">
+        ///         <listheader>
+        ///             <term>
+        ///                 case
+        ///             </term>
+        ///             <description>
+        ///                 description
+        ///             </description>
+        ///         </listheader>
+        ///         <item>
+        ///             <term>
+        ///                 no tokens
+        ///             </term>
+        ///             <description>
+        ///                 the pen was constructed with an empty enumerable of tokens,
+        ///             </description>
+        ///         </item>
+        ///         <item>
+        ///             <term>
+        ///                 all ending tokens
+        ///             </term>
+        ///             <description>
+        ///                 the pen was constructed with an enumerable consisting only of ending tokens (mathematically speaking, this is a <em>subcase</em> of the first case),
+        ///             </description>
+        ///         </item>
+        ///         <item>
+        ///             <term>
+        ///                 by choice
+        ///             </term>
+        ///             <description>
+        ///                 a <em>successor</em> of the last token or an ending token is picked first.
+        ///             </description>
+        ///         </item>
+        ///     </list>
+        /// </remarks>
+        /// <seealso cref="Render(Int32, Func{int, int}, Boolean)" />
+        /// <seealso cref="Render(Int32, Random, Boolean)" />
+        public IEnumerable<String?> Render(int relevantTokens, bool fromBeginning = false) =>
+            Render(relevantTokens, Random, fromBeginning);
     }
 }
