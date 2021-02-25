@@ -21,7 +21,7 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         The tokeniser is not thread-safe. Make sure <see cref="IsEmptyToken" /> function is not changed while it may be in use by another thread, such as through <see cref="Shatter(StreamReader, ShatteringOptions?)" /> or <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> methods.
+    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for checking emptiness of tokens (<see cref="IsEmptyToken" />) should be thread-safe, complete <see cref="Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> methods' calls should be locked to ensure consistent behaviour of the function over a single shattering process.
     ///     </para>
     /// </remarks>
     public abstract class LineByLineTokeniser : ITokeniser

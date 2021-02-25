@@ -28,7 +28,23 @@ namespace MagicText
         private const string RelevantTokensOutOfRangeErrorMessage = "Number of relevant tokens must be non-negative (greater than or equal to 0).";
         private const string PickOutOfRangeErrorMessage = "Picker function must return an integer from [0, n) union {0}.";
 
-        private static readonly Random _Random;
+        private static Int32 _RandomSeed;
+        [ThreadStatic] private static System.Random? _Random;
+
+        /// <summary>
+        ///     <para>
+        ///         Seed for a random number generator.
+        ///     </para>
+        /// </summary>
+        /// <value>New seed.</value>
+        private static Int32 RandomSeed
+        {
+            get => _RandomSeed;
+            set
+            {
+                _RandomSeed = Math.Max(value, 1);
+            }
+        }
 
         /// <summary>
         ///     <para>
@@ -37,16 +53,34 @@ namespace MagicText
         /// </summary>
         /// <remarks>
         ///     <para>
-        ///         The number generator is constructed at the beginning of the runtime, seeded by arithmetically transformed current time. If two processes started at approximately the same time, their number generators may be seeded by the same value. Therefore the main purpose of the number generator is to provide a virtually unpredictable (to an unconcerned human user) implementation of <see cref="Render(Int32, Boolean)" /> without having to provide a custom number generator (a <see cref="Func{T, TResult}" /> delegate or a <see cref="System.Random" /> object); no other properties are guaranteed.
+        ///         The number generator is thread safe (actually, each thread has its own instance) and instances across multiple threads are seeded differently. However, instancess across multiple processes initiated at approximately the same time could be seeded with the same value. Therefore the main purpose of the number generator is to provide a virtually unpredictable (to an unconcerned human user) implementation of <see cref="Render(Int32, Boolean)" /> for a single process without having to provide a custom number generator (a <see cref="Func{T, TResult}" /> delegate or a <see cref="System.Random" /> object); no other properties are guaranteed.
         ///     </para>
         /// </remarks>
-        protected static System.Random Random => _Random;
+        protected static System.Random Random
+        {
+            get
+            {
+                lock (typeof(ThreadSafeRandom))
+                {
+                    if (_Random is null)
+                    {
+                        unchecked
+                        {
+                            _Random = new Random(RandomSeed++);
+                        }
+                    }
+                }
+
+                return _Random;
+            }
+        }
+
 
         static Pen()
         {
             unchecked
             {
-                _Random = new System.Random(Math.Max((Int32)((1073741827L * DateTime.UtcNow.Ticks + 1073741789L) & (Int64)Int32.MaxValue), 1));
+                _RandomSeed = Math.Max((Int32)((1073741827L * DateTime.UtcNow.Ticks + 1073741789L) & (Int64)Int32.MaxValue), 1);
             }
         }
 
@@ -604,7 +638,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen internally; otherwise they are chosen by calling <see cref="System.Random.Next(Int32)" /> method of an internal <see cref="System.Random" /> object (<see cref="Random" />). Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="System.Random.Next(Int32)" /> method of the internal <see cref="System.Random" /> object. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
+        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen internally; otherwise they are chosen by calling <see cref="System.Random.Next(Int32)" /> method of an internal <see cref="System.Random" /> object (<see cref="System.Random" />). Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="System.Random.Next(Int32)" /> method of the internal <see cref="System.Random" /> object. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
         ///     </para>
         ///
         ///     
@@ -619,7 +653,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         Calling this method is essentially the same (reproducibility aside) as calling <see cref="Render(Int32, Random, Boolean)" /> by providing an internal <see cref="System.Random" /> object (<see cref="Random" />) as the parameter <c>random</c>. If no specific <see cref="System.Random" /> object or seed should be used, this method will suffice.
+        ///         Calling this method is essentially the same (reproducibility aside) as calling <see cref="Render(Int32, Random, Boolean)" /> by providing an internal <see cref="System.Random" /> object (<see cref="System.Random" />) as the parameter <c>random</c>. If no specific <see cref="System.Random" /> object or seed should be used, this method will suffice.
         ///     </para>
         ///
         ///     <para>
