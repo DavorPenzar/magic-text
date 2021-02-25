@@ -28,12 +28,20 @@ namespace MagicText
         private const string RelevantTokensOutOfRangeErrorMessage = "Number of relevant tokens must be non-negative (greater than or equal to 0).";
         private const string PickOutOfRangeErrorMessage = "Picker function must return an integer from [0, n) union {0}.";
 
+        private static readonly Object _Locker;
         private static Int32 _RandomSeed;
         [ThreadStatic] private static System.Random? _Random;
 
         /// <summary>
         ///     <para>
-        ///         Seed for a random number generator.
+        ///         Internal locking object of <see cref="Pen" /> class.
+        ///     </para>
+        /// </summary>
+        private static Object Locker => _Locker;
+
+        /// <summary>
+        ///     <para>
+        ///         Seed for the internal random number generator.
         ///     </para>
         /// </summary>
         /// <value>New seed.</value>
@@ -60,7 +68,7 @@ namespace MagicText
         {
             get
             {
-                lock (typeof(ThreadSafeRandom))
+                lock (Locker)
                 {
                     if (_Random is null)
                     {
@@ -78,6 +86,8 @@ namespace MagicText
 
         static Pen()
         {
+            _Locker = new Object();
+
             unchecked
             {
                 _RandomSeed = Math.Max((Int32)((1073741827L * DateTime.UtcNow.Ticks + 1073741789L) & (Int64)Int32.MaxValue), 1);
