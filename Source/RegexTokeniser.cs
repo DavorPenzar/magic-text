@@ -130,17 +130,6 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Regular expression break pattern used by the tokeniser.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         Shattering a line of text <c>line</c> by the tokeniser, without transformation, filtering and replacement of empty lines and line ends, is equivalent (performance aside) to calling <see cref="Regex.Split(String, String)" /> with <c>line</c> as the first argument and <see cref="BreakPattern" /> as the second.
-        ///     </para>
-        /// </summary>
-        public String BreakPattern => Break.ToString();
-
-        /// <summary>
-        ///     <para>
         ///         Transformation function used by the tokeniser. If <c>null</c>, no transformation function is used.
         ///     </para>
         ///
@@ -149,7 +138,18 @@ namespace MagicText
         ///     </para>
         /// </summary>
 
-        public Func<String?, String?>? Transform => _transform;
+        protected Func<String?, String?>? Transform => _transform;
+
+        /// <summary>
+        ///     <para>
+        ///         Regular expression break pattern used by the tokeniser.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         Shattering a line of text <c>line</c> by the tokeniser, without transformation, filtering and replacement of empty lines and line ends, is equivalent (performance aside) to calling <see cref="Regex.Split(String, String)" /> with <c>line</c> as the first argument and <see cref="BreakPattern" /> as the second.
+        ///     </para>
+        /// </summary>
+        public String BreakPattern => Break.ToString();
 
         /// <summary>
         ///     <para>

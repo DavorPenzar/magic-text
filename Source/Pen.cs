@@ -30,7 +30,9 @@ namespace MagicText
 
         private static readonly Object _Locker;
         private static Int32 _RandomSeed;
-        [ThreadStatic] private static System.Random? _Random;
+
+        [ThreadStatic]
+        private static System.Random? _Random;
 
         /// <summary>
         ///     <para>
@@ -61,7 +63,7 @@ namespace MagicText
         /// </summary>
         /// <remarks>
         ///     <para>
-        ///         The number generator is thread safe (actually, each thread has its own instance) and instances across multiple threads are seeded differently. However, instancess across multiple processes initiated at approximately the same time could be seeded with the same value. Therefore the main purpose of the number generator is to provide a virtually unpredictable (to an unconcerned human user) implementation of <see cref="Render(Int32, Boolean)" /> for a single process without having to provide a custom number generator (a <see cref="Func{T, TResult}" /> delegate or a <see cref="System.Random" /> object); no other properties are guaranteed.
+        ///         The number generator is thread safe (actually, each thread has its own instance) and instances across multiple threads are seeded differently. However, instancess across multiple processes initiated at approximately the same time could be seeded with the same value. Therefore the main purpose of the number generator is to provide a virtually unpredictable (to an unconcerned human user) implementation of <see cref="Render(Int32, Boolean)" /> for a single process without having to provide a custom number generator (a <see cref="Func{T, TResult}" /> function or a <see cref="System.Random" /> object); no other properties are guaranteed.
         ///     </para>
         /// </remarks>
         protected static System.Random Random
@@ -228,7 +230,11 @@ namespace MagicText
         private readonly Int32 _firstPosition;
         private readonly Boolean _allEnds;
 
-        /// <value>String comparer used by the pen for comparing tokens.</value>
+        /// <summary>
+        ///     <para>
+        ///         String comparer used by the pen for comparing tokens.
+        ///     </para>
+        /// </summary>
         protected StringComparer Comparer => _comparer;
 
         /// <summary>
@@ -294,11 +300,26 @@ namespace MagicText
         ///     <para>
         ///         Create a pen with provided values.
         ///     </para>
+        ///
+        ///     <para>
+        ///         Tokens shall be compared by <see cref="StringComparer.Ordinal" />.
+        ///     </para>
         /// </summary>
         /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
-        /// <param name="comparer">String comparer. Tokens shall be compared by <paramref name="comparer" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
-        public Pen(IEnumerable<String?> context, StringComparer comparer, String? endToken = null)
+        public Pen(IEnumerable<String?> context, String? endToken = null) : this(context, endToken, StringComparer.Ordinal)
+        {
+        }
+
+        /// <summary>
+        ///     <para>
+        ///         Create a pen with provided values.
+        ///     </para>
+        /// </summary>
+        /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
+        /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
+        /// <param name="comparer">String comparer. Tokens shall be compared by <paramref name="comparer" />.</param>
+        public Pen(IEnumerable<String?> context, String? endToken, StringComparer comparer)
         {
             // Copy comparer and ending token.
             _comparer = comparer;
@@ -384,21 +405,6 @@ namespace MagicText
 
             // Check if all tokens are ending tokens.
             _allEnds = (FirstPosition == Context.Count);
-        }
-
-        /// <summary>
-        ///     <para>
-        ///         Create a pen with provided values.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         Tokens shall be compared by <see cref="StringComparer.Ordinal" />.
-        ///     </para>
-        /// </summary>
-        /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
-        /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
-        public Pen(IEnumerable<String?> context, String? endToken = null) : this(context, StringComparer.Ordinal, endToken)
-        {
         }
 
         /// <summary>

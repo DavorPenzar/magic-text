@@ -55,9 +55,8 @@ namespace MagicText
         ///         Initialise a tokeniser.
         ///     </para>
         /// </summary>
-        public LineByLineTokeniser()
+        public LineByLineTokeniser() : this(String.IsNullOrEmpty)
         {
-            _isEmptyToken = String.IsNullOrEmpty;
         }
 
         /// <summary>
