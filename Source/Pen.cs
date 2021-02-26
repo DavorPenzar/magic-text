@@ -46,7 +46,7 @@ namespace MagicText
         ///         Seed for the internal random number generator.
         ///     </para>
         /// </summary>
-        /// <value>New seed.</value>
+        /// <value>New seed. If <c>value</c> is less than or equal to <c>0</c>, new seed is set to <c>1</c>.</value>
         private static Int32 RandomSeed
         {
             get => _RandomSeed;
@@ -85,14 +85,31 @@ namespace MagicText
             }
         }
 
+        /// <summary>
+        ///     <para>
+        ///         (Pseudo-)Randomly choose a number in the specified range.
+        ///     </para>
+        /// </summary>
+        /// <param name="n">Upper limit of the value to choose.</param>
+        /// <returns>A number greater than or equal to <c>0</c> but (strictly) less than <paramref name="n" />, i. e. a number from range [<c>0</c>, <paramref name="n" />). However, if <paramref name="n" /> is less than or equal to <c>0</c>, <c>0</c> is returned.</returns>
+        /// <remarks>
+        ///     <para>
+        ///         Unlike <see cref="System.Random.Next(Int32)" />, this method does not throw an <see cref="ArgumentOutOfRangeException" /> if the argument is negative—it simply returns <c>0</c> instead.
+        ///     </para>
+        /// </remarks>
+        protected int RandomPicker(int n) =>
+            n < 0 ? 0 : Random.Next(n);
 
         static Pen()
         {
             _Locker = new Object();
 
-            unchecked
+            lock (Locker)
             {
-                _RandomSeed = Math.Max((Int32)((1073741827L * DateTime.UtcNow.Ticks + 1073741789L) & (Int64)Int32.MaxValue), 1);
+                unchecked
+                {
+                    _RandomSeed = Math.Max((Int32)((1073741827L * DateTime.UtcNow.Ticks + 1073741789L) & (Int64)Int32.MaxValue), 1);
+                }
             }
         }
 
@@ -279,6 +296,7 @@ namespace MagicText
         ///         This token (or any other comparing equal to it by <see cref="Comparer" />) shall never be rendered.
         ///     </para>
         /// </remarks>
+        /// <seealso cref="Comparer" />
         public String? EndToken => _endToken;
 
         /// <summary>
@@ -643,7 +661,7 @@ namespace MagicText
         ///         </item>
         ///     </list>
         /// </remarks>
-        /// <seealso cref="Render(Int32, Func{int, int}, Boolean)" />
+        /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
         /// <seealso cref="Render(Int32, Boolean)" />
         public IEnumerable<String?> Render(int relevantTokens, System.Random random, bool fromBeginning = false) =>
             Render(relevantTokens, n => random.Next(n), fromBeginning);
@@ -719,9 +737,9 @@ namespace MagicText
         ///         </item>
         ///     </list>
         /// </remarks>
-        /// <seealso cref="Render(Int32, Func{int, int}, Boolean)" />
+        /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
         /// <seealso cref="Render(Int32, Random, Boolean)" />
         public IEnumerable<String?> Render(int relevantTokens, bool fromBeginning = false) =>
-            Render(relevantTokens, Random, fromBeginning);
+            Render(relevantTokens, RandomPicker, fromBeginning);
     }
 }

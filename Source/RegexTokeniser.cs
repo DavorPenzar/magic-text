@@ -33,7 +33,7 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for token transformation (<see cref="Transform" />) should be thread-safe, complete <see cref="LineByLineTokeniser.Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> methods' calls should be locked to ensure consistent behaviour of the function over a single shattering process.
+    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for token transformation (<see cref="Transform" />) should be thread-safe, lock the tokeniser during complete <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> methods' to ensure consistent behaviour of the function over a single shattering process.
     ///     </para>
     /// </remarks>
     public class RegexTokeniser : LineByLineTokeniser
@@ -189,7 +189,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <code>
-        ///         RegexTokeniser.RegexTokeniser(isEmptyString: isEmptyString, breakPattern: @break.ToString(), transform: transform, options: alterOptions ?? @break.Options)
+        ///         RegexTokeniser.RegexTokeniser(breakPattern: @break.ToString(), transform: transform, options: alterOptions ?? @break.Options)
         ///     </code>
         /// </remarks>
         /// <seealso cref="RegexTokeniser.RegexTokeniser(String, Func{String?, String?}?, Boolean, RegexOptions)"/>
