@@ -94,7 +94,7 @@ namespace MagicText
         /// <returns>A number greater than or equal to <c>0</c> but (strictly) less than <paramref name="n" />, i. e. a number from range [<c>0</c>, <paramref name="n" />). However, if <paramref name="n" /> is less than or equal to <c>0</c>, <c>0</c> is returned.</returns>
         /// <remarks>
         ///     <para>
-        ///         Unlike <see cref="System.Random.Next(Int32)" />, this method does not throw an <see cref="ArgumentOutOfRangeException" /> if the argument is negative—it simply returns <c>0</c> instead.
+        ///         Unlike <see cref="System.Random.Next(Int32)" />, this method does not throw an <see cref="ArgumentOutOfRangeException" /> if the argument is negative—it simply returns <c>0</c> instead. Moreover, if <paramref name="n" /> is strictly negative, no method of the internal (pseudo-)random number generator is invoked (<see cref="Random" />) hence its random state remains unchanged.
         ///     </para>
         /// </remarks>
         protected int RandomPicker(int n) =>
