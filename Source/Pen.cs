@@ -43,10 +43,15 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Seed for the internal random number generator.
+        ///         Seed for the internal (pseudo-)random number generator (<see cref="Random" />).
         ///     </para>
         /// </summary>
         /// <value>New seed. If <c>value</c> is less than or equal to <c>0</c>, new seed is set to <c>1</c>.</value>
+        /// <remarks>
+        ///     <para>
+        ///         The current value does not necessarily indicate the seeding value or the random state of the internal number generator if the number generator has already been instantiated and used and/or the value has changed.
+        ///     </para>
+        /// </remarks>
         private static Int32 RandomSeed
         {
             get => _RandomSeed;
@@ -94,7 +99,7 @@ namespace MagicText
         /// <returns>A number greater than or equal to <c>0</c> but (strictly) less than <paramref name="n" />, i. e. a number from range [<c>0</c>, <paramref name="n" />). However, if <paramref name="n" /> is less than or equal to <c>0</c>, <c>0</c> is returned.</returns>
         /// <remarks>
         ///     <para>
-        ///         Unlike <see cref="System.Random.Next(Int32)" />, this method does not throw an <see cref="ArgumentOutOfRangeException" /> if the argument is negative—it simply returns <c>0</c> instead. Moreover, if <paramref name="n" /> is strictly negative, no method of the internal (pseudo-)random number generator is invoked (<see cref="Random" />) hence its random state remains unchanged.
+        ///         Unlike <see cref="System.Random.Next(Int32)" />, this method does not throw an <see cref="ArgumentOutOfRangeException" /> if the argument is negative—it simply returns <c>0</c> instead. Moreover, if <paramref name="n" /> is strictly negative, no method of the internal (pseudo-)random number generator (<see cref="Random" />) is invoked hence its random state remains unchanged.
         ///     </para>
         /// </remarks>
         protected int RandomPicker(int n) =>
@@ -156,7 +161,7 @@ namespace MagicText
 
             int j;
 
-            for ( /* [`i` is set in function call], */ j = 0; i < tokens.Count && j < sample.Count; ++i, ++j)
+            for (/* [`i` is set in function call,] */ j = 0; i < tokens.Count && j < sample.Count; ++i, ++j)
             {
                 c = comparer.Compare(tokens.ElementAt(i), sample[(cycleStart + j) % sample.Count]);
 
