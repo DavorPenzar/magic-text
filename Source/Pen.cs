@@ -522,8 +522,6 @@ namespace MagicText
 
                     yield return nextToken;
                     text.Add(nextToken);
-
-                    ++next;
                 }
             }
             else
