@@ -16,7 +16,7 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         A complete deep copy of enumerable <c>context</c> (passed to the constructor) is created and stored by the pen. Memory errors may occur if the number of tokens in the enumerable is too large; although memory usage may be reduced by passing <c>true</c> as parameter <c>intern</c> to constructor(s), be aware of other side effects of string interning via <see cref="String.Intern(String)" /> method.
+    ///         A complete deep copy of enumerable <c>context</c> (passed to the constructor) is created and stored by the pen. Memory errors may occur if the number of tokens in the enumerable is too large; although memory usage and even time consumption (if there are many identical duplicates amongst tokens in <c>context</c>) may be reduced by passing <c>true</c> as parameter <c>intern</c> to constructor(s), be aware of other side effects of string interning via <see cref="String.Intern(String)" /> method.
     ///     </para>
     ///
     ///     <para>
