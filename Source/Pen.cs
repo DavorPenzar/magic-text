@@ -16,7 +16,7 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         A complete deep copy of enumerable <c>context</c> (passed to the constructor) is created and stored by the pen. Memory errors may occur if the number of tokens in the enumerable is too large.
+    ///         A complete deep copy of enumerable <c>context</c> (passed to the constructor) is created and stored by the pen. Memory errors may occur if the number of tokens in the enumerable is too large; although memory usage may be reduced by passing <c>true</c> as parameter <c>intern</c> to constructor(s), be aware of other side effects of string interning via <see cref="String.Intern(String)" /> method.
     ///     </para>
     ///
     ///     <para>
@@ -52,12 +52,23 @@ namespace MagicText
         ///         The current value does not necessarily indicate the seeding value or the random state of the internal number generator if the number generator has already been instantiated and used and/or the value has changed.
         ///     </para>
         /// </remarks>
+        /// <seealso cref="Random" />
         private static Int32 RandomSeed
         {
-            get => _RandomSeed;
+            get
+            {
+                lock (Locker)
+                {
+                    return _RandomSeed;
+                }
+            }
+
             set
             {
-                _RandomSeed = Math.Max(value, 1);
+                lock (Locker)
+                {
+                    _RandomSeed = Math.Max(value, 1);
+                }
             }
         }
 
@@ -99,9 +110,17 @@ namespace MagicText
         /// <returns>A number greater than or equal to <c>0</c> but (strictly) less than <paramref name="n" />, i. e. a number from range [<c>0</c>, <paramref name="n" />). However, if <paramref name="n" /> is less than or equal to <c>0</c>, <c>0</c> is returned.</returns>
         /// <remarks>
         ///     <para>
+        ///         This method is intended to be used in <see cref="Render(Int32, Func{Int32, Int32}, Boolean)" /> method as parameter <c>picker</c> to randomly choose tokens. In fact, <see cref="Render(Int32, Boolean)" /> method overload is implemented this way.
+        ///     </para>
+        ///
+        ///     <para>
         ///         Unlike <see cref="System.Random.Next(Int32)" />, this method does not throw an <see cref="ArgumentOutOfRangeException" /> if the argument is negative—it simply returns <c>0</c> instead. Moreover, if <paramref name="n" /> is strictly negative, no method of the internal (pseudo-)random number generator (<see cref="Random" />) is invoked hence its random state remains unchanged.
         ///     </para>
         /// </remarks>
+        /// <seealso cref="Random" />
+        /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
+        /// <seealso cref="Render(Int32, System.Random, Boolean)" />
+        /// <seealso cref="Render(Int32, Boolean)" />
         protected int RandomPicker(int n) =>
             n < 0 ? 0 : Random.Next(n);
 
@@ -330,7 +349,8 @@ namespace MagicText
         /// </summary>
         /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
-        public Pen(IEnumerable<String?> context, String? endToken = null) : this(context, endToken, StringComparer.Ordinal)
+        /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
+        public Pen(IEnumerable<String?> context, String? endToken = null, bool intern = false) : this(context, endToken, StringComparer.Ordinal, intern)
         {
         }
 
@@ -342,7 +362,8 @@ namespace MagicText
         /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
         /// <param name="comparer">String comparer. Tokens shall be compared by <paramref name="comparer" />.</param>
-        public Pen(IEnumerable<String?> context, String? endToken, StringComparer comparer)
+        /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
+        public Pen(IEnumerable<String?> context, String? endToken, StringComparer comparer, bool intern = false)
         {
             // Copy comparer and ending token.
             _comparer = comparer;
@@ -350,6 +371,10 @@ namespace MagicText
 
             // Copy context.
             {
+                if (intern)
+                {
+                    context = context.Select(t => t is null ? null : String.Intern(t));
+                }
                 var contextList = context.ToList();
                 contextList.TrimExcess();
                 _context = contextList.AsReadOnly();
@@ -387,24 +412,8 @@ namespace MagicText
                             ++j;
                         }
 
-                        // The token that first reached the end is less by lexicographic order.
-                        {
-                            var counts = new Boolean[] { i == Context.Count, j == Context.Count };
-                            if (counts.All(f => f))
-                            {
-                                return 0;
-                            }
-                            else if (counts[0])
-                            {
-                                return -1;
-                            }
-                            else if (counts[1])
-                            {
-                                return 1;
-                            }
-                        }
-
-                        return 0;
+                        // Compare indices in the end.
+                        return i.CompareTo(j);
                     }
                 );
                 positionsList.TrimExcess();
@@ -412,19 +421,14 @@ namespace MagicText
             }
 
             // Find the position of the first (non-ending) token.
-            _firstPosition = Context.Select(
-                (t, p) =>
-                {
-                    if (Comparer.Equals(t, EndToken))
-                    {
-                        return null;
-                    }
-
-                    int i = IndexOf(Positions, p);
-
-                    return i == -1 ? null : (Int32?)i;
-                }
-            ).Where(i => !(i is null)).FirstOrDefault() ?? Context.Count;
+            try
+            {
+                _firstPosition = Context.Select((t, p) => Comparer.Equals(t, EndToken) ? -1 : IndexOf(Positions, p)).Where(i => i != -1).First();
+            }
+            catch (InvalidOperationException)
+            {
+                _firstPosition = Context.Count;
+            }
 
             // Check if all tokens are ending tokens.
             _allEnds = (FirstPosition == Context.Count);
