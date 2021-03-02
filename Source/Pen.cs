@@ -95,9 +95,9 @@ namespace MagicText
                             _Random = new Random(RandomSeed++);
                         }
                     }
-                }
 
-                return _Random;
+                    return _Random;
+                }
             }
         }
 
