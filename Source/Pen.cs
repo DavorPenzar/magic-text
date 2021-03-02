@@ -412,8 +412,8 @@ namespace MagicText
                             ++j;
                         }
 
-                        // Compare indices in the end.
-                        return i.CompareTo(j);
+                        // Compare indices in the end (the larger index is in fact `Context.Count` hence reached the end earlier).
+                        return j.CompareTo(i);
                     }
                 );
                 positionsList.TrimExcess();
