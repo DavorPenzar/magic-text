@@ -101,29 +101,6 @@ namespace MagicText
             }
         }
 
-        /// <summary>
-        ///     <para>
-        ///         (Pseudo-)Randomly choose a number in the specified range.
-        ///     </para>
-        /// </summary>
-        /// <param name="n">Upper limit of the value to choose.</param>
-        /// <returns>A number greater than or equal to <c>0</c> but (strictly) less than <paramref name="n" />, i. e. a number from range [<c>0</c>, <paramref name="n" />). However, if <paramref name="n" /> is less than or equal to <c>0</c>, <c>0</c> is returned.</returns>
-        /// <remarks>
-        ///     <para>
-        ///         This method is intended to be used in <see cref="Render(Int32, Func{Int32, Int32}, Boolean)" /> method as parameter <c>picker</c> to randomly choose tokens. In fact, <see cref="Render(Int32, Boolean)" /> method overload is implemented this way.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         Unlike <see cref="System.Random.Next(Int32)" />, this method does not throw an <see cref="ArgumentOutOfRangeException" /> if the argument is negative—it simply returns <c>0</c> instead. Moreover, if <paramref name="n" /> is strictly negative, no method of the internal (pseudo-)random number generator (<see cref="Random" />) is invoked hence its random state remains unchanged.
-        ///     </para>
-        /// </remarks>
-        /// <seealso cref="Random" />
-        /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
-        /// <seealso cref="Render(Int32, System.Random, Boolean)" />
-        /// <seealso cref="Render(Int32, Boolean)" />
-        protected int RandomPicker(int n) =>
-            n < 0 ? 0 : Random.Next(n);
-
         static Pen()
         {
             _Locker = new Object();
@@ -412,7 +389,7 @@ namespace MagicText
                             ++j;
                         }
 
-                        // Compare indices in the end (the larger index is in fact `Context.Count` hence reached the end earlier).
+                        // Finally, compare indices (the greater index has reached the end of `Context`, implying a shorter (sub)sequence).
                         return j.CompareTo(i);
                     }
                 );
@@ -671,7 +648,7 @@ namespace MagicText
         /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
         /// <seealso cref="Render(Int32, Boolean)" />
         public IEnumerable<String?> Render(int relevantTokens, System.Random random, bool fromBeginning = false) =>
-            Render(relevantTokens, n => random.Next(n), fromBeginning);
+            Render(relevantTokens, random.Next, fromBeginning);
 
         /// <summary>
         ///     <para>
@@ -747,6 +724,6 @@ namespace MagicText
         /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
         /// <seealso cref="Render(Int32, Random, Boolean)" />
         public IEnumerable<String?> Render(int relevantTokens, bool fromBeginning = false) =>
-            Render(relevantTokens, RandomPicker, fromBeginning);
+            Render(relevantTokens, Random, fromBeginning);
     }
 }
