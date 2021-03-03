@@ -140,22 +140,28 @@ namespace MagicText
                 {
                     lineTokens = lineTokens.Where(t => !IsEmptyToken(t));
                 }
-                lineTokens = lineTokens.ToList();
 
-                // Add line's tokens to `tokens` if necessary. Update `addLineEnd`.
-                if (lineTokens.Any())
+                // Add appropriate tokens to `tokens` if any. Update `addLineEnd`.
                 {
+                    int oldCount = tokens.Count;
+
                     tokens.AddRange(lineTokens);
-                    addLineEnd = true;
-                }
-                else if (options.IgnoreEmptyLines)
-                {
-                    addLineEnd = false;
-                }
-                else // `!options.IgnoreEmptyLines`
-                {
-                    tokens.Add(options.EmptyLineToken);
-                    addLineEnd = true;
+                    if (tokens.Count == oldCount) // <-- no new tokens were added
+                    {
+                        if (options.IgnoreEmptyLines)
+                        {
+                            addLineEnd = false;
+                        }
+                        else
+                        {
+                            tokens.Add(options.EmptyLineToken);
+                            addLineEnd = true;
+                        }
+                    }
+                    else
+                    {
+                        addLineEnd = true;
+                    }
                 }
             }
 
@@ -218,22 +224,28 @@ namespace MagicText
                 {
                     lineTokens = lineTokens.Where(t => !IsEmptyToken(t));
                 }
-                lineTokens = lineTokens.ToList();
 
-                // Add line's tokens to `tokens` if necessary. Update `addLineEnd`.
-                if (lineTokens.Any())
+                // Add appropriate tokens to `tokens` if any. Update `addLineEnd`.
                 {
+                    int oldCount = tokens.Count;
+
                     tokens.AddRange(lineTokens);
-                    addLineEnd = true;
-                }
-                else if (options.IgnoreEmptyLines)
-                {
-                    addLineEnd = false;
-                }
-                else // `!options.IgnoreEmptyLines`
-                {
-                    tokens.Add(options.EmptyLineToken);
-                    addLineEnd = true;
+                    if (tokens.Count == oldCount) // <-- no new tokens were added
+                    {
+                        if (options.IgnoreEmptyLines)
+                        {
+                            addLineEnd = false;
+                        }
+                        else
+                        {
+                            tokens.Add(options.EmptyLineToken);
+                            addLineEnd = true;
+                        }
+                    }
+                    else
+                    {
+                        addLineEnd = true;
+                    }
                 }
             }
 
