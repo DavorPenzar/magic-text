@@ -20,7 +20,7 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         Changing any of the properties—public or protected—breaks the functionality of the pen. This includes, but is not limited to, manually changing the behaviour of string comparer <see cref="Comparer" />. By doing so, behaviour of <see cref="Render(Int32, Func{Int32, Int32})" /> and <see cref="Render(Int32, Random)" /> methods is unexpected and no longer guaranteed.
+    ///         Changing any of the properties—public or protected—breaks the functionality of the pen. By doing so, behaviour of <see cref="Render(Int32, Func{Int32, Int32}, Boolean)" />, <see cref="Render(Int32, Random, Boolean)" /> and <see cref="Render(Int32, Boolean)" /> methods is unexpected and no longer guaranteed.
     ///     </para>
     /// </remarks>
     public class Pen
@@ -49,7 +49,7 @@ namespace MagicText
         /// <value>New seed. If <c>value</c> is less than or equal to <c>0</c>, new seed is set to <c>1</c>.</value>
         /// <remarks>
         ///     <para>
-        ///         The current value does not necessarily indicate the seeding value or the random state of the internal number generator if the number generator has already been instantiated and used and/or the value has changed.
+        ///         The current value does not necessarily indicate the seeding value or the random state of the internal number generator. The dissonance may appear if the number generator has already been instantiated and used and/or the value of <see cref="RandomSeed" /> has changed.
         ///     </para>
         /// </remarks>
         /// <seealso cref="Random" />
@@ -121,7 +121,7 @@ namespace MagicText
         /// </summary>
         /// <param name="values">List of values amongst which <paramref name="x" /> should be found.</param>
         /// <param name="x">Value to find.</param>
-        /// <returns>Minimal index <c>i</c> such that <c>values[i] == x</c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).</returns>
+        /// <returns>Minimal index <c>i</c> such that <c>values[i] == x</c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" />.</returns>
         protected static int IndexOf(IEnumerable<Int32> values, int x)
         {
             for (var (en, i) = ValueTuple.Create(values.GetEnumerator(), 0); en.MoveNext(); ++i)
@@ -143,7 +143,7 @@ namespace MagicText
         /// <param name="comparer">String comparer used for comparing.</param>
         /// <param name="tokens">List of tokens whose subrange is compared to <paramref name="sample" />.</param>
         /// <param name="sample">Cyclical sample list of tokens. The list represents range <c>{ sample[cycleStart], sample[cycleStart + 1], ..., sample[^1], sample[0], ..., sample[cycleStart - 1] }</c>.</param>
-        /// <param name="i">Starting index of the subrange from <paramref name="tokens" /> to compare. The subrange <c>{ tokens[i], tokens[i + 1], ..., tokens[Math.Min(i + sample.Count - 1, tokens.Count - 1)] }</c> is used (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).</param>
+        /// <param name="i">Starting index of the subrange from <paramref name="tokens" /> to compare. The subrange <c>{ tokens[i], tokens[i + 1], ..., tokens[Math.Min(i + sample.Count - 1, tokens.Count - 1)] }</c> is used.</param>
         /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
         /// <returns>A signed integer that indicates the relative values of subrange from <paramref name="tokens" /> starting from <paramref name="i" /> and cyclical sample <paramref name="sample" />.</returns>
         /// <remarks>
@@ -151,7 +151,7 @@ namespace MagicText
         ///         Values from the subrange of <paramref name="tokens" /> and <paramref name="sample" /> are compared in order by calling <see cref="StringComparer.Compare(String, String)" /> method on <paramref name="comparer" />. If a comparison yields a non-zero value, it is returned. If the subrange from <paramref name="tokens" /> is shorter (in the number of tokens) than <paramref name="sample" /> but all of its tokens compare equal to tokens from the beginning of <paramref name="sample" />, a negative number is returned. If all tokens compare equal and the subrange from <paramref name="tokens" /> is the same length (in the number of tokens) as <paramref name="sample" />, <c>0</c> is returned.
         ///     </para>
         /// </remarks>
-        private static int CompareRange(StringComparer comparer, IReadOnlyCollection<String?> tokens, IList<String?> sample, int i, int cycleStart)
+        private static int CompareRange(StringComparer comparer, ReadOnlyCollection<String?> tokens, IList<String?> sample, int i, int cycleStart)
         {
             int c = 0;
 
@@ -159,7 +159,7 @@ namespace MagicText
 
             for (/* [`i` is set in function call,] */ j = 0; i < tokens.Count && j < sample.Count; ++i, ++j)
             {
-                c = comparer.Compare(tokens.ElementAt(i), sample[(cycleStart + j) % sample.Count]);
+                c = comparer.Compare(tokens[i], sample[(cycleStart + j) % sample.Count]);
 
                 if (c != 0)
                 {
@@ -185,13 +185,13 @@ namespace MagicText
         /// <param name="positions">Sorted positions, or positional ordering of <paramref name="tokens" /> in respect of <paramref name="comparer" />.</param>
         /// <param name="sample">Cyclical sample list of tokens to find. The list represents range <c>{ sample[cycleStart], sample[cycleStart + 1], ..., sample[^1], sample[0], ..., sample[cycleStart - 1] }</c>.</param>
         /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
-        /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sample" /> begins at <c>tokens[positions[i]]</c> and the total number of occurances amongst <paramref name="tokens" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).</returns>
+        /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sample" /> begins at <c>tokens[positions[i]]</c> and the total number of occurances amongst <paramref name="tokens" />.</returns>
         /// <remarks>
         ///     <para>
         ///         The implementation of the method assumes <paramref name="sample" /> actually exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" /> and that <paramref name="positions" /> indeed sort <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />. If the former is not true, the returned index shall point to the position at which <paramref name="t" />'s position should be inserted to retain the sorted order and the number of occurances shall be 0; if the latter is not true, the behaviour of the method is undefined.
         ///     </para>
         /// </remarks>
-        private static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, IReadOnlyCollection<String?> tokens, IReadOnlyCollection<Int32> positions, IList<String?> sample, int cycleStart)
+        private static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, ReadOnlyCollection<String?> tokens, ReadOnlyCollection<Int32> positions, IList<String?> sample, int cycleStart)
         {
             // Binary search...
 
@@ -205,7 +205,7 @@ namespace MagicText
                 while (l < h)
                 {
                     // Compare ranges.
-                    int c = CompareRange(comparer, tokens, sample, positions.ElementAt(m), cycleStart);
+                    int c = CompareRange(comparer, tokens, sample, positions[m], cycleStart);
 
                     // Break the loop or update positions.
                     if (c == 0)
@@ -228,11 +228,11 @@ namespace MagicText
             }
 
             // Find the minimal position index `l` and the maximal index `h` of occurances of `sample` amongst `tokens`.
-            while (l > 0 && CompareRange(comparer, tokens, sample, positions.ElementAt(l - 1), cycleStart) == 0)
+            while (l > 0 && CompareRange(comparer, tokens, sample, positions[l - 1], cycleStart) == 0)
             {
                 --l;
             }
-            while (h < tokens.Count && CompareRange(comparer, tokens, sample, positions.ElementAt(h), cycleStart) == 0)
+            while (h < tokens.Count && CompareRange(comparer, tokens, sample, positions[h], cycleStart) == 0)
             {
                 ++h;
             }
@@ -257,12 +257,12 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Sorting positions of entries in <see cref="Context" />. If <c>i &lt; j</c>, then <c>Comparer.Compare(Context[Positions[i]], Context[Positions[j]]) &lt;= 0</c> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
+        ///         Sorting positions of entries in <see cref="Context" />. If <c>i &lt; j</c>, then <c>Comparer.Compare(Context[Positions[i]], Context[Positions[j]]) &lt;= 0</c>.
         ///     </para>
         /// </summary>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
-        protected IReadOnlyCollection<Int32> Positions => _positions;
+        protected ReadOnlyCollection<Int32> Positions => _positions;
 
         /// <summary>
         ///     <para>
@@ -271,7 +271,7 @@ namespace MagicText
         /// </summary>
         /// <remarks>
         ///     <para>
-        ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ Positions[FirstPosition], Positions[FirstPosition] + 1, Positions[FirstPosition] + 2, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" />).
+        ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ Positions[FirstPosition], Positions[FirstPosition] + 1, Positions[FirstPosition] + 2, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens.
         ///     </para>
         /// </remarks>
         /// <seealso cref="Context" />
@@ -285,7 +285,7 @@ namespace MagicText
         ///         Unsorted tokens of the pen. The order of tokens is kept as provided in the constructor.
         ///     </para>
         /// </summary>
-        public IReadOnlyCollection<String?> Context => _context;
+        public ReadOnlyCollection<String?> Context => _context;
 
         /// <summary>
         ///     <para>
@@ -327,7 +327,7 @@ namespace MagicText
         /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
         /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
-        public Pen(IEnumerable<String?> context, String? endToken = null, bool intern = false) : this(context, endToken, StringComparer.Ordinal, intern)
+        public Pen(IEnumerable<String?> context, String? endToken = null, bool intern = false) : this(context, StringComparer.Ordinal, endToken, intern)
         {
         }
 
@@ -337,10 +337,10 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
-        /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
         /// <param name="comparer">String comparer. Tokens shall be compared by <paramref name="comparer" />.</param>
+        /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
         /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
-        public Pen(IEnumerable<String?> context, String? endToken, StringComparer comparer, bool intern = false)
+        public Pen(IEnumerable<String?> context, StringComparer comparer, String? endToken = null, bool intern = false)
         {
             // Copy comparer and ending token.
             _comparer = comparer;
@@ -374,8 +374,8 @@ namespace MagicText
                         while (i < Context.Count && j < Context.Count)
                         {
                             // Extract current tokens.
-                            var t1 = Context.ElementAt(i);
-                            var t2 = Context.ElementAt(j);
+                            var t1 = Context[i];
+                            var t2 = Context[j];
 
                             // Compare tokens. If not equal, return the result.
                             int c = Comparer.Compare(t1, t2);
@@ -493,9 +493,9 @@ namespace MagicText
             // Render the first token, or the first `relevantTokens` if needed.
             if (fromBeginning)
             {
-                for (var (next, i) = ValueTuple.Create(AllEnds ? Context.Count : Positions.ElementAt(FirstPosition), 0); i < text.Capacity; ++next, ++i)
+                for (var (next, i) = ValueTuple.Create(AllEnds ? Context.Count : Positions[FirstPosition], 0); i < text.Capacity; ++next, ++i)
                 {
-                    var nextToken = next < Context.Count ? Context.ElementAt(next) : EndToken;
+                    var nextToken = next < Context.Count ? Context[next] : EndToken;
                     if (Comparer.Equals(nextToken, EndToken))
                     {
                         yield break;
@@ -513,8 +513,8 @@ namespace MagicText
                     throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
                 }
 
-                int first = pick == Context.Count ? Context.Count : Positions.ElementAt(pick);
-                var firstToken = first < Context.Count ? Context.ElementAt(first) : EndToken;
+                int first = pick == Context.Count ? Context.Count : Positions[pick];
+                var firstToken = first < Context.Count ? Context[first] : EndToken;
                 if (Comparer.Equals(firstToken, EndToken))
                 {
                     yield break;
@@ -554,21 +554,20 @@ namespace MagicText
                     throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
                 }
 
-                int next = Positions.ElementAt(p + pick) + d;
-                var nextToken = next < Context.Count ? Context.ElementAt(next) : EndToken;
+                int next = Positions[p + pick] + d;
+                var nextToken = next < Context.Count ? Context[next] : EndToken;
                 if (Comparer.Equals(nextToken, EndToken))
                 {
                     yield break;
                 }
 
+                yield return nextToken;
                 if (text.Count < text.Capacity)
                 {
-                    yield return nextToken;
                     text.Add(nextToken); 
                 }
                 else
                 {
-                    yield return nextToken;
                     text[c] = nextToken;
                     c = (c + 1) % text.Count; // <-- cyclicity of list `text`
                 }
