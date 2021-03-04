@@ -41,13 +41,14 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Function to check if a token is empty: it returns <c>true</c> if the token to check is empty. Default is <see cref="String.IsNullOrEmpty(String)" />.
+        ///         Default is <see cref="String.IsNullOrEmpty(String)" />.
         ///     </para>
         ///
         ///     <para>
         ///         This function is used in <see cref="Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> methods to filter out empty tokens if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>.
         ///     </para>
         /// </summary>
+        /// <returns>Function to check if a token is empty: it returns <c>true</c> if the token to check is empty.</returns>
         protected Func<String?, Boolean> IsEmptyToken => _isEmptyToken;
 
         /// <summary>

@@ -58,13 +58,10 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Default regular expression breaker.
-        ///     </para>
-        ///
-        ///     <para>
         ///         The regular expression breaker is constructed using the default regular expression break pattern (<see cref="DefaultBreakPattern" />) and with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" />.
         ///     </para>
         /// </summary>
+        /// <returns>Default regular expression breaker.</returns>
         protected static Regex DefaultBreak => _DefaultBreak;
 
         /// <summary>
@@ -119,36 +116,27 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Regular expression breaker used by the tokeniser.
-        ///     </para>
-        ///
-        ///     <para>
         ///         In <see cref="ShatterLine(String)" /> method, <see cref="Regex.Split(String)" /> method is invoked on <see cref="Break" /> to extract raw tokens from <c>line</c>.
         ///     </para>
         /// </summary>
+        /// <returns>Regular expression breaker used by the tokeniser.</returns>
         protected Regex Break => _break;
 
         /// <summary>
         ///     <para>
-        ///         Transformation function used by the tokeniser. If <c>null</c>, no transformation function is used.
-        ///     </para>
-        ///
-        ///     <para>
         ///         Transformation is done on raw regular expression pattern matches, before (potential) filtering of empty tokens.
         ///     </para>
         /// </summary>
+        /// <returns>Transformation function used by the tokeniser. If <c>null</c>, no transformation function is used.</returns>
 
         protected Func<String?, String?>? Transform => _transform;
 
         /// <summary>
         ///     <para>
-        ///         Regular expression break pattern used by the tokeniser.
-        ///     </para>
-        ///
-        ///     <para>
         ///         Shattering a line of text <c>line</c> by the tokeniser, without transformation, filtering and replacement of empty lines and line ends, is equivalent (performance aside) to calling <see cref="Regex.Split(String, String)" /> with <c>line</c> as the first argument and <see cref="BreakPattern" /> as the second.
         ///     </para>
         /// </summary>
+        /// <returns>Regular expression break pattern used by the tokeniser.</returns>
         public String BreakPattern => Break.ToString();
 
         /// <summary>

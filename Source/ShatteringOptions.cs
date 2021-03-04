@@ -11,7 +11,7 @@ namespace MagicText
     /// </summary>
     public class ShatteringOptions
     {
-        /// <value>Indicator if empty tokens should be ignored. Default is <c>false</c>.</value>
+        /// <value>Indicator if empty tokens should be ignored: <c>true</c> if ignoring, <c>false</c> otherwise. Default is <c>false</c>.</value>
         /// <remarks>
         ///     <para>
         ///         Actual implementations of <see cref="ITokeniser" /> interface may define what exactly an <em>empty</em> token means, but usually this would be a <c>null</c> or a string yielding <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> or <see cref="String.IsNullOrWhiteSpace(String)" /> method.
@@ -20,7 +20,7 @@ namespace MagicText
         [DefaultValue(false)]
         public Boolean IgnoreEmptyTokens { get; set; } = false;
 
-        /// <value>Indicator if line ends should be ignored. If <c>false</c>, they should be represented by <see cref="LineEndToken" />s. Default is <c>false</c>.</value>
+        /// <value>Indicator if line ends should be ignored: <c>true</c> if ignoring, <c>false</c> otherwise. If <c>false</c>, they should be represented by <see cref="LineEndToken" />s. Default is <c>false</c>.</value>
         /// <remarks>
         ///     <para>
         ///         Line ends should be considered both the new line character (CR, LF and CRLF) and the end of the input.
@@ -29,7 +29,7 @@ namespace MagicText
         [DefaultValue(false)]
         public Boolean IgnoreLineEnds { get; set; } = false;
 
-        /// <value>Inidcator if empty lines should be ignored, i. e. not produce any tokens. If <c>true</c>, they should not produce even <see cref="LineEndToken" />; if <c>false</c>, they should be represented by <see cref="EmptyLineToken" />s. Default is <c>false</c>.</value>
+        /// <value>Inidcator if empty lines should be ignored, i. e. not produce any tokens: <c>true</c> if ignoring, <c>false</c> otherwise. If <c>true</c>, they should not produce even <see cref="LineEndToken" />; if <c>false</c>, they should be represented by <see cref="EmptyLineToken" />s. Default is <c>false</c>.</value>
         /// <remarks>
         ///     <para>
         ///         Empty lines should be considered those lines that produce no tokens. This should be checked <strong>after</strong> filtering empty tokens out from the line if <see cref="IgnoreEmptyTokens" /> is <c>true</c>.

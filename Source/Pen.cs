@@ -34,18 +34,10 @@ namespace MagicText
         [ThreadStatic]
         private static System.Random? _Random;
 
-        /// <summary>
-        ///     <para>
-        ///         Internal locking object of <see cref="Pen" /> class.
-        ///     </para>
-        /// </summary>
+        /// <returns>Internal locking object of <see cref="Pen" /> class.</returns>
         private static Object Locker => _Locker;
 
-        /// <summary>
-        ///     <para>
-        ///         Seed for the internal (pseudo-)random number generator (<see cref="Random" />).
-        ///     </para>
-        /// </summary>
+        /// <returns>Seed for the internal (pseudo-)random number generator (<see cref="Random" />).</returns>
         /// <value>New seed. If <c>value</c> is less than or equal to <c>0</c>, new seed is set to <c>1</c>.</value>
         /// <remarks>
         ///     <para>
@@ -72,11 +64,7 @@ namespace MagicText
             }
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Internal (pseudo-)random number generator.
-        ///     </para>
-        /// </summary>
+        /// <returns>Internal (pseudo-)random number generator.</returns>
         /// <remarks>
         ///     <para>
         ///         The number generator is thread safe (actually, each thread has its own instance) and instances across multiple threads are seeded differently. However, instancess across multiple processes initiated at approximately the same time could be seeded with the same value. Therefore the main purpose of the number generator is to provide a virtually unpredictable (to an unconcerned human user) implementation of <see cref="Render(Int32, Boolean)" /> for a single process without having to provide a custom number generator (a <see cref="Func{T, TResult}" /> function or a <see cref="System.Random" /> object); no other properties are guaranteed.
@@ -101,6 +89,11 @@ namespace MagicText
             }
         }
 
+        /// <summary>
+        ///     <para>
+        ///         Initialise static fields.
+        ///     </para>
+        /// </summary>
         static Pen()
         {
             _Locker = new Object();
@@ -248,27 +241,15 @@ namespace MagicText
         private readonly Int32 _firstPosition;
         private readonly Boolean _allEnds;
 
-        /// <summary>
-        ///     <para>
-        ///         String comparer used by the pen for comparing tokens.
-        ///     </para>
-        /// </summary>
+        /// <returns>String comparer used by the pen for comparing tokens.</returns>
         protected StringComparer Comparer => _comparer;
 
-        /// <summary>
-        ///     <para>
-        ///         Sorting positions of entries in <see cref="Context" />. If <c>i &lt; j</c>, then <c>Comparer.Compare(Context[Positions[i]], Context[Positions[j]]) &lt;= 0</c>.
-        ///     </para>
-        /// </summary>
+        /// <returns>Sorting positions of entries in <see cref="Context" />: If <c>i &lt; j</c>, then <c>Comparer.Compare(Context[Positions[i]], Context[Positions[j]]) &lt;= 0</c>.</returns>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
         protected ReadOnlyCollection<Int32> Positions => _positions;
 
-        /// <summary>
-        ///     <para>
-        ///         Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is <see cref="IReadOnlyCollection{T}.Count" /> of <see cref="Context" />.
-        ///     </para>
-        /// </summary>
+        /// <returns>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is <see cref="IReadOnlyCollection{T}.Count" /> of <see cref="Context" />.</returns>
         /// <remarks>
         ///     <para>
         ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ Positions[FirstPosition], Positions[FirstPosition] + 1, Positions[FirstPosition] + 2, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens.
@@ -280,18 +261,15 @@ namespace MagicText
         /// <seealso cref="Positions" />
         protected Int32 FirstPosition => _firstPosition;
 
-        /// <summary>
+        /// <returns>Unsorted tokens of the pen.</returns>
+        /// <remarks>
         ///     <para>
-        ///         Unsorted tokens of the pen. The order of tokens is kept as provided in the constructor.
+        ///         The order of tokens is kept as provided in the constructor.
         ///     </para>
-        /// </summary>
+        /// </remarks>
         public ReadOnlyCollection<String?> Context => _context;
 
-        /// <summary>
-        ///     <para>
-        ///         Ending token of the pen.
-        ///     </para>
-        /// </summary>
+        /// <returns>Ending token of the pen.</returns>
         /// <remarks>
         ///     <para>
         ///         This token (or any other comparing equal to it by <see cref="Comparer" />) shall never be rendered.
@@ -300,11 +278,7 @@ namespace MagicText
         /// <seealso cref="Comparer" />
         public String? EndToken => _endToken;
 
-        /// <summary>
-        ///     <para>
-        ///         Indicator of all tokens in <see cref="Context" /> being equal to <see cref="EndToken" /> (as compared by <see cref="Comparer" />).
-        ///     </para>
-        /// </summary>
+        /// <returns>Indicator of all tokens in <see cref="Context" /> being equal to <see cref="EndToken" /> (as compared by <see cref="Comparer" />): <c>true</c> if equal, <c>false</c> otherwise.</returns>
         /// <remarks>
         ///     <para>
         ///         If <see cref="Context" /> is empty, <see cref="AllEnds" /> is <c>true</c>. This coincides with mathematical logic of empty sets.
