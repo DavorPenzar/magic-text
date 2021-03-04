@@ -87,7 +87,7 @@ Do you know that there's still a chance for you?
 
 ```
 
-These are the lyrics (only the first verse) to the song called *Firework* by the American singer Katy Perry. We shall use them because of the anaphora present in them, making it a nice short input that may produce many different results.
+These are the lyrics (only the first verse) to the song called *Firework* by the American singer Katy Perry. We shall use them because of the [anaphora](http://en.wikipedia.org/wiki/Anaphora_(rhetoric)) present in them, making it a nice short input that may produce many different results.
 
 To generate alternative lyrics, one may use the following code:
 
