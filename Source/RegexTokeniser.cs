@@ -38,6 +38,9 @@ namespace MagicText
     /// </remarks>
     public class RegexTokeniser : LineByLineTokeniser
     {
+        private const string RegexPatternNullErrorMessage = "Regular expression pattern may not be `null`.";
+        private const string BreakNullErrorMessage = "Regular expression breaker may not be `null`.";
+
         /// <summary>
         ///     <para>
         ///         Default regular expression break pattern.
@@ -99,9 +102,20 @@ namespace MagicText
         /// <param name="escapeReplacement">If <c>true</c>, <paramref name="replacementPattern" /> is escaped via <see cref="Regex.Escape(String)" /> method before usage.</param>
         /// <param name="options">Options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
         /// <returns>Function that returns <c>null</c> when passed a <c>null</c>, otherwise performs the regular expression based replacement defined.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="matchPattern" /> is <c>null</c>. If <paramref name="replacementPattern" /> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>
+        ///         Exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.
+        ///     </para>
+        /// </remarks>
         /// <seealso cref="RegexTokeniser.Transform" />
         public static Func<String?, String?> CreateReplacementTransformationFunction(string matchPattern, string replacementPattern, bool escapeMatch = false, bool escapeReplacement = false, RegexOptions options = RegexOptions.None)
         {
+            if (matchPattern is null || replacementPattern is null)
+            {
+                throw new ArgumentNullException(RegexPatternNullErrorMessage, (Exception?)null);
+            }
+
             var replace = new Regex(escapeMatch ? Regex.Escape(matchPattern) : matchPattern, options);
             if (escapeReplacement)
             {
@@ -158,7 +172,13 @@ namespace MagicText
         /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <param name="escape">If <c>true</c>, <paramref name="breakPattern" /> is escaped via <see cref="Regex.Escape(String)" /> method before usage.</param>
         /// <param name="options">Options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
-        public RegexTokeniser(String breakPattern, Func<String?, String?>? transform = null, bool escape = false, RegexOptions options = RegexOptions.None) : this(new Regex(escape ? Regex.Escape(breakPattern) : breakPattern, options), transform)
+        /// <exception cref="ArgumentNullException">If <paramref name="breakPattern" /> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>
+        ///         Exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.
+        ///     </para>
+        /// </remarks>
+        public RegexTokeniser(String breakPattern, Func<String?, String?>? transform = null, bool escape = false, RegexOptions options = RegexOptions.None) : this(new Regex(escape ? Regex.Escape(breakPattern ?? throw new ArgumentNullException(nameof(breakPattern), RegexPatternNullErrorMessage)) : breakPattern, options), transform)
         {
         }
 
@@ -171,7 +191,12 @@ namespace MagicText
         /// <param name="break">Regular expression breaker to use.</param>
         /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <param name="alterOptions">If <c>null</c>, <paramref name="break" />'s options (<see cref="Regex.Options" />) are used (actually, no new <see cref="Regex" /> is constructed); otherwise options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
+        /// <exception cref="ArgumentNullException">If <paramref name="break" /> is <c>null</c>.</exception>
         /// <remarks>
+        ///     <para>
+        ///         Exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.
+        ///     </para>
+        ///
         ///     <para>
         ///         Calling this constructor is essentially the same (performance aside) as calling <see cref="RegexTokeniser.RegexTokeniser(String, Func{String?, String?}?, Boolean, RegexOptions)" /> constructor as:
         ///     </para>
@@ -183,6 +208,11 @@ namespace MagicText
         /// <seealso cref="RegexTokeniser.RegexTokeniser(String, Func{String?, String?}?, Boolean, RegexOptions)"/>
         public RegexTokeniser(Regex @break, Func<String?, String?>? transform = null, RegexOptions? alterOptions = null) : base()
         {
+            if (@break is null)
+            {
+                throw new ArgumentNullException(nameof(@break), BreakNullErrorMessage);
+            }
+
             _break = alterOptions is null ? @break : new Regex(@break.ToString(), (RegexOptions)alterOptions!);
             _transform = transform ?? IdentityTransform;
         }
@@ -198,6 +228,7 @@ namespace MagicText
         /// </summary>
         /// <param name="line">Line of text to shatter.</param>
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="line" />.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="line" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         The returned enumerable is merely a query. If multiple enumerations over it should be performed, it is advisable to convert it to a fully built container beforehand, such as a <see cref="List{T}" /> via <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.
@@ -205,6 +236,11 @@ namespace MagicText
         /// </remarks>
         override protected IEnumerable<String?> ShatterLine(String line)
         {
+            if (line is null)
+            {
+                throw new ArgumentNullException(nameof(line), LineNullErrorMessage);
+            }
+
             IEnumerable<String?> tokens = Break.Split(line);
             if (!(Transform is null))
             {

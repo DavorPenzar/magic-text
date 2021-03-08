@@ -26,6 +26,10 @@ namespace MagicText
     /// </remarks>
     public abstract class LineByLineTokeniser : ITokeniser
     {
+        private const string IsEmptyTokenNullErrorMessage = "Function for checking emptiness of tokens may not be `null`.";
+        private const string InputNullErrorMessage = "Input stream reader may not be `null`.";
+        protected const string LineNullErrorMessage = "Line string may not be `null`.";
+
         /// <summary>
         ///     <para>
         ///         Always indicate the token as non-empty.
@@ -40,10 +44,6 @@ namespace MagicText
 
 
         /// <summary>
-        ///     <para>
-        ///         Default is <see cref="String.IsNullOrEmpty(String)" />.
-        ///     </para>
-        ///
         ///     <para>
         ///         This function is used in <see cref="Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> methods to filter out empty tokens if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>.
         ///     </para>
@@ -66,8 +66,14 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <param name="isEmptyToken">Function to check if a token is empty.</param>
+        /// <exception cref="ArgumentNullException">If <paramref name="isEmptyToken" /> is <c>null</c>.</exception>
         protected LineByLineTokeniser(Func<String?, Boolean> isEmptyToken)
         {
+            if (isEmptyToken is null)
+            {
+                throw new ArgumentNullException(nameof(isEmptyToken), IsEmptyTokenNullErrorMessage);
+            }
+
             _isEmptyToken = isEmptyToken;
         }
 
@@ -78,6 +84,7 @@ namespace MagicText
         /// </summary>
         /// <param name="line">Line of text to shatter.</param>
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="line" />.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="line" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         The method <strong>should not</strong> produce <see cref="ShatteringOptions.EmptyLineToken" />s nor <see cref="ShatteringOptions.LineEndToken" />s to represent empty lines and line ends. Also, the method <strong>should not</strong> manually filter out empty tokens. Hence no <see cref="ShatteringOptions" /> are available to the method. The result of an empty line (even without possible filtering out of empty tokens) should be an empty enumerable, while empty tokens, empty lines and line ends are treated within the scope of <see cref="LineByLineTokeniser" /> parent class and its methods.
@@ -97,6 +104,7 @@ namespace MagicText
         /// <param name="input">Stream for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="input" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is false and the final line was non-empty, <see cref="ShatteringOptions.LineEndToken" /> is added to the end of the resulting tokens.
@@ -108,6 +116,11 @@ namespace MagicText
         /// </remarks>
         public IEnumerable<String?> Shatter(StreamReader input, ShatteringOptions? options = null)
         {
+            if (input is null)
+            {
+                throw new ArgumentNullException(nameof(input), InputNullErrorMessage);
+            }
+
             if (options is null)
             {
                 options = new ShatteringOptions();
@@ -181,6 +194,7 @@ namespace MagicText
         /// <param name="input">Stream for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <returns>Task whose result is enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="input" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is false and the final line was non-empty, <see cref="ShatteringOptions.LineEndToken" /> is added to the end of the resulting tokens.
@@ -192,6 +206,11 @@ namespace MagicText
         /// </remarks>
         public async Task<IEnumerable<String?>> ShatterAsync(StreamReader input, ShatteringOptions? options = null)
         {
+            if (input is null)
+            {
+                throw new ArgumentNullException(nameof(input), InputNullErrorMessage);
+            }
+
             if (options is null)
             {
                 options = new ShatteringOptions();

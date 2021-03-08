@@ -25,6 +25,11 @@ namespace MagicText
     /// </remarks>
     public class Pen
     {
+        private const string ValuesNullErrorMessage = "Values' enumerable may not be `null`.";
+        private const string ContextNullErrorMessage = "Context tokens' enumerable may not be `null`.";
+        private const string ComparerNullErrorMessage = "Token (string) comparer may not be `null`.";
+        private const string PickerNullErrorMessage = @"""Random"" number generator function (picker function) may not be `null`.";
+        private const string RandomNullErrorMessage = "(Pseudo-)Random number generator may not be `null`.";
         private const string RelevantTokensOutOfRangeErrorMessage = "Number of relevant tokens must be non-negative (greater than or equal to 0).";
         private const string PickOutOfRangeErrorMessage = "Picker function must return an integer from [0, n) union {0}.";
 
@@ -115,8 +120,14 @@ namespace MagicText
         /// <param name="values">List of values amongst which <paramref name="x" /> should be found.</param>
         /// <param name="x">Value to find.</param>
         /// <returns>Minimal index <c>i</c> such that <c>values[i] == x</c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" />.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="values" /> is <c>null</c>.</exception>
         protected static int IndexOf(IEnumerable<Int32> values, int x)
         {
+            if (values is null)
+            {
+                throw new ArgumentNullException(nameof(values), ValuesNullErrorMessage);
+            }
+
             for (var (en, i) = ValueTuple.Create(values.GetEnumerator(), 0); en.MoveNext(); ++i)
             {
                 if (en.Current == x)
@@ -314,8 +325,18 @@ namespace MagicText
         /// <param name="comparer">String comparer. Tokens shall be compared by <paramref name="comparer" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
         /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
+        /// <exception cref="ArgumentNullException">If <paramref name="context" /> is <c>null</c>. If <paramref name="comparer" /> is <c>null</c>.</exception>
         public Pen(IEnumerable<String?> context, StringComparer comparer, String? endToken = null, bool intern = false)
         {
+            if (context is null)
+            {
+                throw new ArgumentNullException(nameof(context), ContextNullErrorMessage);
+            }
+            if (comparer is null)
+            {
+                throw new ArgumentNullException(nameof(comparer), ComparerNullErrorMessage);
+            }
+
             // Copy comparer and ending token.
             _comparer = comparer;
             _endToken = endToken;
@@ -398,6 +419,7 @@ namespace MagicText
         /// <param name="picker">Random number generator. When passed an integer <c>n</c> (<c>&gt;= 0</c>) as the argument, it should return an integer from range [0, max(<c>n</c>, 1)), i. e. greater than or equal to 0 but (strictly) less than max(<c>n</c>, 1).</param>
         /// <param name="fromBeginning">If <c>true</c>, <paramref name="picker" /> function is not called to choose the first max(<paramref name="relevantTokens" />, 1) tokens, but the beginning of the pen's context is chosen instead; otherwise the first token is chosen by immediately calling <paramref name="picker" /> function.</param>
         /// <returns>A query for rendering tokens.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="picker" /> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative. If <paramref name="picker" /> returns a value outside of the legal range.</exception>
         /// <remarks>
         ///     <para>
@@ -455,6 +477,11 @@ namespace MagicText
         /// <seealso cref="Render(Int32, Boolean)" />
         public IEnumerable<String?> Render(int relevantTokens, Func<Int32, Int32> picker, bool fromBeginning = false)
         {
+            if (picker is null)
+            {
+                throw new ArgumentNullException(nameof(picker), PickerNullErrorMessage);
+            }
+
             if (relevantTokens < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(relevantTokens), RelevantTokensOutOfRangeErrorMessage);
@@ -561,6 +588,7 @@ namespace MagicText
         /// <param name="random">(Pseudo-)Random number generator.</param>
         /// <param name="fromBeginning">If <c>true</c>, <paramref name="picker" /> function is not called to choose the first max(<paramref name="relevantTokens" />, 1) tokens, but the beginning of the pen's context is chosen instead; otherwise the first token is chosen by immediately calling <paramref name="picker" /> function.</param>
         /// <returns>A query for rendering tokens.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="random" /> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative.</exception>
         /// <remarks>
         ///     <para>
@@ -620,8 +648,15 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
         /// <seealso cref="Render(Int32, Boolean)" />
-        public IEnumerable<String?> Render(int relevantTokens, System.Random random, bool fromBeginning = false) =>
-            Render(relevantTokens, random.Next, fromBeginning);
+        public IEnumerable<String?> Render(int relevantTokens, System.Random random, bool fromBeginning = false)
+        {
+            if (random is null)
+            {
+                throw new ArgumentNullException(nameof(random), RandomNullErrorMessage);
+            }
+
+            return Render(relevantTokens, random.Next, fromBeginning);
+        }
 
         /// <summary>
         ///     <para>
