@@ -21,7 +21,7 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for checking emptiness of tokens (<see cref="IsEmptyToken" />) should be thread-safe, lock the tokeniser during complete <see cref="Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> methods' calls to ensure consistent behaviour of the function over a single shattering process.
+    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for checking emptiness of tokens (<see cref="IsEmptyToken" />) should be thread-safe, lock the tokeniser during complete <see cref="Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> method calls to ensure consistent behaviour of the function over a single shattering process.
     ///     </para>
     /// </remarks>
     public abstract class LineByLineTokeniser : ITokeniser
@@ -91,7 +91,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         It is guaranteed that, when called from <see cref="LineByLineTokeniser" />, <paramref name="line" /> shall be a string not containing any line end (CR, LF or CRLF). Nonetheless, when calling from a subclass, its programmer may call the method however they wish, but this is beyond the original programmer's scope.
+        ///         It is guaranteed that, when called from <see cref="LineByLineTokeniser" />, <paramref name="line" /> shall be a non-<c>null</c> string not containing any line end (CR, LF or CRLF). Nonetheless, when calling from a subclass, its programmer may call the method however they wish, but this is beyond the original programmer's scope.
         ///     </para>
         /// </remarks>
         protected abstract IEnumerable<String?> ShatterLine(String line);

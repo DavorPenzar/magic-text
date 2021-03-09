@@ -12,7 +12,7 @@ namespace MagicText
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         If the pen should choose from tokens from multiple sources, the tokens should be concatenated into a single enumerable <c>context</c> passed to the constructor. To prevent overflowing from one source to another (e. g. if the last token from the first source is not a contextual predecessor of the first token from the second source), an ending token (<see cref="EndToken" />) should be put between the sources' tokens in the final enumerable <c>tokens</c>. Choosing the ending token in <see cref="Render(Int32, Func{Int32, Int32})" /> or <see cref="Render(Int32, Random)" /> methods will cause the rendering to stop—the same as when a successor of the last entry in tokens is chosen.
+    ///         If the pen should choose from tokens from multiple sources, the tokens should be concatenated into a single enumerable <c>context</c> passed to the constructor. To prevent overflowing from one source to another (e. g. if the last token from the first source is not a contextual predecessor of the first token from the second source), an ending token (<see cref="EndToken" />) should be put between the sources' tokens in the final enumerable <c>tokens</c>. Choosing the ending token in <see cref="Render(Int32, Func{Int32, Int32}, Boolean)" />, <see cref="Render(Int32, Random, Boolean)" /> or <see cref="Render(Int32, Boolean)" /> methods will cause the rendering to stop—the same as when a successor of the last entry in tokens is chosen.
     ///     </para>
     ///
     ///     <para>
@@ -119,7 +119,7 @@ namespace MagicText
         /// </summary>
         /// <param name="values">List of values amongst which <paramref name="x" /> should be found.</param>
         /// <param name="x">Value to find.</param>
-        /// <returns>Minimal index <c>i</c> such that <c>values[i] == x</c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" />.</returns>
+        /// <returns>Minimal index <c>i</c> such that <c><paramref name="values" />[i] == <paramref name="x" /></c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" /> method calls).</returns>
         /// <exception cref="ArgumentNullException">If <paramref name="values" /> is <c>null</c>.</exception>
         protected static int IndexOf(IEnumerable<Int32> values, int x)
         {
@@ -146,8 +146,8 @@ namespace MagicText
         /// </summary>
         /// <param name="comparer">String comparer used for comparing.</param>
         /// <param name="tokens">List of tokens whose subrange is compared to <paramref name="sample" />.</param>
-        /// <param name="sample">Cyclical sample list of tokens. The list represents range <c>{ sample[cycleStart], sample[cycleStart + 1], ..., sample[^1], sample[0], ..., sample[cycleStart - 1] }</c>.</param>
-        /// <param name="i">Starting index of the subrange from <paramref name="tokens" /> to compare. The subrange <c>{ tokens[i], tokens[i + 1], ..., tokens[Math.Min(i + sample.Count - 1, tokens.Count - 1)] }</c> is used.</param>
+        /// <param name="sample">Cyclical sample list of tokens. The list represents range <c>{ <paramref name="sample" />[<paramref name="cycleStart" />], <paramref name="sample" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sample" />[<paramref name="sample" />.Count - 1], <paramref name="sample" />[0], ..., <paramref name="sample" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
+        /// <param name="i">Starting index of the subrange from <paramref name="tokens" /> to compare. The subrange <c>{ <paramref name="tokens" />[i], <paramref name="tokens" />[i + 1], ..., <paramref name="tokens" />[min(i + <paramref name="sample" />.Count - 1, <paramref name="tokens" />.Count - 1)] }</c> is used.</param>
         /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
         /// <returns>A signed integer that indicates the relative values of subrange from <paramref name="tokens" /> starting from <paramref name="i" /> and cyclical sample <paramref name="sample" />.</returns>
         /// <remarks>
@@ -187,9 +187,9 @@ namespace MagicText
         /// <param name="comparer">String comparer used for comparing.</param>
         /// <param name="tokens">List of tokens amongst which <paramref name="sample" /> should be found.</param>
         /// <param name="positions">Sorted positions, or positional ordering of <paramref name="tokens" /> in respect of <paramref name="comparer" />.</param>
-        /// <param name="sample">Cyclical sample list of tokens to find. The list represents range <c>{ sample[cycleStart], sample[cycleStart + 1], ..., sample[^1], sample[0], ..., sample[cycleStart - 1] }</c>.</param>
+        /// <param name="sample">Cyclical sample list of tokens to find. The list represents range <c>{ <paramref name="sample" />[<paramref name="cycleStart" />], <paramref name="sample" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sample" />[<paramref name="sample" />.Count - 1], <paramref name="sample" />[0], ..., <paramref name="sample" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
         /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
-        /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sample" /> begins at <c>tokens[positions[i]]</c> and the total number of occurances amongst <paramref name="tokens" />.</returns>
+        /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sample" /> begins at <c><paramref name="tokens" />[<paramref name="positions" />[i]]</c> and the total number of occurances amongst <paramref name="tokens" />.</returns>
         /// <remarks>
         ///     <para>
         ///         The implementation of the method assumes <paramref name="sample" /> actually exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" /> and that <paramref name="positions" /> indeed sort <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />. If the former is not true, the returned index shall point to the position at which <paramref name="t" />'s position should be inserted to retain the sorted order and the number of occurances shall be 0; if the latter is not true, the behaviour of the method is undefined.
@@ -255,15 +255,24 @@ namespace MagicText
         /// <returns>String comparer used by the pen for comparing tokens.</returns>
         protected StringComparer Comparer => _comparer;
 
-        /// <returns>Sorting positions of entries in <see cref="Context" />: If <c>i &lt; j</c>, then <c>Comparer.Compare(Context[Positions[i]], Context[Positions[j]]) &lt;= 0</c>.</returns>
+        /// <returns>Sorting positions of entries in <see cref="Context" />: if <c>i &lt; j</c>, then <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Positions" />[i]], <see cref="Context" />[<see cref="Positions" />[j]]) &lt;= 0</c>.</returns>
+        /// <remarks>
+        ///     <para>
+        ///         The order is actually determined by the complete sequence of tokens, and not just by single tokens. For instance, if <c>i != j</c>, but <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Positions" />[i]], <see cref="Context" />[<see cref="Positions" />[j]]) == 0</c> (<c><see cref="Comparer" />.Equals(<see cref="Context" />[<see cref="Positions" />[i]], <see cref="Context" />[<see cref="Positions" />[j]])</c>), then the result of <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Positions" />[i] + 1], <see cref="Context" />[<see cref="Positions" />[j] + 1])</c> is used; if it also evaluates to <c>0</c>, <c><see cref="Positions" />[i] + 2</c> and <c><see cref="Positions" />[j] + 2</c> are checked, and so on. The first position to reach the end (when <c>max(<see cref="Positions" />[i] + n, <see cref="Positions" />[j] + n) == <see cref="Context" />.Count</c> for a non-negative integer <c>n</c>), if all previous positions compared equal, is considered less. Hence <see cref="Positions" /> define a total (linear) lexicographic ordering of <see cref="Context" /> in respect of <see cref="Comparer" />, which may be useful in search algorithms, such as binary search, for finding the position of any non-empty finite sequence of tokens.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         The position(s) of ending tokens (<see cref="EndToken" />), if there are any in <see cref="Context" />, are not fixed nor guaranteed (for instance, their positions are not necessarily at the beginning or the end of <see cref="Positions" />). If the ending token is a <c>null</c> or an empty string (<see cref="String.Empty" />), then ending tokens shall be compared less than any other tokens, provided there are no <c>null</c>s in <see cref="Context" /> in the latter case. But, generally speaking, ending tokens' positions are determined by <see cref="Comparer" /> and the values of other tokens in <see cref="Context" />.
+        ///     </para>
+        /// </remarks>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
         protected ReadOnlyCollection<Int32> Positions => _positions;
 
-        /// <returns>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is <see cref="IReadOnlyCollection{T}.Count" /> of <see cref="Context" />.</returns>
+        /// <returns>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is the number of elements in <see cref="Context" /> (<see cref="IReadOnlyCollection{T}.Count" />).</returns>
         /// <remarks>
         ///     <para>
-        ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ Positions[FirstPosition], Positions[FirstPosition] + 1, Positions[FirstPosition] + 2, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens.
+        ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ <see cref="Positions" />[<see cref="FirstPosition" />], <see cref="Positions" />[<see cref="FirstPosition" />] + 1, ..., <see cref="Positions" />[<see cref="FirstPosition" />] + n, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens.
         ///     </para>
         /// </remarks>
         /// <seealso cref="Context" />
@@ -460,7 +469,7 @@ namespace MagicText
         ///                 all ending tokens
         ///             </term>
         ///             <description>
-        ///                 the pen was constructed with an enumerable consisting only of ending tokens (mathematically speaking, this is a <em>subcase</em> of the first case),
+        ///                 the pen was constructed with an enumerable consisting only of ending tokens (mathematically speaking, this is a <em>supercase</em> of the first case),
         ///             </description>
         ///         </item>
         ///         <item>
@@ -596,7 +605,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         If no specific <see cref="System.Random" /> object or seed should be used, <see cref="Render(Int32, Boolean)" /> method may be invoked instead.
+        ///         If no specific <see cref="System.Random" /> object or seed should be used, <see cref="Render(Int32, Boolean)" /> method may be called instead.
         ///     </para>
         ///
         ///     <para>
@@ -633,7 +642,7 @@ namespace MagicText
         ///                 all ending tokens
         ///             </term>
         ///             <description>
-        ///                 the pen was constructed with an enumerable consisting only of ending tokens (mathematically speaking, this is a <em>subcase</em> of the first case),
+        ///                 the pen was constructed with an enumerable consisting only of ending tokens (mathematically speaking, this is a <em>supercase</em> of the first case),
         ///             </description>
         ///         </item>
         ///         <item>
@@ -716,7 +725,7 @@ namespace MagicText
         ///                 all ending tokens
         ///             </term>
         ///             <description>
-        ///                 the pen was constructed with an enumerable consisting only of ending tokens (mathematically speaking, this is a <em>subcase</em> of the first case),
+        ///                 the pen was constructed with an enumerable consisting only of ending tokens (mathematically speaking, this is a <em>supercase</em> of the first case),
         ///             </description>
         ///         </item>
         ///         <item>

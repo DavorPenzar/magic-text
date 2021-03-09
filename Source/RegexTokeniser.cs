@@ -33,7 +33,7 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for token transformation (<see cref="Transform" />) should be thread-safe, lock the tokeniser during complete <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> methods' to ensure consistent behaviour of the function over a single shattering process.
+    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for token transformation (<see cref="Transform" />) should be thread-safe, lock the tokeniser during complete <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> method calls to ensure consistent behaviour of the function over a single shattering process.
     ///     </para>
     /// </remarks>
     public class RegexTokeniser : LineByLineTokeniser
@@ -130,7 +130,7 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         In <see cref="ShatterLine(String)" /> method, <see cref="Regex.Split(String)" /> method is invoked on <see cref="Break" /> to extract raw tokens from <c>line</c>.
+        ///         In <see cref="ShatterLine(String)" /> method, <see cref="Regex.Split(String)" /> method is called on <see cref="Break" /> to extract raw tokens from <c>line</c>.
         ///     </para>
         /// </summary>
         /// <returns>Regular expression breaker used by the tokeniser.</returns>
@@ -202,7 +202,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <code>
-        ///         RegexTokeniser.RegexTokeniser(breakPattern: @break.ToString(), transform: transform, options: alterOptions ?? @break.Options)
+        ///         <see cref="RegexTokeniser" />.RegexTokeniser(breakPattern: @<paramref name="break" />.ToString(), transform: <paramref name="transform" />, options: <paramref name="alterOptions" /> ?? @<paramref name="break" />.Options)
         ///     </code>
         /// </remarks>
         /// <seealso cref="RegexTokeniser.RegexTokeniser(String, Func{String?, String?}?, Boolean, RegexOptions)"/>
