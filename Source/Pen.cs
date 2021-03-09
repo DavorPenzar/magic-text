@@ -356,7 +356,7 @@ namespace MagicText
                 {
                     context = context.Select(t => t is null ? null : String.Intern(t));
                 }
-                var contextList = context.ToList();
+                var contextList = new List<String?>(context);
                 contextList.TrimExcess();
                 _context = contextList.AsReadOnly();
             }
@@ -421,7 +421,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen internally; otherwise they are chosen by calling <see cref="picker" /> function. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <paramref name="picker" /> function. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
+        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first <c>max(<paramref name="relevantTokens" />, 1)</c> tokens are chosen internally; otherwise they are chosen by calling <see cref="picker" /> function. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <paramref name="picker" /> function. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
         ///     </para>
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
@@ -590,7 +590,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen internally; otherwise they are chosen by calling <see cref="System.Random.Next(Int32)" /> method of <paramref name="random" />. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="System.Random.Next(Int32)" /> method of <paramref name="random" />. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
+        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first <c>max(<paramref name="relevantTokens" />, 1)</c> tokens are chosen internally; otherwise they are chosen by calling <see cref="System.Random.Next(Int32)" /> method of <paramref name="random" />. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="System.Random.Next(Int32)" /> method of <paramref name="random" />. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
         ///     </para>
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
@@ -673,7 +673,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen internally; otherwise they are chosen by calling <see cref="System.Random.Next(Int32)" /> method of an internal <see cref="System.Random" /> object (<see cref="System.Random" />). Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="System.Random.Next(Int32)" /> method of the internal <see cref="System.Random" /> object. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
+        ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first <c>max(<paramref name="relevantTokens" />, 1)</c> tokens are chosen internally; otherwise they are chosen by calling <see cref="System.Random.Next(Int32)" /> method of an internal <see cref="System.Random" /> object (<see cref="System.Random" />). Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="System.Random.Next(Int32)" /> method of the internal <see cref="System.Random" /> object. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
         ///     </para>
         ///
         ///     
