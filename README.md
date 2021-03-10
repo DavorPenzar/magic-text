@@ -87,7 +87,7 @@ Do you know that there's still a chance for you?
 
 ```
 
-These are the lyrics (only the first verse) to the song called [*Firework*](http://youtu.be/QGJuMBdaqIw) by the American singer [Katy Perry](http://katyperry.com/). We shall use them because of the [anaphora](http://en.wikipedia.org/wiki/Anaphora_(rhetoric)) present in them, making it a nice short input that may produce many different results.
+These are the lyrics (only the first verse) to the song called [*Firework*](http://youtube.com/watch?v=QGJuMBdaqIw) by the American singer [Katy Perry](http://katyperry.com/). We shall use them because of the [anaphora](http://en.wikipedia.org/wiki/Anaphora_(rhetoric)) present in them, making it a nice short input that may produce many different results.
 
 To generate alternative lyrics, one may use the following code:
 
@@ -101,17 +101,18 @@ using System.Linq;
 // ...
 
 IEnumerable<String?> tokens;
+Pen pen;
 
-using (var fileStream = File.OpenRead("Firework.txt"))
-using (var fileReader = new StreamReader(fileStream))
+using (Stream fileStream = File.OpenRead("Firework.txt"))
+using (StreamReader fileReader = new StreamReader(fileStream))
 {
-	var tokeniser = new RegexTokeniser();
+	ITokeniser tokeniser = new RegexTokeniser();
 	tokens = tokeniser.Shatter(fileReader, new ShatteringOptions { IgnoreEmptyTokens = true });
 }
 
-var pen = new Pen(tokens);
+pen = new Pen(tokens);
 
-foreach (var token in pen.Render(4, new Random(1000)).Take(300))
+foreach (String? token in pen.Render(4, new Random(1000)).Take(300))
 {
 	Console.Write(token);
 }
