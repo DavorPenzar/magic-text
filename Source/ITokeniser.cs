@@ -39,7 +39,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">If <paramref name="input" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
-        ///         The method should ultimately return the same enumerable of tokens as <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> method called with the same parameters.
+        ///         The method should ultimately return the same enumerable of tokens as <see cref="Shatter(StreamReader, ShatteringOptions?)" /> method called with the same parameters.
         ///     </para>
         /// </remarks>
         public Task<IEnumerable<String?>> ShatterAsync(StreamReader input, ShatteringOptions? options = null);

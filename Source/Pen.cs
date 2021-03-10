@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 
 namespace MagicText
 {
@@ -12,11 +13,11 @@ namespace MagicText
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         If the pen should choose from tokens from multiple sources, the tokens should be concatenated into a single enumerable <c>context</c> passed to the constructor. To prevent overflowing from one source to another (e. g. if the last token from the first source is not a contextual predecessor of the first token from the second source), an ending token (<see cref="EndToken" />) should be put between the sources' tokens in the final enumerable <c>tokens</c>. Choosing the ending token in <see cref="Render(Int32, Func{Int32, Int32}, Boolean)" />, <see cref="Render(Int32, Random, Boolean)" /> or <see cref="Render(Int32, Boolean)" /> methods will cause the rendering to stop—the same as when a successor of the last entry in tokens is chosen.
+    ///         If the pen should choose from tokens from multiple sources, the tokens should be concatenated into a single enumerable <c>context</c> passed to the constructor. To prevent overflowing from one source to another (e. g. if the last token from the first source is not a contextual predecessor of the first token from the second source), an ending token (<see cref="EndToken" />) should be put between the sources' tokens in the final enumerable <c>tokens</c>. Choosing an ending token in <see cref="Render(Int32, Func{Int32, Int32}, Boolean)" />, <see cref="Render(Int32, Random, Boolean)" /> or <see cref="Render(Int32, Boolean)" /> methods shall cause the rendering to stop—the same as when a successor of the last entry in tokens is chosen.
     ///     </para>
     ///
     ///     <para>
-    ///         A complete deep copy of enumerable <c>context</c> (passed to the constructor) is created and stored by the pen. Memory errors may occur if the number of tokens in the enumerable is too large; although memory usage and even time consumption (if there are many identical duplicates amongst tokens in <c>context</c>) may be reduced by passing <c>true</c> as parameter <c>intern</c> to constructor(s), be aware of other side effects of string interning via <see cref="String.Intern(String)" /> method.
+    ///         A complete deep copy of enumerable <c>context</c> (passed to the constructor) is created and stored by the pen. Memory errors may occur if the number of tokens in the enumerable is too large. To reduce memory usage and even time consumption, <c>true</c> may be passed as parameter <c>intern</c> to constructor(s); however, be aware of other side effects of string interning via <see cref="String.Intern(String)" /> method.
     ///     </para>
     ///
     ///     <para>
@@ -25,13 +26,14 @@ namespace MagicText
     /// </remarks>
     public class Pen
     {
+        private const string ValueComparerNullErrorMessage = "Value comparer may not be `null`.";
         private const string ValuesNullErrorMessage = "Values' enumerable may not be `null`.";
         private const string ContextNullErrorMessage = "Context tokens' enumerable may not be `null`.";
-        private const string ComparerNullErrorMessage = "Token (string) comparer may not be `null`.";
+        private const string TokenComparerNullErrorMessage = "Token (string) comparer may not be `null`.";
         private const string PickerNullErrorMessage = @"""Random"" number generator function (picker function) may not be `null`.";
         private const string RandomNullErrorMessage = "(Pseudo-)Random number generator may not be `null`.";
         private const string RelevantTokensOutOfRangeErrorMessage = "Number of relevant tokens must be non-negative (greater than or equal to 0).";
-        private const string PickOutOfRangeErrorMessage = "Picker function must return an integer from [0, n) union {0}.";
+        private const string PickOutOfRangeErrorMessage = "Picker function must return an integer from [0, n) including 0 (even if `n == 0`).";
 
         private static readonly Object _Locker;
         private static Int32 _RandomSeed;
@@ -46,7 +48,7 @@ namespace MagicText
         /// <value>New seed. If <c>value</c> is less than or equal to <c>0</c>, new seed is set to <c>1</c>.</value>
         /// <remarks>
         ///     <para>
-        ///         The current value does not necessarily indicate the seeding value or the random state of the internal number generator. The dissonance may appear if the number generator has already been instantiated and used and/or the value of <see cref="RandomSeed" /> has changed.
+        ///         The current value does not necessarily indicate the seeding value or the random state of the internal number generator. The dissonance may appear if the number generator has already been instantiated and used or if the value of <see cref="RandomSeed" /> has changed.
         ///     </para>
         /// </remarks>
         /// <seealso cref="Random" />
@@ -73,6 +75,10 @@ namespace MagicText
         /// <remarks>
         ///     <para>
         ///         The number generator is thread safe (actually, each thread has its own instance) and instances across multiple threads are seeded differently. However, instancess across multiple processes initiated at approximately the same time could be seeded with the same value. Therefore the main purpose of the number generator is to provide a virtually unpredictable (to an unconcerned human user) implementation of <see cref="Render(Int32, Boolean)" /> for a single process without having to provide a custom number generator (a <see cref="Func{T, TResult}" /> function or a <see cref="System.Random" /> object); no other properties are guaranteed.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         If the code is expected to spread over multiple threads (either explicitly by starting <see cref="Thread" /> instances or implicitly by programming asynchronously), reference returned by <see cref="Random" /> property should not be stored in an outside variable and used later. Directly reference property <see cref="Random" /> in such scenarios.
         ///     </para>
         /// </remarks>
         protected static System.Random Random
@@ -117,20 +123,25 @@ namespace MagicText
         ///         Retrieve the index of a value.
         ///     </para>
         /// </summary>
-        /// <param name="values">List of values amongst which <paramref name="x" /> should be found.</param>
+        /// <param name="values">Enumerable of values amongst which <paramref name="x" /> should be found. Even if <paramref name="values" /> are comparable, the enumerable does not have to be sorted.</param>
         /// <param name="x">Value to find.</param>
+        /// <param name="comparer">Comparer used for checking equality of instances of type <typeparamref name="T" />.</param>
         /// <returns>Minimal index <c>i</c> such that <c><paramref name="values" />[i] == <paramref name="x" /></c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" /> method calls).</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="values" /> is <c>null</c>.</exception>
-        protected static int IndexOf(IEnumerable<Int32> values, int x)
+        /// <exception cref="ArgumentNullException">If <paramref name="values" /> is <c>null</c>. If <paramref name="comparer" /> is <c>null</c>.</exception>
+        protected static Int32 IndexOf<T>(IEnumerable<T> values, T x, IEqualityComparer<T> comparer)
         {
             if (values is null)
             {
                 throw new ArgumentNullException(nameof(values), ValuesNullErrorMessage);
             }
+            if (comparer is null)
+            {
+                throw new ArgumentNullException(nameof(comparer), ValueComparerNullErrorMessage);
+            }
 
             for (var (en, i) = ValueTuple.Create(values.GetEnumerator(), 0); en.MoveNext(); ++i)
             {
-                if (en.Current == x)
+                if (comparer.Equals(en.Current, x))
                 {
                     return i;
                 }
@@ -141,30 +152,45 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
+        ///         Retrieve the index of a value.
+        ///     </para>
+        /// </summary>
+        /// <param name="values">Enumerable of values amongst which <paramref name="x" /> should be found. Even if <paramref name="values" /> are comparable, the enumerable does not have to be sorted.</param>
+        /// <param name="x">Value to find.</param>
+        /// <returns>Minimal index <c>i</c> such that <c><paramref name="values" />[i] == <paramref name="x" /></c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" /> method calls).</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="values" /> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>
+        ///         Instances of type <typeparamref name="T" /> shall be compared by <see cref="EqualityComparer{T}.Default" />.
+        ///     </para>
+        /// </remarks>
+        protected static Int32 IndexOf<T>(IEnumerable<T> values, T x) =>
+            IndexOf(values, x, EqualityComparer<T>.Default);
+
+        /// <summary>
+        ///     <para>
         ///         Compare a subrange of <paramref name="tokens" /> with a sample of tokens <paramref name="sample" /> in respect of <paramref name="comparer" />.
         ///     </para>
         /// </summary>
         /// <param name="comparer">String comparer used for comparing.</param>
         /// <param name="tokens">List of tokens whose subrange is compared to <paramref name="sample" />.</param>
-        /// <param name="sample">Cyclical sample list of tokens. The list represents range <c>{ <paramref name="sample" />[<paramref name="cycleStart" />], <paramref name="sample" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sample" />[<paramref name="sample" />.Count - 1], <paramref name="sample" />[0], ..., <paramref name="sample" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
+        /// <param name="sample">Cyclical sample list of tokens. The list represents range <c>{ <paramref name="sample" />[<paramref name="cycleStart" />], <paramref name="sample" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sample" />[<paramref name="sample" />.Count - 1], <paramref name="sample" />[0], ..., <paramref name="sample" />[<paramref name="cycleStart" /> - 1] }</c>. The list is treated as <strong>read-only</strong> in the function (it is not changed).</param>
         /// <param name="i">Starting index of the subrange from <paramref name="tokens" /> to compare. The subrange <c>{ <paramref name="tokens" />[i], <paramref name="tokens" />[i + 1], ..., <paramref name="tokens" />[min(i + <paramref name="sample" />.Count - 1, <paramref name="tokens" />.Count - 1)] }</c> is used.</param>
         /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
         /// <returns>A signed integer that indicates the relative values of subrange from <paramref name="tokens" /> starting from <paramref name="i" /> and cyclical sample <paramref name="sample" />.</returns>
         /// <remarks>
         ///     <para>
-        ///         Values from the subrange of <paramref name="tokens" /> and <paramref name="sample" /> are compared in order by calling <see cref="StringComparer.Compare(String, String)" /> method on <paramref name="comparer" />. If a comparison yields a non-zero value, it is returned. If the subrange from <paramref name="tokens" /> is shorter (in the number of tokens) than <paramref name="sample" /> but all of its tokens compare equal to tokens from the beginning of <paramref name="sample" />, a negative number is returned. If all tokens compare equal and the subrange from <paramref name="tokens" /> is the same length (in the number of tokens) as <paramref name="sample" />, <c>0</c> is returned.
+        ///         Values from the subrange of <paramref name="tokens" /> and <paramref name="sample" /> are compared in order by calling <see cref="StringComparer.Compare(String, String)" /> method on <paramref name="comparer" />. If a comparison yields a non-zero value, it is returned. If the subrange from <paramref name="tokens" /> is shorter (in the number of tokens) than <paramref name="sample" /> but all of its tokens compare equal to corresponding tokens from the beginning of <paramref name="sample" />, a negative number is returned. If all tokens compare equal and the subrange from <paramref name="tokens" /> is the same length (in the number of tokens) as <paramref name="sample" />, <c>0</c> is returned.
         ///     </para>
         /// </remarks>
-        private static int CompareRange(StringComparer comparer, ReadOnlyCollection<String?> tokens, IList<String?> sample, int i, int cycleStart)
+        private static Int32 CompareRange(StringComparer comparer, ReadOnlyCollection<String?> tokens, IList<String?> sample, Int32 i, Int32 cycleStart)
         {
             int c = 0;
 
             int j;
-
             for (/* [`i` is set in function call,] */ j = 0; i < tokens.Count && j < sample.Count; ++i, ++j)
             {
                 c = comparer.Compare(tokens[i], sample[(cycleStart + j) % sample.Count]);
-
                 if (c != 0)
                 {
                     break;
@@ -187,15 +213,15 @@ namespace MagicText
         /// <param name="comparer">String comparer used for comparing.</param>
         /// <param name="tokens">List of tokens amongst which <paramref name="sample" /> should be found.</param>
         /// <param name="positions">Sorted positions, or positional ordering of <paramref name="tokens" /> in respect of <paramref name="comparer" />.</param>
-        /// <param name="sample">Cyclical sample list of tokens to find. The list represents range <c>{ <paramref name="sample" />[<paramref name="cycleStart" />], <paramref name="sample" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sample" />[<paramref name="sample" />.Count - 1], <paramref name="sample" />[0], ..., <paramref name="sample" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
+        /// <param name="sample">Cyclical sample list of tokens to find. The list represents range <c>{ <paramref name="sample" />[<paramref name="cycleStart" />], <paramref name="sample" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sample" />[<paramref name="sample" />.Count - 1], <paramref name="sample" />[0], ..., <paramref name="sample" />[<paramref name="cycleStart" /> - 1] }</c>.  The list is treated as <strong>read-only</strong> in the function (it is not changed).</param>
         /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
-        /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sample" /> begins at <c><paramref name="tokens" />[<paramref name="positions" />[i]]</c> and the total number of occurances amongst <paramref name="tokens" />.</returns>
+        /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sample" /> begins at <c><paramref name="tokens" />[<paramref name="positions" />[i]]</c> and the total number of its occurances amongst <paramref name="tokens" />.</returns>
         /// <remarks>
         ///     <para>
         ///         The implementation of the method assumes <paramref name="sample" /> actually exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" /> and that <paramref name="positions" /> indeed sort <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />. If the former is not true, the returned index shall point to the position at which <paramref name="t" />'s position should be inserted to retain the sorted order and the number of occurances shall be 0; if the latter is not true, the behaviour of the method is undefined.
         ///     </para>
         /// </remarks>
-        private static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, ReadOnlyCollection<String?> tokens, ReadOnlyCollection<Int32> positions, IList<String?> sample, int cycleStart)
+        private static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, ReadOnlyCollection<String?> tokens, ReadOnlyCollection<Int32> positions, IList<String?> sample, Int32 cycleStart)
         {
             // Binary search...
 
@@ -269,7 +295,7 @@ namespace MagicText
         /// <seealso cref="Comparer" />
         protected ReadOnlyCollection<Int32> Positions => _positions;
 
-        /// <returns>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is the number of elements in <see cref="Context" /> (<see cref="IReadOnlyCollection{T}.Count" />).</returns>
+        /// <returns>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is the total number of elements in <see cref="Context" /> (<see cref="IReadOnlyCollection{T}.Count" />).</returns>
         /// <remarks>
         ///     <para>
         ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ <see cref="Positions" />[<see cref="FirstPosition" />], <see cref="Positions" />[<see cref="FirstPosition" />] + 1, ..., <see cref="Positions" />[<see cref="FirstPosition" />] + n, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens.
@@ -281,7 +307,7 @@ namespace MagicText
         /// <seealso cref="Positions" />
         protected Int32 FirstPosition => _firstPosition;
 
-        /// <returns>Unsorted tokens of the pen.</returns>
+        /// <returns>Tokens of the pen.</returns>
         /// <remarks>
         ///     <para>
         ///         The order of tokens is kept as provided in the constructor.
@@ -313,15 +339,17 @@ namespace MagicText
         ///     <para>
         ///         Create a pen with provided values.
         ///     </para>
-        ///
+        /// </summary>
+        /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of tokens in <paramref name="context" />.</param>
+        /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
+        /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
+        /// <exception cref="ArgumentNullException">If <paramref name="context" /> is <c>null</c>.</exception>
+        /// <remarks>
         ///     <para>
         ///         Tokens shall be compared by <see cref="StringComparer.Ordinal" />.
         ///     </para>
-        /// </summary>
-        /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
-        /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
-        /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
-        public Pen(IEnumerable<String?> context, String? endToken = null, bool intern = false) : this(context, StringComparer.Ordinal, endToken, intern)
+        /// </remarks>
+        public Pen(IEnumerable<String?> context, String? endToken = null, Boolean intern = false) : this(context, StringComparer.Ordinal, endToken, intern)
         {
         }
 
@@ -330,12 +358,12 @@ namespace MagicText
         ///         Create a pen with provided values.
         ///     </para>
         /// </summary>
-        /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of <paramref name="context" />.</param>
-        /// <param name="comparer">String comparer. Tokens shall be compared by <paramref name="comparer" />.</param>
+        /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of tokens in <paramref name="context" />.</param>
+        /// <param name="comparer">String comparer. Tokens shall be compared (e. g. for equality) by <paramref name="comparer" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
         /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
         /// <exception cref="ArgumentNullException">If <paramref name="context" /> is <c>null</c>. If <paramref name="comparer" /> is <c>null</c>.</exception>
-        public Pen(IEnumerable<String?> context, StringComparer comparer, String? endToken = null, bool intern = false)
+        public Pen(IEnumerable<String?> context, StringComparer comparer, String? endToken = null, Boolean intern = false)
         {
             if (context is null)
             {
@@ -343,12 +371,12 @@ namespace MagicText
             }
             if (comparer is null)
             {
-                throw new ArgumentNullException(nameof(comparer), ComparerNullErrorMessage);
+                throw new ArgumentNullException(nameof(comparer), TokenComparerNullErrorMessage);
             }
 
             // Copy comparer and ending token.
             _comparer = comparer;
-            _endToken = endToken;
+            _endToken = !intern || endToken is null ? endToken : String.Intern(endToken);
 
             // Copy context.
             {
@@ -364,7 +392,7 @@ namespace MagicText
 
             // Find sorting positions of tokens in context.
             {
-                var positionsList = Enumerable.Range(0, Context.Count).ToList();
+                var positionsList = new List<Int32>(Enumerable.Range(0, Context.Count));
                 positionsList.Sort(
                     (i, j) =>
                     {
@@ -429,7 +457,8 @@ namespace MagicText
         /// <param name="fromBeginning">If <c>true</c>, <paramref name="picker" /> function is not called to choose the first max(<paramref name="relevantTokens" />, 1) tokens, but the beginning of the pen's context is chosen instead; otherwise the first token is chosen by immediately calling <paramref name="picker" /> function.</param>
         /// <returns>A query for rendering tokens.</returns>
         /// <exception cref="ArgumentNullException">If <paramref name="picker" /> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative. If <paramref name="picker" /> returns a value outside of the legal range.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative.</exception>
+        /// <exception cref="InvalidOperationException">If <paramref name="picker" /> returns a value outside of the legal range.</exception>
         /// <remarks>
         ///     <para>
         ///         An extra copy of <paramref name="relevantTokens"/> tokens is kept when generating new tokens. Memory errors may occur if <paramref name="relevantTokens"/> is too large.
@@ -484,7 +513,7 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="Render(Int32, Random, Boolean)" />
         /// <seealso cref="Render(Int32, Boolean)" />
-        public IEnumerable<String?> Render(int relevantTokens, Func<Int32, Int32> picker, bool fromBeginning = false)
+        public IEnumerable<String?> Render(Int32 relevantTokens, Func<Int32, Int32> picker, Boolean fromBeginning = false)
         {
             if (picker is null)
             {
@@ -520,7 +549,7 @@ namespace MagicText
                 int pick = fromBeginning ? FirstPosition : picker(Context.Count + 1);
                 if (pick < 0 || pick > Context.Count)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
+                    throw new InvalidOperationException(PickOutOfRangeErrorMessage);
                 }
 
                 int first = pick == Context.Count ? Context.Count : Positions[pick];
@@ -561,7 +590,7 @@ namespace MagicText
                 int pick = picker(n);
                 if (pick < 0 || pick >= n)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
+                    throw new InvalidOperationException(PickOutOfRangeErrorMessage);
                 }
 
                 int next = Positions[p + pick] + d;
@@ -595,7 +624,7 @@ namespace MagicText
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
         /// <param name="random">(Pseudo-)Random number generator.</param>
-        /// <param name="fromBeginning">If <c>true</c>, <paramref name="picker" /> function is not called to choose the first max(<paramref name="relevantTokens" />, 1) tokens, but the beginning of the pen's context is chosen instead; otherwise the first token is chosen by immediately calling <paramref name="picker" /> function.</param>
+        /// <param name="fromBeginning">If <c>true</c>, <paramref name="random" /> is not used to choose the first max(<paramref name="relevantTokens" />, 1) tokens, but the beginning of the pen's context is chosen instead; otherwise the first token is chosen by immediately calling <see cref="System.Random.Next(Int32)"/> method on <paramref name="random" />.</param>
         /// <returns>A query for rendering tokens.</returns>
         /// <exception cref="ArgumentNullException">If <paramref name="random" /> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative.</exception>
@@ -657,7 +686,7 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
         /// <seealso cref="Render(Int32, Boolean)" />
-        public IEnumerable<String?> Render(int relevantTokens, System.Random random, bool fromBeginning = false)
+        public IEnumerable<String?> Render(Int32 relevantTokens, System.Random random, Boolean fromBeginning = false)
         {
             if (random is null)
             {
@@ -675,11 +704,9 @@ namespace MagicText
         ///     <para>
         ///         If <paramref name="fromBeginning" /> is <c>true</c>, the first <c>max(<paramref name="relevantTokens" />, 1)</c> tokens are chosen internally; otherwise they are chosen by calling <see cref="System.Random.Next(Int32)" /> method of an internal <see cref="System.Random" /> object (<see cref="System.Random" />). Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="System.Random.Next(Int32)" /> method of the internal <see cref="System.Random" /> object. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
         ///     </para>
-        ///
-        ///     
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
-        /// <param name="fromBeginning">If <c>true</c>, <paramref name="picker" /> function is not called to choose the first max(<paramref name="relevantTokens" />, 1) tokens, but the beginning of the pen's context is chosen instead; otherwise the first token is chosen by immediately calling <paramref name="picker" /> function.</param>
+        /// <param name="fromBeginning">If <c>true</c>, the beginning of the pen's context is chosen for the first <paramref name="relevantTokens" /> tokens; otherwise the first token is chosen by immediately calling <see cref="System.Random.Next(Int32)"/> method on the internal (pseudo-)random number generator (<see cref="Random" />).</param>
         /// <returns>A query for rendering tokens.</returns>
         /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative.</exception>
         /// <remarks>
@@ -740,7 +767,7 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
         /// <seealso cref="Render(Int32, Random, Boolean)" />
-        public IEnumerable<String?> Render(int relevantTokens, bool fromBeginning = false) =>
+        public IEnumerable<String?> Render(Int32 relevantTokens, Boolean fromBeginning = false) =>
             Render(relevantTokens, Random, fromBeginning);
     }
 }

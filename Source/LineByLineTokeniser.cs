@@ -37,17 +37,11 @@ namespace MagicText
         /// </summary>
         /// <param name="token">Token to check.</param>
         /// <returns><c>false</c></returns>
-        protected static bool IsEmptyTokenAlwaysFalse(String? token) =>
+        protected static Boolean IsEmptyTokenAlwaysFalse(String? token) =>
             false;
 
         private readonly Func<String?, Boolean> _isEmptyToken;
 
-
-        /// <summary>
-        ///     <para>
-        ///         This function is used in <see cref="Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> methods to filter out empty tokens if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>.
-        ///     </para>
-        /// </summary>
         /// <returns>Function to check if a token is empty: it returns <c>true</c> if the token to check is empty.</returns>
         protected Func<String?, Boolean> IsEmptyToken => _isEmptyToken;
 
@@ -69,12 +63,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">If <paramref name="isEmptyToken" /> is <c>null</c>.</exception>
         protected LineByLineTokeniser(Func<String?, Boolean> isEmptyToken)
         {
-            if (isEmptyToken is null)
-            {
-                throw new ArgumentNullException(nameof(isEmptyToken), IsEmptyTokenNullErrorMessage);
-            }
-
-            _isEmptyToken = isEmptyToken;
+            _isEmptyToken = isEmptyToken ?? throw new ArgumentNullException(nameof(isEmptyToken), IsEmptyTokenNullErrorMessage);
         }
 
         /// <summary>
@@ -87,11 +76,11 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">If <paramref name="line" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
-        ///         The method <strong>should not</strong> produce <see cref="ShatteringOptions.EmptyLineToken" />s nor <see cref="ShatteringOptions.LineEndToken" />s to represent empty lines and line ends. Also, the method <strong>should not</strong> manually filter out empty tokens. Hence no <see cref="ShatteringOptions" /> are available to the method. The result of an empty line (even without possible filtering out of empty tokens) should be an empty enumerable, while empty tokens, empty lines and line ends are treated within the scope of <see cref="LineByLineTokeniser" /> parent class and its methods.
+        ///         The method <strong>should not</strong> produce <see cref="ShatteringOptions.EmptyLineToken" />s to represent empty lines and <see cref="ShatteringOptions.LineEndToken" />s for line ends. Also, the method <strong>should not</strong> manually filter out empty tokens. Hence no <see cref="ShatteringOptions" /> are available to the method. The result of an empty line should be an empty enumerable, while empty tokens, empty lines and line ends are treated within the scope of <see cref="LineByLineTokeniser" /> parent class and its methods.
         ///     </para>
         ///
         ///     <para>
-        ///         It is guaranteed that, when called from <see cref="LineByLineTokeniser" />, <paramref name="line" /> shall be a non-<c>null</c> string not containing any line end (CR, LF or CRLF). Nonetheless, when calling from a subclass, its programmer may call the method however they wish, but this is beyond the original programmer's scope.
+        ///         It is guaranteed that, when called from <see cref="LineByLineTokeniser" />'s non-overridable methods, <paramref name="line" /> shall be a non-<c>null</c> string not containing a line end (CR, LF or CRLF). Nonetheless, when calling from a derived class, its programmer may call the method however they wish, but this is beyond the original programmer's scope.
         ///     </para>
         /// </remarks>
         protected abstract IEnumerable<String?> ShatterLine(String line);
@@ -111,7 +100,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         It is guaranteed that the returned enumerable is a fully built container, such as <see cref="List{T}" />, and not just an enumeration query.
+        ///         It is guaranteed that the returned enumerable is a fully built container, such as <see cref="List{T}" />, and not merely an enumeration query.
         ///     </para>
         /// </remarks>
         public IEnumerable<String?> Shatter(StreamReader input, ShatteringOptions? options = null)
@@ -160,22 +149,25 @@ namespace MagicText
                     int oldCount = tokens.Count;
 
                     tokens.AddRange(lineTokens);
-                    if (tokens.Count == oldCount) // <-- no new tokens were added
+                    do
                     {
-                        if (options.IgnoreEmptyLines)
+                        if (tokens.Count == oldCount) // <-- no new tokens were added
                         {
-                            addLineEnd = false;
+                            if (options.IgnoreEmptyLines)
+                            {
+                                addLineEnd = false;
+
+                                break;
+                            }
+                            else
+                            {
+                                tokens.Add(options.EmptyLineToken);
+                            }
                         }
-                        else
-                        {
-                            tokens.Add(options.EmptyLineToken);
-                            addLineEnd = true;
-                        }
-                    }
-                    else
-                    {
+
                         addLineEnd = true;
                     }
+                    while (false);
                 }
             }
 
@@ -201,7 +193,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         It is guaranteed that the returned enumerable is a fully built container, such as <see cref="List{T}" />, and not just an enumeration query.
+        ///         It is guaranteed that the returned enumerable is a fully built container, such as <see cref="List{T}" />, and not merely an enumeration query.
         ///     </para>
         /// </remarks>
         public async Task<IEnumerable<String?>> ShatterAsync(StreamReader input, ShatteringOptions? options = null)
@@ -250,22 +242,25 @@ namespace MagicText
                     int oldCount = tokens.Count;
 
                     tokens.AddRange(lineTokens);
-                    if (tokens.Count == oldCount) // <-- no new tokens were added
+                    do
                     {
-                        if (options.IgnoreEmptyLines)
+                        if (tokens.Count == oldCount) // <-- no new tokens were added
                         {
-                            addLineEnd = false;
+                            if (options.IgnoreEmptyLines)
+                            {
+                                addLineEnd = false;
+
+                                break;
+                            }
+                            else
+                            {
+                                tokens.Add(options.EmptyLineToken);
+                            }
                         }
-                        else
-                        {
-                            tokens.Add(options.EmptyLineToken);
-                            addLineEnd = true;
-                        }
-                    }
-                    else
-                    {
+
                         addLineEnd = true;
                     }
+                    while (false);
                 }
             }
 

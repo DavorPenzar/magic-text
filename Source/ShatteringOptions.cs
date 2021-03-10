@@ -9,55 +9,265 @@ namespace MagicText
     ///         Options for <see cref="ITokeniser.Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> methods.
     ///     </para>
     /// </summary>
-    public class ShatteringOptions
+    public class ShatteringOptions : IEquatable<ShatteringOptions>, ICloneable
     {
-        /// <value>Indicator if empty tokens should be ignored: <c>true</c> if ignoring, <c>false</c> otherwise. Default is <c>false</c>.</value>
+        private const string OtherNullErrorMessage = "Shattering options to copy may not be `null`.";
+
+        private bool ignoreEmptyTokens;
+        private bool ignoreLineEnds;
+        private bool ignoreEmptyLines;
+
+        private String? lineEndToken;
+        private String? emptyLineToken;
+
+        /// <summary>
+        ///     <para>
+        ///         Default is <c>false</c>.
+        ///     </para>
+        /// </summary>
+        /// <returns>Indicator if empty tokens should be ignored: <c>true</c> if ignoring, <c>false</c> otherwise.</returns>
+        /// <value>New indicator value.</value>
         /// <remarks>
         ///     <para>
         ///         Actual implementations of <see cref="ITokeniser" /> interface may define what exactly an <em>empty</em> token means, but usually this would be a <c>null</c> or a string yielding <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> or <see cref="String.IsNullOrWhiteSpace(String)" /> method.
         ///     </para>
         /// </remarks>
         [DefaultValue(false)]
-        public Boolean IgnoreEmptyTokens { get; set; } = false;
+        public Boolean IgnoreEmptyTokens
+        {
+            get => ignoreEmptyTokens;
+            set
+            {
+                ignoreEmptyTokens = value;
+            }
+        }
 
-        /// <value>Indicator if line ends should be ignored: <c>true</c> if ignoring, <c>false</c> otherwise. If <c>false</c>, they should be represented by <see cref="LineEndToken" />s. Default is <c>false</c>.</value>
+        /// <summary>
+        ///     <para>
+        ///         Default is <c>false</c>.
+        ///     </para>
+        /// </summary>
+        /// <returns>Indicator if line ends should be ignored: <c>true</c> if ignoring, <c>false</c> otherwise.</returns>
+        /// <value>New indicator value.</value>
         /// <remarks>
+        ///     <para>
+        ///         If <c>false</c>, line ends should be represented by <see cref="LineEndToken" />s.
+        ///     </para>
+        ///
         ///     <para>
         ///         Line ends should be considered both the new line character (CR, LF and CRLF) and the end of the input.
         ///     </para>
         /// </remarks>
         [DefaultValue(false)]
-        public Boolean IgnoreLineEnds { get; set; } = false;
+        public Boolean IgnoreLineEnds
+        {
+            get => ignoreLineEnds;
+            set
+            {
+                ignoreLineEnds = value;
+            }
+        }
 
-        /// <value>Inidcator if empty lines should be ignored, i. e. not produce any tokens: <c>true</c> if ignoring, <c>false</c> otherwise. If <c>true</c>, they should not produce even <see cref="LineEndToken" />; if <c>false</c>, they should be represented by <see cref="EmptyLineToken" />s. Default is <c>false</c>.</value>
+        /// <summary>
+        ///     <para>
+        ///         Default is <c>false</c>.
+        ///     </para>
+        /// </summary>
+        /// <returns>Inidcator if empty lines should be ignored, i. e. not produce any tokens: <c>true</c> if ignoring, <c>false</c> otherwise.</returns>
+        /// <value>New indicator value.</value>
         /// <remarks>
+        ///     <para>
+        ///         If <c>true</c>, empty lines should not produce even <see cref="LineEndToken" />; if <c>false</c>, they should be represented by <see cref="EmptyLineToken" />s.
+        ///     </para>
+        ///
         ///     <para>
         ///         Empty lines should be considered those lines that produce no tokens. This should be checked <strong>after</strong> filtering empty tokens out from the line if <see cref="IgnoreEmptyTokens" /> is <c>true</c>.
         ///     </para>
         /// </remarks>
         [DefaultValue(false)]
-        public Boolean IgnoreEmptyLines { get; set; } = false;
+        public Boolean IgnoreEmptyLines
+        {
+            get => ignoreEmptyLines;
+            set
+            {
+                ignoreEmptyLines = true;
+            }
+        }
 
-        /// <value>Token to represent the line end. Default is <see cref="Environment.NewLine" />.</value>
+        /// <summary>
+        ///     <para>
+        ///         Default is <see cref="Environment.NewLine" />.
+        ///     </para>
+        /// </summary>
+        /// <returns>Token to represent a line end.</returns>
+        /// <value>New token value.</value>
         /// <remarks>
         ///     <para>
         ///         Line ends should be considered both the new line character (CR, LF and CRLF) and the end of the input.
         ///     </para>
         ///
         ///     <para>
-        ///         If a line is discarded as empty (if <see cref="IgnoreEmptyLines" /> is <c>true</c>), it should not produce a <see cref="LineEndToken" />.
+        ///         If a line is discarded as empty (if <see cref="IgnoreEmptyLines" /> is <c>true</c>), it should not produce <see cref="LineEndToken" />.
         ///     </para>
         /// </remarks>
         [DefaultValue("\n")] // <-- this may be different from `Environment.NewLine`
-        public String? LineEndToken { get; set; } = Environment.NewLine;
+        public String? LineEndToken
+        {
+            get => lineEndToken;
+            set
+            {
+                lineEndToken = value;
+            }
+        }
 
-        /// <value>Token to represent an empty line. Default is <see cref="String.Empty" />.</value>
+        /// <summary>
+        ///     <para>
+        ///         Default is <see cref="String.Empty" />.
+        ///     </para>
+        /// </summary>
+        /// <returns>Token to represent an empty line.</returns>
+        /// <value>New token value.</value>
         /// <remarks>
         ///     <para>
-        ///         If a line does not produce any token (after ignoring empty tokens if <see cref="IgnoreEmptyTokens" /> is <c>true</c>) but should not be discarded (if <see cref="IgnoreEmptyLines" /> is <c>false</c>), it should be represented by <see cref="EmptyLineToken" />. This should be done even if <see cref="EmptyLineToken" /> would be considered an empty token and empty tokens should be ignored (if <see cref="IgnoreEmptyTokens" /> is <c>true</c>).
+        ///         If a line produces no tokens (after ignoring empty tokens if <see cref="IgnoreEmptyTokens" /> is <c>true</c>) but should not be discarded (if <see cref="IgnoreEmptyLines" /> is <c>false</c>), it should be represented by <see cref="EmptyLineToken" />. This should be done even if <see cref="EmptyLineToken" /> would be considered an empty token and empty tokens should be ignored (if <see cref="IgnoreEmptyTokens" /> is <c>true</c>).
         ///     </para>
         /// </remarks>
         [DefaultValue("")]
-        public String? EmptyLineToken { get; set; } = String.Empty;
+        public String? EmptyLineToken
+        {
+            get => emptyLineToken;
+            set
+            {
+                emptyLineToken = value;
+            }
+        }
+
+        /// <summary>
+        ///     <para>
+        ///         Create default shattering options.
+        ///     </para>
+        /// </summary>
+        public ShatteringOptions() : this(false, false, false, Environment.NewLine, String.Empty)
+        {
+        }
+
+        /// <summary>
+        ///     <para>
+        ///         Copy shattering options.
+        ///     </para>
+        /// </summary>
+        /// <param name="other">Shattering options to copy.</param>
+        /// <exception cref="ArgumentNullException">If <paramref name="other" /> is <c>null</c>.</exception>
+        public ShatteringOptions(ShatteringOptions other) :
+            this(
+                other?.IgnoreEmptyTokens ?? throw new ArgumentNullException(nameof(other), OtherNullErrorMessage),
+                other?.IgnoreLineEnds ?? throw new ArgumentNullException(nameof(other), OtherNullErrorMessage),
+                other?.IgnoreEmptyLines ?? throw new ArgumentNullException(nameof(other), OtherNullErrorMessage),
+                other?.LineEndToken,
+                other?.EmptyLineToken
+            )
+        {
+        }
+
+        /// <summary>
+        ///     <para>
+        ///         Create specified shattering options.
+        ///     </para>
+        /// </summary>
+        /// <param name="ignoreEmptyTokens">Indicator if empty tokens should be ignored.</param>
+        /// <param name="ignoreLineEnds">Indicator if line ends should be ignored.</param>
+        /// <param name="ignoreEmptyLines">Inidcator if empty lines should be ignored.</param>
+        /// <param name="lineEndToken">Token to represent a line end.</param>
+        /// <param name="emptyLineToken">Token to represent an empty line.</param>
+        public ShatteringOptions(Boolean ignoreEmptyTokens, Boolean ignoreLineEnds, Boolean ignoreEmptyLines, String? lineEndToken, String? emptyLineToken)
+        {
+            this.ignoreEmptyTokens = ignoreEmptyTokens;
+            this.ignoreLineEnds = ignoreLineEnds;
+            this.ignoreEmptyLines = ignoreEmptyLines;
+            this.lineEndToken = lineEndToken;
+            this.emptyLineToken = emptyLineToken;
+        }
+
+        /// <summary>
+        ///     <para>
+        ///         Deconstruct shattering options.
+        ///     </para>
+        /// </summary>
+        /// <param name="ignoreEmptyTokens">Indicator if empty tokens should be ignored.</param>
+        /// <param name="ignoreLineEnds">Indicator if line ends should be ignored.</param>
+        /// <param name="ignoreEmptyLines">Inidcator if empty lines should be ignored.</param>
+        /// <param name="lineEndToken">Token to represent a line end.</param>
+        /// <param name="emptyLineToken">Token to represent an empty line.</param>
+        public void Deconstruct(out Boolean ignoreEmptyTokens, out Boolean ignoreLineEnds, out Boolean ignoreEmptyLines, out String? lineEndToken, out String? emptyLineToken)
+        {
+            ignoreEmptyTokens = IgnoreEmptyTokens;
+            ignoreLineEnds = IgnoreLineEnds;
+            ignoreEmptyLines = IgnoreEmptyLines;
+            lineEndToken = LineEndToken;
+            emptyLineToken = EmptyLineToken;
+        }
+
+        /// <summary>
+        ///     <para>
+        ///         Compute shattering options' hash code.
+        ///     </para>
+        /// </summary>
+        /// <returns>Hash code.</returns>
+        public override Int32 GetHashCode()
+        {
+            int hashCode = 7;
+
+            hashCode = 31 * hashCode + IgnoreEmptyTokens.GetHashCode();
+            hashCode = 31 * hashCode + IgnoreLineEnds.GetHashCode();
+            hashCode = 31 * hashCode + IgnoreEmptyLines.GetHashCode();
+            hashCode = 31 * hashCode + (lineEndToken?.GetHashCode() ?? 0);
+            hashCode = 31 * hashCode + (emptyLineToken?.GetHashCode() ?? 0);
+
+            return hashCode;
+        }
+
+        /// <summary>
+        ///     <para>
+        ///         Compare shattering options to another shattering options for equality.
+        ///     </para>
+        /// </summary>
+        /// <param name="other">Another instance of <see cref="ShatteringOptions" />.</param>
+        /// <returns>If shattering options are equal according to all relevant values, <c>true</c>; <c>false</c>otherwise.</returns>
+        public Boolean Equals(ShatteringOptions? other) =>
+            !(other is null) &&
+                IgnoreEmptyTokens == other.IgnoreEmptyTokens &&
+                IgnoreLineEnds == other.IgnoreLineEnds &&
+                IgnoreEmptyLines == other.IgnoreEmptyLines &&
+                String.Equals(LineEndToken, other.LineEndToken) &&
+                String.Equals(EmptyLineToken, other.EmptyLineToken);
+
+        /// <summary>
+        ///     <para>
+        ///         Compare shattering options to another <see cref="Object" /> for equality.
+        ///     </para>
+        /// </summary>
+        /// <param name="obj">Another <see cref="Object" />.</param>
+        /// <returns>If <paramref name="obj" /> is also shattering options and the shattering options are equal according to all relevant values, <c>true</c>; <c>false</c>otherwise.</returns>
+        public override bool Equals(Object? obj)
+        {
+            try
+            {
+                return !(obj is null) && Equals((ShatteringOptions)obj);
+            }
+            catch (InvalidCastException)
+            {
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     <para>
+        ///         Clone shattering options.
+        ///     </para>
+        /// </summary>
+        /// <returns>New instance of <see cref="ShatteringOptions" /> with the same values.</returns>
+        public Object Clone() =>
+            new ShatteringOptions(this);
     }
 }
