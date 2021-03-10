@@ -10,9 +10,9 @@ The library provides simple interfaces and classes for tokenising existing text 
 
 Tokens extracted from a text block are usually words + punctuation + white spaces, or single characters. It should not be considered a good practice to mix *apples and oranges*, i. e. to have some tokens in form of complete words, while others as single characters. Both tokenisation policies mentioned are implemented in the librabry, while additional policies may be obtained by:
 
-1.  passing desired ```ShatteringOptions``` to tokenisation methods,
-2.  constructing ```RegexTokeniser``` with custom regular expression break pattern and transformation method,
-3.  implementing custom extensions of ```LineByLineTokeniser``` abstract class or implementing a complete ```ITokeniser``` interface.
+1.  passing desired [```ShatteringOptions```](Source/ShatteringOptions.cs) to tokenisation methods,
+2.  constructing [```RegexTokeniser```](Source/RegexTokeniser.cs) with custom regular expression break pattern and transformation method,
+3.  implementing custom extension of [```LineByLineTokeniser```](Source/LineByLineTokeniser.cs) abstract class or implementing complete [```ITokeniser```](Source/ITokeniser.cs) interface.
 
 Once extracted, the collection of tokens (in the order as read from input) is called ***context*** in the rest of this document. The terminology is inspired by actual context of words in usual forms of text.
 
@@ -87,7 +87,7 @@ Do you know that there's still a chance for you?
 
 ```
 
-These are the lyrics (only the first verse) to the song called *Firework* by the American singer Katy Perry. We shall use them because of the [anaphora](http://en.wikipedia.org/wiki/Anaphora_(rhetoric)) present in them, making it a nice short input that may produce many different results.
+These are the lyrics (only the first verse) to the song called [*Firework*](http://youtu.be/QGJuMBdaqIw) by the American singer [Katy Perry](http://katyperry.com/). We shall use them because of the [anaphora](http://en.wikipedia.org/wiki/Anaphora_(rhetoric)) present in them, making it a nice short input that may produce many different results.
 
 To generate alternative lyrics, one may use the following code:
 
@@ -139,7 +139,7 @@ Do you know that there's still a chance for you?
 
 ```
 
-Alternatively, if ```CharTokeniser``` is used instead of ```RegexTokeniser```, the code outputs:
+Alternatively, if [```CharTokeniser```](Source/CharTokeniser.cs) is used instead of [```RegexTokeniser```](Source/RegexTokeniser.cs), the code outputs:
 
 ```
  deep?
@@ -158,7 +158,7 @@ Do you know that there's a spark in
 
 ##  Remarks
 
-This library should not be used when working with large corpora of context tokens. Objects of class ```Pen``` store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks a possibility to work with a large number of tokens. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storing tokens externally.
+This library should not be used when working with large corpora of context tokens. Objects of class [```Pen```](Source/Pen.cs) store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks a possibility to work with a large number of tokens. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storing tokens externally.
 
 ##  References
 
