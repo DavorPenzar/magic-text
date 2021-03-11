@@ -226,8 +226,8 @@ namespace MagicText
             hashCode = 31 * hashCode + IgnoreEmptyTokens.GetHashCode();
             hashCode = 31 * hashCode + IgnoreLineEnds.GetHashCode();
             hashCode = 31 * hashCode + IgnoreEmptyLines.GetHashCode();
-            hashCode = 31 * hashCode + (lineEndToken?.GetHashCode() ?? 0);
-            hashCode = 31 * hashCode + (emptyLineToken?.GetHashCode() ?? 0);
+            hashCode = 31 * hashCode + (lineEndToken is null ? 0 : lineEndToken.GetHashCode());
+            hashCode = 31 * hashCode + (emptyLineToken is null ? 0 : emptyLineToken.GetHashCode());
 
             return hashCode;
         }
