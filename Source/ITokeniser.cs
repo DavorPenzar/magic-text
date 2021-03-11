@@ -20,7 +20,7 @@ namespace MagicText
         /// <param name="input">Stream for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults should be used.</param>
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="input" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         The method should return the same enumerable of tokens as <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> method called with the same parameters.
@@ -35,8 +35,8 @@ namespace MagicText
         /// </summary>
         /// <param name="input">Stream for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults should be used.</param>
-        /// <returns>Task whose result is enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="input" /> is <c>null</c>.</exception>
+        /// <returns>Task that represents the asynchronous shattering operation. The value of <see cref="Task{TResult}.Result" /> is enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         The method should ultimately return the same enumerable of tokens as <see cref="Shatter(StreamReader, ShatteringOptions?)" /> method called with the same parameters.

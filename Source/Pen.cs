@@ -127,7 +127,7 @@ namespace MagicText
         /// <param name="x">Value to find.</param>
         /// <param name="comparer">Comparer used for checking equality of instances of type <typeparamref name="T" />.</param>
         /// <returns>Minimal index <c>i</c> such that <c><paramref name="values" />[i] == <paramref name="x" /></c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" /> method calls).</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="values" /> is <c>null</c>. If <paramref name="comparer" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="values" /> is <c>null</c>. If <paramref name="comparer" /> is <c>null</c>.</exception>
         protected static Int32 IndexOf<T>(IEnumerable<T> values, T x, IEqualityComparer<T> comparer)
         {
             if (values is null)
@@ -158,7 +158,7 @@ namespace MagicText
         /// <param name="values">Enumerable of values amongst which <paramref name="x" /> should be found. Even if <paramref name="values" /> are comparable, the enumerable does not have to be sorted.</param>
         /// <param name="x">Value to find.</param>
         /// <returns>Minimal index <c>i</c> such that <c><paramref name="values" />[i] == <paramref name="x" /></c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" /> method calls).</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="values" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="values" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         Instances of type <typeparamref name="T" /> shall be compared by <see cref="EqualityComparer{T}.Default" />.
@@ -343,7 +343,7 @@ namespace MagicText
         /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of tokens in <paramref name="context" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
         /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
-        /// <exception cref="ArgumentNullException">If <paramref name="context" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="context" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         Tokens shall be compared by <see cref="StringComparer.Ordinal" />.
@@ -362,7 +362,7 @@ namespace MagicText
         /// <param name="comparer">String comparer. Tokens shall be compared (e. g. for equality) by <paramref name="comparer" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
         /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
-        /// <exception cref="ArgumentNullException">If <paramref name="context" /> is <c>null</c>. If <paramref name="comparer" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="context" /> is <c>null</c>. Parameter <paramref name="comparer" /> is <c>null</c>.</exception>
         public Pen(IEnumerable<String?> context, StringComparer comparer, String? endToken = null, Boolean intern = false)
         {
             if (context is null)
@@ -456,9 +456,8 @@ namespace MagicText
         /// <param name="picker">Random number generator. When passed an integer <c>n</c> (<c>&gt;= 0</c>) as the argument, it should return an integer from range [0, max(<c>n</c>, 1)), i. e. greater than or equal to 0 but (strictly) less than max(<c>n</c>, 1).</param>
         /// <param name="fromBeginning">If <c>true</c>, <paramref name="picker" /> function is not called to choose the first max(<paramref name="relevantTokens" />, 1) tokens, but the beginning of the pen's context is chosen instead; otherwise the first token is chosen by immediately calling <paramref name="picker" /> function.</param>
         /// <returns>A query for rendering tokens.</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="picker" /> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative.</exception>
-        /// <exception cref="InvalidOperationException">If <paramref name="picker" /> returns a value outside of the legal range.</exception>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="picker" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Parameter <paramref name="relevantTokens" /> is (strictly) negative. Function <paramref name="picker" /> returns a value outside of the legal range.</exception>
         /// <remarks>
         ///     <para>
         ///         An extra copy of <paramref name="relevantTokens"/> tokens is kept when generating new tokens. Memory errors may occur if <paramref name="relevantTokens"/> is too large.
@@ -549,7 +548,7 @@ namespace MagicText
                 int pick = fromBeginning ? FirstPosition : picker(Context.Count + 1);
                 if (pick < 0 || pick > Context.Count)
                 {
-                    throw new InvalidOperationException(PickOutOfRangeErrorMessage);
+                    throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
                 }
 
                 int first = pick == Context.Count ? Context.Count : Positions[pick];
@@ -590,7 +589,7 @@ namespace MagicText
                 int pick = picker(n);
                 if (pick < 0 || pick >= n)
                 {
-                    throw new InvalidOperationException(PickOutOfRangeErrorMessage);
+                    throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
                 }
 
                 int next = Positions[p + pick] + d;
@@ -626,8 +625,8 @@ namespace MagicText
         /// <param name="random">(Pseudo-)Random number generator.</param>
         /// <param name="fromBeginning">If <c>true</c>, <paramref name="random" /> is not used to choose the first max(<paramref name="relevantTokens" />, 1) tokens, but the beginning of the pen's context is chosen instead; otherwise the first token is chosen by immediately calling <see cref="System.Random.Next(Int32)"/> method on <paramref name="random" />.</param>
         /// <returns>A query for rendering tokens.</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="random" /> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative.</exception>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="random" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Parameter <paramref name="relevantTokens" /> is (strictly) negative.</exception>
         /// <remarks>
         ///     <para>
         ///         An extra copy of <paramref name="relevantTokens"/> tokens is kept when generating new tokens. Memory errors may occur if <paramref name="relevantTokens"/> is too large.
@@ -708,7 +707,7 @@ namespace MagicText
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
         /// <param name="fromBeginning">If <c>true</c>, the beginning of the pen's context is chosen for the first <paramref name="relevantTokens" /> tokens; otherwise the first token is chosen by immediately calling <see cref="System.Random.Next(Int32)"/> method on the internal (pseudo-)random number generator (<see cref="Random" />).</param>
         /// <returns>A query for rendering tokens.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">If <paramref name="relevantTokens" /> is (strictly) negative.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Parameter <paramref name="relevantTokens" /> is (strictly) negative.</exception>
         /// <remarks>
         ///     <para>
         ///         An extra copy of <paramref name="relevantTokens"/> tokens is kept when generating new tokens. Memory errors may occur if <paramref name="relevantTokens"/> is too large.

@@ -36,7 +36,7 @@ namespace MagicText
         /// </summary>
         /// <param name="line">Line of text to shatter.</param>
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="line" />.</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="line" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="line" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         The returned enumerable is merely a query. If multiple enumerations over it should be performed, it is advisable to convert it to a fully built container beforehand, such as <see cref="List{T}" /> via <see cref="List{T}.List(IEnumerable{T})" /> constructor or <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.

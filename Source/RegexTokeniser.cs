@@ -102,7 +102,7 @@ namespace MagicText
         /// <param name="escapeReplacement">If <c>true</c>, <paramref name="replacementPattern" /> is escaped via <see cref="Regex.Escape(String)" /> method before usage.</param>
         /// <param name="options">Options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
         /// <returns>Function that returns <c>null</c> when passed a <c>null</c>, and otherwise performs the regular expression based replacement defined.</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="matchPattern" /> is <c>null</c>. If <paramref name="replacementPattern" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="matchPattern" /> is <c>null</c>. Parameter <paramref name="replacementPattern" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         Exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.
@@ -171,7 +171,7 @@ namespace MagicText
         /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <param name="escape">If <c>true</c>, <paramref name="breakPattern" /> is escaped via <see cref="Regex.Escape(String)" /> method before usage.</param>
         /// <param name="options">Options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
-        /// <exception cref="ArgumentNullException">If <paramref name="breakPattern" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="breakPattern" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         Exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.
@@ -189,7 +189,7 @@ namespace MagicText
         /// <param name="break">Regular expression breaker to use.</param>
         /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <param name="alterOptions">If <c>null</c>, <paramref name="break" />'s options (<see cref="Regex.Options" />) are used (actually, no new <see cref="Regex" /> is constructed); otherwise options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
-        /// <exception cref="ArgumentNullException">If <paramref name="break" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="break" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         Exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.
@@ -226,7 +226,7 @@ namespace MagicText
         /// </summary>
         /// <param name="line">Line of text to shatter.</param>
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="line" />.</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="line" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="line" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         The returned enumerable is merely a query. If multiple enumerations over it should be performed, it is advisable to convert it to a fully built container beforehand, such as <see cref="List{T}" /> via <see cref="List{T}.List(IEnumerable{T})" /> constructor or <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.

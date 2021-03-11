@@ -26,8 +26,8 @@ namespace MagicText
         /// <param name="text">Input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="text" />.</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="tokeniser" /> is <c>null</c>. If <paramref name="text" /> is <c>null</c>.</exception>
-        /// <exception cref="InvalidOperationException">If <see cref="ITokeniser.Shatter(StreamReader, ShatteringOptions?)" /> returns <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="tokeniser" /> is <c>null</c>. Parameter <paramref name="text" /> is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">Parameter <see cref="ITokeniser.Shatter(StreamReader, ShatteringOptions?)" /> returns <c>null</c>.</exception>
         public static IEnumerable<String?> Shatter(this ITokeniser tokeniser, String text, ShatteringOptions? options = null)
         {
             if (tokeniser is null)
@@ -60,9 +60,9 @@ namespace MagicText
         /// <param name="tokeniser">Tokeniser used for shattering.</param>
         /// <param name="text">Input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
-        /// <returns>Task whose result is enumerable of tokens (in the order they were read) read from <paramref name="text" />.</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="tokeniser" /> is <c>null</c>. If <paramref name="text" /> is <c>null</c>.</exception>
-        /// <exception cref="InvalidOperationException">If <see cref="ITokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> ultimately returns <c>null</c>.</exception>
+        /// <returns>Task that represents the asynchronous shattering operation. The value of <see cref="Task{TResult}.Result" /> is enumerable of tokens (in the order they were read) read from <paramref name="text" />.</returns>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="tokeniser" /> is <c>null</c>. If <paramref name="text" /> is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">Parameter <see cref="ITokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> ultimately returns <c>null</c>.</exception>
         public static async Task<IEnumerable<String?>> ShatterAsync(this ITokeniser tokeniser, String text, ShatteringOptions? options = null)
         {
             if (tokeniser is null)
