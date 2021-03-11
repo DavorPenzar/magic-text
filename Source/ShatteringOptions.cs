@@ -13,6 +13,12 @@ namespace MagicText
     {
         private const string OtherNullErrorMessage = "Shattering options to copy may not be `null`.";
 
+        public static Boolean operator ==(ShatteringOptions? left, ShatteringOptions? right) =>
+            left?.Equals(right) ?? right is null;
+
+        public static Boolean operator !=(ShatteringOptions? left, ShatteringOptions? right) =>
+            !(left == right);
+
         private bool ignoreEmptyTokens;
         private bool ignoreLineEnds;
         private bool ignoreEmptyLines;
@@ -234,12 +240,15 @@ namespace MagicText
         /// <param name="other">Another instance of <see cref="ShatteringOptions" />.</param>
         /// <returns>If shattering options are equal according to all relevant values, <c>true</c>; <c>false</c>otherwise.</returns>
         public Boolean Equals(ShatteringOptions? other) =>
-            !(other is null) &&
-                IgnoreEmptyTokens == other.IgnoreEmptyTokens &&
-                IgnoreLineEnds == other.IgnoreLineEnds &&
-                IgnoreEmptyLines == other.IgnoreEmptyLines &&
-                String.Equals(LineEndToken, other.LineEndToken) &&
-                String.Equals(EmptyLineToken, other.EmptyLineToken);
+            Object.ReferenceEquals(this, other) ||
+                (
+                    !(other is null) &&
+                    IgnoreEmptyTokens == other.IgnoreEmptyTokens &&
+                    IgnoreLineEnds == other.IgnoreLineEnds &&
+                    IgnoreEmptyLines == other.IgnoreEmptyLines &&
+                    String.Equals(LineEndToken, other.LineEndToken) &&
+                    String.Equals(EmptyLineToken, other.EmptyLineToken)
+                );
 
         /// <summary>
         ///     <para>
