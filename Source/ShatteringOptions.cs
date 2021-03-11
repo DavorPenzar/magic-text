@@ -14,7 +14,7 @@ namespace MagicText
         private const string OtherNullErrorMessage = "Shattering options to copy may not be `null`.";
 
         public static Boolean operator ==(ShatteringOptions? left, ShatteringOptions? right) =>
-            left?.Equals(right) ?? right is null;
+            left is null ? right is null : left.Equals(right);
 
         public static Boolean operator !=(ShatteringOptions? left, ShatteringOptions? right) =>
             !(left == right);
