@@ -13,6 +13,10 @@ namespace MagicText
     /// </summary>
     /// <remarks>
     ///     <para>
+    ///         A derived class must minimally implement <see cref="ShatterLine(String)" /> method to make a useful (non-abstract) instance of <see cref="LineByLineTokeniser" />.
+    ///     </para>
+    ///
+    ///     <para>
     ///         By default, empty tokens are considered those tokens that yield <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> method. Derived classes may override this behaviour.
     ///     </para>
     ///

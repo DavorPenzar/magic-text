@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MagicText
@@ -41,8 +40,7 @@ namespace MagicText
 
             List<String?> tokens;
 
-            using (Stream textStream = new MemoryStream(Encoding.Default.GetBytes(text)))
-            using (TextReader textReader = new StreamReader(textStream, Encoding.Default))
+            using (TextReader textReader = new StringReader(text))
             {
                 tokens = new List<String?>(tokeniser.Shatter(textReader, options) ?? throw new InvalidOperationException(TokensNullErrorMessage));
             }
@@ -76,8 +74,7 @@ namespace MagicText
 
             List<String?> tokens;
 
-            using (Stream textStream = new MemoryStream(Encoding.Default.GetBytes(text)))
-            using (TextReader textReader = new StreamReader(textStream, Encoding.Default))
+            using (TextReader textReader = new StringReader(text))
             {
                 tokens = new List<String?>(await tokeniser.ShatterAsync(textReader, options) ?? throw new InvalidOperationException(TokensNullErrorMessage));
             }
