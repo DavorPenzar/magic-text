@@ -104,10 +104,10 @@ IEnumerable<String?> tokens;
 Pen pen;
 
 using (Stream fileStream = File.OpenRead("Firework.txt"))
-using (StreamReader fileReader = new StreamReader(fileStream))
+using (TextReader fileReader = new StreamReader(fileStream))
 {
 	ITokeniser tokeniser = new RegexTokeniser();
-	tokens = tokeniser.Shatter(fileReader, new ShatteringOptions { IgnoreEmptyTokens = true });
+	tokens = tokeniser.Shatter(fileReader, new ShatteringOptions() { IgnoreEmptyTokens = true });
 }
 
 pen = new Pen(tokens);
