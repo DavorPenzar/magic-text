@@ -27,7 +27,7 @@ namespace MagicText
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="text" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="tokeniser" /> is <c>null</c>. Parameter <paramref name="text" /> is <c>null</c>.</exception>
-        /// <exception cref="InvalidOperationException">Parameter <see cref="ITokeniser.Shatter(StreamReader, ShatteringOptions?)" /> returns <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">Parameter <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> returns <c>null</c>.</exception>
         public static IEnumerable<String?> Shatter(this ITokeniser tokeniser, String text, ShatteringOptions? options = null)
         {
             if (tokeniser is null)
@@ -41,8 +41,8 @@ namespace MagicText
 
             List<String?> tokens;
 
-            using (var textStream = new MemoryStream(Encoding.Default.GetBytes(text)))
-            using (var textReader = new StreamReader(textStream, Encoding.Default))
+            using (Stream textStream = new MemoryStream(Encoding.Default.GetBytes(text)))
+            using (TextReader textReader = new StreamReader(textStream, Encoding.Default))
             {
                 tokens = new List<String?>(tokeniser.Shatter(textReader, options) ?? throw new InvalidOperationException(TokensNullErrorMessage));
             }
@@ -62,7 +62,7 @@ namespace MagicText
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <returns>Task that represents the asynchronous shattering operation. The value of <see cref="Task{TResult}.Result" /> is enumerable of tokens (in the order they were read) read from <paramref name="text" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="tokeniser" /> is <c>null</c>. If <paramref name="text" /> is <c>null</c>.</exception>
-        /// <exception cref="InvalidOperationException">Parameter <see cref="ITokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> ultimately returns <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">Parameter <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?)" /> ultimately returns <c>null</c>.</exception>
         public static async Task<IEnumerable<String?>> ShatterAsync(this ITokeniser tokeniser, String text, ShatteringOptions? options = null)
         {
             if (tokeniser is null)
@@ -76,8 +76,8 @@ namespace MagicText
 
             List<String?> tokens;
 
-            using (var textStream = new MemoryStream(Encoding.Default.GetBytes(text)))
-            using (var textReader = new StreamReader(textStream, Encoding.Default))
+            using (Stream textStream = new MemoryStream(Encoding.Default.GetBytes(text)))
+            using (TextReader textReader = new StreamReader(textStream, Encoding.Default))
             {
                 tokens = new List<String?>(await tokeniser.ShatterAsync(textReader, options) ?? throw new InvalidOperationException(TokensNullErrorMessage));
             }

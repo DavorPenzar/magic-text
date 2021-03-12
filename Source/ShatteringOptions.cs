@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
@@ -6,12 +7,13 @@ namespace MagicText
 {
     /// <summary>
     ///     <para>
-    ///         Options for <see cref="ITokeniser.Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(StreamReader, ShatteringOptions?)" /> methods.
+    ///         Options for <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?)" /> methods.
     ///     </para>
     /// </summary>
     public class ShatteringOptions : IEquatable<ShatteringOptions>, ICloneable
     {
         private const string OtherNullErrorMessage = "Shattering options to copy may not be `null`.";
+        private const string StringComparerNullErrorMessage = "String comparer may not be `null`.";
 
         public static Boolean operator ==(ShatteringOptions? left, ShatteringOptions? right) =>
             left is null ? right is null : left.Equals(right);
@@ -238,17 +240,31 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <param name="other">Another instance of <see cref="ShatteringOptions" />.</param>
+        /// <param name="stringComparer">Comparer used for comparing strings for equality.</param>
+        /// <returns>If shattering options are equal according to all relevant values, <c>true</c>; <c>false</c>otherwise.</returns>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="stringComparer" /> is <c>null</c>.</exception>
+        public Boolean Equals(ShatteringOptions? other, IEqualityComparer<String?> stringComparer) =>
+            stringComparer is null ?
+                throw new ArgumentNullException(nameof(stringComparer), StringComparerNullErrorMessage) :
+                Object.ReferenceEquals(this, other) ||
+                    (
+                        !(other is null) &&
+                        IgnoreEmptyTokens == other.IgnoreEmptyTokens &&
+                        IgnoreLineEnds == other.IgnoreLineEnds &&
+                        IgnoreEmptyLines == other.IgnoreEmptyLines &&
+                        stringComparer.Equals(LineEndToken, other.LineEndToken) &&
+                        stringComparer.Equals(EmptyLineToken, other.EmptyLineToken)
+                    );
+
+        /// <summary>
+        ///     <para>
+        ///         Compare shattering options to another shattering options for equality.
+        ///     </para>
+        /// </summary>
+        /// <param name="other">Another instance of <see cref="ShatteringOptions" />.</param>
         /// <returns>If shattering options are equal according to all relevant values, <c>true</c>; <c>false</c>otherwise.</returns>
         public Boolean Equals(ShatteringOptions? other) =>
-            Object.ReferenceEquals(this, other) ||
-                (
-                    !(other is null) &&
-                    IgnoreEmptyTokens == other.IgnoreEmptyTokens &&
-                    IgnoreLineEnds == other.IgnoreLineEnds &&
-                    IgnoreEmptyLines == other.IgnoreEmptyLines &&
-                    String.Equals(LineEndToken, other.LineEndToken) &&
-                    String.Equals(EmptyLineToken, other.EmptyLineToken)
-                );
+            Equals(other, EqualityComparer<String?>.Default);
 
         /// <summary>
         ///     <para>

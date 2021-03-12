@@ -26,10 +26,8 @@ namespace MagicText
     /// </remarks>
     public class Pen
     {
-        private const string ValueComparerNullErrorMessage = "Value comparer may not be `null`.";
         private const string ValuesNullErrorMessage = "Values' enumerable may not be `null`.";
         private const string ContextNullErrorMessage = "Context tokens' enumerable may not be `null`.";
-        private const string TokenComparerNullErrorMessage = "Token (string) comparer may not be `null`.";
         private const string PickerNullErrorMessage = @"""Random"" number generator function (picker function) may not be `null`.";
         private const string RandomNullErrorMessage = "(Pseudo-)Random number generator may not be `null`.";
         private const string RelevantTokensOutOfRangeErrorMessage = "Number of relevant tokens must be non-negative (greater than or equal to 0).";
@@ -125,47 +123,35 @@ namespace MagicText
         /// </summary>
         /// <param name="values">Enumerable of values amongst which <paramref name="x" /> should be found. Even if <paramref name="values" /> are comparable, the enumerable does not have to be sorted.</param>
         /// <param name="x">Value to find.</param>
-        /// <param name="comparer">Comparer used for checking equality of instances of type <typeparamref name="T" />.</param>
+        /// <param name="comparer">Comparer used for comparing instances of type <typeparamref name="T" /> for equality. If <c>null</c>, <see cref="EqualityComparer{T}.Default" /> is used.</param>
         /// <returns>Minimal index <c>i</c> such that <c><paramref name="values" />[i] == <paramref name="x" /></c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" /> method calls).</returns>
-        /// <exception cref="ArgumentNullException">Parameter <paramref name="values" /> is <c>null</c>. If <paramref name="comparer" /> is <c>null</c>.</exception>
-        protected static Int32 IndexOf<T>(IEnumerable<T> values, T x, IEqualityComparer<T> comparer)
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="values" /> is <c>null</c>.</exception>
+        protected static Int32 IndexOf<T>(IEnumerable<T> values, T x, IEqualityComparer<T>? comparer = null)
         {
             if (values is null)
             {
                 throw new ArgumentNullException(nameof(values), ValuesNullErrorMessage);
             }
+
             if (comparer is null)
             {
-                throw new ArgumentNullException(nameof(comparer), ValueComparerNullErrorMessage);
+                comparer = EqualityComparer<T>.Default;
             }
+
+            int index = -1;
 
             for (var (en, i) = ValueTuple.Create(values.GetEnumerator(), 0); en.MoveNext(); ++i)
             {
                 if (comparer.Equals(en.Current, x))
                 {
-                    return i;
+                    index = i;
+
+                    break;
                 }
             }
 
-            return -1;
+            return index;
         }
-
-        /// <summary>
-        ///     <para>
-        ///         Retrieve the index of a value.
-        ///     </para>
-        /// </summary>
-        /// <param name="values">Enumerable of values amongst which <paramref name="x" /> should be found. Even if <paramref name="values" /> are comparable, the enumerable does not have to be sorted.</param>
-        /// <param name="x">Value to find.</param>
-        /// <returns>Minimal index <c>i</c> such that <c><paramref name="values" />[i] == <paramref name="x" /></c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" /> method calls).</returns>
-        /// <exception cref="ArgumentNullException">Parameter <paramref name="values" /> is <c>null</c>.</exception>
-        /// <remarks>
-        ///     <para>
-        ///         Instances of type <typeparamref name="T" /> shall be compared by <see cref="EqualityComparer{T}.Default" />.
-        ///     </para>
-        /// </remarks>
-        protected static Int32 IndexOf<T>(IEnumerable<T> values, T x) =>
-            IndexOf(values, x, EqualityComparer<T>.Default);
 
         /// <summary>
         ///     <para>
@@ -188,6 +174,7 @@ namespace MagicText
             int c = 0;
 
             int j;
+
             for (/* [`i` is set in function call,] */ j = 0; i < tokens.Count && j < sample.Count; ++i, ++j)
             {
                 c = comparer.Compare(tokens[i], sample[(cycleStart + j) % sample.Count]);
@@ -342,40 +329,18 @@ namespace MagicText
         /// </summary>
         /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of tokens in <paramref name="context" />.</param>
         /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
+        /// <param name="comparer">String comparer. Tokens shall be compared (e. g. for equality) by <paramref name="comparer" />. If <c>null</c>, <see cref="StringComparer.Ordinal" /> is used.</param>
         /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="context" /> is <c>null</c>.</exception>
-        /// <remarks>
-        ///     <para>
-        ///         Tokens shall be compared by <see cref="StringComparer.Ordinal" />.
-        ///     </para>
-        /// </remarks>
-        public Pen(IEnumerable<String?> context, String? endToken = null, Boolean intern = false) : this(context, StringComparer.Ordinal, endToken, intern)
-        {
-        }
-
-        /// <summary>
-        ///     <para>
-        ///         Create a pen with provided values.
-        ///     </para>
-        /// </summary>
-        /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of tokens in <paramref name="context" />.</param>
-        /// <param name="comparer">String comparer. Tokens shall be compared (e. g. for equality) by <paramref name="comparer" />.</param>
-        /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
-        /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
-        /// <exception cref="ArgumentNullException">Parameter <paramref name="context" /> is <c>null</c>. Parameter <paramref name="comparer" /> is <c>null</c>.</exception>
-        public Pen(IEnumerable<String?> context, StringComparer comparer, String? endToken = null, Boolean intern = false)
+        public Pen(IEnumerable<String?> context, String? endToken = null, StringComparer? comparer = null, Boolean intern = false)
         {
             if (context is null)
             {
                 throw new ArgumentNullException(nameof(context), ContextNullErrorMessage);
             }
-            if (comparer is null)
-            {
-                throw new ArgumentNullException(nameof(comparer), TokenComparerNullErrorMessage);
-            }
 
             // Copy comparer and ending token.
-            _comparer = comparer;
+            _comparer = comparer ?? StringComparer.Ordinal;
             _endToken = !intern || endToken is null ? endToken : String.Intern(endToken);
 
             // Copy context.

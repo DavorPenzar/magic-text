@@ -21,7 +21,7 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for checking emptiness of tokens (<see cref="IsEmptyToken" />) should be thread-safe, lock the tokeniser during complete <see cref="Shatter(StreamReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(StreamReader, ShatteringOptions?)" /> method calls to ensure consistent behaviour of the function over a single shattering process.
+    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for checking emptiness of tokens (<see cref="IsEmptyToken" />) should be thread-safe, lock the tokeniser during complete <see cref="Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions?)" /> method calls to ensure consistent behaviour of the function over a single shattering process.
     ///     </para>
     /// </remarks>
     public abstract class LineByLineTokeniser : ITokeniser
@@ -90,7 +90,7 @@ namespace MagicText
         ///         Shatter text read from <paramref name="input" /> into tokens synchronously.
         ///     </para>
         /// </summary>
-        /// <param name="input">Stream for reading the input text.</param>
+        /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
@@ -103,7 +103,7 @@ namespace MagicText
         ///         It is guaranteed that the returned enumerable is a fully built container, such as <see cref="List{T}" />, and not merely an enumeration query.
         ///     </para>
         /// </remarks>
-        public IEnumerable<String?> Shatter(StreamReader input, ShatteringOptions? options = null)
+        public IEnumerable<String?> Shatter(TextReader input, ShatteringOptions? options = null)
         {
             if (input is null)
             {
@@ -183,7 +183,7 @@ namespace MagicText
         ///         Shatter text read from <paramref name="input" /> into tokens asynchronously.
         ///     </para>
         /// </summary>
-        /// <param name="input">Stream for reading the input text.</param>
+        /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <returns>Task that represents the asynchronous shattering operation. The value of <see cref="Task{TResult}.Result" /> is enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
@@ -196,7 +196,7 @@ namespace MagicText
         ///         It is guaranteed that the returned enumerable is a fully built container, such as <see cref="List{T}" />, and not merely an enumeration query.
         ///     </para>
         /// </remarks>
-        public async Task<IEnumerable<String?>> ShatterAsync(StreamReader input, ShatteringOptions? options = null)
+        public async Task<IEnumerable<String?>> ShatterAsync(TextReader input, ShatteringOptions? options = null)
         {
             if (input is null)
             {
