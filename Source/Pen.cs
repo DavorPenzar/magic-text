@@ -477,7 +477,7 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="Render(Int32, Random, Boolean)" />
         /// <seealso cref="Render(Int32, Boolean)" />
-        public IEnumerable<String?> Render(Int32 relevantTokens, Func<Int32, Int32> picker, Boolean fromBeginning = false)
+        public virtual IEnumerable<String?> Render(Int32 relevantTokens, Func<Int32, Int32> picker, Boolean fromBeginning = false)
         {
             if (picker is null)
             {
@@ -650,7 +650,7 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
         /// <seealso cref="Render(Int32, Boolean)" />
-        public IEnumerable<String?> Render(Int32 relevantTokens, System.Random random, Boolean fromBeginning = false)
+        public virtual IEnumerable<String?> Render(Int32 relevantTokens, System.Random random, Boolean fromBeginning = false)
         {
             if (random is null)
             {
@@ -731,7 +731,7 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
         /// <seealso cref="Render(Int32, Random, Boolean)" />
-        public IEnumerable<String?> Render(Int32 relevantTokens, Boolean fromBeginning = false) =>
+        public virtual IEnumerable<String?> Render(Int32 relevantTokens, Boolean fromBeginning = false) =>
             Render(relevantTokens, Random, fromBeginning);
     }
 }

@@ -13,7 +13,7 @@ namespace MagicText
     public class ShatteringOptions : IEquatable<ShatteringOptions>, ICloneable
     {
         private const string OtherNullErrorMessage = "Shattering options to copy may not be `null`.";
-        private const string StringComparerNullErrorMessage = "String comparer may not be `null`.";
+        protected const string StringComparerNullErrorMessage = "String comparer may not be `null`.";
 
         public static Boolean operator ==(ShatteringOptions? left, ShatteringOptions? right) =>
             left is null ? right is null : left.Equals(right);
@@ -243,7 +243,7 @@ namespace MagicText
         /// <param name="stringComparer">Comparer used for comparing strings for equality.</param>
         /// <returns>If shattering options are equal according to all relevant values, <c>true</c>; <c>false</c>otherwise.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="stringComparer" /> is <c>null</c>.</exception>
-        public Boolean Equals(ShatteringOptions? other, IEqualityComparer<String?> stringComparer) =>
+        public virtual Boolean Equals(ShatteringOptions? other, IEqualityComparer<String?> stringComparer) =>
             stringComparer is null ?
                 throw new ArgumentNullException(nameof(stringComparer), StringComparerNullErrorMessage) :
                 Object.ReferenceEquals(this, other) ||
@@ -263,7 +263,7 @@ namespace MagicText
         /// </summary>
         /// <param name="other">Another instance of <see cref="ShatteringOptions" />.</param>
         /// <returns>If shattering options are equal according to all relevant values, <c>true</c>; <c>false</c>otherwise.</returns>
-        public Boolean Equals(ShatteringOptions? other) =>
+        public virtual Boolean Equals(ShatteringOptions? other) =>
             Equals(other, EqualityComparer<String?>.Default);
 
         /// <summary>
@@ -292,7 +292,7 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <returns>New instance of <see cref="ShatteringOptions" /> with the same values.</returns>
-        public Object Clone() =>
+        public virtual Object Clone() =>
             new ShatteringOptions(this);
     }
 }
