@@ -47,7 +47,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
-        ///         Although the method accepts <paramref name="cancellationToken" /> to support cancelling the operation, this should be used with caution. For instance, <paramref name="input" /> is <see cref="StreamReader" />, data already read from underlying <see cref="Stream" /> may be irrecoverable. Therefore implementations of the method should return the enumerable of tokens extracted up until the moment of cancellation, and not just throw an exception (<see cref="OperationCanceledException" /> or <see cref="TaskCanceledException" />), in case the task was cancelled.
+        ///         Although the method accepts <paramref name="cancellationToken" /> to support cancelling the operation, this should be used with caution. For instance, if <paramref name="input" /> is <see cref="StreamReader" />, data already read from underlying <see cref="Stream" /> may be irrecoverable. Therefore implementations of the method should return the enumerable of tokens extracted up until the moment of cancellation, and not just throw an exception (<see cref="OperationCanceledException" /> or <see cref="TaskCanceledException" />), in case the task was cancelled.
         ///     </para>
         ///
         ///     <para>
