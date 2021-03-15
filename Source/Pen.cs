@@ -76,7 +76,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         If the code is expected to spread over multiple threads (either explicitly by starting <see cref="Thread" /> instances or implicitly by programming asynchronously), reference returned by <see cref="Random" /> property should not be stored in an outside variable and used later. Directly reference property <see cref="Random" /> in such scenarios.
+        ///         If the code is expected to spread over multiple threads (either explicitly by starting <see cref="Thread" />s or implicitly by programming asynchronously), reference returned by <see cref="Random" /> property should not be stored in an outside variable and used later. Reference property <see cref="Random" /> directly in such scenarios.
         ///     </para>
         /// </remarks>
         protected static System.Random Random
@@ -732,6 +732,6 @@ namespace MagicText
         /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
         /// <seealso cref="Render(Int32, Random, Boolean)" />
         public virtual IEnumerable<String?> Render(Int32 relevantTokens, Boolean fromBeginning = false) =>
-            Render(relevantTokens, Random, fromBeginning);
+            Render(relevantTokens, n => Random.Next(n), fromBeginning); // not `Render(relevantTokens, Random, fromBeginning)` to avoid accessing the thread-static (pseudo-)random number generator (`Pen.Random`) from multiple threads if the returned query (enumerable) is enumerated from multiple threads
     }
 }
