@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Threading;
 
 namespace MagicText
 {
     /// <summary>
     ///     <para>
-    ///         Options for <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?)" /> methods.
+    ///         Options for <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?, CancellationToken)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods.
     ///     </para>
     /// </summary>
     public class ShatteringOptions : IEquatable<ShatteringOptions>, ICloneable

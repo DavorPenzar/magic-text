@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MagicText
@@ -25,7 +26,7 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for checking emptiness of tokens (<see cref="IsEmptyToken" />) should be thread-safe, lock the tokeniser during complete <see cref="Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions?)" /> method calls to ensure consistent behaviour of the function over a single shattering process.
+    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for checking emptiness of tokens (<see cref="IsEmptyToken" />) should be thread-safe, lock the tokeniser during complete <see cref="Shatter(TextReader, ShatteringOptions?, CancellationToken)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.
     ///     </para>
     /// </remarks>
     public abstract class LineByLineTokeniser : ITokeniser
@@ -96,9 +97,14 @@ namespace MagicText
         /// </summary>
         /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
+        /// <param name="cancellationToken">Cancellation token. See <em>Remarks</em> for additional information.</param>
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
         /// <remarks>
+        ///     <para>
+        ///         Although the method accepts <paramref name="cancellationToken" /> to support cancelling the operation, this should be used with caution. For instance, if <paramref name="input" /> is <see cref="StreamReader" />, data already read from underlying <see cref="Stream" /> may be irrecoverable. Therefore the method returns the enumerable of tokens extracted up until the moment of cancellation, without throwing an exception (<see cref="OperationCanceledException" /> or <see cref="TaskCanceledException" />), in case the task was cancelled.
+        ///     </para>
+        ///
         ///     <para>
         ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is false and the final line was non-empty, <see cref="ShatteringOptions.LineEndToken" /> is added to the end of the resulting tokens.
         ///     </para>
@@ -107,7 +113,7 @@ namespace MagicText
         ///         It is guaranteed that the returned enumerable is a fully built container, such as <see cref="List{T}" />, and not merely an enumeration query.
         ///     </para>
         /// </remarks>
-        public IEnumerable<String?> Shatter(TextReader input, ShatteringOptions? options = null)
+        public IEnumerable<String?> Shatter(TextReader input, ShatteringOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (input is null)
             {
@@ -134,7 +140,12 @@ namespace MagicText
                     tokens.Add(options.LineEndToken);
                 }
 
-                // Read and shatter next line.
+                // Read and shatter next line if not cancelled.
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
 
                 var line = input.ReadLine();
                 if (line is null)
@@ -155,7 +166,7 @@ namespace MagicText
                     tokens.AddRange(lineTokens);
                     do
                     {
-                        if (tokens.Count == oldCount) // <-- no new tokens were added
+                        if (tokens.Count == oldCount) // <-- no new tokens were added (the line is empty)
                         {
                             if (options.IgnoreEmptyLines)
                             {
@@ -189,9 +200,19 @@ namespace MagicText
         /// </summary>
         /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
+        /// <param name="cancellationToken">Cancellation token. See <em>Remarks</em> for additional information.</param>
+        /// <param name="continueOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (<see cref="TextReader.ReadLineAsync" /> method calls) should be marshalled back to the original context. See <em>Remarks</em> for additional information.</param>
         /// <returns>Task that represents the asynchronous shattering operation. The value of <see cref="Task{TResult}.Result" /> is enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
         /// <remarks>
+        ///     <para>
+        ///         Although the method accepts <paramref name="cancellationToken" /> to support cancelling the operation, this should be used with caution. For instance, if <paramref name="input" /> is <see cref="StreamReader" />, data already read from underlying <see cref="Stream" /> may be irrecoverable. Therefore the method returns the enumerable of tokens extracted up until the moment of cancellation, without throwing an exception (<see cref="OperationCanceledException" /> or <see cref="TaskCanceledException" />), in case the task was cancelled.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         Usually the default <c>false</c> value of <paramref name="continueOnCapturedContext" /> is desirable as it may optimise the asynchronous shattering process. However, in some cases only the original context might have reading access to the resource provided by <paramref name="input" />, and thus <paramref name="continueOnCapturedContext" /> should be set to <c>true</c> to avoid errors.
+        ///     </para>
+        ///
         ///     <para>
         ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is false and the final line was non-empty, <see cref="ShatteringOptions.LineEndToken" /> is added to the end of the resulting tokens.
         ///     </para>
@@ -200,7 +221,7 @@ namespace MagicText
         ///         It is guaranteed that the returned enumerable is a fully built container, such as <see cref="List{T}" />, and not merely an enumeration query.
         ///     </para>
         /// </remarks>
-        public async Task<IEnumerable<String?>> ShatterAsync(TextReader input, ShatteringOptions? options = null)
+        public async Task<IEnumerable<String?>> ShatterAsync(TextReader input, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueOnCapturedContext = false)
         {
             if (input is null)
             {
@@ -227,9 +248,14 @@ namespace MagicText
                     tokens.Add(options.LineEndToken);
                 }
 
-                // Read and shatter next line.
+                // Read and shatter next line if not cancelled.
 
-                var line = await input.ReadLineAsync();
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                var line = await input.ReadLineAsync().ConfigureAwait(continueOnCapturedContext);
                 if (line is null)
                 {
                     break;
@@ -248,7 +274,7 @@ namespace MagicText
                     tokens.AddRange(lineTokens);
                     do
                     {
-                        if (tokens.Count == oldCount) // <-- no new tokens were added
+                        if (tokens.Count == oldCount) // <-- no new tokens were added (the line is empty)
                         {
                             if (options.IgnoreEmptyLines)
                             {
