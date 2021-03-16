@@ -6,7 +6,7 @@
 
 ##  Quick Info
 
-The library provides simple interfaces and classes for tokenising existing text blocks and generating new ones upon the extracted tokens. The library is written in [*C# version 8*](http://docs.microsoft.com/en-gb/dotnet/csharp/whats-new/csharp-8) compliant with [*.NET Standard 2.0*](http://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.0.md), without the need for any additional [*NuGet* packages](http://nuget.org/).
+The library provides simple interfaces and classes for tokenising existing text blocks and generating new ones upon the extracted tokens. The library is written in [*C# version 8*](http://docs.microsoft.com/en-gb/dotnet/csharp/whats-new/csharp-8) compliant with [*.NET Standard 2.1*](http://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.1.md), without the need for any additional [*NuGet* packages](http://nuget.org/).
 
 Tokens extracted from a text block are usually words + punctuation + white spaces, or single characters. It should not be considered a good practice to mix *apples and oranges*, i. e. to have some tokens in form of complete words, while others as single characters. Both tokenisation policies mentioned are implemented in the librabry, while additional policies may be obtained by:
 
