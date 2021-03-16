@@ -101,6 +101,7 @@ namespace MagicText
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <returns>Query to enumerate tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
+        /// <exception cref="NullReferenceException">Method <see cref="ShatterLine(String)" /> returns <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         Returned enumerable is merely a query for enumerating tokens to allow simultaneously reading and enumerating tokens from <paramref name="input" />. If a fully built container is needed, consider using <see cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" /> extension method instead to improve performance and avoid accidentally enumerating the query after disposing <paramref name="input" />.
@@ -142,7 +143,7 @@ namespace MagicText
                     yield break;
                 }
 
-                var lineTokens = ShatterLine(line) ?? throw new InvalidOperationException(LineTokensNullErrorMessage);
+                var lineTokens = ShatterLine(line) ?? throw new NullReferenceException(LineTokensNullErrorMessage);
                 if (options.IgnoreEmptyTokens)
                 {
                     lineTokens = lineTokens.Where(t => !IsEmptyToken(t));
@@ -194,6 +195,7 @@ namespace MagicText
         /// <param name="continueOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (<see cref="TextReader.ReadLineAsync" /> method calls) is marshalled back to the original context (via <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method). See <em>Remarks</em> for additional information.</param>
         /// <returns>Query to asynchronously enumerate tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
+        /// <exception cref="NullReferenceException">Method <see cref="ShatterLine(String)" /> returns <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         Although the method accepts <paramref name="cancellationToken" /> to support cancelling the operation, this should be used with caution. For instance, if <paramref name="input" /> is <see cref="StreamReader" />, data having already been read from underlying <see cref="Stream" /> may be irrecoverable when cancelling the operation.
@@ -248,7 +250,7 @@ namespace MagicText
                     break;
                 }
 
-                var lineTokens = ShatterLine(line) ?? throw new InvalidOperationException(LineTokensNullErrorMessage);
+                var lineTokens = ShatterLine(line) ?? throw new NullReferenceException(LineTokensNullErrorMessage);
                 if (options.IgnoreEmptyTokens)
                 {
                     lineTokens = lineTokens.Where(t => !IsEmptyToken(t));
