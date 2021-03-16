@@ -107,7 +107,7 @@ using (Stream fileStream = File.OpenRead("Firework.txt"))
 using (TextReader fileReader = new StreamReader(fileStream))
 {
 	ITokeniser tokeniser = new RegexTokeniser();
-	tokens = tokeniser.Shatter(fileReader, new ShatteringOptions() { IgnoreEmptyTokens = true });
+	tokens = tokeniser.ShatterToList(fileReader, new ShatteringOptions() { IgnoreEmptyTokens = true });
 }
 
 pen = new Pen(tokens);
