@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 
@@ -118,6 +117,46 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
+        ///         Generate non-negative (pseudo-)random integer using internal (pseudo-)random number generator (<see cref="Random" />).
+        ///     </para>
+        /// </summary>
+        /// <returns>(Pseudo-)random integer that is greater than or equal to <c>0</c> and less than <see cref="Int32.MaxValue" />.</returns>
+        protected static Int32 RandomNext() =>
+            Random.Next();
+
+        /// <summary>
+        ///     <para>
+        ///         Generate non-negative (pseudo-)random integer using internal (pseudo-)random number generator (<see cref="Random" />).
+        ///     </para>
+        /// </summary>
+        /// <param name="maxValue">The exclusive upper bound of the random number to be generated.</param>
+        /// <returns>(Pseudo-)random integer that is greater than or equal to <c>0</c> and less than <paramref name="maxValue" />. However, if <paramref name="maxValue" /> equals <c>0</c>, <c>0</c> is returned.</returns>
+        /// <remarks>
+        ///     <para>
+        ///         Exceptions thrown by <see cref="System.Random.Next(Int32)" /> method (notably <see cref="ArgumentOutOfRangeException" />) are not caught.
+        ///     </para>
+        /// </remarks>
+        protected static Int32 RandomNext(Int32 maxValue) =>
+            Random.Next(maxValue);
+
+        /// <summary>
+        ///     <para>
+        ///         Generate non-negative (pseudo-)random integer using internal (pseudo-)random number generator (<see cref="Random" />).
+        ///     </para>
+        /// </summary>
+        /// <param name="minValue">The inclusive lower bound of the random number returned.</param>
+        /// <param name="maxValue">The exclusive upper bound of the random number to be generated.</param>
+        /// <returns>(Pseudo-)random integer that is greater than or equal to <c>0</c> and less than <paramref name="maxValue" />. However, if <paramref name="maxValue" /> equals <c>0</c>, <c>0</c> is returned.</returns>
+        /// <remarks>
+        ///     <para>
+        ///         Exceptions thrown by <see cref="System.Random.Next(Int32, Int32)" /> method (notably <see cref="ArgumentOutOfRangeException" />) are not caught.
+        ///     </para>
+        /// </remarks>
+        protected static Int32 RandomNext(Int32 minValue, Int32 maxValue) =>
+            Random.Next(minValue, maxValue);
+
+        /// <summary>
+        ///     <para>
         ///         Retrieve the index of a value.
         ///     </para>
         /// </summary>
@@ -140,13 +179,16 @@ namespace MagicText
 
             int index = -1;
 
-            for (var (en, i) = ValueTuple.Create(values.GetEnumerator(), 0); en.MoveNext(); ++i)
+            using (IEnumerator<T> en = values.GetEnumerator())
             {
-                if (comparer.Equals(en.Current, x))
+                for (int i = 0; en.MoveNext(); ++i)
                 {
-                    index = i;
+                    if (comparer.Equals(en.Current, x))
+                    {
+                        index = i;
 
-                    break;
+                        break;
+                    }
                 }
             }
 
@@ -160,7 +202,7 @@ namespace MagicText
         /// </summary>
         /// <param name="comparer">String comparer used for comparing.</param>
         /// <param name="tokens">List of tokens whose subrange is compared to <paramref name="sample" />.</param>
-        /// <param name="sample">Cyclical sample list of tokens. The list represents range <c>{ <paramref name="sample" />[<paramref name="cycleStart" />], <paramref name="sample" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sample" />[<paramref name="sample" />.Count - 1], <paramref name="sample" />[0], ..., <paramref name="sample" />[<paramref name="cycleStart" /> - 1] }</c>. The list is treated as <strong>read-only</strong> in the function (it is not changed).</param>
+        /// <param name="sample">Cyclical sample list of tokens. The list represents range <c>{ <paramref name="sample" />[<paramref name="cycleStart" />], <paramref name="sample" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sample" />[<paramref name="sample" />.Count - 1], <paramref name="sample" />[0], ..., <paramref name="sample" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
         /// <param name="i">Starting index of the subrange from <paramref name="tokens" /> to compare. The subrange <c>{ <paramref name="tokens" />[i], <paramref name="tokens" />[i + 1], ..., <paramref name="tokens" />[min(i + <paramref name="sample" />.Count - 1, <paramref name="tokens" />.Count - 1)] }</c> is used.</param>
         /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
         /// <returns>A signed integer that indicates the relative values of subrange from <paramref name="tokens" /> starting from <paramref name="i" /> and cyclical sample <paramref name="sample" />.</returns>
@@ -169,7 +211,7 @@ namespace MagicText
         ///         Values from the subrange of <paramref name="tokens" /> and <paramref name="sample" /> are compared in order by calling <see cref="StringComparer.Compare(String, String)" /> method on <paramref name="comparer" />. If a comparison yields a non-zero value, it is returned. If the subrange from <paramref name="tokens" /> is shorter (in the number of tokens) than <paramref name="sample" /> but all of its tokens compare equal to corresponding tokens from the beginning of <paramref name="sample" />, a negative number is returned. If all tokens compare equal and the subrange from <paramref name="tokens" /> is the same length (in the number of tokens) as <paramref name="sample" />, <c>0</c> is returned.
         ///     </para>
         /// </remarks>
-        private static Int32 CompareRange(StringComparer comparer, ReadOnlyCollection<String?> tokens, IList<String?> sample, Int32 i, Int32 cycleStart)
+        private static Int32 CompareRange(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<String?> sample, Int32 i, Int32 cycleStart)
         {
             int c = 0;
 
@@ -200,7 +242,7 @@ namespace MagicText
         /// <param name="comparer">String comparer used for comparing.</param>
         /// <param name="tokens">List of tokens amongst which <paramref name="sample" /> should be found.</param>
         /// <param name="positions">Sorted positions, or positional ordering of <paramref name="tokens" /> in respect of <paramref name="comparer" />.</param>
-        /// <param name="sample">Cyclical sample list of tokens to find. The list represents range <c>{ <paramref name="sample" />[<paramref name="cycleStart" />], <paramref name="sample" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sample" />[<paramref name="sample" />.Count - 1], <paramref name="sample" />[0], ..., <paramref name="sample" />[<paramref name="cycleStart" /> - 1] }</c>.  The list is treated as <strong>read-only</strong> in the function (it is not changed).</param>
+        /// <param name="sample">Cyclical sample list of tokens to find. The list represents range <c>{ <paramref name="sample" />[<paramref name="cycleStart" />], <paramref name="sample" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sample" />[<paramref name="sample" />.Count - 1], <paramref name="sample" />[0], ..., <paramref name="sample" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
         /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
         /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sample" /> begins at <c><paramref name="tokens" />[<paramref name="positions" />[i]]</c> and the total number of its occurances amongst <paramref name="tokens" />.</returns>
         /// <remarks>
@@ -208,7 +250,7 @@ namespace MagicText
         ///         The implementation of the method assumes <paramref name="sample" /> actually exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" /> and that <paramref name="positions" /> indeed sort <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />. If the former is not true, the returned index shall point to the position at which <paramref name="t" />'s position should be inserted to retain the sorted order and the number of occurances shall be 0; if the latter is not true, the behaviour of the method is undefined.
         ///     </para>
         /// </remarks>
-        private static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, ReadOnlyCollection<String?> tokens, ReadOnlyCollection<Int32> positions, IList<String?> sample, Int32 cycleStart)
+        private static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> positions, IReadOnlyList<String?> sample, Int32 cycleStart)
         {
             // Binary search...
 
@@ -259,8 +301,8 @@ namespace MagicText
         }
 
         private readonly StringComparer _comparer;
-        private readonly ReadOnlyCollection<String?> _context;
-        private readonly ReadOnlyCollection<Int32> _positions;
+        private readonly IReadOnlyList<String?> _context;
+        private readonly IReadOnlyList<Int32> _positions;
         private readonly String? _endToken;
         private readonly Int32 _firstPosition;
         private readonly Boolean _allEnds;
@@ -280,9 +322,9 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
-        protected ReadOnlyCollection<Int32> Positions => _positions;
+        protected IReadOnlyList<Int32> Positions => _positions;
 
-        /// <returns>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is the total number of elements in <see cref="Context" /> (<see cref="IReadOnlyCollection{T}.Count" />).</returns>
+        /// <returns>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is the total number of elements in <see cref="Context" /> (<see cref="IIReadOnlyList{T}.Count" />).</returns>
         /// <remarks>
         ///     <para>
         ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ <see cref="Positions" />[<see cref="FirstPosition" />], <see cref="Positions" />[<see cref="FirstPosition" />] + 1, ..., <see cref="Positions" />[<see cref="FirstPosition" />] + n, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens.
@@ -300,7 +342,7 @@ namespace MagicText
         ///         The order of tokens is kept as provided in the constructor.
         ///     </para>
         /// </remarks>
-        public ReadOnlyCollection<String?> Context => _context;
+        public IReadOnlyList<String?> Context => _context;
 
         /// <returns>Ending token of the pen.</returns>
         /// <remarks>
@@ -650,7 +692,7 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
         /// <seealso cref="Render(Int32, Boolean)" />
-        public virtual IEnumerable<String?> Render(Int32 relevantTokens, System.Random random, Boolean fromBeginning = false)
+        public IEnumerable<String?> Render(Int32 relevantTokens, System.Random random, Boolean fromBeginning = false)
         {
             if (random is null)
             {
@@ -731,7 +773,7 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="Render(Int32, Func{Int32, Int32}, Boolean)" />
         /// <seealso cref="Render(Int32, Random, Boolean)" />
-        public virtual IEnumerable<String?> Render(Int32 relevantTokens, Boolean fromBeginning = false) =>
-            Render(relevantTokens, n => Random.Next(n), fromBeginning); // not `Render(relevantTokens, Random, fromBeginning)` to avoid accessing the thread-static (pseudo-)random number generator (`Pen.Random`) from multiple threads if the returned query (enumerable) is enumerated from multiple threads
+        public IEnumerable<String?> Render(Int32 relevantTokens, Boolean fromBeginning = false) =>
+            Render(relevantTokens, RandomNext, fromBeginning); // not `Render(relevantTokens, Random, fromBeginning)` to avoid accessing the thread-static (pseudo-)random number generator (`Pen.Random`) from multiple threads if the returned query (enumerable) is enumerated from multiple threads
     }
 }

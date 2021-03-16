@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,13 +27,14 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for checking emptiness of tokens (<see cref="IsEmptyToken" />) should be thread-safe, lock the tokeniser during complete <see cref="Shatter(TextReader, ShatteringOptions?, CancellationToken)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.
+    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for checking emptiness of tokens (<see cref="IsEmptyToken" />) should be thread-safe, lock the tokeniser during complete <see cref="Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.
     ///     </para>
     /// </remarks>
     public abstract class LineByLineTokeniser : ITokeniser
     {
         private const string IsEmptyTokenNullErrorMessage = "Function for checking emptiness of tokens may not be `null`.";
         private const string InputNullErrorMessage = "Input stream reader may not be `null`.";
+        private const string LineTokensNullErrorMessage = "Line tokens may not be `null`.";
         protected const string LineNullErrorMessage = "Line string may not be `null`.";
 
         /// <summary>
@@ -97,23 +99,18 @@ namespace MagicText
         /// </summary>
         /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
-        /// <param name="cancellationToken">Cancellation token. See <em>Remarks</em> for additional information.</param>
-        /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
+        /// <returns>Query to enumerate tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
-        ///         Although the method accepts <paramref name="cancellationToken" /> to support cancelling the operation, this should be used with caution. For instance, if <paramref name="input" /> is <see cref="StreamReader" />, data already read from underlying <see cref="Stream" /> may be irrecoverable. Therefore the method returns the enumerable of tokens extracted up until the moment of cancellation, without throwing an exception (<see cref="OperationCanceledException" /> or <see cref="TaskCanceledException" />), in case the task was cancelled.
+        ///         Returned enumerable is merely a query for enumerating tokens to allow simultaneously reading and enumerating tokens from <paramref name="input" />. If a fully built container is needed, consider using <see cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" /> extension method instead to improve performance and avoid accidentally enumerating the query after disposing <paramref name="input" />.
         ///     </para>
         ///
         ///     <para>
-        ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is false and the final line was non-empty, <see cref="ShatteringOptions.LineEndToken" /> is added to the end of the resulting tokens.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         It is guaranteed that the returned enumerable is a fully built container, such as <see cref="List{T}" />, and not merely an enumeration query.
+        ///         The method returns the equivalent enumeration of tokens as <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method called with the same parameters.
         ///     </para>
         /// </remarks>
-        public IEnumerable<String?> Shatter(TextReader input, ShatteringOptions? options = null, CancellationToken cancellationToken = default)
+        public IEnumerable<String?> Shatter(TextReader input, ShatteringOptions? options = null)
         {
             if (input is null)
             {
@@ -125,9 +122,6 @@ namespace MagicText
                 options = new ShatteringOptions();
             }
 
-            // Initialise tokens.
-            var tokens = new List<String?>();
-
             // Declare:
             var addLineEnd = false; // indicator that a line end should be added
 
@@ -137,36 +131,38 @@ namespace MagicText
                 // Add `options.LineEndToken` to `tokens` if necessary.
                 if (!options.IgnoreLineEnds && addLineEnd)
                 {
-                    tokens.Add(options.LineEndToken);
+                    yield return options.LineEndToken;
                 }
 
-                // Read and shatter next line if not cancelled.
-
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    break;
-                }
+                // Read and shatter next line.
 
                 var line = input.ReadLine();
                 if (line is null)
                 {
-                    break;
+                    yield break;
                 }
 
-                var lineTokens = ShatterLine(line);
+                var lineTokens = ShatterLine(line) ?? throw new InvalidOperationException(LineTokensNullErrorMessage);
                 if (options.IgnoreEmptyTokens)
                 {
                     lineTokens = lineTokens.Where(t => !IsEmptyToken(t));
                 }
 
-                // Add appropriate tokens to `tokens` if any. Update `addLineEnd`.
+                // Return appropriate tokens and update `addLineEnd`.
                 {
-                    int oldCount = tokens.Count;
+                    int i = 0;
 
-                    tokens.AddRange(lineTokens);
+                    using (IEnumerator<String?> en = lineTokens.GetEnumerator())
+                    {
+                        for (i = 0; en.MoveNext(); ++i)
+                        {
+                            yield return en.Current;
+                        }
+                    }
+
                     do
                     {
-                        if (tokens.Count == oldCount) // <-- no new tokens were added (the line is empty)
+                        if (i == 0) // <-- no new tokens were returned (the line is empty)
                         {
                             if (options.IgnoreEmptyLines)
                             {
@@ -176,7 +172,7 @@ namespace MagicText
                             }
                             else
                             {
-                                tokens.Add(options.EmptyLineToken);
+                                yield return options.EmptyLineToken;
                             }
                         }
 
@@ -185,12 +181,6 @@ namespace MagicText
                     while (false);
                 }
             }
-
-            // Finalise tokens and return.
-
-            tokens.TrimExcess();
-
-            return tokens;
         }
 
         /// <summary>
@@ -201,12 +191,12 @@ namespace MagicText
         /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <param name="cancellationToken">Cancellation token. See <em>Remarks</em> for additional information.</param>
-        /// <param name="continueOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (<see cref="TextReader.ReadLineAsync" /> method calls) should be marshalled back to the original context. See <em>Remarks</em> for additional information.</param>
-        /// <returns>Task that represents the asynchronous shattering operation. The value of <see cref="Task{TResult}.Result" /> is enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
+        /// <param name="continueOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (<see cref="TextReader.ReadLineAsync" /> method calls) is marshalled back to the original context (via <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method). See <em>Remarks</em> for additional information.</param>
+        /// <returns>Query to asynchronously enumerate tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
-        ///         Although the method accepts <paramref name="cancellationToken" /> to support cancelling the operation, this should be used with caution. For instance, if <paramref name="input" /> is <see cref="StreamReader" />, data already read from underlying <see cref="Stream" /> may be irrecoverable. Therefore the method returns the enumerable of tokens extracted up until the moment of cancellation, without throwing an exception (<see cref="OperationCanceledException" /> or <see cref="TaskCanceledException" />), in case the task was cancelled.
+        ///         Although the method accepts <paramref name="cancellationToken" /> to support cancelling the operation, this should be used with caution. For instance, if <paramref name="input" /> is <see cref="StreamReader" />, data having already been read from underlying <see cref="Stream" /> may be irrecoverable when cancelling the operation.
         ///     </para>
         ///
         ///     <para>
@@ -214,14 +204,14 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         If <see cref="ShatteringOptions.IgnoreLineEnds" /> is false and the final line was non-empty, <see cref="ShatteringOptions.LineEndToken" /> is added to the end of the resulting tokens.
+        ///         Returned enumerable is merely a query for enumerating tokens to allow simultaneously reading and enumerating tokens from <paramref name="input" />. If a fully built container is needed, consider using <see cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> extension method instead to improve performance and avoid accidentally enumerating the query after disposing <paramref name="input" />.
         ///     </para>
         ///
         ///     <para>
-        ///         It is guaranteed that the returned enumerable is a fully built container, such as <see cref="List{T}" />, and not merely an enumeration query.
+        ///         The method ultimately returns the equivalent enumeration of tokens as <see cref="Shatter(TextReader, ShatteringOptions?)" /> method called with the same parameters.
         ///     </para>
         /// </remarks>
-        public async Task<IEnumerable<String?>> ShatterAsync(TextReader input, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueOnCapturedContext = false)
+        public async IAsyncEnumerable<String?> ShatterAsync(TextReader input, ShatteringOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default, Boolean continueOnCapturedContext = false)
         {
             if (input is null)
             {
@@ -233,9 +223,6 @@ namespace MagicText
                 options = new ShatteringOptions();
             }
 
-            // Initialise tokens.
-            var tokens = new List<String?>();
-
             // Declare:
             var addLineEnd = false; // indicator that a line end should be added
 
@@ -245,14 +232,14 @@ namespace MagicText
                 // Add `options.LineEndToken` to `tokens` if necessary.
                 if (!options.IgnoreLineEnds && addLineEnd)
                 {
-                    tokens.Add(options.LineEndToken);
+                    yield return options.LineEndToken;
                 }
 
                 // Read and shatter next line if not cancelled.
 
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    break;
+                    yield break;
                 }
 
                 var line = await input.ReadLineAsync().ConfigureAwait(continueOnCapturedContext);
@@ -261,20 +248,27 @@ namespace MagicText
                     break;
                 }
 
-                var lineTokens = ShatterLine(line);
+                var lineTokens = ShatterLine(line) ?? throw new InvalidOperationException(LineTokensNullErrorMessage);
                 if (options.IgnoreEmptyTokens)
                 {
                     lineTokens = lineTokens.Where(t => !IsEmptyToken(t));
                 }
 
-                // Add appropriate tokens to `tokens` if any. Update `addLineEnd`.
+                // Return appropriate tokens and update `addLineEnd`.
                 {
-                    int oldCount = tokens.Count;
+                    int i = 0;
 
-                    tokens.AddRange(lineTokens);
+                    using (IEnumerator<String?> en = lineTokens.GetEnumerator())
+                    {
+                        for (i = 0; en.MoveNext(); ++i)
+                        {
+                            yield return en.Current;
+                        }
+                    }
+
                     do
                     {
-                        if (tokens.Count == oldCount) // <-- no new tokens were added (the line is empty)
+                        if (i == 0) // <-- no new tokens were returned (the line is empty)
                         {
                             if (options.IgnoreEmptyLines)
                             {
@@ -284,7 +278,7 @@ namespace MagicText
                             }
                             else
                             {
-                                tokens.Add(options.EmptyLineToken);
+                                yield return options.EmptyLineToken;
                             }
                         }
 
@@ -293,12 +287,6 @@ namespace MagicText
                     while (false);
                 }
             }
-
-            // Finalise tokens and return.
-
-            tokens.TrimExcess();
-
-            return tokens;
         }
     }
 }
