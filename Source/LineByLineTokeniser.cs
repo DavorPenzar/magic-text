@@ -124,7 +124,7 @@ namespace MagicText
             }
 
             // Declare:
-            var addLineEnd = false; // indicator that a line end should be added
+            bool addLineEnd = false; // indicator that a line end should be added
 
             // Shatter text from `input` line-by-line.
             while (true)
@@ -137,13 +137,13 @@ namespace MagicText
 
                 // Read and shatter next line.
 
-                var line = input.ReadLine();
+                String? line = input.ReadLine();
                 if (line is null)
                 {
                     yield break;
                 }
 
-                var lineTokens = ShatterLine(line) ?? throw new NullReferenceException(LineTokensNullErrorMessage);
+                IEnumerable<String?> lineTokens = ShatterLine(line) ?? throw new NullReferenceException(LineTokensNullErrorMessage);
                 if (options.IgnoreEmptyTokens)
                 {
                     lineTokens = lineTokens.Where(t => !IsEmptyToken(t));
@@ -192,17 +192,18 @@ namespace MagicText
         /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <param name="cancellationToken">Cancellation token. See <em>Remarks</em> for additional information.</param>
-        /// <param name="continueOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (<see cref="TextReader.ReadLineAsync" /> method calls) is marshalled back to the original context (via <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method). See <em>Remarks</em> for additional information.</param>
+        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (<see cref="TextReader.ReadLineAsync" /> method calls) is marshalled back to the original context (via <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method). See <em>Remarks</em> for additional information.</param>
         /// <returns>Query to asynchronously enumerate tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
         /// <exception cref="NullReferenceException">Method <see cref="ShatterLine(String)" /> returns <c>null</c>.</exception>
+        /// <exception cref="OperationCanceledException">Operation is cancelled via <paramref name="cancellationToken" />.</exception>
         /// <remarks>
         ///     <para>
         ///         Although the method accepts <paramref name="cancellationToken" /> to support cancelling the operation, this should be used with caution. For instance, if <paramref name="input" /> is <see cref="StreamReader" />, data having already been read from underlying <see cref="Stream" /> may be irrecoverable when cancelling the operation.
         ///     </para>
         ///
         ///     <para>
-        ///         Usually the default <c>false</c> value of <paramref name="continueOnCapturedContext" /> is desirable as it may optimise the asynchronous shattering process. However, in some cases only the original context might have reading access to the resource provided by <paramref name="input" />, and thus <paramref name="continueOnCapturedContext" /> should be set to <c>true</c> to avoid errors.
+        ///         Usually the default <c>false</c> value of <paramref name="continueTasksOnCapturedContext" /> is desirable as it may optimise the asynchronous shattering process. However, in some cases only the original context might have reading access to the resource provided by <paramref name="input" />, and thus <paramref name="continueTasksOnCapturedContext" /> should be set to <c>true</c> to avoid errors.
         ///     </para>
         ///
         ///     <para>
@@ -213,7 +214,7 @@ namespace MagicText
         ///         The method ultimately returns the equivalent enumeration of tokens as <see cref="Shatter(TextReader, ShatteringOptions?)" /> method called with the same parameters.
         ///     </para>
         /// </remarks>
-        public async IAsyncEnumerable<String?> ShatterAsync(TextReader input, ShatteringOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default, Boolean continueOnCapturedContext = false)
+        public async IAsyncEnumerable<String?> ShatterAsync(TextReader input, ShatteringOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
         {
             if (input is null)
             {
@@ -226,7 +227,7 @@ namespace MagicText
             }
 
             // Declare:
-            var addLineEnd = false; // indicator that a line end should be added
+            bool addLineEnd = false; // indicator that a line end should be added
 
             // Shatter text from `input` line-by-line.
             while (true)
@@ -239,18 +240,15 @@ namespace MagicText
 
                 // Read and shatter next line if not cancelled.
 
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    yield break;
-                }
+                cancellationToken.ThrowIfCancellationRequested();
 
-                var line = await input.ReadLineAsync().ConfigureAwait(continueOnCapturedContext);
+                String? line = await input.ReadLineAsync().ConfigureAwait(continueTasksOnCapturedContext);
                 if (line is null)
                 {
                     break;
                 }
 
-                var lineTokens = ShatterLine(line) ?? throw new NullReferenceException(LineTokensNullErrorMessage);
+                IEnumerable<String?> lineTokens = ShatterLine(line) ?? throw new NullReferenceException(LineTokensNullErrorMessage);
                 if (options.IgnoreEmptyTokens)
                 {
                     lineTokens = lineTokens.Where(t => !IsEmptyToken(t));

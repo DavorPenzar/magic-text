@@ -126,7 +126,7 @@ namespace MagicText
                 replacementPattern = Regex.Escape(replacementPattern);
             }
 
-            var replace = new Regex(matchPattern, options);
+            Regex replace = new Regex(matchPattern, options);
 
             return t => t is null ? null : replace.Replace(t, replacementPattern);
         }

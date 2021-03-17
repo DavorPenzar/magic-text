@@ -16,6 +16,7 @@ namespace MagicText
     {
         private const string TokeniserNullErrorMessage = "Tokeniser instance may not be `null`.";
         private const string TextNullErrorMessage = "Input text string may not be `null`.";
+        private const string TokensNullErrorMessage = "Token enumerable returned by shattering may not be `null`.";
 
         /// <summary>
         ///     <para>
@@ -27,13 +28,14 @@ namespace MagicText
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <returns>Query to enumerate tokens (in the order they were read) read from <paramref name="text" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="tokeniser" /> is <c>null</c>. Parameter <paramref name="text" /> is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">Method <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> call returns <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         Returned enumerable is merely a query for enumerating tokens to allow simultaneously reading and enumerating tokens from <paramref name="text" />. If a fully built container is needed, consider using <see cref="ShatterToList(ITokeniser, String, ShatteringOptions?)" /> extension method instead to improve performance.
         ///     </para>
         ///
         ///     <para>
-        ///         Exceptions thrown by <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> method are not caught.
+        ///         Exceptions thrown by <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> method method call and <see cref="IEnumerable{T}.GetEnumerator" /> are not caught.
         ///     </para>
         /// </remarks>
         public static IEnumerable<String?> Shatter(this ITokeniser tokeniser, String text, ShatteringOptions? options = null)
@@ -49,7 +51,7 @@ namespace MagicText
 
             using TextReader textReader = new StringReader(text);
 
-            foreach (String? token in tokeniser.Shatter(textReader, options))
+            foreach (String? token in tokeniser.Shatter(textReader, options) ?? throw new InvalidOperationException(TokensNullErrorMessage))
             {
                 yield return token;
             }
@@ -65,6 +67,7 @@ namespace MagicText
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <returns>List of tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="tokeniser" /> is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">Method <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> call returns <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         The returned enumerable is a fully-built container (not merely a query) and is therefore safe to enumerate even after disposing <paramref name="input" />. However, as such it is impossible to enumerate it before the complete reading and shattering process is finished.
@@ -81,7 +84,7 @@ namespace MagicText
                 throw new ArgumentNullException(nameof(tokeniser), TokeniserNullErrorMessage);
             }
 
-            List<String?> tokens = new List<String?>(tokeniser.Shatter(input, options));
+            List<String?> tokens = new List<String?>(tokeniser.Shatter(input, options) ?? throw new InvalidOperationException(TokensNullErrorMessage));
             tokens.TrimExcess();
 
             return tokens;
@@ -97,6 +100,7 @@ namespace MagicText
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <returns>List of tokens (in the order they were read) read from <paramref name="text" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="tokeniser" /> is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">Method <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> call returns <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         The returned enumerable is a fully-built container (not merely a query). However, as such it is impossible to enumerate it before the complete reading and shattering process is finished.
@@ -128,16 +132,17 @@ namespace MagicText
         /// <param name="text">Input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <param name="cancellationToken">Cancellation token. See <em>Remarks</em> for additional information.</param>
-        /// <param name="continueOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync" /> method calls) should be marshalled back to the original context (via <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method). See <em>Remarks</em> for additional information.</param>
+        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync" /> method calls) should be marshalled back to the original context (via <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> and <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension methods). See <em>Remarks</em> for additional information.</param>
         /// <returns>Query to asynchronously enumerate tokens (in the order they were read) read from <paramref name="text" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="tokeniser" /> is <c>null</c>. Parameter <paramref name="text" /> is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">Method <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> call returns <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         Since <see cref="String" />s are immutable and encapsulated <see cref="StringReader" /> is not available outside of the method, <paramref name="cancellationToken" /> may be used to cancel the shattering process without extra caution.
         ///     </para>
         ///
         ///     <para>
-        ///         Parameter <paramref name="continueOnCapturedContext" /> should always be set to <c>false</c> as every context has reading access to all <see cref="String" />s, including <paramref name="text" />. Providing <c>true</c> as <paramref name="continueOnCapturedContext" /> indeed passes the value to <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method call, which may in turn slow down the shattering process. The parameter is exposed only to mantain consistency of method signatures and calls.
+        ///         Parameter <paramref name="continueTasksOnCapturedContext" /> should always be set to <c>false</c> as every context has reading access to all <see cref="String" />s, including <paramref name="text" />. Providing <c>true</c> as <paramref name="continueTasksOnCapturedContext" /> indeed passes the value to <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method call, which may in turn slow down the shattering process. The parameter is exposed only to mantain consistency of method signatures and calls.
         ///     </para>
         ///
         ///     <para>
@@ -148,7 +153,7 @@ namespace MagicText
         ///         Exceptions thrown by <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method are not caught.
         ///     </para>
         /// </remarks>
-        public static async IAsyncEnumerable<String?> ShatterAsync(this ITokeniser tokeniser, String text, ShatteringOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default, Boolean continueOnCapturedContext = false)
+        public static async IAsyncEnumerable<String?> ShatterAsync(this ITokeniser tokeniser, String text, ShatteringOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
         {
             if (tokeniser is null)
             {
@@ -161,7 +166,7 @@ namespace MagicText
 
             using TextReader textReader = new StringReader(text);
 
-            await foreach (String? token in tokeniser.ShatterAsync(textReader, options, cancellationToken, continueOnCapturedContext).ConfigureAwait(continueOnCapturedContext))
+            await foreach (String? token in tokeniser.ShatterAsync(textReader, options, cancellationToken, continueTasksOnCapturedContext)?.ConfigureAwait(continueTasksOnCapturedContext) ?? throw new InvalidOperationException(TokensNullErrorMessage))
             {
                 yield return token;
             }
@@ -176,16 +181,17 @@ namespace MagicText
         /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <param name="cancellationToken">Cancellation token. See <em>Remarks</em> for additional information.</param>
-        /// <param name="continueOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync" /> method calls) should be marshalled back to the original context (via <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method). See <em>Remarks</em> for additional information.</param>
+        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync" /> method calls) should be marshalled back to the original context (via <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> and <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension methods). See <em>Remarks</em> for additional information.</param>
         /// <returns>Task that represents the asynchronous shattering operation. The value of <see cref="Task{TResult}.Result" /> is list of tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="tokeniser" /> is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">Method <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> call returns <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         Although the method accepts <paramref name="cancellationToken" /> to support cancelling the operation, this should be used with caution. For instance, if <paramref name="input" /> is <see cref="StreamReader" />, data having already been read from underlying <see cref="Stream" /> may be irrecoverable when cancelling the operation.
         ///     </para>
         ///
         ///     <para>
-        ///         Usually the default <c>false</c> value of <paramref name="continueOnCapturedContext" /> is desirable as it may optimise the asynchronous shattering process. However, in some cases only the original context might have reading access to the resource provided by <paramref name="input" />, and thus <paramref name="continueOnCapturedContext" /> should be set to <c>true</c> to avoid errors.
+        ///         Usually the default <c>false</c> value of <paramref name="continueTasksOnCapturedContext" /> is desirable as it may optimise the asynchronous shattering process. However, in some cases only the original context might have reading access to the resource provided by <paramref name="input" />, and thus <paramref name="continueTasksOnCapturedContext" /> should be set to <c>true</c> to avoid errors.
         ///     </para>
         ///
         ///     <para>
@@ -196,7 +202,7 @@ namespace MagicText
         ///         Exceptions thrown by <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method (notably <see cref="ArgumentNullException" />) are not caught.
         ///     </para>
         /// </remarks>
-        public static async Task<IReadOnlyList<String?>> ShatterToListAsync(this ITokeniser tokeniser, TextReader input, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueOnCapturedContext = false)
+        public static async Task<IReadOnlyList<String?>> ShatterToListAsync(this ITokeniser tokeniser, TextReader input, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
         {
             if (tokeniser is null)
             {
@@ -204,7 +210,7 @@ namespace MagicText
             }
 
             List<String?> tokens = new List<String?>();
-            await foreach (String? token in tokeniser.ShatterAsync(input, options, cancellationToken, continueOnCapturedContext).ConfigureAwait(continueOnCapturedContext))
+            await foreach (String? token in tokeniser.ShatterAsync(input, options, cancellationToken, continueTasksOnCapturedContext)?.ConfigureAwait(continueTasksOnCapturedContext) ?? throw new InvalidOperationException(TokensNullErrorMessage))
             {
                 tokens.Add(token);
             }
@@ -222,16 +228,17 @@ namespace MagicText
         /// <param name="text">Input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
         /// <param name="cancellationToken">Cancellation token. See <em>Remarks</em> for additional information.</param>
-        /// <param name="continueOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync" /> method calls) should be marshalled back to the original context (via <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method). See <em>Remarks</em> for additional information.</param>
+        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync" /> method calls) should be marshalled back to the original context (via <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> and <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension methods). See <em>Remarks</em> for additional information.</param>
         /// <returns>Task that represents the asynchronous shattering operation. The value of <see cref="Task{TResult}.Result" /> is list of tokens (in the order they were read) read from <paramref name="text" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="tokeniser" /> is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">Method <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> call returns <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         Since <see cref="String" />s are immutable and encapsulated <see cref="StringReader" /> is not available outside of the method, <paramref name="cancellationToken" /> may be used to cancel the shattering process without extra caution.
         ///     </para>
         ///
         ///     <para>
-        ///         Parameter <paramref name="continueOnCapturedContext" /> should always be set to <c>false</c> as every context has reading access to all <see cref="String" />s, including <paramref name="text" />. Providing <c>true</c> as <paramref name="continueOnCapturedContext" /> indeed passes the value to <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method call, which may in turn slow down the shattering process. The parameter is exposed only to mantain consistency of method signatures and calls.
+        ///         Parameter <paramref name="continueTasksOnCapturedContext" /> should always be set to <c>false</c> as every context has reading access to all <see cref="String" />s, including <paramref name="text" />. Providing <c>true</c> as <paramref name="continueTasksOnCapturedContext" /> indeed passes the value to <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method call, which may in turn slow down the shattering process. The parameter is exposed only to mantain consistency of method signatures and calls.
         ///     </para>
         ///
         ///     <para>
@@ -242,7 +249,7 @@ namespace MagicText
         ///         Exceptions thrown by <see cref="ShatterAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean)" /> method (notably <see cref="ArgumentNullException" />) are not caught.
         ///     </para>
         /// </remarks>
-        public static async Task<IReadOnlyList<String?>> ShatterToListAsync(this ITokeniser tokeniser, String text, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueOnCapturedContext = false)
+        public static async Task<IReadOnlyList<String?>> ShatterToListAsync(this ITokeniser tokeniser, String text, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
         {
             if (tokeniser is null)
             {
@@ -250,7 +257,7 @@ namespace MagicText
             }
 
             List<String?> tokens = new List<String?>();
-            await foreach (String? token in tokeniser.ShatterAsync(text, options, cancellationToken, continueOnCapturedContext).ConfigureAwait(continueOnCapturedContext))
+            await foreach (String? token in tokeniser.ShatterAsync(text, options, cancellationToken, continueTasksOnCapturedContext).ConfigureAwait(continueTasksOnCapturedContext))
             {
                 tokens.Add(token);
             }
