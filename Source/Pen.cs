@@ -27,8 +27,8 @@ namespace MagicText
     /// </remarks>
     public class Pen
     {
-        private const string ValuesNullErrorMessage = "Values' enumerable may not be `null`.";
-        protected const string ContextNullErrorMessage = "Context tokens' enumerable may not be `null`.";
+        private const string ValuesNullErrorMessage = "Value enumerable may not be `null`.";
+        protected const string ContextNullErrorMessage = "Context token enumerable may not be `null`.";
         protected const string PickerNullErrorMessage = @"""Random"" number generator function (picker function) may not be `null`.";
         private const string RandomNullErrorMessage = "(Pseudo-)Random number generator may not be `null`.";
         protected const string RelevantTokensOutOfRangeErrorMessage = "Number of relevant tokens must be non-negative (greater than or equal to 0).";
@@ -166,7 +166,7 @@ namespace MagicText
         /// <param name="values">Enumerable of values amongst which <paramref name="x" /> should be found. Even if <paramref name="values" /> are comparable, the enumerable does not have to be sorted.</param>
         /// <param name="x">Value to find.</param>
         /// <param name="comparer">Comparer used for comparing instances of type <typeparamref name="T" /> for equality. If <c>null</c>, <see cref="EqualityComparer{T}.Default" /> is used.</param>
-        /// <returns>Minimal index <c>i</c> such that <c><paramref name="values" />[i] == <paramref name="x" /></c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" /> method calls).</returns>
+        /// <returns>Minimal index <c>i</c> such that <c><paramref name="comparer" />.Equals(<paramref name="values" />[i], <paramref name="x" />)</c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" /> method calls).</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="values" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
@@ -212,7 +212,7 @@ namespace MagicText
         /// <param name="x">Value to find.</param>
         /// <param name="comparer">Comparer used for comparing instances of type <typeparamref name="T" /> for equality. If <c>null</c>, <see cref="EqualityComparer{T}.Default" /> is used.</param>
         /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s should be marshalled back to the original context (via <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> and <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension methods).</param>
-        /// <returns>Minimal index <c>i</c> such that <c><paramref name="values" />[i] == <paramref name="x" /></c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" /> method calls).</returns>
+        /// <returns>Task that represents the operation of retrieving the index. The value of <see cref="Task{TResult}.Result" /> is minimal index <c>i</c> such that <c><paramref name="comparer" />.Equals(<paramref name="values" />[i], <paramref name="x" />)</c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" /> method calls).</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="values" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
@@ -362,7 +362,7 @@ namespace MagicText
         private readonly IReadOnlyList<String?> _context;
         private readonly IReadOnlyList<Int32> _positions;
         private readonly String? _endToken;
-        private readonly Int32 _firstPosition;
+        private readonly Int32 _firstPositionIndex;
         private readonly Boolean _allEnds;
 
         /// <returns>String comparer used by the pen for comparing tokens.</returns>
@@ -382,17 +382,17 @@ namespace MagicText
         /// <seealso cref="Comparer" />
         protected IReadOnlyList<Int32> Positions => _positions;
 
-        /// <returns>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is the total number of elements in <see cref="Context" /> (<see cref="IIReadOnlyList{T}.Count" />).</returns>
+        /// <returns>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is the total number of elements in <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</returns>
         /// <remarks>
         ///     <para>
-        ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ <see cref="Positions" />[<see cref="FirstPosition" />], <see cref="Positions" />[<see cref="FirstPosition" />] + 1, ..., <see cref="Positions" />[<see cref="FirstPosition" />] + n, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens.
+        ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ <see cref="Positions" />[<see cref="FirstPositionIndex" />], <see cref="Positions" />[<see cref="FirstPositionIndex" />] + 1, ..., <see cref="Positions" />[<see cref="FirstPositionIndex" />] + n, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens.
         ///     </para>
         /// </remarks>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
         /// <seealso cref="EndToken" />
         /// <seealso cref="Positions" />
-        protected Int32 FirstPosition => _firstPosition;
+        protected Int32 FirstPositionIndex => _firstPositionIndex;
 
         /// <returns>Tokens of the pen.</returns>
         /// <remarks>
@@ -497,15 +497,15 @@ namespace MagicText
             // Find the position of the first (non-ending) token.
             try
             {
-                _firstPosition = Context.Select((t, p) => Comparer.Equals(t, EndToken) ? -1 : IndexOf(Positions, p)).Where(i => i != -1).First();
+                _firstPositionIndex = Context.Select((t, p) => Comparer.Equals(t, EndToken) ? -1 : IndexOf(Positions, p)).Where(i => i != -1).First();
             }
             catch (InvalidOperationException)
             {
-                _firstPosition = Context.Count;
+                _firstPositionIndex = Context.Count;
             }
 
             // Check if all tokens are ending tokens.
-            _allEnds = (FirstPosition == Context.Count);
+            _allEnds = (FirstPositionIndex == Context.Count);
         }
 
         /// <summary>
