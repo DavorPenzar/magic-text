@@ -13,12 +13,12 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         Additionally, the tokeniser provides a possibility to transform tokens immediately after the extraction of regular expression matches and prior to checking for empty tokens. Initially, the idea was to use regular expressions for the transformation, but a custom transformation function may be provided instead. A convenient static method <see cref="CreateReplacementTransformationFunction(String, String, Boolean, Boolean, RegexOptions)" /> is implemented to easily create regular expression based replacement functions.
+    ///         Additionally, the tokeniser provides a possibility to transform tokens immediately after the extraction of regular expression matches and prior to checking for empty tokens. Initially, the idea was to use regular expressions for the transformation as regular expressions are often used for text replacement, but the tokeniser accepts any <see cref="Func{T, TResult}" /> delegate for the transformation function (<see cref="Transform" />). This way <see cref="RegexTokeniser" /> class provides a wider range of tokenising policies and, at the same time, its implementation and interface are more consistent with other libraries, most notably the standard .NET library (such as in <see cref="Enumerable.Select{TSource, TResult}(IEnumerable{TSource}, Func{TSource, TResult})" /> extension method). However, to use a regular expression based replacement, the lambda-function <c>t => <see cref="Regex" />.Replace(t, matchPattern, replacementPattern)</c>, where <c>matchPattern</c> and <c>replacementPattern</c> are regular expressions to match and to use for replacement respectively, may be provided (amongst other solutions).
     ///     </para>
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         If the default regular expression break pattern (<see cref="DefaultBreakPattern" />) should be used without special <see cref="RegexOptions" />, better performance is achieved when using <see cref="RegexTokeniser.RegexTokeniser" /> constructor, in which case a pre-built <see cref="Regex" /> object is used constructed with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" />, instead of <see cref="RegexTokeniser.RegexTokeniser(String, Func{String?, String?}?, Boolean, RegexOptions)" /> constructor.
+    ///         If the default regular expression break pattern (<see cref="DefaultBreakPattern" />) should be used without special <see cref="RegexOptions" />, better performance is achieved when using <see cref="RegexTokeniser.RegexTokeniser" /> constructor, in which case a pre-built <see cref="Regex" /> object is used constructed with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" />, instead of <see cref="RegexTokeniser.RegexTokeniser(String, Boolean, RegexOptions, Func{String?, String?}?)" /> constructor.
     ///     </para>
     ///
     ///     <para>
@@ -88,49 +88,6 @@ namespace MagicText
         protected static String? IdentityTransform(String? token) =>
             token;
 
-        /// <summary>
-        ///     <para>
-        ///         Create a transformation function of regular expression based replacement.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         This method is useful for creating <see cref="RegexTokeniser" />s' regular expression based transformation functions (<see cref="RegexTokeniser.Transform" />).
-        ///     </para>
-        /// </summary>
-        /// <param name="matchPattern">Regular expression pattern to match.</param>
-        /// <param name="replacementPattern">Regular expression pattern for replacement of matches captured by <paramref name="matchPattern" />.</param>
-        /// <param name="escapeMatch">If <c>true</c>, <paramref name="matchPattern" /> is escaped via <see cref="Regex.Escape(String)" /> method before usage.</param>
-        /// <param name="escapeReplacement">If <c>true</c>, <paramref name="replacementPattern" /> is escaped via <see cref="Regex.Escape(String)" /> method before usage.</param>
-        /// <param name="options">Options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
-        /// <returns>Function that returns <c>null</c> when passed a <c>null</c>, and otherwise performs the regular expression based replacement defined.</returns>
-        /// <exception cref="ArgumentNullException">Parameter <paramref name="matchPattern" /> is <c>null</c>. Parameter <paramref name="replacementPattern" /> is <c>null</c>.</exception>
-        /// <remarks>
-        ///     <para>
-        ///         Exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.
-        ///     </para>
-        /// </remarks>
-        /// <seealso cref="RegexTokeniser.Transform" />
-        public static Func<String?, String?> CreateReplacementTransformationFunction(String matchPattern, String replacementPattern, Boolean escapeMatch = false, Boolean escapeReplacement = false, RegexOptions options = RegexOptions.None)
-        {
-            if (matchPattern is null || replacementPattern is null)
-            {
-                throw new ArgumentNullException(RegexPatternNullErrorMessage, (Exception?)null);
-            }
-
-            if (escapeMatch)
-            {
-                matchPattern = Regex.Escape(matchPattern);
-            }
-            if (escapeReplacement)
-            {
-                replacementPattern = Regex.Escape(replacementPattern);
-            }
-
-            Regex replace = new Regex(matchPattern, options);
-
-            return t => t is null ? null : replace.Replace(t, replacementPattern);
-        }
-
         private readonly Regex _break;
         private readonly Func<String?, String?>? _transform;
 
@@ -169,16 +126,16 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <param name="breakPattern">Regular expression break pattern to use.</param>
-        /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <param name="escape">If <c>true</c>, <paramref name="breakPattern" /> is escaped via <see cref="Regex.Escape(String)" /> method before usage.</param>
         /// <param name="options">Options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
+        /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="breakPattern" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
         ///         Exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.
         ///     </para>
         /// </remarks>
-        public RegexTokeniser(String breakPattern, Func<String?, String?>? transform = null, Boolean escape = false, RegexOptions options = RegexOptions.None) : this(breakPattern is null ? throw new ArgumentNullException(nameof(breakPattern), RegexPatternNullErrorMessage) : new Regex(escape ? Regex.Escape(breakPattern) : breakPattern, options), transform)
+        public RegexTokeniser(String breakPattern, Boolean escape = false, RegexOptions options = RegexOptions.None, Func<String?, String?>? transform = null) : this(breakPattern is null ? throw new ArgumentNullException(nameof(breakPattern), RegexPatternNullErrorMessage) : new Regex(escape ? Regex.Escape(breakPattern) : breakPattern, options), null, transform)
         {
         }
 
@@ -188,8 +145,8 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <param name="break">Regular expression breaker to use.</param>
-        /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <param name="alterOptions">If <c>null</c>, <paramref name="break" />'s options (<see cref="Regex.Options" />) are used (actually, no new <see cref="Regex" /> is constructed); otherwise options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
+        /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="break" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
@@ -197,15 +154,15 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         Calling this constructor is essentially the same (performance aside) as calling <see cref="RegexTokeniser.RegexTokeniser(String, Func{String?, String?}?, Boolean, RegexOptions)" /> constructor as:
+        ///         Calling this constructor is essentially the same (performance aside) as calling <see cref="RegexTokeniser.RegexTokeniser(String, Boolean, RegexOptions, Func{String?, String?}?)" /> constructor as:
         ///     </para>
         ///
         ///     <code>
-        ///         <see cref="RegexTokeniser" />.RegexTokeniser(breakPattern: @<paramref name="break" />.ToString(), transform: <paramref name="transform" />, options: <paramref name="alterOptions" /> ?? @<paramref name="break" />.Options)
+        ///         <see cref="RegexTokeniser" />.RegexTokeniser(breakPattern: @<paramref name="break" />.ToString(), escape: false, options: <paramref name="alterOptions" /> ?? @<paramref name="break" />.Options, transform: <paramref name="transform" />)
         ///     </code>
         /// </remarks>
-        /// <seealso cref="RegexTokeniser.RegexTokeniser(String, Func{String?, String?}?, Boolean, RegexOptions)" />
-        public RegexTokeniser(Regex @break, Func<String?, String?>? transform = null, RegexOptions? alterOptions = null) : base()
+        /// <seealso cref="RegexTokeniser.RegexTokeniser(String, Boolean, RegexOptions, Func{String?, String?}?)" />
+        public RegexTokeniser(Regex @break, RegexOptions? alterOptions = null, Func<String?, String?>? transform = null) : base()
         {
             if (@break is null)
             {
@@ -243,7 +200,7 @@ namespace MagicText
             IEnumerable<String?> tokens = Break.Split(line);
             if (!(Transform is null))
             {
-                tokens = tokens.Select(t => Transform(t));
+                tokens = tokens.Select(Transform);
             }
 
             return tokens;
