@@ -613,7 +613,7 @@ namespace MagicText
             // Find sorting positions of tokens in context.
             {
                 List<Int32> positionsList = new List<Int32>(Enumerable.Range(0, Context.Count));
-                positionsList.Sort((new PositionSorter(Comparer, Context)).Compare);
+                positionsList.Sort(new PositionSorter(Comparer, Context));
                 positionsList.TrimExcess();
                 _positions = positionsList.AsReadOnly();
             }
