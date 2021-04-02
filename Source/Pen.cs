@@ -83,12 +83,41 @@ namespace MagicText
                 _tokens = tokens ?? throw new ArgumentNullException(nameof(tokens), TokensNullErrorMessage);
             }
 
+            /// <summary>
+            ///     <para>
+            ///         Get the hash code of <paramref name="obj" />.
+            ///     </para>
+            /// </summary>
+            /// <param name="obj">Object of which the hash code is seeked.</param>
+            /// <returns>Hash code of <paramref name="obj" />.</returns>
             public Int32 GetHashCode(Int32 obj) =>
                 obj.GetHashCode();
 
+            /// <summary>
+            ///     <para>
+            ///         Compare <paramref name="x" /> and <paramref name="y" /> for equality.
+            ///     </para>
+            /// </summary>
+            /// <param name="x">Left object to compare.</param>
+            /// <param name="y">Right object tot compare.</param>
+            /// <returns>If <paramref name="x" /> and <paramref name="y" /> compare equal, <c>true</c>; <c>false</c> otherwise.</returns>
             public Boolean Equals(Int32 x, Int32 y) =>
                 (x == y);
 
+            /// <summary>
+            ///     <para>
+            ///         Compare <paramref name="x" /> and <paramref name="y" />.
+            ///     </para>
+            /// </summary>
+            /// <param name="x">Left object to compare.</param>
+            /// <param name="y">Right object tot compare.</param>
+            /// <returns>A strictly negative, i. e. less than 0, value if <paramref name="x" /> compares (strictly) less than <paramref name="y" />; a strictly positive, i. e. greater than 0, value if <paramref name="x" /> compares (strictly) less than <paramref name="y" />; 0 otherwise (<paramref name="x" /> and <paramref name="y" /> compare equal).</returns>
+            /// <remarks>
+            ///     <para>
+            ///         See <see cref="Tokens" /> to understand how (legal) indices are compared. If any of <paramref name="x" /> and <paramref name="y" /> is out of range as an index of <see cref="Tokens" />, simply <see cref="Int32.CompareTo(Int32)" /> method is used for comparison.
+            ///     </para>
+            /// </remarks>
+            /// <seealso cref="Tokens" />
             public Int32 Compare(Int32 x, Int32 y)
             {
                 // Compare indices. If not equal, compare tokens (if possible).
@@ -158,7 +187,7 @@ namespace MagicText
             /// <returns>Tokens to ignore.</returns>
             /// <remarks>
             ///     <para>
-            ///         If a token is found in <see cref="IgnoreTokens" />, the search in <see cref="FindIndex(String?, Int32)" /> is immediately terminated and -1 is returned.
+            ///         If a token is found in <see cref="IgnoreTokens" /> via <see cref="Enumerable.Contains{TSource}(IEnumerable{TSource}, TSource)" /> extension method, the search in <see cref="FindIndex(String?, Int32)" /> is immediately terminated and -1 is returned. Note that <see cref="Enumerable.Contains{TSource}(IEnumerable{TSource}, TSource)" /> extension method actually calls <see cref="ICollection{T}.Contains(T)" /> method if the source enumerable implements <see cref="ICollection{T}" /> interface, which may be useful if a special string comparison should be used when checking if a token should be ignored (for instance, pass <see cref="HashSet{T}" /> of strings constructed with a desired <see cref="StringComparer" />).
             ///     </para>
             /// </remarks>
             public IReadOnlyCollection<String?> IgnoreTokens =>
@@ -183,7 +212,7 @@ namespace MagicText
             ///     </para>
             /// </summary>
             /// <param name="token">Token whose <paramref name="index" /> should be found.</param>
-            /// <param name="index">Index of <paramref name="token" /> (element in <see cref="Index" />).</param>
+            /// <param name="index">Index of <paramref name="token" /> (potential element in <see cref="Index" />).</param>
             /// <returns>If <paramref name="token" /> should be ignored (if <see cref="IgnoreTokens" /> contains it), -1; otherwise minimal index <c>i</c> such that <c><see cref="Index" />[i] == <paramref name="index" /></c>. If <paramref name="index" /> is not found, -1 is returned as well.</returns>
             public Int32 FindIndex(String? token, Int32 index) =>
                 IgnoreTokens.Contains(token) ? -1 : Index.IndexOf(index);
