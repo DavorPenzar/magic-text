@@ -48,15 +48,10 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         The pattern matches all non-empty continuous white space groups, punctuation symbol groups (periods, exclamation marks, question marks, colons, semicolons, brackets and dashes) and the horizontal ellipsis. The pattern is enclosed in (round) brackets to be captured by <see cref="Regex.Split(String)" /> method.
+        ///         The pattern matches all non-empty continuous groups of white spaces (<c>"\\s"</c>), punctuation symbols (<c>"\\p{P}"</c>) and separator characters (<c>"\\p{Z}"</c>). The pattern is enclosed in (round) brackets to be captured by <see cref="Regex.Split(String)" /> method.
         ///     </para>
         /// </summary>
-        /// <remarks>
-        ///     <para>
-        ///         As the pattern captures both punctuation symbol groups and white space groups, and the latter usually follow the former, shattering inputs using the pattern may cause empty tokens. For instance, shattering the string <c>"Lorem. Ipsum."</c> shall result in enumerable of tokens <c>{ "Lorem", ".", "", " ", "Ipsum", "." }</c> (note the empty string between the first period (<c>'.'</c>) and the white space (<c>' '</c>)). The empty tokens may be ignored by providing corresponding <see cref="ShatteringOptions" /> to <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods, or a custom regular expression may be used which, for instance, allows whitespaces after the punctuation symbols (append <c>"\\s*"</c> after the punctuation symbol group).
-        ///     </para>
-        /// </remarks>
-        public const string DefaultBreakPattern = @"(\s+|[\.!\?‽¡¿⸘,:;\(\)\[\]\{\}\-—–]+|…)";
+        public const string DefaultBreakPattern = @"([\s\p{P}\p{Z}]+)";
 
         private static readonly Regex _DefaultBreak;
 

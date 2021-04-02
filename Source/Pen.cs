@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MagicText
 {
@@ -27,7 +25,11 @@ namespace MagicText
     /// </remarks>
     public class Pen
     {
-        private const string ValuesNullErrorMessage = "Value enumerable may not be `null`.";
+        private const string ComparerNullErrorMessage = "String comparer may not be `null`.";
+        private const string TokensNullErrorMessage = "Token list may not be `null`.";
+        private const string IndexNullErrorMessage = "Index may not be `null`.";
+        private const string SampleNullErrorMessage = "Sample tokens may not be `null`.";
+        private const string CycleStartOutOfRangeErrorMessage = "Cycle start is not a valid index of the sample.";
         protected const string ContextNullErrorMessage = "Context token enumerable may not be `null`.";
         protected const string PickerNullErrorMessage = @"""Random"" number generator function (picker function) may not be `null`.";
         private const string RandomNullErrorMessage = "(Pseudo-)Random number generator may not be `null`.";
@@ -37,7 +39,7 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Auxiliary <see cref="Int32" /> comparer for sorting positions of tokens in <see cref="Pen.Context" />.
+        ///         Auxiliary <see cref="Int32" /> comparer for sorting indices of tokens in <see cref="Pen.Context" />.
         ///     </para>
         /// </summary>
         /// <remarks>
@@ -45,10 +47,10 @@ namespace MagicText
         ///         Only the reference of the enumerable <c>tokens</c> passed to the constructor is stored by the sorter in <see cref="Tokens" /> property. Changing the content of the enumerable externally, or even its order, results in unconsitent behaviour of comparison via <see cref="Compare(Int32, Int32)" /> method.
         ///     </para>
         /// </remarks>
-        private class PositionSorter : IEqualityComparer<Int32>, IComparer<Int32>
+        private class Indexer : IEqualityComparer<Int32>, IComparer<Int32>
         {
-            private const String ComparerNullErrorMessage = "String comparer may not be `null`.";
-            private const String TokensNullErrorMessage = "Token list may not be `null`.";
+            private const string ComparerNullErrorMessage = "String comparer may not be `null`.";
+            private const string TokensNullErrorMessage = "Token list may not be `null`.";
 
             private readonly StringComparer _comparer;
             private readonly IReadOnlyList<String?> _tokens;
@@ -61,7 +63,7 @@ namespace MagicText
             /// <remarks>
             ///     <para>
             ///         If integers <c>x</c>, <c>y</c> are legal indices of <see cref="Tokens" />, they are compared by comparing <c><see cref="Tokens" />[x]</c>, <c><see cref="Tokens" />[y]</c> using <see cref="Comparer" /> in <see cref="Compare(Int32, Int32)" /> method. Ties are resolved by comparing <c><see cref="Tokens" />[x + 1]</c>, <c><see cref="Tokens" />[y + 1]</c> and so on; the first index to reach the end of <see cref="Tokens" /> is considered less if all tokens compared equal.
-            ///     </para> content of <see cref="Tokens" /> changes from an outer source, the behaviour of index comparison (<see cref="Compare(Int32, Int32)" /> becomes unconsistent.
+            ///     </para>
             /// </remarks>
             /// <seealso cref="Comparer" />
             public IReadOnlyList<String?> Tokens =>
@@ -75,7 +77,7 @@ namespace MagicText
             /// <param name="comparer">String comparer. Tokens shall be compared (e. g. for equality) by <paramref name="comparer" />.</param>
             /// <param name="tokens">Reference tokens. Indices shall be compared by comparing elements of <paramref name="tokens" />.</param>
             /// <exception cref="ArgumentNullException">Parameter <paramref name="comparer" /> is <c>null</c>. Parameter <paramref name="tokens" /> is <c>null</c>.</exception>
-            public PositionSorter(StringComparer comparer, IReadOnlyList<String?> tokens)
+            public Indexer(StringComparer comparer, IReadOnlyList<String?> tokens)
             {
                 _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer), ComparerNullErrorMessage);
                 _tokens = tokens ?? throw new ArgumentNullException(nameof(tokens), TokensNullErrorMessage);
@@ -93,7 +95,6 @@ namespace MagicText
                 int c = y.CompareTo(x);
                 if (c != 0 && x >= 0 && y >= 0)
                 {
-                    // Lexicographically compare.
                     while (x < Tokens.Count && y < Tokens.Count)
                     {
                         // Extract current tokens.
@@ -124,18 +125,18 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Auxiliary position index finder for finding position indices of tokens in <see cref="Pen.Context" />.
+        ///         Auxiliary index finder for finding indices of tokens in <see cref="Pen.Context" />.
         ///     </para>
         /// </summary>
         /// <remarks>
         ///     <para>
-        ///         Only the reference of the enumerables <c>positions</c> and <c>ignoreTokens</c> passed to the constructor is stored by the finder in <see cref="Positions" /> and <see cref="IgnoreTokens" /> properties respectively. Changing the content of the enumerables externally, or even their orders, results in unconsitent behaviour of search via <see cref="FindPositionIndex(String?, Int32)" /> method.
+        ///         Only the reference of the enumerables <c>index</c> and <c>ignoreTokens</c> passed to the constructor is stored by the finder in <see cref="Index" /> and <see cref="IgnoreTokens" /> properties respectively. Changing the content of the enumerables externally, or even their orders, results in unconsitent behaviour of search via <see cref="FindIndex(String?, Int32)" /> method.
         ///     </para>
         /// </remarks>
-        private class PositionIndexFinder
+        private class IndexFinder
         {
-            private const String PositionsNullErrorMessage = "Position list may not be `null`.";
-            private const String IgnoreTokensNullErrorMessage = "Ignored token list may not be `null`.";
+            private const string IndexNullErrorMessage = "Index may not be `null`.";
+            private const string IgnoreTokensNullErrorMessage = "Ignored token list may not be `null`.";
 
             /// <summary>
             ///     <para>
@@ -147,17 +148,17 @@ namespace MagicText
             public static Boolean IsValidIndex(Int32 index) =>
                 (index >= 0);
 
-            private readonly IReadOnlyList<Int32> _positions;
+            private readonly IReadOnlyList<Int32> _index;
             private readonly IReadOnlyCollection<String?> _ignoreTokens;
 
             /// <returns>Sorting positions of tokens.</returns>
-            protected IReadOnlyList<Int32> Positions =>
-                _positions;
+            protected IReadOnlyList<Int32> Index =>
+                _index;
 
             /// <returns>Tokens to ignore.</returns>
             /// <remarks>
             ///     <para>
-            ///         If a token is found in <see cref="IgnoreTokens" />, the search in <see cref="FindPositionIndex(String?, Int32)" /> is immediately terminated and -1 is returned.
+            ///         If a token is found in <see cref="IgnoreTokens" />, the search in <see cref="FindIndex(String?, Int32)" /> is immediately terminated and -1 is returned.
             ///     </para>
             /// </remarks>
             public IReadOnlyCollection<String?> IgnoreTokens =>
@@ -165,37 +166,37 @@ namespace MagicText
 
             /// <summary>
             ///     <para>
-            ///         Create a position index finder.
+            ///         Create an index finder.
             ///     </para>
             /// </summary>
-            /// <param name="positions">Sorting positions of tokens.</param>
+            /// <param name="positions">Sorting index of tokens.</param>
             /// <param name="ignoreTokens">Tokens to ignore.</param>
-            public PositionIndexFinder(IReadOnlyList<Int32> positions, IReadOnlyCollection<String?> ignoreTokens)
+            public IndexFinder(IReadOnlyList<Int32> positions, IReadOnlyCollection<String?> ignoreTokens)
             {
-                _positions = positions ?? throw new ArgumentNullException(nameof(positions), PositionsNullErrorMessage);
+                _index = positions ?? throw new ArgumentNullException(nameof(positions), IndexNullErrorMessage);
                 _ignoreTokens = ignoreTokens ?? throw new ArgumentNullException(nameof(ignoreTokens), IgnoreTokensNullErrorMessage);
             }
 
             /// <summary>
             ///     <para>
-            ///         Find the index of <paramref name="token" />'s <paramref name="position" />.
+            ///         Find the position of <paramref name="token" />'s <paramref name="index" /> in <see cref="Index" />.
             ///     </para>
             /// </summary>
-            /// <param name="token">Token whose <paramref name="position" /> should be found.</param>
-            /// <param name="position">Position of <paramref name="token" /> (element in <see cref="Positions" />).</param>
-            /// <returns>If <paramref name="token" /> should be ignored (if <see cref="IgnoreTokens" /> contains it), -1; otherwise minimal index <c>i</c> such that <c><see cref="Positions" />[i] == <paramref name="position" /></c>. If <paramref name="position" /> is not found, -1 is returned as well.</returns>
-            public Int32 FindPositionIndex(String? token, Int32 position) =>
-                IgnoreTokens.Contains(token) ? -1 : Pen.IndexOf(Positions, position);
+            /// <param name="token">Token whose <paramref name="index" /> should be found.</param>
+            /// <param name="index">Index of <paramref name="token" /> (element in <see cref="Index" />).</param>
+            /// <returns>If <paramref name="token" /> should be ignored (if <see cref="IgnoreTokens" /> contains it), -1; otherwise minimal index <c>i</c> such that <c><see cref="Index" />[i] == <paramref name="index" /></c>. If <paramref name="index" /> is not found, -1 is returned as well.</returns>
+            public Int32 FindIndex(String? token, Int32 index) =>
+                IgnoreTokens.Contains(token) ? -1 : Index.IndexOf(index);
         }
 
-        private static readonly Object _Locker;
-        private static Int32 _RandomSeed;
+        private static readonly Object _locker;
+        private static Int32 randomSeed;
 
         [ThreadStatic]
-        private static System.Random? _Random;
+        private static System.Random? mutableThreadStaticRandom;
 
         /// <returns>Internal locking object of <see cref="Pen" /> class.</returns>
-        private static Object Locker => _Locker;
+        private static Object Locker => _locker;
 
         /// <returns>Seed for the internal (pseudo-)random number generator (<see cref="Random" />).</returns>
         /// <value>New seed. If <c>value</c> is less than or equal to <c>0</c>, new seed is set to <c>1</c>.</value>
@@ -211,7 +212,7 @@ namespace MagicText
             {
                 lock (Locker)
                 {
-                    return _RandomSeed;
+                    return randomSeed;
                 }
             }
 
@@ -219,7 +220,7 @@ namespace MagicText
             {
                 lock (Locker)
                 {
-                    _RandomSeed = Math.Max(value, 1);
+                    randomSeed = Math.Max(value, 1);
                 }
             }
         }
@@ -240,15 +241,15 @@ namespace MagicText
             {
                 lock (Locker)
                 {
-                    if (_Random is null)
+                    if (mutableThreadStaticRandom is null)
                     {
                         unchecked
                         {
-                            _Random = new Random(RandomSeed++);
+                            mutableThreadStaticRandom = new Random(RandomSeed++);
                         }
                     }
 
-                    return _Random;
+                    return mutableThreadStaticRandom;
                 }
             }
         }
@@ -260,13 +261,13 @@ namespace MagicText
         /// </summary>
         static Pen()
         {
-            _Locker = new Object();
+            _locker = new Object();
 
             lock (Locker)
             {
                 unchecked
                 {
-                    _RandomSeed = Math.Max((Int32)((1073741827L * DateTime.UtcNow.Ticks + 1073741789L) & (Int64)Int32.MaxValue), 1);
+                    randomSeed = Math.Max((Int32)((1073741827L * DateTime.UtcNow.Ticks + 1073741789L) & (Int64)Int32.MaxValue), 1);
                 }
             }
         }
@@ -313,101 +314,6 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Retrieve the index of a value.
-        ///     </para>
-        /// </summary>
-        /// <param name="values">Enumerable of values amongst which <paramref name="x" /> should be found. Even if <paramref name="values" /> are comparable, the enumerable does not have to be sorted.</param>
-        /// <param name="x">Value to find.</param>
-        /// <param name="comparer">Comparer used for comparing instances of type <typeparamref name="T" /> for equality. If <c>null</c>, <see cref="EqualityComparer{T}.Default" /> is used.</param>
-        /// <returns>Minimal index <c>i</c> such that <c><paramref name="comparer" />.Equals(<paramref name="values" />[i], <paramref name="x" />)</c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" /> method calls).</returns>
-        /// <exception cref="ArgumentNullException">Parameter <paramref name="values" /> is <c>null</c>.</exception>
-        /// <remarks>
-        ///     <para>
-        ///         In order to find <paramref name="x" /> amongst <paramref name="values" />, enumerable <paramref name="values" /> must be enumerated. If and when the first occurance of <paramref name="x" /> is found, the enumeration is terminated.
-        ///     </para>
-        /// </remarks>
-        public static Int32 IndexOf<T>(IEnumerable<T> values, T x, IEqualityComparer<T>? comparer = null)
-        {
-            if (values is null)
-            {
-                throw new ArgumentNullException(nameof(values), ValuesNullErrorMessage);
-            }
-
-            if (comparer is null)
-            {
-                comparer = EqualityComparer<T>.Default;
-            }
-
-            int index = -1;
-
-            using (IEnumerator<T> enumerator = values.GetEnumerator())
-            {
-                for (int i = 0; enumerator.MoveNext(); ++i)
-                {
-                    if (comparer.Equals(enumerator.Current, x))
-                    {
-                        index = i;
-
-                        break;
-                    }
-                }
-            }
-
-            return index;
-        }
-
-        /// <summary>
-        ///     <para>
-        ///         Retrieve the index of a value asynchronously.
-        ///     </para>
-        /// </summary>
-        /// <param name="values">Asynchronous enumerable of values amongst which <paramref name="x" /> should be found. Even if <paramref name="values" /> are comparable, the enumerable does not have to be sorted.</param>
-        /// <param name="x">Value to find.</param>
-        /// <param name="comparer">Comparer used for comparing instances of type <typeparamref name="T" /> for equality. If <c>null</c>, <see cref="EqualityComparer{T}.Default" /> is used.</param>
-        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s should be marshalled back to the original context (via <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> and <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension methods).</param>
-        /// <returns>Task that represents the operation of retrieving the index. The value of <see cref="Task{TResult}.Result" /> is minimal index <c>i</c> such that <c><paramref name="comparer" />.Equals(<paramref name="values" />[i], <paramref name="x" />)</c>, or <c>-1</c> if <paramref name="x" /> is not found amongst <paramref name="values" /> (read indexers as <see cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, Int32)" /> method calls).</returns>
-        /// <exception cref="ArgumentNullException">Parameter <paramref name="values" /> is <c>null</c>.</exception>
-        /// <remarks>
-        ///     <para>
-        ///         In order to find <paramref name="x" /> amongst <paramref name="values" />, enumerable <paramref name="values" /> must be enumerated. If and when the first occurance of <paramref name="x" /> is found, the enumeration is terminated.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         Usually the default <c>false</c> value of <paramref name="continueTasksOnCapturedContext" /> is desirable as it may optimise the asynchronous enumeration process. However, in some cases only the original context might have required access rights to used resources (<paramref name="values" />), and thus <paramref name="continueTasksOnCapturedContext" /> should be set to <c>true</c> to avoid errors.
-        ///     </para>
-        /// </remarks>
-        public async static Task<Int32> IndexOfAsync<T>(IAsyncEnumerable<T> values, T x, IEqualityComparer<T>? comparer = null, CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
-        {
-            if (values is null)
-            {
-                throw new ArgumentNullException(nameof(values), ValuesNullErrorMessage);
-            }
-
-            if (comparer is null)
-            {
-                comparer = EqualityComparer<T>.Default;
-            }
-
-            int index = -1;
-
-            await using (ConfiguredCancelableAsyncEnumerable<T>.Enumerator enumerator = values.WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext).GetAsyncEnumerator())
-            {
-                for (int i = 0; await enumerator.MoveNextAsync(); ++i)
-                {
-                    if (comparer.Equals(enumerator.Current, x))
-                    {
-                        index = i;
-
-                        break;
-                    }
-                }
-            }
-
-            return index;
-        }
-
-        /// <summary>
-        ///     <para>
         ///         Compare a subrange of <paramref name="tokens" /> with a sample of tokens <paramref name="sample" /> in respect of <paramref name="comparer" />.
         ///     </para>
         /// </summary>
@@ -429,6 +335,7 @@ namespace MagicText
             {
                 int j;
 
+                // Compare tokens.
                 for (/* [`i` is set in function call,] */ j = 0; i < tokens.Count && j < sample.Count; ++i, ++j)
                 {
                     c = comparer.Compare(tokens[i], sample[(cycleStart + j) % sample.Count]);
@@ -438,6 +345,7 @@ namespace MagicText
                     }
                 }
 
+                // If `tokens` has reached the end, but `sample` has not, consider the subrange of `tokens` less.
                 if (c == 0 && i == tokens.Count && j < sample.Count)
                 {
                     c = -1;
@@ -449,22 +357,45 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Find the first position index and the number of occurances of <paramref name="sample" /> in <paramref name="tokens" /> sorted by <paramref name="positions" />.
+        ///         Find the first index and the number of occurances of <paramref name="sample" /> in <paramref name="tokens" /> sorted by <paramref name="index" />.
         ///     </para>
         /// </summary>
         /// <param name="comparer">String comparer used for comparing.</param>
         /// <param name="tokens">List of tokens amongst which <paramref name="sample" /> should be found.</param>
-        /// <param name="positions">Sorted positions, or positional ordering of <paramref name="tokens" /> in respect of <paramref name="comparer" />.</param>
+        /// <param name="index">Positional ordering of <paramref name="tokens" /> in respect of <paramref name="comparer" />.</param>
         /// <param name="sample">Cyclical sample list of tokens to find. The list represents range <c>{ <paramref name="sample" />[<paramref name="cycleStart" />], <paramref name="sample" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sample" />[<paramref name="sample" />.Count - 1], <paramref name="sample" />[0], ..., <paramref name="sample" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
         /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
-        /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sample" /> begins at <c><paramref name="tokens" />[<paramref name="positions" />[i]]</c> and the total number of its occurances amongst <paramref name="tokens" />.</returns>
+        /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sample" /> begins at <c><paramref name="tokens" />[<paramref name="index" />[i]]</c> and the total number of its occurances amongst <paramref name="tokens" />.</returns>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="comparer" /> is <c>null</c>. Parameter <paramref name="tokens" /> is <c>null</c>. Parameter <paramref name="index" /> is <c>null</c>. Parameter <paramref name="sample" /> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Parameter <paramref name="cycleStart" /> is not a valid index of <paramref name="sample" /> (it is strictly negative, i. e. less than 0, or greater than or equal to <see cref="IReadOnlyCollection{T}.Count" /> of <paramref name="sample" />).</exception>
         /// <remarks>
         ///     <para>
-        ///         The implementation of the method assumes <paramref name="sample" /> actually exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" /> and that <paramref name="positions" /> indeed sort <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />. If the former is not true, the returned index shall point to the position at which <paramref name="t" />'s position should be inserted to retain the sorted order and the number of occurances shall be 0; if the latter is not true, the behaviour of the method is undefined.
+        ///         The implementation of the method <em>assumes</em> <paramref name="sample" /> actually exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" /> and that <paramref name="index" /> indeed sorts <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />. If the former is not true, the returned index shall point to the position at which <paramref name="t" />'s position should be inserted to retain the sorted order and the number of occurances shall be 0; if the latter is not true, the behaviour of the method is undefined.
         ///     </para>
         /// </remarks>
-        private static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> positions, IReadOnlyList<String?> sample, Int32 cycleStart)
+        protected static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IReadOnlyList<String?> sample, Int32 cycleStart)
         {
+            if (comparer is null)
+            {
+                throw new ArgumentNullException(nameof(comparer), ComparerNullErrorMessage);
+            }
+            if (tokens is null)
+            {
+                throw new ArgumentNullException(nameof(tokens), TokensNullErrorMessage);
+            }
+            if (index is null)
+            {
+                throw new ArgumentNullException(nameof(index), IndexNullErrorMessage);
+            }
+            if (sample is null)
+            {
+                throw new ArgumentNullException(nameof(sample), SampleNullErrorMessage);
+            }
+            if (cycleStart < 0 || cycleStart >= sample.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(cycleStart), CycleStartOutOfRangeErrorMessage);
+            }
+
             // Binary search...
 
             // Initialise lower, upper and middle positions.
@@ -477,7 +408,7 @@ namespace MagicText
                 while (l < h)
                 {
                     // Compare ranges.
-                    int c = CompareRange(comparer, tokens, sample, positions[m], cycleStart);
+                    int c = CompareRange(comparer, tokens, sample, index[m], cycleStart);
 
                     // Break the loop or update positions.
                     if (c == 0)
@@ -500,11 +431,11 @@ namespace MagicText
             }
 
             // Find the minimal position index `l` and the maximal index `h` of occurances of `sample` amongst `tokens`.
-            while (l > 0 && CompareRange(comparer, tokens, sample, positions[l - 1], cycleStart) == 0)
+            while (l > 0 && CompareRange(comparer, tokens, sample, index[l - 1], cycleStart) == 0)
             {
                 --l;
             }
-            while (h < tokens.Count && CompareRange(comparer, tokens, sample, positions[h], cycleStart) == 0)
+            while (h < tokens.Count && CompareRange(comparer, tokens, sample, index[h], cycleStart) == 0)
             {
                 ++h;
             }
@@ -513,41 +444,60 @@ namespace MagicText
             return ValueTuple.Create(l, h - l);
         }
 
+        /// <summary>
+        ///     <para>
+        ///         Find the first index and the number of occurances of <paramref name="sample" /> in <paramref name="tokens" /> sorted by <paramref name="index" />.
+        ///     </para>
+        /// </summary>
+        /// <param name="comparer">String comparer used for comparing.</param>
+        /// <param name="tokens">List of tokens amongst which <paramref name="sample" /> should be found.</param>
+        /// <param name="index">Positional ordering of <paramref name="tokens" /> in respect of <paramref name="comparer" />.</param>
+        /// <param name="sample">Sample of tokens to find.</param>
+        /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sample" /> begins at <c><paramref name="tokens" />[<paramref name="index" />[i]]</c> and the total number of its occurances amongst <paramref name="tokens" />.</returns>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="comparer" /> is <c>null</c>. Parameter <paramref name="tokens" /> is <c>null</c>. Parameter <paramref name="index" /> is <c>null</c>. Parameter <paramref name="sample" /> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>
+        ///         The implementation of the method <em>assumes</em> <paramref name="sample" /> actually exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" /> and that <paramref name="index" /> indeed sorts <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />. If the former is not true, the returned index shall point to the position at which <paramref name="t" />'s position should be inserted to retain the sorted order and the number of occurances shall be 0; if the latter is not true, the behaviour of the method is undefined.
+        ///     </para>
+        /// </remarks>
+        protected static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IEnumerable<String?> sample) =>
+            FindPositionIndexAndCount(comparer, tokens, index, sample?.ToList()!, 0);
+
         private readonly StringComparer _comparer;
         private readonly IReadOnlyList<String?> _context;
-        private readonly IReadOnlyList<Int32> _positions;
+        private readonly IReadOnlyList<Int32> _index;
         private readonly String? _endToken;
-        private readonly Int32 _firstPositionIndex;
+        private readonly Int32 _firstIndexPosition;
         private readonly Boolean _allEnds;
 
         /// <returns>String comparer used by the pen for comparing tokens.</returns>
         protected StringComparer Comparer => _comparer;
 
-        /// <returns>Sorting positions of entries in <see cref="Context" />: if <c>i &lt; j</c>, then <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Positions" />[i]], <see cref="Context" />[<see cref="Positions" />[j]]) &lt;= 0</c>.</returns>
+        /// <returns>Index of entries in <see cref="Context" /> sorted ascendingly (their sorting positions): if <c>i &lt; j</c>, then <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Index" />[i]], <see cref="Context" />[<see cref="Index" />[j]]) &lt;= 0</c>.</returns>
         /// <remarks>
         ///     <para>
-        ///         The order is actually determined by the complete sequence of tokens, and not just by single tokens. For instance, if <c>i != j</c>, but <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Positions" />[i]], <see cref="Context" />[<see cref="Positions" />[j]]) == 0</c> (<c><see cref="Comparer" />.Equals(<see cref="Context" />[<see cref="Positions" />[i]], <see cref="Context" />[<see cref="Positions" />[j]])</c>), then the result of <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Positions" />[i] + 1], <see cref="Context" />[<see cref="Positions" />[j] + 1])</c> is used; if it also evaluates to <c>0</c>, <c><see cref="Positions" />[i] + 2</c> and <c><see cref="Positions" />[j] + 2</c> are checked, and so on. The first position to reach the end (when <c>max(<see cref="Positions" />[i] + n, <see cref="Positions" />[j] + n) == <see cref="Context" />.Count</c> for a non-negative integer <c>n</c>), if all previous positions compared equal, is considered less. Hence <see cref="Positions" /> define a total (linear) lexicographic ordering of <see cref="Context" /> in respect of <see cref="Comparer" />, which may be useful in search algorithms, such as binary search, for finding the position of any non-empty finite sequence of tokens.
+        ///         The order is actually determined by the complete sequence of tokens, and not just by single tokens. For instance, if <c>i != j</c>, but <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Index" />[i]], <see cref="Context" />[<see cref="Index" />[j]]) == 0</c> (<c><see cref="Comparer" />.Equals(<see cref="Context" />[<see cref="Index" />[i]], <see cref="Context" />[<see cref="Index" />[j]])</c>), then the result of <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Index" />[i] + 1], <see cref="Context" />[<see cref="Index" />[j] + 1])</c> is used; if it also evaluates to <c>0</c>, <c><see cref="Index" />[i] + 2</c> and <c><see cref="Index" />[j] + 2</c> are checked, and so on. The first position to reach the end (when <c>max(<see cref="Index" />[i] + n, <see cref="Index" />[j] + n) == <see cref="Context" />.Count</c> for a non-negative integer <c>n</c>), if all previous positions compared equal, is considered less. Hence <see cref="Index" /> defines a total (linear) lexicographic ordering of <see cref="Context" /> in respect of <see cref="Comparer" />, which may be useful in search algorithms, such as binary search, for finding the position of any non-empty finite sequence of tokens.
         ///     </para>
         ///
         ///     <para>
-        ///         The position(s) of ending tokens (<see cref="EndToken" />), if there are any in <see cref="Context" />, are not fixed nor guaranteed (for instance, their positions are not necessarily at the beginning or the end of <see cref="Positions" />). If the ending token is a <c>null</c> or an empty string (<see cref="String.Empty" />), then ending tokens shall be compared less than any other tokens, provided there are no <c>null</c>s in <see cref="Context" /> in the latter case. But, generally speaking, ending tokens' positions are determined by <see cref="Comparer" /> and the values of other tokens in <see cref="Context" />.
+        ///         The position(s) of ending tokens' (<see cref="EndToken" />) indices, if there are any in <see cref="Context" />, are not fixed nor guaranteed (for instance, they are not necessarily at the beginning or the end of <see cref="Index" />). If the ending token is a <c>null</c> or an empty string (<see cref="String.Empty" />), then ending tokens shall be compared less than any other tokens and their indices shall be <em>pushed</em> to the beginning, provided there are no <c>null</c>s in <see cref="Context" /> in the latter case. But, generally speaking, ending tokens' indices are determined by <see cref="Comparer" /> and the values of other tokens in <see cref="Context" />.
         ///     </para>
         /// </remarks>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
-        protected IReadOnlyList<Int32> Positions => _positions;
+        protected IReadOnlyList<Int32> Index => _index;
 
-        /// <returns>Position (index of <see cref="Positions" />) of the first non-ending token (<see cref="EndToken" />) in <see cref="Context" />. If such a token does not exist, the value is the total number of elements in <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</returns>
+        /// <returns>Position of the first non-ending token's (<see cref="EndToken" />) index in <see cref="Context" /> (index of <see cref="Index" />). If such a token does not exist, <see cref="FirstIndexPosition" /> evaluates to the total number of elements in <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</returns>
         /// <remarks>
         ///     <para>
-        ///         This position index points to the position of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ <see cref="Positions" />[<see cref="FirstPositionIndex" />], <see cref="Positions" />[<see cref="FirstPositionIndex" />] + 1, ..., <see cref="Positions" />[<see cref="FirstPositionIndex" />] + n, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens.
+        ///         This index position points to the index of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ <see cref="Index" />[<see cref="FirstIndexPosition" />], <see cref="Index" />[<see cref="FirstIndexPosition" />] + 1, ..., <see cref="Index" />[<see cref="FirstIndexPosition" />] + n, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens.
         ///     </para>
         /// </remarks>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
         /// <seealso cref="EndToken" />
-        /// <seealso cref="Positions" />
-        protected Int32 FirstPositionIndex => _firstPositionIndex;
+        /// <seealso cref="Index" />
+        protected Int32 FirstIndexPosition => _firstIndexPosition;
 
         /// <returns>Tokens of the pen.</returns>
         /// <remarks>
@@ -613,9 +563,9 @@ namespace MagicText
             // Find sorting positions of tokens in context.
             {
                 List<Int32> positionsList = new List<Int32>(Enumerable.Range(0, Context.Count));
-                positionsList.Sort(new PositionSorter(Comparer, Context));
+                positionsList.Sort(new Indexer(Comparer, Context));
                 positionsList.TrimExcess();
-                _positions = positionsList.AsReadOnly();
+                _index = positionsList.AsReadOnly();
             }
 
             // Find the position of the first (non-ending) token.
@@ -623,17 +573,17 @@ namespace MagicText
                 int firstPositionIndexVar;
                 try
                 {
-                    firstPositionIndexVar = Context.Select((new PositionIndexFinder(Positions, new HashSet<String?>(1, comparer) { EndToken })).FindPositionIndex).Where(PositionIndexFinder.IsValidIndex).First();
+                    firstPositionIndexVar = Context.Select((new IndexFinder(Index, new HashSet<String?>(1, comparer) { EndToken })).FindIndex).Where(IndexFinder.IsValidIndex).First();
                 }
                 catch (InvalidOperationException)
                 {
                     firstPositionIndexVar = Context.Count;
                 }
-                _firstPositionIndex = firstPositionIndexVar;
+                _firstIndexPosition = firstPositionIndexVar;
             }
 
             // Check if all tokens are ending tokens.
-            _allEnds = (FirstPositionIndex == Context.Count);
+            _allEnds = (FirstIndexPosition == Context.Count);
         }
 
         /// <summary>
@@ -650,7 +600,7 @@ namespace MagicText
         /// <param name="fromPosition">If set, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen as <c>{ <see cref="Context" />[<paramref name="fromPosition" />], <see cref="Context" />[<paramref name="fromPosition" /> + 1], ..., <see cref="Context" />[<paramref name="fromPosition" /> + max(<paramref name="relevantTokens" />, 1) - 1] }</c> (or fewer if the index exceeds its limitation or an ending token is reached) without calling <paramref name="picker" /> function; otherwise the first token is chosen by immediately calling <paramref name="picker" /> function. The value must be greater than or equal to 0 and less than or equal to the total number of tokens in <see cref="Context" />.</param>
         /// <returns>Query for rendering tokens.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="picker" /> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Parameter <paramref name="relevantTokens" /> is (strictly) negative. Parameter <paramref name="fromPosition" /> is (strictly) negative or (strictly) greater than the total number of tokens in <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). Function <paramref name="picker" /> returns a value outside of the legal range.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Parameter <paramref name="relevantTokens" /> is (strictly) negative, i. e. less than 0. Parameter <paramref name="fromPosition" /> is (strictly) negative or (strictly) greater than the total number of tokens in <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). Function <paramref name="picker" /> returns a value outside of the legal range.</exception>
         /// <remarks>
         ///     <para>
         ///         An extra copy of <paramref name="relevantTokens"/> tokens is kept when generating new tokens. Memory errors may occur if <paramref name="relevantTokens"/> is too large.
@@ -751,7 +701,7 @@ namespace MagicText
                     throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
                 }
 
-                int first = Positions[pick];
+                int first = Index[pick];
                 String? firstToken = first < Context.Count ? Context[first] : EndToken;
                 if (Comparer.Equals(firstToken, EndToken))
                 {
@@ -780,7 +730,7 @@ namespace MagicText
                 }
                 else
                 {
-                    (p, n) = FindPositionIndexAndCount(Comparer, Context, Positions, text, c);
+                    (p, n) = FindPositionIndexAndCount(Comparer, Context, Index, text, c);
                     d = text.Count; // note that `text` shall never hold more than `relevantTokens` tokens
                 }
 
@@ -792,7 +742,7 @@ namespace MagicText
                     throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
                 }
 
-                int next = Positions[p + pick] + d;
+                int next = Index[p + pick] + d;
                 String? nextToken = next < Context.Count ? Context[next] : EndToken;
                 if (Comparer.Equals(nextToken, EndToken))
                 {
@@ -826,7 +776,7 @@ namespace MagicText
         /// <param name="fromPosition">If set, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen as <c>{ <see cref="Context" />[<paramref name="fromPosition" />], <see cref="Context" />[<paramref name="fromPosition" /> + 1], ..., <see cref="Context" />[<paramref name="fromPosition" /> + max(<paramref name="relevantTokens" />, 1) - 1] }</c> (or fewer if the index exceeds its limitation or an ending token is reached) without calling <paramref name="picker" /> function; otherwise the first token is chosen by immediately calling <see cref="System.Random.Next(Int32)"/> method on <paramref name="random" />. The value must be greater than or equal to 0 and less than or equal to the total number of tokens in <see cref="Context" />.</param>
         /// <returns>Query for rendering tokens.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="random" /> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Parameter <paramref name="relevantTokens" /> is (strictly) negative. Parameter <paramref name="fromPosition" /> is (strictly) negative or (strictly) greater than the total number of tokens in <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Parameter <paramref name="relevantTokens" /> is (strictly) negative, i. e. less than 0. Parameter <paramref name="fromPosition" /> is (strictly) negative or (strictly) greater than the total number of tokens in <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</exception>
         /// <remarks>
         ///     <para>
         ///         An extra copy of <paramref name="relevantTokens"/> tokens is kept when generating new tokens. Memory errors may occur if <paramref name="relevantTokens"/> is too large.
@@ -907,7 +857,7 @@ namespace MagicText
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
         /// <param name="fromPosition">If set, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen as <c>{ <see cref="Context" />[<paramref name="fromPosition" />], <see cref="Context" />[<paramref name="fromPosition" /> + 1], ..., <see cref="Context" />[<paramref name="fromPosition" /> + max(<paramref name="relevantTokens" />, 1) - 1] }</c> (or fewer if the index exceeds its limitation or an ending token is reached) without calling <paramref name="picker" /> function; otherwise the first token is chosen by immediately calling <see cref="System.Random.Next(Int32)"/> method on the internal (pseudo-)random number generator (<see cref="Random" />). The value must be greater than or equal to 0 and less than or equal to the total number of tokens in <see cref="Context" />.</param>
         /// <returns>Query for rendering tokens.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Parameter <paramref name="relevantTokens" /> is (strictly) negative. Parameter <paramref name="fromPosition" /> is (strictly) negative or (strictly) greater than the total number of tokens in <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Parameter <paramref name="relevantTokens" /> is (strictly) negative, i. e. less than 0. Parameter <paramref name="fromPosition" /> is (strictly) negative or (strictly) greater than the total number of tokens in <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</exception>
         /// <remarks>
         ///     <para>
         ///         An extra copy of <paramref name="relevantTokens"/> tokens is kept when generating new tokens. Memory errors may occur if <paramref name="relevantTokens"/> is too large.
