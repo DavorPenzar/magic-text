@@ -50,6 +50,10 @@ namespace MagicText
         ///     <para>
         ///         The pattern matches all non-empty continuous groups of white spaces (<c>"\\s"</c>), punctuation symbols (<c>"\\p{P}"</c>) and separator characters (<c>"\\p{Z}"</c>). The pattern is enclosed in (round) brackets to be captured by <see cref="Regex.Split(String)" /> method.
         ///     </para>
+        ///
+        ///     <para>
+        ///         <strong>Nota bene.</strong> If a match occurs exactly at the beginning or the end of the (line of) text to split, the splitting shall yield empty strings at the corresponding end of the input. Empty strings (tokens) may be ignored by passing adequate <see cref="ShatteringOptions" /> to <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods, but this could unintentionally ignore some results of token transformation (via <see cref="Transform" /> function). Although the occurance of empty strings is the case with splitting the input using any regular expression breaking pattern in the described scenario(s), the remark is stated here since a grammatically correct text usually ends with a punctuation symbol, which is considered a breaking point by this breaking pattern.
+        ///     </para>
         /// </summary>
         public const string DefaultBreakPattern = @"([\s\p{P}\p{Z}]+)";
 
@@ -140,7 +144,7 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <param name="break">Regular expression breaker to use.</param>
-        /// <param name="alterOptions">If <c>null</c>, <paramref name="break" />'s options (<see cref="Regex.Options" />) are used (actually, no new <see cref="Regex" /> is constructed); otherwise options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
+        /// <param name="alterOptions">If not set, <paramref name="break" />'s options (<see cref="Regex.Options" />) are used (actually, no new <see cref="Regex" /> is constructed); otherwise options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
         /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="break" /> is <c>null</c>.</exception>
         /// <remarks>
@@ -157,14 +161,14 @@ namespace MagicText
         ///     </code>
         /// </remarks>
         /// <seealso cref="RegexTokeniser.RegexTokeniser(String, Boolean, RegexOptions, Func{String?, String?}?)" />
-        public RegexTokeniser(Regex @break, RegexOptions? alterOptions = null, Func<String?, String?>? transform = null) : base()
+        public RegexTokeniser(Regex @break, Nullable<RegexOptions> alterOptions = default, Func<String?, String?>? transform = null) : base()
         {
             if (@break is null)
             {
                 throw new ArgumentNullException(nameof(@break), BreakNullErrorMessage);
             }
 
-            _break = alterOptions is null ? @break : new Regex(@break.ToString(), (RegexOptions)alterOptions!);
+            _break = alterOptions.HasValue ? new Regex(@break.ToString(), alterOptions.Value) : @break;
             _transform = transform;
         }
 
