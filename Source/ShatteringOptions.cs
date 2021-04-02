@@ -221,19 +221,35 @@ namespace MagicText
         ///         Compute shattering options' hash code.
         ///     </para>
         /// </summary>
+        /// <param name="stringComparer">Comparer used for comparing strings for equality (actually, for retrieving the hash code).</param>
         /// <returns>Hash code.</returns>
-        public override Int32 GetHashCode()
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="stringComparer" /> is <c>null</c>.</exception>
+        public Int32 GetHashCode(IEqualityComparer<String?> stringComparer)
         {
+            if (stringComparer is null)
+            {
+                throw new ArgumentNullException(nameof(stringComparer), StringComparerNullErrorMessage);
+            }
+
             int hashCode = 7;
 
             hashCode = 31 * hashCode + IgnoreEmptyTokens.GetHashCode();
             hashCode = 31 * hashCode + IgnoreLineEnds.GetHashCode();
             hashCode = 31 * hashCode + IgnoreEmptyLines.GetHashCode();
-            hashCode = 31 * hashCode + (lineEndToken is null ? 0 : lineEndToken.GetHashCode());
-            hashCode = 31 * hashCode + (emptyLineToken is null ? 0 : emptyLineToken.GetHashCode());
+            hashCode = 31 * hashCode + stringComparer.GetHashCode(lineEndToken);
+            hashCode = 31 * hashCode + stringComparer.GetHashCode(EmptyLineToken);
 
             return hashCode;
         }
+
+        /// <summary>
+        ///     <para>
+        ///         Compute shattering options' hash code.
+        ///     </para>
+        /// </summary>
+        /// <returns>Hash code.</returns>
+        public override Int32 GetHashCode() =>
+            GetHashCode(EqualityComparer<String?>.Default);
 
         /// <summary>
         ///     <para>

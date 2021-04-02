@@ -134,7 +134,7 @@ namespace MagicText
         ///         Exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.
         ///     </para>
         /// </remarks>
-        public RegexTokeniser(String breakPattern, Boolean escape = false, RegexOptions options = RegexOptions.None, Func<String?, String?>? transform = null) : this(breakPattern is null ? throw new ArgumentNullException(nameof(breakPattern), RegexPatternNullErrorMessage) : new Regex(escape ? Regex.Escape(breakPattern) : breakPattern, options), null, transform)
+        public RegexTokeniser(String breakPattern, Boolean escape = false, RegexOptions options = RegexOptions.None, Func<String?, String?>? transform = null) : this(@break: breakPattern is null ? throw new ArgumentNullException(nameof(breakPattern), RegexPatternNullErrorMessage) : new Regex(escape ? Regex.Escape(breakPattern) : breakPattern, options), transform: transform)
         {
         }
 
