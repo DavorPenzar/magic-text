@@ -579,15 +579,10 @@ namespace MagicText
 
             // Copy context.
             {
-                if (intern)
-                {
-                    context = context.Select(t => t is null ? null : String.Intern(t));
-                }
-                List<String?> contextList = new List<String?>(context);
+                List<String?> contextList = new List<String?>(intern ? context.Select(t => t is null ? null : String.Intern(t)) : context);
                 contextList.TrimExcess();
                 _context = contextList.AsReadOnly();
             }
-
 
             // Find sorting positions of tokens in context.
             {
@@ -690,7 +685,6 @@ namespace MagicText
             {
                 throw new ArgumentNullException(nameof(picker), PickerNullErrorMessage);
             }
-
             if (relevantTokens < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(relevantTokens), RelevantTokensOutOfRangeErrorMessage);
@@ -864,15 +858,8 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />
         /// <seealso cref="Render(Int32, Nullable{Int32})" />
-        public IEnumerable<String?> Render(Int32 relevantTokens, System.Random random, Nullable<Int32> fromPosition = default)
-        {
-            if (random is null)
-            {
-                throw new ArgumentNullException(nameof(random), RandomNullErrorMessage);
-            }
-
-            return Render(relevantTokens, random.Next, fromPosition);
-        }
+        public IEnumerable<String?> Render(Int32 relevantTokens, System.Random random, Nullable<Int32> fromPosition = default) =>
+            random is null ? throw new ArgumentNullException(nameof(random), RandomNullErrorMessage) : Render(relevantTokens, random.Next, fromPosition);
 
         /// <summary>
         ///     <para>

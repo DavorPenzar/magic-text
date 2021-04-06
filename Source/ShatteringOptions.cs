@@ -207,7 +207,7 @@ namespace MagicText
         /// <param name="ignoreEmptyLines">Inidcator if empty lines should be ignored.</param>
         /// <param name="lineEndToken">Token to represent a line end.</param>
         /// <param name="emptyLineToken">Token to represent an empty line.</param>
-        public void Deconstruct(out Boolean ignoreEmptyTokens, out Boolean ignoreLineEnds, out Boolean ignoreEmptyLines, out String? lineEndToken, out String? emptyLineToken)
+        public virtual void Deconstruct(out Boolean ignoreEmptyTokens, out Boolean ignoreLineEnds, out Boolean ignoreEmptyLines, out String? lineEndToken, out String? emptyLineToken)
         {
             ignoreEmptyTokens = IgnoreEmptyTokens;
             ignoreLineEnds = IgnoreLineEnds;
@@ -222,9 +222,9 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <param name="stringComparer">Comparer used for comparing strings for equality (actually, for retrieving the hash code).</param>
-        /// <returns>Hash code.</returns>
+        /// <returns>Hash code of the options.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="stringComparer" /> is <c>null</c>.</exception>
-        public Int32 GetHashCode(IEqualityComparer<String?> stringComparer)
+        public virtual Int32 GetHashCode(IEqualityComparer<String?> stringComparer)
         {
             if (stringComparer is null)
             {
@@ -247,8 +247,8 @@ namespace MagicText
         ///         Compute shattering options' hash code.
         ///     </para>
         /// </summary>
-        /// <returns>Hash code.</returns>
-        public override Int32 GetHashCode() =>
+        /// <returns>Hash code of the options.</returns>
+        public sealed override Int32 GetHashCode() =>
             GetHashCode(EqualityComparer<String?>.Default);
 
         /// <summary>
@@ -280,7 +280,7 @@ namespace MagicText
         /// </summary>
         /// <param name="other">Another instance of <see cref="ShatteringOptions" />.</param>
         /// <returns>If shattering options are equal according to all relevant values, <c>true</c>; <c>false</c>otherwise.</returns>
-        public virtual Boolean Equals(ShatteringOptions? other) =>
+        public Boolean Equals(ShatteringOptions? other) =>
             Equals(other, EqualityComparer<String?>.Default);
 
         /// <summary>
@@ -290,7 +290,7 @@ namespace MagicText
         /// </summary>
         /// <param name="obj">Another <see cref="Object" />.</param>
         /// <returns>If <paramref name="obj" /> is also shattering options and the shattering options are equal according to all relevant values, <c>true</c>; <c>false</c>otherwise.</returns>
-        public override bool Equals(Object? obj)
+        public sealed override bool Equals(Object? obj)
         {
             try
             {

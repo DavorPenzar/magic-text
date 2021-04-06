@@ -116,7 +116,6 @@ namespace MagicText
         /// </summary>
         public RegexTokeniser() : this(DefaultBreak)
         {
-            _break = DefaultBreak;
         }
 
         /// <summary>
@@ -160,7 +159,7 @@ namespace MagicText
         ///         <see cref="RegexTokeniser" />.RegexTokeniser(breakPattern: @<paramref name="break" />.ToString(), escape: false, options: <paramref name="alterOptions" /> ?? @<paramref name="break" />.Options, transform: <paramref name="transform" />)
         ///     </code>
         /// </remarks>
-        /// <seealso cref="RegexTokeniser.RegexTokeniser(String, Boolean, RegexOptions, Func{String?, String?}?)" />
+        /// <seealso cref="RegexTokeniser(String, Boolean, RegexOptions, Func{String?, String?}?)" />
         public RegexTokeniser(Regex @break, Nullable<RegexOptions> alterOptions = default, Func<String?, String?>? transform = null) : base()
         {
             if (@break is null)
@@ -189,7 +188,7 @@ namespace MagicText
         ///         The returned enumerable is merely a query. If multiple enumerations over it should be performed, it is advisable to convert it to a fully built container beforehand, such as <see cref="List{T}" /> via <see cref="List{T}.List(IEnumerable{T})" /> constructor or <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.
         ///     </para>
         /// </remarks>
-        override protected IEnumerable<String?> ShatterLine(String line)
+        protected override IEnumerable<String?> ShatterLine(String line)
         {
             if (line is null)
             {

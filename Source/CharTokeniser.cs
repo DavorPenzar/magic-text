@@ -11,7 +11,7 @@ namespace MagicText
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         Empty tokens are considered those characters that yield <c>true</c> when converted to strings via <see cref="Char.ToString()" /> method and checked via <see cref="String.IsNullOrEmpty(String)" /> method.
+    ///         Empty tokens are considered those characters that yield <c>true</c> when converted to strings via <see cref="Char.ToString(Char)" /> method and checked via <see cref="String.IsNullOrEmpty(String)" /> method.
     ///     </para>
     ///
     ///     <para>
@@ -42,7 +42,7 @@ namespace MagicText
         ///         The returned enumerable is merely a query. If multiple enumerations over it should be performed, it is advisable to convert it to a fully built container beforehand, such as <see cref="List{T}" /> via <see cref="List{T}.List(IEnumerable{T})" /> constructor or <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.
         ///     </para>
         /// </remarks>
-        override protected IEnumerable<String?> ShatterLine(String line) =>
-            line?.Select(c => c.ToString()) ?? throw new ArgumentNullException(nameof(line), LineNullErrorMessage);
+        protected override IEnumerable<String?> ShatterLine(String line) =>
+            line?.Select(Char.ToString) ?? throw new ArgumentNullException(nameof(line), LineNullErrorMessage);
     }
 }

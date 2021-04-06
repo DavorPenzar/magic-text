@@ -173,5 +173,36 @@ namespace MagicText
 
             return @this;
         }
+
+        /// <summary>
+        ///     <para>
+        ///         Apply asynchronous <paramref name="action" /> on an object and return it.
+        ///     </para>
+        /// </summary>
+        /// <typeparam name="T">Type of the object on which <paramref name="action" /> should be applied.</typeparam>
+        /// <param name="this">Object on which <paramref name="action" /> should be applied.</param>
+        /// <param name="action">Action to apply on object <paramref name="this" />.</param>
+        /// <returns>Task that represents the operation of applying <paramref name="action" /> on object <paramref name="this" />. The value of <see cref="Task{TResult}.Result" /> is object <paramref name="this" />.</returns>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="action" /> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>
+        ///         It is not checked whether <paramref name="this" /> is <c>null</c> or not before passing it to <paramref name="action" />.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         Exceptions thrown by <paramref name="action" /> are not caught.
+        ///     </para>
+        /// </remarks>
+        public static async Task<T> ApplyActionAsync<T>(this T @this, Func<T, ConfiguredTaskAwaitable> action)
+        {
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action), ActionNullErrorMessage);
+            }
+
+            await action(@this);
+
+            return @this;
+        }
     }
 }
