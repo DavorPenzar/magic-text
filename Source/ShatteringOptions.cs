@@ -99,7 +99,7 @@ namespace MagicText
             get => ignoreEmptyLines;
             set
             {
-                ignoreEmptyLines = true;
+                ignoreEmptyLines = value;
             }
         }
 

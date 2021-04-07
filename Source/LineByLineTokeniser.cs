@@ -39,6 +39,50 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
+        ///         Auxiliary predicate wrapper that exposes a predicate's negation.
+        ///     </para>
+        /// </summary>
+        /// <typeparam name="T">Type of the parameter of the predicate that this class encapsulates.</typeparam>
+        private class NegativePredicate<T>
+        {
+            private const string PositivePredicateNullErrorMessage = "Positive predicate may not be `null`.";
+
+            private readonly Func<T, Boolean> _positivePredicate;
+
+            /// <returns>Predicate that is negated through <see cref="Evaluate(T)" /> method.</returns>
+            public Func<T, Boolean> PositivePredicate =>
+                _positivePredicate;
+
+            /// <summary>
+            ///     <para>
+            ///         Initialise a negative wrapper of a predicate.
+            ///     </para>
+            /// </summary>
+            /// <param name="positivePredicate">Predicate that is negated through <see cref="Evaluate(T)" /> method.</param>
+            /// <exception cref="ArgumentNullException">Parameter <paramref name="positivePredicate" /> is <c>null</c>.</exception>
+            public NegativePredicate(Func<T, Boolean> positivePredicate)
+            {
+                _positivePredicate = positivePredicate ?? throw new ArgumentNullException(nameof(positivePredicate), PositivePredicateNullErrorMessage);
+            }
+
+            /// <summary>
+            ///     <para>
+            ///         Check negation of the evaluation of the argument via encapsulated predicate (<see cref="PositivePredicate" />).
+            ///     </para>
+            /// </summary>
+            /// <param name="arg">The parameter to check.</param>
+            /// <returns>Boolean negation (<c>true</c> to <c>false</c> and vice versa) of the evaluation of <paramref name="arg" /> via encapsulated predicate (<see cref="PositivePredicate" />). Simply put, the method returns <c>!<see cref="PositivePredicate" />(<paramref name="arg" />)</c>.</returns>
+            /// <remarks>
+            ///     <para>
+            ///         Exceptions thrown by encapsuplated predicate (<see cref="PositivePredicate" />) are not caught.
+            ///     </para>
+            /// </remarks>
+            public Boolean Evaluate(T arg) =>
+                !PositivePredicate(arg);
+        }
+
+        /// <summary>
+        ///     <para>
         ///         Always indicate the token as non-empty.
         ///     </para>
         /// </summary>
@@ -48,9 +92,13 @@ namespace MagicText
             false;
 
         private readonly Func<String?, Boolean> _isEmptyToken;
+        private readonly Func<String?, Boolean> _isNonEmptyToken;
 
-        /// <returns>Function to check if a token is empty: it returns <c>true</c> if the token to check is empty.</returns>
+        /// <returns>Function to check if a token is empty: it returns <c>true</c> if and only if the token to check is empty.</returns>
         protected Func<String?, Boolean> IsEmptyToken => _isEmptyToken;
+
+        /// <returns>Function to check if a token is non-empty: it returns <c>true</c> if and only if the token to check is non-empty.</returns>
+        protected Func<String?, Boolean> IsNonEmptyToken => _isNonEmptyToken;
 
         /// <summary>
         ///     <para>
@@ -71,6 +119,7 @@ namespace MagicText
         protected LineByLineTokeniser(Func<String?, Boolean> isEmptyToken)
         {
             _isEmptyToken = isEmptyToken ?? throw new ArgumentNullException(nameof(isEmptyToken), IsEmptyTokenNullErrorMessage);
+            _isNonEmptyToken = (new NegativePredicate<String?>(IsEmptyToken)).Evaluate;
         }
 
         /// <summary>
@@ -146,7 +195,7 @@ namespace MagicText
                 IEnumerable<String?> lineTokens = ShatterLine(line) ?? throw new NullReferenceException(LineTokensNullErrorMessage);
                 if (options.IgnoreEmptyTokens)
                 {
-                    lineTokens = lineTokens.Where(t => !IsEmptyToken(t));
+                    lineTokens = lineTokens.Where(IsNonEmptyToken);
                 }
 
                 // Return appropriate tokens and update `addLineEnd`.
@@ -203,6 +252,10 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
+        ///         The enumeration may be cancelled via <see cref="TaskAsyncEnumerableExtensions.WithCancellation{T}(IAsyncEnumerable{T}, CancellationToken)" /> extension method as parameter <paramref name="cancellationToken" /> is set with <see cref="EnumeratorCancellationAttribute" /> attribute.
+        ///     </para>
+        ///
+        ///     <para>
         ///         Usually the default <c>false</c> value of <paramref name="continueTasksOnCapturedContext" /> is desirable as it may optimise the asynchronous shattering process. However, in some cases only the original context might have reading access to the resource provided by <paramref name="input" />, and thus <paramref name="continueTasksOnCapturedContext" /> should be set to <c>true</c> to avoid errors.
         ///     </para>
         ///
@@ -251,7 +304,7 @@ namespace MagicText
                 IEnumerable<String?> lineTokens = ShatterLine(line) ?? throw new NullReferenceException(LineTokensNullErrorMessage);
                 if (options.IgnoreEmptyTokens)
                 {
-                    lineTokens = lineTokens.Where(t => !IsEmptyToken(t));
+                    lineTokens = lineTokens.Where(IsNonEmptyToken);
                 }
 
                 // Return appropriate tokens and update `addLineEnd`.

@@ -57,7 +57,7 @@ namespace MagicText
         /// </summary>
         public const string DefaultBreakPattern = @"([\s\p{P}\p{Z}]+)";
 
-        private static readonly Regex _DefaultBreak;
+        private static readonly Regex _defaultBreak;
 
         /// <summary>
         ///     <para>
@@ -65,7 +65,7 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <returns>Default regular expression breaker.</returns>
-        protected static Regex DefaultBreak => _DefaultBreak;
+        protected static Regex DefaultBreak => _defaultBreak;
 
         /// <summary>
         ///     <para>
@@ -74,7 +74,7 @@ namespace MagicText
         /// </summary>
         static RegexTokeniser()
         {
-            _DefaultBreak = new Regex(DefaultBreakPattern, RegexOptions.Compiled);
+            _defaultBreak = new Regex(DefaultBreakPattern, RegexOptions.Compiled);
         }
 
         /// <summary>
