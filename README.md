@@ -12,7 +12,7 @@ Tokens extracted from a text block are usually words + punctuation + white space
 
 1.  passing desired [```ShatteringOptions```](Source/ShatteringOptions.cs) to tokenisation methods,
 2.  constructing a [```RegexTokeniser```](Source/RegexTokeniser.cs) with a custom regular expression break pattern and potentially with a transformation method,
-3.  implementing a custom extension of [```LineByLineTokeniser```](Source/LineByLineTokeniser.cs) abstract class or implementing the complete [```ITokeniser```](Source/ITokeniser.cs) interface.
+3.  implementing a custom extension of [```LineByLineTokeniser```](Source/LineByLineTokeniser.cs) abstract class or implementing complete [```ITokeniser```](Source/ITokeniser.cs) interface.
 
 Once extracted, the collection of tokens (in the order as read from the input) is called ***context*** in the rest of this document. The terminology is inspired by actual context of words in usual forms of text.
 
