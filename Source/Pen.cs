@@ -303,6 +303,21 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
+        ///         Retrieve the system's reference to the specified nullable string.
+        ///     </para>
+        /// </summary>
+        /// <param name="str">Nullable string to search for in the intern pool.</param>
+        /// <returns>If <paramref name="str" /> is <c>null</c>, <c>null</c> is returned as well. Otherwise the system's reference to <paramref name="str" /> is returned if it is returned (if not, a new reference to a string with the value of <paramref name="str" />).</returns>
+        /// <remarks>
+        ///     <para>
+        ///         Unlike <see cref="String.Intern(String)" /> method, this method does not throw <see cref="ArgumentNullException" /> if the argument is <c>null</c>; instead, <c>null</c> is simply returned. However, <see cref="String.Intern(String)" /> method is indeed called for non-<c>null</c> arguments and therefore strings interned via this method are interned in the same system's intern pool of strings as strings interned via <see cref="String.Intern(String)" /> method (and vice versa).
+        ///     </para>
+        /// </remarks>
+        protected static String? InternNullableString(String? str) =>
+            str is null ? str : String.Intern(str);
+
+        /// <summary>
+        ///     <para>
         ///         Generate non-negative (pseudo-)random integer using internal (pseudo-)random number generator (<see cref="Random" />).
         ///     </para>
         /// </summary>
@@ -579,7 +594,7 @@ namespace MagicText
 
             // Copy context.
             {
-                List<String?> contextList = new List<String?>(intern ? context.Select(t => t is null ? null : String.Intern(t)) : context);
+                List<String?> contextList = new List<String?>(intern ? context.Select(InternNullableString) : context);
                 contextList.TrimExcess();
                 _context = contextList.AsReadOnly();
             }
