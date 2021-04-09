@@ -8,7 +8,7 @@ namespace MagicText
 {
     /// <summary>
     ///     <para>
-    ///         Options for <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods.
+    ///         Options for <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods, as well as extension methods from <see cref="TokeniserExtensions" />.
     ///     </para>
     /// </summary>
     public class ShatteringOptions : IEquatable<ShatteringOptions>, ICloneable
@@ -21,6 +21,18 @@ namespace MagicText
 
         public static Boolean operator !=(ShatteringOptions? left, ShatteringOptions? right) =>
             !(left == right);
+
+        /// <returns>The default shattering options.</returns>
+        /// <remarks>
+        ///     <para>
+        ///         Retrieving the value of this property is <strong>exactly the same</strong> as creating shattering options using <see cref="ShatteringOptions.ShatteringOptions" /> constructor. The property is provided merely to enable a more readable and explicit code when handling <c>null</c>-options in the implementation of <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         The property always returns a new reference (to newly constructed default shattering options). Hence changes made to one options returned by the property do not affect the others. Also, <c><see cref="Object" />.ReferenceEquals(<see cref="Default" />, <see cref="Default" />)</c> never evaluates to <c>true</c>, although <c><see cref="Default" />.Equals(<see cref="Default" />)</c> and <c><see cref="Default" /> == <see cref="Default" /></c> evaluate to <c>true</c> because of the overloads of methods and operators.
+        ///     </para>
+        /// </remarks>
+        public static ShatteringOptions Default => new ShatteringOptions();
 
         private bool ignoreEmptyTokens;
         private bool ignoreLineEnds;

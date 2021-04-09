@@ -12,7 +12,7 @@ namespace MagicText
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         If the pen should choose from tokens from multiple sources, the tokens should be concatenated into a single enumerable <c>context</c> passed to the constructor. To prevent overflowing from one source to another (e. g. if the last token from the first source is not a contextual predecessor of the first token from the second source), an ending token (<see cref="EndToken" />) should be put between the sources' tokens in the final enumerable <c>tokens</c>. Choosing an ending token in <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, Random, Nullable{Int32})" /> or <see cref="Render(Int32, Nullable{Int32})" /> methods shall cause the rendering to stop—the same as when a successor of the last entry in tokens is chosen.
+    ///         If the pen should choose from tokens from multiple sources, the tokens should be concatenated into a single enumerable <c>context</c> passed to the constructor. To prevent overflowing from one source to another (e. g. if the last token from the first source is not a contextual predecessor of the first token from the second source), an ending token (<see cref="SentinelToken" />) should be put between the sources' tokens in the final enumerable <c>tokens</c>. Choosing an ending token in <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, Random, Nullable{Int32})" /> or <see cref="Render(Int32, Nullable{Int32})" /> methods shall cause the rendering to stop—the same as when a successor of the last entry in tokens is chosen.
     ///     </para>
     ///
     ///     <para>
@@ -69,7 +69,7 @@ namespace MagicText
 
             /// <summary>
             ///     <para>
-            ///         Create a position sorter with provided values.
+            ///         Create a position sorter with provided options.
             ///     </para>
             /// </summary>
             /// <param name="comparer">String comparer. Tokens shall be compared (e. g. for equality) by <paramref name="comparer" />.</param>
@@ -191,7 +191,7 @@ namespace MagicText
 
             /// <summary>
             ///     <para>
-            ///         Create an index finder with provided values.
+            ///         Create an index finder with provided options.
             ///     </para>
             /// </summary>
             /// <param name="positions">Sorting index of tokens.</param>
@@ -506,9 +506,9 @@ namespace MagicText
         private readonly StringComparer _comparer;
         private readonly IReadOnlyList<String?> _context;
         private readonly IReadOnlyList<Int32> _index;
-        private readonly String? _endToken;
+        private readonly String? _sentinelToken;
         private readonly Int32 _firstIndexPosition;
-        private readonly Boolean _allEnds;
+        private readonly Boolean _allSentinels;
 
         /// <returns>String comparer used by the pen for comparing tokens.</returns>
         protected StringComparer Comparer => _comparer;
@@ -520,22 +520,22 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         The position(s) of ending tokens' (<see cref="EndToken" />) indices, if there are any in <see cref="Context" />, are not fixed nor guaranteed (for instance, they are not necessarily at the beginning or the end of <see cref="Index" />). If the ending token is a <c>null</c> or an empty string (<see cref="String.Empty" />), then ending tokens shall be compared less than any other tokens and their indices shall be <em>pushed</em> to the beginning, provided there are no <c>null</c>s in <see cref="Context" /> in the latter case. But, generally speaking, ending tokens' indices are determined by <see cref="Comparer" /> and the values of other tokens in <see cref="Context" />.
+        ///         The position(s) of ending tokens' (<see cref="SentinelToken" />) indices, if there are any in <see cref="Context" />, are not fixed nor guaranteed (for instance, they are not necessarily at the beginning or the end of <see cref="Index" />). If the ending token is <c>null</c> or an empty string (<see cref="String.Empty" />), then ending tokens shall be compared less than any other tokens and their indices shall be <em>pushed</em> to the beginning, provided there are no <c>null</c>s in <see cref="Context" /> in the latter case. But, generally speaking, ending tokens' indices are determined by <see cref="Comparer" /> and the values of other tokens in <see cref="Context" />.
         ///     </para>
         /// </remarks>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
         protected IReadOnlyList<Int32> Index => _index;
 
-        /// <returns>Position of the first non-ending token's (<see cref="EndToken" />) index in <see cref="Context" /> (index of <see cref="Index" />). If such a token does not exist, <see cref="FirstIndexPosition" /> evaluates to the total number of elements in <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</returns>
+        /// <returns>Position of the first non-ending token's (<see cref="SentinelToken" />) index in <see cref="Context" /> (index of <see cref="Index" />). If such a token does not exist, <see cref="FirstIndexPosition" /> evaluates to the total number of elements in <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</returns>
         /// <remarks>
         ///     <para>
-        ///         This index position points to the index of the <strong>actual</strong> first non-ending token (<see cref="EndToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ <see cref="Index" />[<see cref="FirstIndexPosition" />], <see cref="Index" />[<see cref="FirstIndexPosition" />] + 1, ..., <see cref="Index" />[<see cref="FirstIndexPosition" />] + n, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens.
+        ///         This index position points to the index of the <strong>actual</strong> first non-ending token (<see cref="SentinelToken" />) in <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of <see cref="Comparer" />. Hence <c>{ <see cref="Index" />[<see cref="FirstIndexPosition" />], <see cref="Index" />[<see cref="FirstIndexPosition" />] + 1, ..., <see cref="Index" />[<see cref="FirstIndexPosition" />] + n, ... }</c> enumerates <see cref="Context" /> from the beginning by ignoring potential initial ending tokens.
         ///     </para>
         /// </remarks>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
-        /// <seealso cref="EndToken" />
+        /// <seealso cref="SentinelToken" />
         /// <seealso cref="Index" />
         protected Int32 FirstIndexPosition => _firstIndexPosition;
 
@@ -554,30 +554,30 @@ namespace MagicText
         ///     </para>
         /// </remarks>
         /// <seealso cref="Comparer" />
-        public String? EndToken => _endToken;
+        public String? SentinelToken => _sentinelToken;
 
-        /// <returns>Indicator of all tokens in <see cref="Context" /> being equal to <see cref="EndToken" /> (as compared by <see cref="Comparer" />): <c>true</c> if equal, <c>false</c> otherwise.</returns>
+        /// <returns>Indicator of all tokens in <see cref="Context" /> being equal to the ending token (<see cref="SentinelToken" />) (as compared by <see cref="Comparer" />): <c>true</c> if equal, <c>false</c> otherwise.</returns>
         /// <remarks>
         ///     <para>
-        ///         If <see cref="Context" /> is empty, <see cref="AllEnds" /> is <c>true</c>. This coincides with mathematical logic of empty sets.
+        ///         If <see cref="Context" /> is empty, <see cref="AllSentinels" /> is <c>true</c>. This coincides with mathematical logic of empty sets.
         ///     </para>
         /// </remarks>
         /// <seealso cref="Context" />
-        /// <seealso cref="EndToken" />
+        /// <seealso cref="SentinelToken" />
         /// <seealso cref="Comparer" />
-        public Boolean AllEnds => _allEnds;
+        public Boolean AllSentinels => _allSentinels;
 
         /// <summary>
         ///     <para>
-        ///         Create a pen with provided values.
+        ///         Create a pen with provided options.
         ///     </para>
         /// </summary>
         /// <param name="context">Input tokens. Random text shall be generated based on <paramref name="context" />: both by picking only from <paramref name="context" /> and by using the order of tokens in <paramref name="context" />.</param>
-        /// <param name="endToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
+        /// <param name="sentinelToken">Ending token. See <em>Remarks</em> of <see cref="Pen" /> for clarification.</param>
         /// <param name="comparer">String comparer. Tokens shall be compared (e. g. for equality) by <paramref name="comparer" />. If <c>null</c>, <see cref="StringComparer.Ordinal" /> is used.</param>
         /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="context" /> is <c>null</c>.</exception>
-        public Pen(IEnumerable<String?> context, String? endToken = null, StringComparer? comparer = null, Boolean intern = false)
+        public Pen(IEnumerable<String?> context, String? sentinelToken = null, StringComparer? comparer = null, Boolean intern = false)
         {
             if (context is null)
             {
@@ -586,7 +586,7 @@ namespace MagicText
 
             // Copy comparer and ending token.
             _comparer = comparer ?? StringComparer.Ordinal;
-            _endToken = intern ? InternNullableString(endToken) : endToken;
+            _sentinelToken = intern ? InternNullableString(sentinelToken) : sentinelToken;
 
             // Copy context.
             {
@@ -608,7 +608,7 @@ namespace MagicText
                 int firstPositionIndexVar;
                 try
                 {
-                    firstPositionIndexVar = Context.Select((new IndexFinder(Index, new HashSet<String?>(1, comparer) { EndToken })).FindIndex).Where(IndexFinder.IsValidIndex).First();
+                    firstPositionIndexVar = Context.Select((new IndexFinder(Index, new HashSet<String?>(1, comparer) { SentinelToken })).FindIndex).Where(IndexFinder.IsValidIndex).First();
                 }
                 catch (InvalidOperationException)
                 {
@@ -618,7 +618,7 @@ namespace MagicText
             }
 
             // Check if all tokens are ending tokens.
-            _allEnds = (FirstIndexPosition == Context.Count);
+            _allSentinels = (FirstIndexPosition == Context.Count);
         }
 
         /// <summary>
@@ -627,7 +627,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         If <paramref name="fromPosition" /> is set, the first <c>max(<paramref name="relevantTokens" />, 1)</c> tokens are chosen accordingly; otherwise they are chosen by calling <paramref name="picker" /> function. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <paramref name="picker" /> function. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
+        ///         If <paramref name="fromPosition" /> is set, the first <c>max(<paramref name="relevantTokens" />, 1)</c> tokens are chosen accordingly; otherwise they are chosen by calling <paramref name="picker" /> function. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <paramref name="picker" /> function. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="SentinelToken" />) is chosen—the ending tokens are not rendered.
         ///     </para>
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens. The value must be greater than or equal to 0.</param>
@@ -717,8 +717,8 @@ namespace MagicText
                 int i;
                 for ((next, i) = ValueTuple.Create(fromPosition.Value, 0); i < text.Capacity; ++next, ++i)
                 {
-                    String? nextToken = next < Context.Count ? Context[next] : EndToken;
-                    if (Comparer.Equals(nextToken, EndToken))
+                    String? nextToken = next < Context.Count ? Context[next] : SentinelToken;
+                    if (Comparer.Equals(nextToken, SentinelToken))
                     {
                         yield break;
                     }
@@ -736,8 +736,8 @@ namespace MagicText
                 }
 
                 int first = pick < Context.Count ? Index[pick] : Context.Count;
-                String? firstToken = first < Context.Count ? Context[first] : EndToken;
-                if (Comparer.Equals(firstToken, EndToken))
+                String? firstToken = first < Context.Count ? Context[first] : SentinelToken;
+                if (Comparer.Equals(firstToken, SentinelToken))
                 {
                     yield break;
                 }
@@ -777,8 +777,8 @@ namespace MagicText
                 }
 
                 int next = Index[p + pick] + d;
-                String? nextToken = next < Context.Count ? Context[next] : EndToken;
-                if (Comparer.Equals(nextToken, EndToken))
+                String? nextToken = next < Context.Count ? Context[next] : SentinelToken;
+                if (Comparer.Equals(nextToken, SentinelToken))
                 {
                     yield break;
                 }
@@ -802,7 +802,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         If <paramref name="fromPosition" /> is set, the first <c>max(<paramref name="relevantTokens" />, 1)</c> tokens are chosen accordingly; otherwise they are chosen by calling <see cref="System.Random.Next(Int32)" /> method of <paramref name="random" />. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="System.Random.Next(Int32)" /> method of <paramref name="random" />. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
+        ///         If <paramref name="fromPosition" /> is set, the first <c>max(<paramref name="relevantTokens" />, 1)</c> tokens are chosen accordingly; otherwise they are chosen by calling <see cref="System.Random.Next(Int32)" /> method of <paramref name="random" />. Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="System.Random.Next(Int32)" /> method of <paramref name="random" />. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="SentinelToken" />) is chosen—the ending tokens are not rendered.
         ///     </para>
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
@@ -878,7 +878,7 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         If <paramref name="fromPosition" /> is set, the first <c>max(<paramref name="relevantTokens" />, 1)</c> tokens are chosen accordingly; otherwise they are chosen by calling <see cref="System.Random.Next(Int32)" /> method of an internal <see cref="System.Random" /> object (<see cref="System.Random" />). Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="System.Random.Next(Int32)" /> method of the internal <see cref="System.Random" /> object. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="EndToken" />) is chosen—the ending tokens are not rendered.
+        ///         If <paramref name="fromPosition" /> is set, the first <c>max(<paramref name="relevantTokens" />, 1)</c> tokens are chosen accordingly; otherwise they are chosen by calling <see cref="System.Random.Next(Int32)" /> method of an internal <see cref="System.Random" /> object (<see cref="System.Random" />). Each consecutive token is chosen by observing the most recent <paramref name="relevantTokens" /> tokens (or the number of generated tokens if <paramref name="relevantTokens" /> tokens have not yet been generated) and choosing one of the possible successors by calling <see cref="System.Random.Next(Int32)" /> method of the internal <see cref="System.Random" /> object. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="SentinelToken" />) is chosen—the ending tokens are not rendered.
         ///     </para>
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>

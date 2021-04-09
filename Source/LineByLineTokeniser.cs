@@ -49,7 +49,7 @@ namespace MagicText
 
             private readonly Func<T, Boolean> _positivePredicate;
 
-            /// <returns>Predicate that is negated through <see cref="Evaluate(T)" /> method.</returns>
+            /// <returns>Predicate that is negated through <see cref="EvaluateNegation(T)" /> method.</returns>
             public Func<T, Boolean> PositivePredicate => _positivePredicate;
 
             /// <summary>
@@ -57,7 +57,7 @@ namespace MagicText
             ///         Create a negative wrapper of a predicate.
             ///     </para>
             /// </summary>
-            /// <param name="positivePredicate">Predicate that is negated through <see cref="Evaluate(T)" /> method.</param>
+            /// <param name="positivePredicate">Predicate that is negated through <see cref="EvaluateNegation(T)" /> method.</param>
             /// <exception cref="ArgumentNullException">Parameter <paramref name="positivePredicate" /> is <c>null</c>.</exception>
             public NegativePredicateWrapper(Func<T, Boolean> positivePredicate)
             {
@@ -66,7 +66,7 @@ namespace MagicText
 
             /// <summary>
             ///     <para>
-            ///         Check negation of the evaluation of the argument via encapsulated predicate (<see cref="PositivePredicate" />).
+            ///         Negate the evaluation of the argument via encapsulated predicate (<see cref="PositivePredicate" />).
             ///     </para>
             /// </summary>
             /// <param name="arg">The parameter to check.</param>
@@ -76,7 +76,7 @@ namespace MagicText
             ///         Exceptions thrown by the encapsuplated predicate (<see cref="PositivePredicate" />) are not caught.
             ///     </para>
             /// </remarks>
-            public Boolean Evaluate(T arg) =>
+            public Boolean EvaluateNegation(T arg) =>
                 !PositivePredicate(arg);
         }
 
@@ -118,7 +118,7 @@ namespace MagicText
         protected LineByLineTokeniser(Func<String?, Boolean> isEmptyToken)
         {
             _isEmptyToken = isEmptyToken ?? throw new ArgumentNullException(nameof(isEmptyToken), IsEmptyTokenNullErrorMessage);
-            _isNonEmptyToken = (new NegativePredicateWrapper<String?>(IsEmptyToken)).Evaluate;
+            _isNonEmptyToken = (new NegativePredicateWrapper<String?>(IsEmptyToken)).EvaluateNegation;
         }
 
         /// <summary>
@@ -146,19 +146,21 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <param name="input">Reader for reading the input text.</param>
-        /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
+        /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <returns>Query to enumerate tokens (in the order they were read) read from <paramref name="input" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
         /// <exception cref="NullReferenceException">Method <see cref="ShatterLine(String)" /> returns <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
-        ///         Returned enumerable is merely a query for enumerating tokens to allow simultaneously reading and enumerating tokens from <paramref name="input" />. If a fully built container is needed, consider using <see cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" /> extension method instead to improve performance and avoid accidentally enumerating the query after disposing <paramref name="input" />.
+        ///         Returned enumerable is merely a query for enumerating tokens (<em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from <paramref name="input" />. If a fully built container is needed, consider using <see cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" /> extension method instead to improve performance and avoid accidentally enumerating the query after disposing <paramref name="input" />.
         ///     </para>
         ///
         ///     <para>
         ///         The method returns the equivalent enumeration of tokens as <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method called with the same parameters.
         ///     </para>
         /// </remarks>
+        /// <seealso cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
+        /// <seealso cref="ShatteringOptions" />
         public IEnumerable<String?> Shatter(TextReader input, ShatteringOptions? options = null)
         {
             if (input is null)
@@ -168,7 +170,7 @@ namespace MagicText
 
             if (options is null)
             {
-                options = new ShatteringOptions();
+                options = ShatteringOptions.Default;
             }
 
             // Declare:
@@ -238,7 +240,7 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <param name="input">Reader for reading the input text.</param>
-        /// <param name="options">Shattering options. If <c>null</c>, defaults are used.</param>
+        /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <param name="cancellationToken">Cancellation token. See <em>Remarks</em> for additional information.</param>
         /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (<see cref="TextReader.ReadLineAsync" /> method calls) is marshalled back to the original context (via <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method). See <em>Remarks</em> for additional information.</param>
         /// <returns>Query to asynchronously enumerate tokens (in the order they were read) read from <paramref name="input" />.</returns>
@@ -259,13 +261,15 @@ namespace MagicText
         ///     </para>
         ///
         ///     <para>
-        ///         Returned enumerable is merely a query for enumerating tokens to allow simultaneously reading and enumerating tokens from <paramref name="input" />. If a fully built container is needed, consider using <see cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> extension method instead to improve performance and avoid accidentally enumerating the query after disposing <paramref name="input" />.
+        ///         Returned enumerable is merely a query for enumerating tokens (<em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from <paramref name="input" />. If a fully built container is needed, consider using <see cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> extension method instead to improve performance and avoid accidentally enumerating the query after disposing <paramref name="input" />.
         ///     </para>
         ///
         ///     <para>
         ///         The method ultimately returns the equivalent enumeration of tokens as <see cref="Shatter(TextReader, ShatteringOptions?)" /> method called with the same parameters.
         ///     </para>
         /// </remarks>
+        /// <seealso cref="Shatter(TextReader, ShatteringOptions?)" />
+        /// <seealso cref="ShatteringOptions" />
         public async IAsyncEnumerable<String?> ShatterAsync(TextReader input, ShatteringOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
         {
             if (input is null)
@@ -275,7 +279,7 @@ namespace MagicText
 
             if (options is null)
             {
-                options = new ShatteringOptions();
+                options = ShatteringOptions.Default;
             }
 
             // Declare:
@@ -287,17 +291,18 @@ namespace MagicText
                 // Add `options.LineEndToken` to `tokens` if necessary.
                 if (!options.IgnoreLineEnds && addLineEnd)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     yield return options.LineEndToken;
                 }
 
-                // Read and shatter next line if not cancelled.
-
                 cancellationToken.ThrowIfCancellationRequested();
+
+                // Read and shatter next line.
 
                 String? line = await input.ReadLineAsync().ConfigureAwait(continueTasksOnCapturedContext);
                 if (line is null)
                 {
-                    break;
+                    yield break;
                 }
 
                 IEnumerable<String?> lineTokens = ShatterLine(line) ?? throw new NullReferenceException(LineTokensNullErrorMessage);
@@ -314,6 +319,7 @@ namespace MagicText
                     {
                         for (i = 0; en.MoveNext(); ++i)
                         {
+                            cancellationToken.ThrowIfCancellationRequested();
                             yield return en.Current;
                         }
                     }
