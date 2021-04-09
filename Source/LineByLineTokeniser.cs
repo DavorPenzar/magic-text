@@ -43,24 +43,23 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <typeparam name="T">Type of the parameter of the predicate that this class encapsulates.</typeparam>
-        private class NegativePredicate<T>
+        private class NegativePredicateWrapper<T>
         {
             private const string PositivePredicateNullErrorMessage = "Positive predicate may not be `null`.";
 
             private readonly Func<T, Boolean> _positivePredicate;
 
             /// <returns>Predicate that is negated through <see cref="Evaluate(T)" /> method.</returns>
-            public Func<T, Boolean> PositivePredicate =>
-                _positivePredicate;
+            public Func<T, Boolean> PositivePredicate => _positivePredicate;
 
             /// <summary>
             ///     <para>
-            ///         Initialise a negative wrapper of a predicate.
+            ///         Create a negative wrapper of a predicate.
             ///     </para>
             /// </summary>
             /// <param name="positivePredicate">Predicate that is negated through <see cref="Evaluate(T)" /> method.</param>
             /// <exception cref="ArgumentNullException">Parameter <paramref name="positivePredicate" /> is <c>null</c>.</exception>
-            public NegativePredicate(Func<T, Boolean> positivePredicate)
+            public NegativePredicateWrapper(Func<T, Boolean> positivePredicate)
             {
                 _positivePredicate = positivePredicate ?? throw new ArgumentNullException(nameof(positivePredicate), PositivePredicateNullErrorMessage);
             }
@@ -74,7 +73,7 @@ namespace MagicText
             /// <returns>Boolean negation (<c>true</c> to <c>false</c> and vice versa) of the evaluation of <paramref name="arg" /> via encapsulated predicate (<see cref="PositivePredicate" />). Simply put, the method returns <c>!<see cref="PositivePredicate" />(<paramref name="arg" />)</c>.</returns>
             /// <remarks>
             ///     <para>
-            ///         Exceptions thrown by encapsuplated predicate (<see cref="PositivePredicate" />) are not caught.
+            ///         Exceptions thrown by the encapsuplated predicate (<see cref="PositivePredicate" />) are not caught.
             ///     </para>
             /// </remarks>
             public Boolean Evaluate(T arg) =>
@@ -119,7 +118,7 @@ namespace MagicText
         protected LineByLineTokeniser(Func<String?, Boolean> isEmptyToken)
         {
             _isEmptyToken = isEmptyToken ?? throw new ArgumentNullException(nameof(isEmptyToken), IsEmptyTokenNullErrorMessage);
-            _isNonEmptyToken = (new NegativePredicate<String?>(IsEmptyToken)).Evaluate;
+            _isNonEmptyToken = (new NegativePredicateWrapper<String?>(IsEmptyToken)).Evaluate;
         }
 
         /// <summary>

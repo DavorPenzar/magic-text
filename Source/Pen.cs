@@ -44,10 +44,10 @@ namespace MagicText
         /// </summary>
         /// <remarks>
         ///     <para>
-        ///         Only the reference of the enumerable <c>tokens</c> passed to the constructor is stored by the sorter in <see cref="Tokens" /> property. Changing the content of the enumerable externally, or even its order, results in unconsitent behaviour of comparison via <see cref="Compare(Int32, Int32)" /> method.
+        ///         Only the reference of the list <c>tokens</c> passed to the constructor is stored by the sorter in <see cref="Tokens" /> property. Changing the content of the enumerable externally, or even its order, results in unconsitent behaviour of comparison via <see cref="Compare(Int32, Int32)" /> method.
         ///     </para>
         /// </remarks>
-        private class Indexer : IEqualityComparer<Int32>, IComparer<Int32>
+        private class IndexComparer : IEqualityComparer<Int32>, IComparer<Int32>
         {
             private const string ComparerNullErrorMessage = "String comparer may not be `null`.";
             private const string TokensNullErrorMessage = "Token list may not be `null`.";
@@ -56,8 +56,7 @@ namespace MagicText
             private readonly IReadOnlyList<String?> _tokens;
 
             /// <returns>String comparer used by the sorter for comparing tokens.</returns>
-            protected StringComparer Comparer =>
-                _comparer;
+            protected StringComparer Comparer => _comparer;
 
             /// <returns>Reference tokens.</returns>
             /// <remarks>
@@ -66,18 +65,17 @@ namespace MagicText
             ///     </para>
             /// </remarks>
             /// <seealso cref="Comparer" />
-            public IReadOnlyList<String?> Tokens =>
-                _tokens;
+            public IReadOnlyList<String?> Tokens => _tokens;
 
             /// <summary>
             ///     <para>
-            ///         Create a position sorter.
+            ///         Create a position sorter with provided values.
             ///     </para>
             /// </summary>
             /// <param name="comparer">String comparer. Tokens shall be compared (e. g. for equality) by <paramref name="comparer" />.</param>
             /// <param name="tokens">Reference tokens. Indices shall be compared by comparing elements of <paramref name="tokens" />.</param>
             /// <exception cref="ArgumentNullException">Parameter <paramref name="comparer" /> is <c>null</c>. Parameter <paramref name="tokens" /> is <c>null</c>.</exception>
-            public Indexer(StringComparer comparer, IReadOnlyList<String?> tokens)
+            public IndexComparer(StringComparer comparer, IReadOnlyList<String?> tokens)
             {
                 _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer), ComparerNullErrorMessage);
                 _tokens = tokens ?? throw new ArgumentNullException(nameof(tokens), TokensNullErrorMessage);
@@ -88,7 +86,7 @@ namespace MagicText
             ///         Get the hash code of <paramref name="obj" />.
             ///     </para>
             /// </summary>
-            /// <param name="obj">Object of which the hash code is seeked.</param>
+            /// <param name="obj">Index of which the hash code is seeked.</param>
             /// <returns>Hash code of <paramref name="obj" />.</returns>
             public Int32 GetHashCode(Int32 obj) =>
                 obj.GetHashCode();
@@ -98,8 +96,8 @@ namespace MagicText
             ///         Compare <paramref name="x" /> and <paramref name="y" /> for equality.
             ///     </para>
             /// </summary>
-            /// <param name="x">Left object to compare.</param>
-            /// <param name="y">Right object tot compare.</param>
+            /// <param name="x">Left index to compare.</param>
+            /// <param name="y">Right index tot compare.</param>
             /// <returns>If <paramref name="x" /> and <paramref name="y" /> compare equal, <c>true</c>; <c>false</c> otherwise.</returns>
             public Boolean Equals(Int32 x, Int32 y) =>
                 (x == y);
@@ -109,8 +107,8 @@ namespace MagicText
             ///         Compare <paramref name="x" /> and <paramref name="y" />.
             ///     </para>
             /// </summary>
-            /// <param name="x">Left object to compare.</param>
-            /// <param name="y">Right object tot compare.</param>
+            /// <param name="x">Left index to compare.</param>
+            /// <param name="y">Right index tot compare.</param>
             /// <returns>A strictly negative, i. e. less than 0, value if <paramref name="x" /> compares (strictly) less than <paramref name="y" />; a strictly positive, i. e. greater than 0, value if <paramref name="x" /> compares (strictly) less than <paramref name="y" />; 0 otherwise (<paramref name="x" /> and <paramref name="y" /> compare equal).</returns>
             /// <remarks>
             ///     <para>
@@ -181,8 +179,7 @@ namespace MagicText
             private readonly IReadOnlyCollection<String?> _ignoreTokens;
 
             /// <returns>Sorting positions of tokens.</returns>
-            protected IReadOnlyList<Int32> Index =>
-                _index;
+            protected IReadOnlyList<Int32> Index => _index;
 
             /// <returns>Tokens to ignore.</returns>
             /// <remarks>
@@ -190,12 +187,11 @@ namespace MagicText
             ///         If a token is found in <see cref="IgnoreTokens" /> via <see cref="Enumerable.Contains{TSource}(IEnumerable{TSource}, TSource)" /> extension method, the search in <see cref="FindIndex(String?, Int32)" /> is immediately terminated and -1 is returned. Note that <see cref="Enumerable.Contains{TSource}(IEnumerable{TSource}, TSource)" /> extension method actually calls <see cref="ICollection{T}.Contains(T)" /> method if the source enumerable implements <see cref="ICollection{T}" /> interface, which may be useful if a special string comparison should be used when checking if a token should be ignored (for instance, pass <see cref="HashSet{T}" /> of strings constructed with a desired <see cref="StringComparer" />).
             ///     </para>
             /// </remarks>
-            public IReadOnlyCollection<String?> IgnoreTokens =>
-                _ignoreTokens;
+            public IReadOnlyCollection<String?> IgnoreTokens => _ignoreTokens;
 
             /// <summary>
             ///     <para>
-            ///         Create an index finder.
+            ///         Create an index finder with provided values.
             ///     </para>
             /// </summary>
             /// <param name="positions">Sorting index of tokens.</param>
@@ -307,7 +303,7 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <param name="str">Nullable string to search for in the intern pool.</param>
-        /// <returns>If <paramref name="str" /> is <c>null</c>, <c>null</c> is returned as well. Otherwise the system's reference to <paramref name="str" /> is returned if it is returned (if not, a new reference to a string with the value of <paramref name="str" />).</returns>
+        /// <returns>If <paramref name="str" /> is <c>null</c>, <c>null</c> is returned as well. Otherwise the system's reference to <paramref name="str" /> is returned if it is interned (if not, a new reference to a string with the value of <paramref name="str" />, interned in the system's intern pool, is returned).</returns>
         /// <remarks>
         ///     <para>
         ///         Unlike <see cref="String.Intern(String)" /> method, this method does not throw <see cref="ArgumentNullException" /> if the argument is <c>null</c>; instead, <c>null</c> is simply returned. However, <see cref="String.Intern(String)" /> method is indeed called for non-<c>null</c> arguments and therefore strings interned via this method are interned in the same system's intern pool of strings as strings interned via <see cref="String.Intern(String)" /> method (and vice versa).
@@ -590,7 +586,7 @@ namespace MagicText
 
             // Copy comparer and ending token.
             _comparer = comparer ?? StringComparer.Ordinal;
-            _endToken = !intern || endToken is null ? endToken : String.Intern(endToken);
+            _endToken = intern ? InternNullableString(endToken) : endToken;
 
             // Copy context.
             {
@@ -602,7 +598,7 @@ namespace MagicText
             // Find sorting positions of tokens in context.
             {
                 List<Int32> positionsList = new List<Int32>(Enumerable.Range(0, Context.Count));
-                positionsList.Sort(new Indexer(Comparer, Context));
+                positionsList.Sort(new IndexComparer(Comparer, Context));
                 positionsList.TrimExcess();
                 _index = positionsList.AsReadOnly();
             }
@@ -739,7 +735,7 @@ namespace MagicText
                     throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
                 }
 
-                int first = Index[pick];
+                int first = pick < Context.Count ? Index[pick] : Context.Count;
                 String? firstToken = first < Context.Count ? Context[first] : EndToken;
                 if (Comparer.Equals(firstToken, EndToken))
                 {
@@ -775,7 +771,7 @@ namespace MagicText
                 // Render the next token.
 
                 int pick = picker(n);
-                if (pick < 0 || pick >= n)
+                if (pick < 0 || pick >= Math.Max(n, 1)) // actually, `n` should never be 0
                 {
                     throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
                 }
