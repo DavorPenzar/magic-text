@@ -8,7 +8,7 @@ namespace MagicText
 {
     /// <summary>
     ///     <para>
-    ///         Options for <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods, as well as extension methods from <see cref="TokeniserExtensions" />.
+    ///         Options for <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods and for extension methods from <see cref="TokeniserExtensions" />.
     ///     </para>
     /// </summary>
     public class ShatteringOptions : IEquatable<ShatteringOptions>, ICloneable
