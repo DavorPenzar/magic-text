@@ -18,7 +18,7 @@ Once extracted, the collection of tokens (in the order as read from the input) i
 
 ### Possible Use Cases
 
-In the author's opinion, the library does not provide any actually useful functionality for applications built using [.NET](http://dotnet.microsoft.com/). However, it may be used in self-educational purposes (for understanding some algorithm principles such as tokenisation, sorting, searching etc.&mdash;although inline documentation and comments are, addmitingly, not very *neat* hear and there), for fun (to construct meaningless blocks of text), for various unit testing (to generate [*mock objects*](http://en.wikipedia.org/wiki/Mock_object)) or maybe even for implementation of some parts when programming [chatbots](http://en.wikipedia.org/wiki/Chatbot).
+In the author's opinion, the library does not seem to provide any actually useful functionality for applications built using [.NET](http://dotnet.microsoft.com/). However, it may be used in self-educational purposes (for understanding some algorithm principles such as tokenisation, sorting, searching etc.&mdash;although inline documentation and comments are, addmitingly, not very *neat* hear and there), for various unit testing (to generate [*mock objects*](http://en.wikipedia.org/wiki/Mock_object)) or maybe even for implementation of some parts when programming [chatbots](http://en.wikipedia.org/wiki/Chatbot). The main idea, though, behind writing this library was generating random blocks of text *for fun*.
 
 ### Algorithm Explanation
 
