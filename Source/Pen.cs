@@ -547,12 +547,17 @@ namespace MagicText
         /// </remarks>
         public IReadOnlyList<String?> Context => _context;
 
-        /// <returns>Ending token of the pen.</returns>
+        /// <returns>Ending token of the pen (see <em>Remarks</em> of <see cref="Pen" />).</returns>
         /// <remarks>
         ///     <para>
-        ///         This token (or any other comparing equal to it by <see cref="Comparer" />) shall never be rendered.
+        ///         The ending token (<see cref="SentinelToken" />), or any other comparing equal to it by <see cref="Comparer" />, shall never be rendered.
+        ///     </para>
+        ///
+        ///     <para>
+        ///         If the ending token is <c>null</c>, it <strong>does not</strong> mean that no token is considered an ending token. It simply means that <c>null</c>s are considered ending tokens. Moreover, the ending token <strong>cannot</strong> be ignored (not used)—if no token should be considered an ending token, set the ending token to a value not appearing in <see cref="Context" /> (which can be found via an adaptation of <a href="http://en.wikipedia.org/wiki/Cantor%27s_diagonal_argument">Cantor's diagonal method</a>). Note, however, that comparing long strings is expensive in time resources, and therefore <em>short</em> ending tokens should be preferred: <c>null</c>, <c><see cref="String.Empty" /></c>, <c>"\0"</c> etc. (depending on the values in <see cref="Context" />).
         ///     </para>
         /// </remarks>
+        /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
         public String? SentinelToken => _sentinelToken;
 
