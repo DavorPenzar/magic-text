@@ -166,8 +166,8 @@ Do you know that there's a spark in
 
 ##  Remarks
 
-This library should not be used when working with large corpora of context tokens. Objects of class [```Pen```](Source/Pen.cs) store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks the possibility to work with a large number of tokens. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storing tokens externally.
+This library should not be used when working with large corpora of context tokens. Objects of class [```Pen```](Source/Pen.cs) store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks the possibility to work with a large number of tokens that would not fit in the internal memory all at once. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storing tokens externally.
 
 ##  References
 
-The complete library is customly written by a single author&mdash;me&mdash;but the logic behind it is widely known and used in many applications (at least I have come accross it a few times throughout my student days). As I consider the logic as general knowledge in the field, I did not use any extraneous sources of knowledge for implementing the library and therefore do not feel a moral or any other obligation to cite sources and references.
+The complete library is customly written by a single author&mdash;me&mdash;but the logic behind it is widely known and is used in many applications (at least I have come accross it a few times throughout my student days). As I consider the logic as general knowledge in the field, I did not use any extraneous sources of knowledge for implementing the library and therefore do not feel a moral or any other obligation to cite sources and references.
