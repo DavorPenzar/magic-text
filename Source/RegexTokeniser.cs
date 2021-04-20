@@ -13,7 +13,7 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         Additionally, the tokeniser provides a possibility to transform tokens immediately after the extraction of regular expression matches and prior to checking for empty tokens. Initially, the idea was to use regular expressions for the transformation as regular expressions are often used for text replacement, but the tokeniser accepts any <see cref="Func{T, TResult}" /> delegate for the transformation function (<see cref="Transform" />). This way <see cref="RegexTokeniser" /> class provides a wider range of tokenising policies and, at the same time, its implementation and interface are more consistent with other libraries, most notably the standard .NET library (such as in <see cref="Enumerable.Select{TSource, TResult}(IEnumerable{TSource}, Func{TSource, TResult})" /> extension method). However, to use a regular expression based replacement, the lambda-function <c>t => <see cref="Regex" />.Replace(t, matchPattern, replacementPattern)</c>, where <c>matchPattern</c> and <c>replacementPattern</c> are regular expressions to match and to use for replacement respectively, may be provided (amongst other solutions).
+    ///         Additionally, the tokeniser provides a possibility to transform tokens immediately after the extraction of regular expression matches and prior to checking for empty tokens. Initially, the idea was to use regular expressions for the transformation as regular expressions are often used for text replacement, but the tokeniser accepts any <see cref="Func{T, TResult}" /> delegate for the transformation function (<see cref="Transform" />). This way <see cref="RegexTokeniser" /> class provides a wider range of tokenising policies and, at the same time, its implementation and interface are more consistent with other libraries, most notably the standard <em>.NET</em> library (such as <see cref="Enumerable.Select{TSource, TResult}(IEnumerable{TSource}, Func{TSource, TResult})" /> extension method). Still, to use a regular expression based replacement, lambda-function <c>t => <see cref="Regex" />.Replace(t, matchPattern, replacementPattern)</c>, where <c>matchPattern</c> and <c>replacementPattern</c> are regular expressions to match and to use for replacement respectively, may be provided (amongst other solutions).
     ///     </para>
     /// </summary>
     /// <remarks>
@@ -30,17 +30,17 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         Each line from the input is split into raw tokens via <see cref="Regex.Split(String)" /> method (using the internal regular expression breaker (<see cref="Break" />) defined on construction of the tokeniser). If a transformation function (<see cref="Transform" />) is set, it is then used to transform each raw token. The filtering of empty tokens is done <strong>after</strong> the transformation.
+    ///         Each line from the input is split into <em>raw</em> tokens via <see cref="Regex.Split(String)" /> method (using the internal regular expression breaker (<see cref="Break" />) defined on construction of the tokeniser). If a transformation function (<see cref="Transform" />) is set, it is then used to transform each raw token. The filtering of empty tokens is done <strong>after</strong> the transformation.
     ///     </para>
     ///
     ///     <para>
-    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for token transformation (<see cref="Transform" />) should be thread-safe, lock the tokeniser during complete <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.
+    ///         No thread safety mechanism is implemented nor assumed by the class. If the transformation function should be thread-safe, lock the tokeniser during complete <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.
     ///     </para>
     /// </remarks>
     public class RegexTokeniser : LineByLineTokeniser
     {
-        private const string RegexPatternNullErrorMessage = "Regular expression pattern may not be `null`.";
-        private const string BreakNullErrorMessage = "Regular expression breaker may not be `null`.";
+        protected const string RegexPatternNullErrorMessage = "Regular expression pattern may not be `null`.";
+        protected const string BreakNullErrorMessage = "Regular expression breaker may not be `null`.";
 
         /// <summary>
         ///     <para>

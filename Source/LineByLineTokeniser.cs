@@ -32,7 +32,7 @@ namespace MagicText
     /// </remarks>
     public abstract class LineByLineTokeniser : ITokeniser
     {
-        private const string IsEmptyTokenNullErrorMessage = "Function for checking emptiness of tokens may not be `null`.";
+        protected const string IsEmptyTokenNullErrorMessage = "Function for checking emptiness of tokens may not be `null`.";
         private const string InputNullErrorMessage = "Input stream reader may not be `null`.";
         private const string LineTokensNullErrorMessage = "Line tokens may not be `null`.";
         protected const string LineNullErrorMessage = "Line string may not be `null`.";
@@ -101,7 +101,7 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Initialise a tokeniser.
+        ///         Create a default tokeniser.
         ///     </para>
         /// </summary>
         public LineByLineTokeniser() : this(String.IsNullOrEmpty)
@@ -110,7 +110,7 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Initialise a tokeniser with provided options.
+        ///         Create a tokeniser with provided options.
         ///     </para>
         /// </summary>
         /// <param name="isEmptyToken">Function to check if a token is empty.</param>

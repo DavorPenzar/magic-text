@@ -25,7 +25,7 @@ namespace MagicText
     /// </remarks>
     public class Pen
     {
-        private const string ComparerNullErrorMessage = "String comparer may not be `null`.";
+        protected const string ComparerNullErrorMessage = "String comparer may not be `null`.";
         private const string TokensNullErrorMessage = "Token list may not be `null`.";
         private const string IndexNullErrorMessage = "Index may not be `null`.";
         private const string SampleNullErrorMessage = "Sample tokens may not be `null`.";
@@ -433,7 +433,7 @@ namespace MagicText
             }
             if (cycleStart < 0 || cycleStart >= sample.Count)
             {
-                throw new ArgumentOutOfRangeException(nameof(cycleStart), CycleStartOutOfRangeErrorMessage);
+                throw new ArgumentOutOfRangeException(nameof(cycleStart), cycleStart, CycleStartOutOfRangeErrorMessage);
             }
 
             // Binary search...
@@ -703,7 +703,7 @@ namespace MagicText
             }
             if (relevantTokens < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(relevantTokens), RelevantTokensOutOfRangeErrorMessage);
+                throw new ArgumentOutOfRangeException(nameof(relevantTokens), relevantTokens, RelevantTokensOutOfRangeErrorMessage);
             }
 
             // Initialise the list of `relevantTokens` most recent tokens and its first position (the list will be cyclical after rendering `relevantTokens` tokens).
@@ -715,7 +715,7 @@ namespace MagicText
             {
                 if (fromPosition.Value < 0 || fromPosition.Value > Context.Count)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(fromPosition), FromPositionOutOfRangeErrorMessage);
+                    throw new ArgumentOutOfRangeException(nameof(fromPosition), fromPosition.Value, FromPositionOutOfRangeErrorMessage);
                 }
 
                 int next;
@@ -737,7 +737,7 @@ namespace MagicText
                 int pick = picker(Context.Count + 1);
                 if (pick < 0 || pick > Context.Count)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
+                    throw new ArgumentOutOfRangeException(nameof(picker), pick, PickOutOfRangeErrorMessage);
                 }
 
                 int first = pick < Context.Count ? Index[pick] : Context.Count;
@@ -778,7 +778,7 @@ namespace MagicText
                 int pick = picker(n);
                 if (pick < 0 || pick >= Math.Max(n, 1)) // actually, `n` should never be 0
                 {
-                    throw new ArgumentOutOfRangeException(nameof(picker), PickOutOfRangeErrorMessage);
+                    throw new ArgumentOutOfRangeException(nameof(picker), pick, PickOutOfRangeErrorMessage);
                 }
 
                 int next = Index[p + pick] + d;
