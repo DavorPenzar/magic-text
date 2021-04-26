@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 
@@ -501,7 +502,19 @@ namespace MagicText
         ///     </para>
         /// </remarks>
         protected static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IEnumerable<String?> sample) =>
-            FindPositionIndexAndCount(comparer, tokens, index, sample?.ToList()!, 0);
+            FindPositionIndexAndCount(
+                comparer,
+                tokens,
+                index,
+                sample switch
+                {
+                    null => null!,
+                    IReadOnlyList<String?> sampleReadOnlyList => sampleReadOnlyList,
+                    IList<String?> sampleList => new ReadOnlyCollection<String?>(sampleList),
+                    _ => new List<String?>(sample)
+                },
+                0
+            );
 
         private readonly StringComparer _comparer;
         private readonly IReadOnlyList<String?> _context;
