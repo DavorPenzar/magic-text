@@ -124,7 +124,7 @@ Console.WriteLine();
 
 ```
 
-The code above outputs:
+The code above uses [```Pen```](Source/Pen.cs) class and [```ITokeniser```](Source/ITokeniser.cs) interface (implemented through [```RegexTokeniser```](Source/RegexTokeniser.cs) class) provided by the library and outputs:
 
 ```
  deep?
