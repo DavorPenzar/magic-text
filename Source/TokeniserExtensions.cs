@@ -7,22 +7,14 @@ using System.Threading.Tasks;
 
 namespace MagicText
 {
-    /// <summary>
-    ///     <para>
-    ///         Static class with auxiliary extension methods for instances of <see cref="ITokeniser" /> interface.
-    ///     </para>
-    /// </summary>
+    /// <summary>Static class with auxiliary extension methods for instances of <see cref="ITokeniser" /> interface.</summary>
     public static class TokeniserExtensions
     {
         private const string TokeniserNullErrorMessage = "Tokeniser instance may not be `null`.";
         private const string TextNullErrorMessage = "Input text string may not be `null`.";
         private const string TokensNullErrorMessage = "Token enumerable returned by shattering may not be `null`.";
 
-        /// <summary>
-        ///     <para>
-        ///         Shatter <paramref name="text" /> into tokens synchronously.
-        ///     </para>
-        /// </summary>
+        /// <summary>Shatter <paramref name="text" /> into tokens synchronously.</summary>
         /// <param name="tokeniser">Tokeniser used for shattering.</param>
         /// <param name="text">Input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
@@ -65,11 +57,7 @@ namespace MagicText
             }
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Shatter text read from <paramref name="input" /> into token list synchronously.
-        ///     </para>
-        /// </summary>
+        /// <summary>Shatter text read from <paramref name="input" /> into token list synchronously.</summary>
         /// <param name="tokeniser">Tokeniser used for shattering.</param>
         /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
@@ -102,11 +90,7 @@ namespace MagicText
             return tokens;
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Shatter <paramref name="text" /> into token list synchronously.
-        ///     </para>
-        /// </summary>
+        /// <summary>Shatter <paramref name="text" /> into token list synchronously.</summary>
         /// <param name="tokeniser">Tokeniser used for shattering.</param>
         /// <param name="text">Input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
@@ -142,11 +126,7 @@ namespace MagicText
             return tokens;
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Shatter <paramref name="text" /> into tokens asynchronously.
-        ///     </para>
-        /// </summary>
+        /// <summary>Shatter <paramref name="text" /> into tokens asynchronously.</summary>
         /// <param name="tokeniser">Tokeniser used for shattering.</param>
         /// <param name="text">Input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
@@ -199,11 +179,7 @@ namespace MagicText
             }
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Shatter text read from <paramref name="input" /> into token list asynchronously.
-        ///     </para>
-        /// </summary>
+        /// <summary>Shatter text read from <paramref name="input" /> into token list asynchronously.</summary>
         /// <param name="tokeniser">Tokeniser used for shattering.</param>
         /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
@@ -250,11 +226,7 @@ namespace MagicText
             return tokens;
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Shatter <paramref name="text" /> into token list asynchronously.
-        ///     </para>
-        /// </summary>
+        /// <summary>Shatter <paramref name="text" /> into token list asynchronously.</summary>
         /// <param name="tokeniser">Tokeniser used for shattering.</param>
         /// <param name="text">Input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>

@@ -4,11 +4,7 @@ using System.Linq;
 
 namespace MagicText
 {
-    /// <summary>
-    ///     <para>
-    ///         Tokeniser which shatters text at each character.
-    ///     </para>
-    /// </summary>
+    /// <summary>Tokeniser which shatters text at each character.</summary>
     /// <remarks>
     ///     <para>
     ///         Empty tokens (<see cref="ShatteringOptions.IgnoreEmptyTokens" />) are considered those characters that yield <c>true</c> when converted to strings via <see cref="Char.ToString(Char)" /> method and checked via <see cref="String.IsNullOrEmpty(String)" /> method.
@@ -24,20 +20,12 @@ namespace MagicText
     /// </remarks>
     public class CharTokeniser : LineByLineTokeniser
     {
-        /// <summary>
-        ///     <para>
-        ///         Create a default tokeniser.
-        ///     </para>
-        /// </summary>
+        /// <summary>Create a default tokeniser.</summary>
         public CharTokeniser() : base()
         {
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Shatter a single line into tokens.
-        ///     </para>
-        /// </summary>
+        /// <summary>Shatter a single line into tokens.</summary>
         /// <param name="line">Line of text to shatter.</param>
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="line" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="line" /> is <c>null</c>.</exception>

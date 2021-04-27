@@ -8,11 +8,7 @@ using System.Threading.Tasks;
 
 namespace MagicText
 {
-    /// <summary>
-    ///     <para>
-    ///         Tokeniser which shatters text shattering its lines one by one.
-    ///     </para>
-    /// </summary>
+    /// <summary>Tokeniser which shatters text shattering its lines one by one.</summary>
     /// <remarks>
     ///     <para>
     ///         A derived class must minimally implement <see cref="ShatterLine(String)" /> method to make a useful (non-abstract) instance of <see cref="LineByLineTokeniser" />.
@@ -41,11 +37,7 @@ namespace MagicText
         private const string LineTokensNullErrorMessage = "Line tokens may not be `null`.";
         protected const string LineNullErrorMessage = "Line string may not be `null`.";
 
-        /// <summary>
-        ///     <para>
-        ///         Auxiliary predicate wrapper that exposes a predicate's negation.
-        ///     </para>
-        /// </summary>
+        /// <summary>Auxiliary predicate wrapper that exposes a predicate's negation.</summary>
         /// <typeparam name="T">Type of the parameter of the predicate that this class encapsulates.</typeparam>
         private class NegativePredicateWrapper<T> : Object
         {
@@ -53,14 +45,11 @@ namespace MagicText
 
             private readonly Func<T, Boolean> _positivePredicate;
 
-            /// <returns>Predicate that is negated through <see cref="EvaluateNegation(T)" /> method.</returns>
+            /// <summary>Predicate that is negated through <see cref="EvaluateNegation(T)" /> method.</summary>
+            /// <returns>Wrapped predicate.</returns>
             public Func<T, Boolean> PositivePredicate => _positivePredicate;
 
-            /// <summary>
-            ///     <para>
-            ///         Create a negative wrapper of a predicate.
-            ///     </para>
-            /// </summary>
+            /// <summary>Create a negative wrapper of a predicate.</summary>
             /// <param name="positivePredicate">Predicate that is negated through <see cref="EvaluateNegation(T)" /> method.</param>
             /// <exception cref="ArgumentNullException">Parameter <paramref name="positivePredicate" /> is <c>null</c>.</exception>
             public NegativePredicateWrapper(Func<T, Boolean> positivePredicate) : base()
@@ -68,11 +57,7 @@ namespace MagicText
                 _positivePredicate = positivePredicate ?? throw new ArgumentNullException(nameof(positivePredicate), PositivePredicateNullErrorMessage);
             }
 
-            /// <summary>
-            ///     <para>
-            ///         Negate the evaluation of the argument via encapsulated predicate (<see cref="PositivePredicate" />).
-            ///     </para>
-            /// </summary>
+            /// <summary>Negate the evaluation of the argument via encapsulated predicate (<see cref="PositivePredicate" />).</summary>
             /// <param name="arg">The parameter to check.</param>
             /// <returns>Boolean negation (<c>true</c> to <c>false</c> and vice versa) of the evaluation of <paramref name="arg" /> via encapsulated predicate (<see cref="PositivePredicate" />). Simply put, the method returns <c>!<see cref="PositivePredicate" />(<paramref name="arg" />)</c>.</returns>
             /// <remarks>
@@ -84,11 +69,7 @@ namespace MagicText
                 !PositivePredicate(arg);
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Always indicate the token as non-empty.
-        ///     </para>
-        /// </summary>
+        /// <summary>Always indicate the token as non-empty.</summary>
         /// <param name="token">Token to check.</param>
         /// <returns><c>false</c></returns>
         protected static Boolean IsEmptyTokenAlwaysFalse(String? token) =>
@@ -97,26 +78,20 @@ namespace MagicText
         private readonly Func<String?, Boolean> _isEmptyToken;
         private readonly Func<String?, Boolean> _isNonEmptyToken;
 
-        /// <returns>Function to check if a token is empty: it returns <c>true</c> if and only if the token to check is empty.</returns>
+        /// <summary>Function to check if a token is empty: it returns <c>true</c> if and only if the token to check is empty.</summary>
+        /// <returns>Token emptiness checking function.</returns>
         protected Func<String?, Boolean> IsEmptyToken => _isEmptyToken;
 
-        /// <returns>Function to check if a token is non-empty: it returns <c>true</c> if and only if the token to check is non-empty.</returns>
+        /// <summary>Function to check if a token is non-empty: it returns <c>true</c> if and only if the token to check is non-empty.</summary>
+        /// <returns>Token non-emptiness checking function.</returns>
         protected Func<String?, Boolean> IsNonEmptyToken => _isNonEmptyToken;
 
-        /// <summary>
-        ///     <para>
-        ///         Create a default tokeniser.
-        ///     </para>
-        /// </summary>
+        /// <summary>Create a default tokeniser.</summary>
         public LineByLineTokeniser() : this(String.IsNullOrEmpty)
         {
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Create a tokeniser with provided options.
-        ///     </para>
-        /// </summary>
+        /// <summary>Create a tokeniser with provided options.</summary>
         /// <param name="isEmptyToken">Function to check if a token is empty.</param>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="isEmptyToken" /> is <c>null</c>.</exception>
         protected LineByLineTokeniser(Func<String?, Boolean> isEmptyToken) : base()
@@ -125,11 +100,7 @@ namespace MagicText
             _isNonEmptyToken = (new NegativePredicateWrapper<String?>(IsEmptyToken)).EvaluateNegation;
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Shatter a single line into tokens.
-        ///     </para>
-        /// </summary>
+        /// <summary>Shatter a single line into tokens.</summary>
         /// <param name="line">Line of text to shatter.</param>
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="line" />.</returns>
         /// <exception cref="ArgumentNullException">If <paramref name="line" /> is <c>null</c>.</exception>
@@ -144,11 +115,7 @@ namespace MagicText
         /// </remarks>
         protected abstract IEnumerable<String?> ShatterLine(String line);
 
-        /// <summary>
-        ///     <para>
-        ///         Shatter text read from <paramref name="input" /> into tokens synchronously.
-        ///     </para>
-        /// </summary>
+        /// <summary>Shatter text read from <paramref name="input" /> into tokens synchronously.</summary>
         /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <returns>Query to enumerate tokens (in the order they were read) read from <paramref name="input" />.</returns>
@@ -238,11 +205,7 @@ namespace MagicText
             }
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Shatter text read from <paramref name="input" /> into tokens asynchronously.
-        ///     </para>
-        /// </summary>
+        /// <summary>Shatter text read from <paramref name="input" /> into tokens asynchronously.</summary>
         /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <param name="cancellationToken">Cancellation token. See <em>Remarks</em> for additional information.</param>

@@ -7,21 +7,13 @@ using System.Threading.Tasks;
 
 namespace MagicText
 {
-    /// <summary>
-    ///     <para>
-    ///         Useful extension methods used in the library.
-    ///     </para>
-    /// </summary>
+    /// <summary>Useful extension methods used in the library.</summary>
     internal static class ObjectExtensions
     {
         private const string ValuesNullErrorMessage = "Value enumerable may not be `null`.";
         private const string ActionNullErrorMessage = "Action to apply may not be `null`.";
 
-        /// <summary>
-        ///     <para>
-        ///         Retrieve the index of a value.
-        ///     </para>
-        /// </summary>
+        /// <summary>Retrieve the index of a value.</summary>
         /// <param name="values">Enumerable of values amongst which <paramref name="x" /> should be found. Even if <paramref name="values" /> are comparable, the enumerable does not have to be sorted.</param>
         /// <param name="x">Value to find.</param>
         /// <param name="comparer">Comparer used for comparing instances of type <typeparamref name="T" /> for equality. If <c>null</c>, <see cref="EqualityComparer{T}.Default" /> is used.</param>
@@ -62,11 +54,7 @@ namespace MagicText
             return index;
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Retrieve the index of a value asynchronously.
-        ///     </para>
-        /// </summary>
+        /// <summary>Retrieve the index of a value asynchronously.</summary>
         /// <param name="values">Asynchronous enumerable of values amongst which <paramref name="x" /> should be found. Even if <paramref name="values" /> are comparable, the enumerable does not have to be sorted.</param>
         /// <param name="x">Value to find.</param>
         /// <param name="comparer">Comparer used for comparing instances of type <typeparamref name="T" /> for equality. If <c>null</c>, <see cref="EqualityComparer{T}.Default" /> is used.</param>
@@ -113,11 +101,7 @@ namespace MagicText
             return index;
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Apply <paramref name="action" /> on an object and return it.
-        ///     </para>
-        /// </summary>
+        /// <summary>Apply <paramref name="action" /> on an object and return it.</summary>
         /// <typeparam name="T">Type of the object on which <paramref name="action" /> should be applied.</typeparam>
         /// <param name="this">Object on which <paramref name="action" /> should be applied.</param>
         /// <param name="action">Action to apply on object <paramref name="this" />.</param>
@@ -144,11 +128,7 @@ namespace MagicText
             return @this;
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Apply asynchronous <paramref name="action" /> on an object and return it.
-        ///     </para>
-        /// </summary>
+        /// <summary>Apply asynchronous <paramref name="action" /> on an object and return it.</summary>
         /// <typeparam name="T">Type of the object on which <paramref name="action" /> should be applied.</typeparam>
         /// <param name="this">Object on which <paramref name="action" /> should be applied.</param>
         /// <param name="action">Action to apply on object <paramref name="this" />.</param>
@@ -176,11 +156,7 @@ namespace MagicText
             return @this;
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Apply asynchronous <paramref name="action" /> on an object and return it.
-        ///     </para>
-        /// </summary>
+        /// <summary>Apply asynchronous <paramref name="action" /> on an object and return it.</summary>
         /// <typeparam name="T">Type of the object on which <paramref name="action" /> should be applied.</typeparam>
         /// <param name="this">Object on which <paramref name="action" /> should be applied.</param>
         /// <param name="action">Action to apply on object <paramref name="this" />.</param>
@@ -202,11 +178,7 @@ namespace MagicText
         public static async Task<T> ApplyActionAsync<T>(this T @this, Func<T, Task> action) =>
             await ApplyActionAsync(@this, action, true).ConfigureAwait(true);
 
-        /// <summary>
-        ///     <para>
-        ///         Apply asynchronous <paramref name="action" /> on an object and return it.
-        ///     </para>
-        /// </summary>
+        /// <summary>Apply asynchronous <paramref name="action" /> on an object and return it.</summary>
         /// <typeparam name="T">Type of the object on which <paramref name="action" /> should be applied.</typeparam>
         /// <param name="this">Object on which <paramref name="action" /> should be applied.</param>
         /// <param name="action">Action to apply on object <paramref name="this" />.</param>

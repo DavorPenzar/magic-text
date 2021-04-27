@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 using System.Threading;
 
 namespace MagicText
 {
-    /// <summary>
-    ///     <para>
-    ///         Options for <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods and for extension methods from <see cref="TokeniserExtensions" />.
-    ///     </para>
-    /// </summary>
-    public class ShatteringOptions : Object, IEquatable<ShatteringOptions>, ICloneable
+    /// <summary>Options for <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods and for extension methods from <see cref="TokeniserExtensions" />.</summary>
+    [Serializable]
+    public class ShatteringOptions : Object, IEquatable<ShatteringOptions>, ICloneable, ISerializable
     {
+        protected const string SerialisationInfoNullErrorMessage = "Serialisation info may not be `null`.";
         private const string OtherNullErrorMessage = "Shattering options to copy may not be `null`.";
         protected const string StringComparerNullErrorMessage = "String comparer may not be `null`.";
 
@@ -23,7 +23,8 @@ namespace MagicText
         public static Boolean operator !=(ShatteringOptions? left, ShatteringOptions? right) =>
             !(left == right);
 
-        /// <returns>The default shattering options.</returns>
+        /// <summary>Default shattering options to use when none are set.</summary>
+        /// <returns>Default shattering options.</returns>
         /// <remarks>
         ///     <para>
         ///         Retrieving the value of this property is <strong>exactly the same</strong> as creating shattering options using <see cref="ShatteringOptions.ShatteringOptions()" /> constructor. The property is provided merely to enable a more readable and explicit code when handling <c>null</c>-options in the implementation of <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods.
@@ -42,13 +43,9 @@ namespace MagicText
         private String? lineEndToken;
         private String? emptyLineToken;
 
-        /// <summary>
-        ///     <para>
-        ///         Default is <c>false</c>.
-        ///     </para>
-        /// </summary>
-        /// <returns>Indicator if empty tokens should be ignored: <c>true</c> if ignoring, <c>false</c> otherwise.</returns>
-        /// <value>New indicator value.</value>
+        /// <summary>Policy of ignoring empty tokens: <c>true</c> if ignoring, <c>false</c> otherwise. Default is <c>false</c>.</summary>
+        /// <returns>If empty tokens should be ignored, <c>true</c>; <c>false</c> otherwise.</returns>
+        /// <value>New ignoring empty tokens policy value.</value>
         /// <remarks>
         ///     <para>
         ///         Actual implementations of <see cref="ITokeniser" /> interface may define what exactly an <em>empty</em> token means, but usually this would be a <c>null</c> or a string yielding <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> or <see cref="String.IsNullOrWhiteSpace(String)" /> method.
@@ -66,16 +63,12 @@ namespace MagicText
             }
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Default is <c>false</c>.
-        ///     </para>
-        /// </summary>
-        /// <returns>Indicator if line ends should be ignored: <c>true</c> if ignoring, <c>false</c> otherwise.</returns>
-        /// <value>New indicator value.</value>
+        /// <summary>Policy of ignoring line ends: <c>true</c> if ignoring, <c>false</c> otherwise. Default is <c>false</c>.</summary>
+        /// <returns>If line ends should be ignored, <c>true</c>; <c>false</c> otherwise.</returns>
+        /// <value>New ignoring line ends policy value.</value>
         /// <remarks>
         ///     <para>
-        ///         If <c>false</c>, line ends should be represented by <see cref="LineEndToken" />s.
+        ///         If <c>false</c>, line ends should be copied or represented by <see cref="LineEndToken" />s.
         ///     </para>
         ///
         ///     <para>
@@ -97,16 +90,12 @@ namespace MagicText
             }
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Default is <c>false</c>.
-        ///     </para>
-        /// </summary>
-        /// <returns>Inidcator if empty lines should be ignored, i. e. not produce any tokens: <c>true</c> if ignoring, <c>false</c> otherwise.</returns>
-        /// <value>New indicator value.</value>
+        /// <summary>Policy of ignoring empty lines: <c>true</c> if ignoring, <c>false</c> otherwise. Default is <c>false</c>.</summary>
+        /// <returns>If empty lines should be ignored, <c>true</c>; <c>false</c> otherwise.</returns>
+        /// <value>New ignoring empty lines policy value.</value>
         /// <remarks>
         ///     <para>
-        ///         If <c>true</c>, an empty lines might not produce even <see cref="LineEndToken" />s (it depends on the <see cref="ITokeniser" /> interface implementation used); if <c>false</c>, they should be represented by <see cref="EmptyLineToken" />s.
+        ///         If <c>true</c>, empty lines might not produce even <see cref="LineEndToken" />s (it depends on the <see cref="ITokeniser" /> interface implementation used); if <c>false</c>, they should be represented by <see cref="EmptyLineToken" />s.
         ///     </para>
         ///
         ///     <para>
@@ -132,20 +121,16 @@ namespace MagicText
             }
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Default is <see cref="Environment.NewLine" />.
-        ///     </para>
-        /// </summary>
-        /// <returns>Token to represent a line end.</returns>
-        /// <value>New token value.</value>
+        /// <summary>Token to represent a line end. Default is <see cref="Environment.NewLine" />.</summary>
+        /// <returns>Line end token.</returns>
+        /// <value>New line end token value.</value>
         /// <remarks>
         ///     <para>
         ///         Actual implementations of <see cref="ITokeniser" /> interface may define what exactly a <em>line end</em> means, but usually this would be the new line characters (CR, LF and CRLF) and/or the end of the input. Furthermore, an actual implementation of <see cref="ITokeniser" /> interface at hand may as well choose to merely copy the line end, and not replace it with <see cref="LineEndToken" />. The property is given to allow standardisation of line ends when shattering text, but not to force it.
         ///     </para>
         ///
         ///     <para>
-        ///         If a line is discarded as empty (when <see cref="IgnoreEmptyLines" /> is <c>true</c>), it might not produce <see cref="LineEndToken" />—it depends on the <see cref="ITokeniser" /> interface implementation used.
+        ///         If a line is discarded as empty (when <see cref="IgnoreEmptyLines" /> is <c>true</c>), it might not produce <see cref="LineEndToken" />â€”it depends on the <see cref="ITokeniser" /> interface implementation used.
         ///     </para>
         /// </remarks>
         /// <seealso cref="IgnoreLineEnds" />
@@ -164,13 +149,9 @@ namespace MagicText
             }
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Default is <see cref="String.Empty" />.
-        ///     </para>
-        /// </summary>
-        /// <returns>Token to represent an empty line.</returns>
-        /// <value>New token value.</value>
+        /// <summary>Token to represent an empty line. Default is <see cref="String.Empty" />.</summary>
+        /// <returns>Empty line token.</returns>
+        /// <value>New empty line token value.</value>
         /// <remarks>
         ///     <para>
         ///         If a line is empty but should not be discarded (if <see cref="IgnoreEmptyLines" /> is <c>false</c>), it might be be represented by <see cref="EmptyLineToken" />. If empty lines are substituted by <see cref="EmptyLineToken" />, it should be done even if <see cref="EmptyLineToken" /> would be considered an empty token and empty tokens should be ignored (if <see cref="IgnoreEmptyTokens" /> is <c>true</c>). However, an actual implementation of <see cref="ITokeniser" /> interface at hand may choose to simply yield 0 tokens for an empty line instead of <see cref="EmptyLineToken" />. The property is given to allow using empty lines as special breaks (such as paragraph breaks), but not to force it.
@@ -200,20 +181,12 @@ namespace MagicText
             }
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Create default shattering options.
-        ///     </para>
-        /// </summary>
+        /// <summary>Create default shattering options.</summary>
         public ShatteringOptions() : this(false, false, false, Environment.NewLine, String.Empty)
         {
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Copy shattering options.
-        ///     </para>
-        /// </summary>
+        /// <summary>Copy shattering options.</summary>
         /// <param name="other">Shattering options to copy.</param>
         /// <exception cref="ArgumentNullException">If <paramref name="other" /> is <c>null</c>.</exception>
         public ShatteringOptions(ShatteringOptions other) :
@@ -227,11 +200,7 @@ namespace MagicText
         {
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Create specified shattering options.
-        ///     </para>
-        /// </summary>
+        /// <summary>Create specified shattering options.</summary>
         /// <param name="ignoreEmptyTokens">Indicator if empty tokens should be ignored.</param>
         /// <param name="ignoreLineEnds">Indicator if line ends should be ignored.</param>
         /// <param name="ignoreEmptyLines">Inidcator if empty lines should be ignored.</param>
@@ -246,11 +215,27 @@ namespace MagicText
             this.emptyLineToken = emptyLineToken;
         }
 
-        /// <summary>
+        /// <summary>Construct shattering options by retrieving serialisation info (deserialise the options).</summary>
+        /// <param name="info">Serialisation info to read data.</param>
+        /// <param name="context">Source of this deserialisation.</param>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="info" /> is <c>null</c>.</exception>
+        /// <remarks>
         ///     <para>
-        ///         Deconstruct shattering options.
+        ///         Exceptions thrown by <paramref name="info" />'s methods (most notably <see cref="SerializationException" /> and <see cref="InvalidCastException" />) are not caught.
         ///     </para>
-        /// </summary>
+        /// </remarks>
+        protected ShatteringOptions(SerializationInfo info, StreamingContext context) :
+            this(
+                info?.GetBoolean(nameof(IgnoreEmptyTokens)) ?? throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage),
+                info?.GetBoolean(nameof(IgnoreLineEnds)) ?? throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage),
+                info?.GetBoolean(nameof(IgnoreEmptyLines)) ?? throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage),
+                info?.GetString(nameof(LineEndToken)),
+                info?.GetString(nameof(EmptyLineToken))
+            )
+        {
+        }
+
+        /// <summary>Deconstruct shattering options.</summary>
         /// <param name="ignoreEmptyTokens">Indicator if empty tokens should be ignored.</param>
         /// <param name="ignoreLineEnds">Indicator if line ends should be ignored.</param>
         /// <param name="ignoreEmptyLines">Inidcator if empty lines should be ignored.</param>
@@ -265,11 +250,7 @@ namespace MagicText
             emptyLineToken = EmptyLineToken;
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Compute shattering options' hash code.
-        ///     </para>
-        /// </summary>
+        /// <summary>Compute shattering options' hash code.</summary>
         /// <param name="stringComparer">Comparer used for comparing strings for equality (actually, for retrieving the hash code).</param>
         /// <returns>Hash code of the options.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="stringComparer" /> is <c>null</c>.</exception>
@@ -291,20 +272,12 @@ namespace MagicText
             return hashCode;
         }
 
-        /// <summary>
-        ///     <para>
-        ///         Compute shattering options' hash code.
-        ///     </para>
-        /// </summary>
+        /// <summary>Compute shattering options' hash code.</summary>
         /// <returns>Hash code of the options.</returns>
         public override Int32 GetHashCode() =>
             GetHashCode(EqualityComparer<String?>.Default);
 
-        /// <summary>
-        ///     <para>
-        ///         Compare shattering options to another shattering options for equality.
-        ///     </para>
-        /// </summary>
+        /// <summary>Compare shattering options to another shattering options for equality.</summary>
         /// <param name="other">Another instance of <see cref="ShatteringOptions" />.</param>
         /// <param name="stringComparer">Comparer used for comparing strings for equality.</param>
         /// <returns>If shattering options are equal according to all relevant values, <c>true</c>; <c>false</c>otherwise.</returns>
@@ -322,28 +295,20 @@ namespace MagicText
                         stringComparer.Equals(EmptyLineToken, other.EmptyLineToken)
                     );
 
-        /// <summary>
-        ///     <para>
-        ///         Compare shattering options to another shattering options for equality.
-        ///     </para>
-        /// </summary>
+        /// <summary>Compare shattering options to another shattering options for equality.</summary>
         /// <param name="other">Another instance of <see cref="ShatteringOptions" />.</param>
         /// <returns>If shattering options are equal according to all relevant values, <c>true</c>; <c>false</c>otherwise.</returns>
-        Boolean IEquatable<ShatteringOptions>.Equals(ShatteringOptions? other) =>
+        public virtual Boolean Equals(ShatteringOptions? other) =>
             Equals(other, EqualityComparer<String?>.Default);
 
-        /// <summary>
-        ///     <para>
-        ///         Compare shattering options to another <see cref="Object" /> for equality.
-        ///     </para>
-        /// </summary>
+        /// <summary>Compare shattering options to another <see cref="Object" /> for equality.</summary>
         /// <param name="obj">Another <see cref="Object" />.</param>
         /// <returns>If <paramref name="obj" /> is also shattering options and the shattering options are equal according to all relevant values, <c>true</c>; <c>false</c>otherwise.</returns>
         public override bool Equals(Object? obj)
         {
             try
             {
-                return !(obj is null) && ((IEquatable<ShatteringOptions>)this).Equals((ShatteringOptions)obj);
+                return !(obj is null) && Equals((ShatteringOptions)obj);
             }
             catch (InvalidCastException)
             {
@@ -352,21 +317,37 @@ namespace MagicText
             return false;
         }
 
-        /// <summary>
+        /// <summary>Populate serialisation info with data needed to serialise the options.</summary>
+        /// <param name="info">Serialisation info to populate with data.</param>
+        /// <param name="context">Destination for this serialisation.</param>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="info" /> is <c>null</c>.</exception>
+        /// <remarks>
         ///     <para>
-        ///         Clone shattering options.
+        ///         Exceptions thrown by <paramref name="info" />'s methods (most notably <see cref="SerializationException" />) are not caught.
         ///     </para>
-        /// </summary>
+        /// </remarks>
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info is null)
+            {
+                throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage);
+            }
+
+            info.AddValue(nameof(IgnoreEmptyTokens), IgnoreEmptyTokens);
+            info.AddValue(nameof(IgnoreLineEnds), IgnoreLineEnds);
+            info.AddValue(nameof(IgnoreEmptyLines), IgnoreEmptyLines);
+            info.AddValue(nameof(LineEndToken), LineEndToken, typeof(String));
+            info.AddValue(nameof(EmptyLineToken), EmptyLineToken, typeof(String));
+        }
+
+        /// <summary>Clone shattering options.</summary>
         /// <returns>New instance of <see cref="ShatteringOptions" /> with the same values.</returns>
         public virtual ShatteringOptions Clone() =>
             new ShatteringOptions(this);
 
-        /// <summary>
-        ///     <para>
-        ///         Clone shattering options.
-        ///     </para>
-        /// </summary>
-        /// <returns>New instance of <see cref="ShatteringOptions" /> with the same values.</returns>
+        /// <summary>Clone shattering options.</summary>
+        /// <returns>Boxed new instance of <see cref="ShatteringOptions" /> with the same values.</returns>
         Object ICloneable.Clone() =>
             Clone();
     }

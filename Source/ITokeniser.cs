@@ -7,18 +7,10 @@ using System.Threading.Tasks;
 
 namespace MagicText
 {
-    /// <summary>
-    ///     <para>
-    ///         Interface for tokenising (<em>shattering</em> into tokens) input texts.
-    ///     </para>
-    /// </summary>
+    /// <summary>Interface for tokenising (<em>shattering</em> into tokens) input texts.</summary>
     public interface ITokeniser
     {
-        /// <summary>
-        ///     <para>
-        ///         Shatter text read from <paramref name="input" /> into tokens synchronously.
-        ///     </para>
-        /// </summary>
+        /// <summary>Shatter text read from <paramref name="input" /> into tokens synchronously.</summary>
         /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) should be used.</param>
         /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="input" />.</returns>
@@ -38,11 +30,7 @@ namespace MagicText
         /// <seealso cref="ShatteringOptions" />
         public IEnumerable<String?> Shatter(TextReader input, ShatteringOptions? options = null);
 
-        /// <summary>
-        ///     <para>
-        ///         Shatter text read from <paramref name="input" /> into tokens asynchronously.
-        ///     </para>
-        /// </summary>
+        /// <summary>Shatter text read from <paramref name="input" /> into tokens asynchronously.</summary>
         /// <param name="input">Reader for reading the input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) should be used.</param>
         /// <param name="cancellationToken">Cancellation token. See <em>Remarks</em> for additional information.</param>
