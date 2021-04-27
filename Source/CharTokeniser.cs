@@ -11,11 +11,15 @@ namespace MagicText
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         Empty tokens are considered those characters that yield <c>true</c> when converted to strings via <see cref="Char.ToString(Char)" /> method and checked via <see cref="String.IsNullOrEmpty(String)" /> method.
+    ///         Empty tokens (<see cref="ShatteringOptions.IgnoreEmptyTokens" />) are considered those characters that yield <c>true</c> when converted to strings via <see cref="Char.ToString(Char)" /> method and checked via <see cref="String.IsNullOrEmpty(String)" /> method.
     ///     </para>
     ///
     ///     <para>
-    ///         Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same.
+    ///         Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same. These + the end of the input are considered line ends and are substituted by <see cref="ShatteringOptions.LineEndToken" /> if <see cref="ShatteringOptions.IgnoreLineEnds" /> is <c>false</c>.
+    ///     </para>
+    ///
+    ///     <para>
+    ///         Empty lines are substituted by <see cref="ShatteringOptions.EmptyLineToken" /> if <see cref="ShatteringOptions.IgnoreEmptyLines" /> is <c>false</c>.
     ///     </para>
     /// </remarks>
     public class CharTokeniser : LineByLineTokeniser

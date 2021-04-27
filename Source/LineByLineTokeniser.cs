@@ -19,18 +19,22 @@ namespace MagicText
     ///     </para>
     ///
     ///     <para>
-    ///         By default, empty tokens are considered those tokens that yield <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> method. Derived classes may override this behaviour.
+    ///         By default, empty tokens (<see cref="ShatteringOptions.IgnoreEmptyTokens" />) are considered those tokens that yield <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> method. Derived classes may override this behaviour.
     ///     </para>
     ///
     ///     <para>
-    ///         Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same.
+    ///         Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same. These + the end of the input are considered line ends and are substituted by <see cref="ShatteringOptions.LineEndToken" /> if <see cref="ShatteringOptions.IgnoreLineEnds" /> is <c>false</c>.
+    ///     </para>
+    ///
+    ///     <para>
+    ///         Empty lines are substituted by <see cref="ShatteringOptions.EmptyLineToken" /> if <see cref="ShatteringOptions.IgnoreEmptyLines" /> is <c>false</c>.
     ///     </para>
     ///
     ///     <para>
     ///         No thread safety mechanism is implemented nor assumed by the class. If the function for checking emptiness of tokens (<see cref="IsEmptyToken" />) should be thread-safe, lock the tokeniser during complete <see cref="Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.
     ///     </para>
     /// </remarks>
-    public abstract class LineByLineTokeniser : ITokeniser
+    public abstract class LineByLineTokeniser : Object, ITokeniser
     {
         protected const string IsEmptyTokenNullErrorMessage = "Function for checking emptiness of tokens may not be `null`.";
         private const string InputNullErrorMessage = "Input stream reader may not be `null`.";
@@ -43,7 +47,7 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <typeparam name="T">Type of the parameter of the predicate that this class encapsulates.</typeparam>
-        private class NegativePredicateWrapper<T>
+        private class NegativePredicateWrapper<T> : Object
         {
             private const string PositivePredicateNullErrorMessage = "Positive predicate may not be `null`.";
 
@@ -59,7 +63,7 @@ namespace MagicText
             /// </summary>
             /// <param name="positivePredicate">Predicate that is negated through <see cref="EvaluateNegation(T)" /> method.</param>
             /// <exception cref="ArgumentNullException">Parameter <paramref name="positivePredicate" /> is <c>null</c>.</exception>
-            public NegativePredicateWrapper(Func<T, Boolean> positivePredicate)
+            public NegativePredicateWrapper(Func<T, Boolean> positivePredicate) : base()
             {
                 _positivePredicate = positivePredicate ?? throw new ArgumentNullException(nameof(positivePredicate), PositivePredicateNullErrorMessage);
             }
@@ -115,7 +119,7 @@ namespace MagicText
         /// </summary>
         /// <param name="isEmptyToken">Function to check if a token is empty.</param>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="isEmptyToken" /> is <c>null</c>.</exception>
-        protected LineByLineTokeniser(Func<String?, Boolean> isEmptyToken)
+        protected LineByLineTokeniser(Func<String?, Boolean> isEmptyToken) : base()
         {
             _isEmptyToken = isEmptyToken ?? throw new ArgumentNullException(nameof(isEmptyToken), IsEmptyTokenNullErrorMessage);
             _isNonEmptyToken = (new NegativePredicateWrapper<String?>(IsEmptyToken)).EvaluateNegation;

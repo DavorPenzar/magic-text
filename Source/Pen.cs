@@ -24,13 +24,12 @@ namespace MagicText
     ///         Changing any of the properties—public or protected—breaks the functionality of the pen. By doing so, behaviour of <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods is unexpected and no longer guaranteed.
     ///     </para>
     /// </remarks>
-    public class Pen
+    public class Pen : Object
     {
         protected const string ComparerNullErrorMessage = "String comparer may not be `null`.";
         private const string TokensNullErrorMessage = "Token list may not be `null`.";
         private const string IndexNullErrorMessage = "Index may not be `null`.";
         private const string SampleNullErrorMessage = "Sample tokens may not be `null`.";
-        private const string CycleStartOutOfRangeErrorMessage = "Cycle start is not a valid index of the sample.";
         protected const string ContextNullErrorMessage = "Context token enumerable may not be `null`.";
         protected const string PickerNullErrorMessage = @"""Random"" number generator function (picker function) may not be `null`.";
         private const string RandomNullErrorMessage = "(Pseudo-)Random number generator may not be `null`.";
@@ -45,10 +44,10 @@ namespace MagicText
         /// </summary>
         /// <remarks>
         ///     <para>
-        ///         Only the reference of the list <c>tokens</c> passed to the constructor is stored by the sorter in <see cref="Tokens" /> property. Changing the content of the enumerable externally, or even its order, results in unconsitent behaviour of comparison via <see cref="Compare(Int32, Int32)" /> method.
+        ///         Only the reference of the list <c>tokens</c> passed to the constructor is stored by the sorter in <see cref="Tokens" /> property. Changing the content of the enumerable externally, or even its order, results in unconsitent behaviour of comparison via <see cref="IComparer{T}.Compare(T, T)" /> method.
         ///     </para>
         /// </remarks>
-        private class IndexComparer : IEqualityComparer<Int32>, IComparer<Int32>
+        private class IndexComparer : Object, IEqualityComparer<Int32>, IComparer<Int32>
         {
             private const string ComparerNullErrorMessage = "String comparer may not be `null`.";
             private const string TokensNullErrorMessage = "Token list may not be `null`.";
@@ -62,7 +61,7 @@ namespace MagicText
             /// <returns>Reference tokens.</returns>
             /// <remarks>
             ///     <para>
-            ///         If integers <c>x</c>, <c>y</c> are legal indices of <see cref="Tokens" />, they are compared by comparing <c><see cref="Tokens" />[x]</c>, <c><see cref="Tokens" />[y]</c> using <see cref="Comparer" /> in <see cref="Compare(Int32, Int32)" /> method. Ties are resolved by comparing <c><see cref="Tokens" />[x + 1]</c>, <c><see cref="Tokens" />[y + 1]</c> and so on; the first index to reach the end of <see cref="Tokens" /> is considered less if all tokens compared equal.
+            ///         If integers <c>x</c>, <c>y</c> are legal indices of <see cref="Tokens" />, they are compared by comparing <c><see cref="Tokens" />[x]</c>, <c><see cref="Tokens" />[y]</c> using <see cref="Comparer" /> in <see cref="IComparer{T}.Compare(T, T)" /> method. Ties are resolved by comparing <c><see cref="Tokens" />[x + 1]</c>, <c><see cref="Tokens" />[y + 1]</c> and so on; the first index to reach the end of <see cref="Tokens" /> is considered less if all tokens compared equal.
             ///     </para>
             /// </remarks>
             /// <seealso cref="Comparer" />
@@ -76,7 +75,7 @@ namespace MagicText
             /// <param name="comparer">String comparer. Tokens shall be compared (e. g. for equality) by <paramref name="comparer" />.</param>
             /// <param name="tokens">Reference tokens. Indices shall be compared by comparing elements of <paramref name="tokens" />.</param>
             /// <exception cref="ArgumentNullException">Parameter <paramref name="comparer" /> is <c>null</c>. Parameter <paramref name="tokens" /> is <c>null</c>.</exception>
-            public IndexComparer(StringComparer comparer, IReadOnlyList<String?> tokens)
+            public IndexComparer(StringComparer comparer, IReadOnlyList<String?> tokens) : base()
             {
                 _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer), ComparerNullErrorMessage);
                 _tokens = tokens ?? throw new ArgumentNullException(nameof(tokens), TokensNullErrorMessage);
@@ -89,7 +88,7 @@ namespace MagicText
             /// </summary>
             /// <param name="obj">Index of which the hash code is seeked.</param>
             /// <returns>Hash code of <paramref name="obj" />.</returns>
-            public Int32 GetHashCode(Int32 obj) =>
+            Int32 IEqualityComparer<Int32>.GetHashCode(Int32 obj) =>
                 obj.GetHashCode();
 
             /// <summary>
@@ -100,7 +99,7 @@ namespace MagicText
             /// <param name="x">Left index to compare.</param>
             /// <param name="y">Right index tot compare.</param>
             /// <returns>If <paramref name="x" /> and <paramref name="y" /> compare equal, <c>true</c>; <c>false</c> otherwise.</returns>
-            public Boolean Equals(Int32 x, Int32 y) =>
+            Boolean IEqualityComparer<Int32>.Equals(Int32 x, Int32 y) =>
                 (x == y);
 
             /// <summary>
@@ -117,7 +116,7 @@ namespace MagicText
             ///     </para>
             /// </remarks>
             /// <seealso cref="Tokens" />
-            public Int32 Compare(Int32 x, Int32 y)
+            Int32 IComparer<Int32>.Compare(Int32 x, Int32 y)
             {
                 // Compare indices. If not equal, compare tokens (if possible).
                 int c = y.CompareTo(x);
@@ -161,7 +160,7 @@ namespace MagicText
         ///         Only the reference of the enumerables <c>index</c> and <c>ignoreTokens</c> passed to the constructor is stored by the finder in <see cref="Index" /> and <see cref="IgnoreTokens" /> properties respectively. Changing the content of the enumerables externally, or even their orders, results in unconsitent behaviour of search via <see cref="FindIndex(String?, Int32)" /> method.
         ///     </para>
         /// </remarks>
-        private class IndexFinder
+        private class IndexFinder : Object
         {
             private const string IndexNullErrorMessage = "Index may not be `null`.";
             private const string IgnoreTokensNullErrorMessage = "Ignored token list may not be `null`.";
@@ -197,7 +196,7 @@ namespace MagicText
             /// </summary>
             /// <param name="positions">Sorting index of tokens.</param>
             /// <param name="ignoreTokens">Tokens to ignore.</param>
-            public IndexFinder(IReadOnlyList<Int32> positions, IReadOnlyCollection<String?> ignoreTokens)
+            public IndexFinder(IReadOnlyList<Int32> positions, IReadOnlyCollection<String?> ignoreTokens) : base()
             {
                 _index = positions ?? throw new ArgumentNullException(nameof(positions), IndexNullErrorMessage);
                 _ignoreTokens = ignoreTokens ?? throw new ArgumentNullException(nameof(ignoreTokens), IgnoreTokensNullErrorMessage);
@@ -355,21 +354,21 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Compare a subrange of <paramref name="tokens" /> with a sample of tokens <paramref name="sample" /> in respect of <paramref name="comparer" />.
+        ///         Compare a subrange of <paramref name="tokens" /> with a sample of tokens <paramref name="sampleCycle" /> in respect of <paramref name="comparer" />.
         ///     </para>
         /// </summary>
         /// <param name="comparer">String comparer used for comparing.</param>
-        /// <param name="tokens">List of tokens whose subrange is compared to <paramref name="sample" />.</param>
-        /// <param name="sample">Cyclical sample list of tokens. The list represents range <c>{ <paramref name="sample" />[<paramref name="cycleStart" />], <paramref name="sample" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sample" />[<paramref name="sample" />.Count - 1], <paramref name="sample" />[0], ..., <paramref name="sample" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
-        /// <param name="i">Starting index of the subrange from <paramref name="tokens" /> to compare. The subrange <c>{ <paramref name="tokens" />[i], <paramref name="tokens" />[i + 1], ..., <paramref name="tokens" />[min(i + <paramref name="sample" />.Count - 1, <paramref name="tokens" />.Count - 1)] }</c> is used.</param>
-        /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
-        /// <returns>A signed integer that indicates the relative values of subrange from <paramref name="tokens" /> starting from <paramref name="i" /> and cyclical sample <paramref name="sample" />.</returns>
+        /// <param name="tokens">List of tokens whose subrange is compared to <paramref name="sampleCycle" />.</param>
+        /// <param name="sampleCycle">Cyclical sample list of tokens. The list represents range <c>{ <paramref name="sampleCycle" />[<paramref name="cycleStart" />], <paramref name="sampleCycle" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sampleCycle" />[<paramref name="sampleCycle" />.Count - 1], <paramref name="sampleCycle" />[0], ..., <paramref name="sampleCycle" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
+        /// <param name="i">Starting index of the subrange from <paramref name="tokens" /> to compare. The subrange <c>{ <paramref name="tokens" />[i], <paramref name="tokens" />[i + 1], ..., <paramref name="tokens" />[min(i + <paramref name="sampleCycle" />.Count - 1, <paramref name="tokens" />.Count - 1)] }</c> is used.</param>
+        /// <param name="cycleStart">Starting index of the cycle in <paramref name="sampleCycle" />.</param>
+        /// <returns>A signed integer that indicates the relative values of subrange from <paramref name="tokens" /> starting from <paramref name="i" /> and cyclical sample <paramref name="sampleCycle" />.</returns>
         /// <remarks>
         ///     <para>
-        ///         Values from the subrange of <paramref name="tokens" /> and <paramref name="sample" /> are compared in order by calling <see cref="StringComparer.Compare(String, String)" /> method on <paramref name="comparer" />. If a comparison yields a non-zero value, it is returned. If the subrange from <paramref name="tokens" /> is shorter (in the number of tokens) than <paramref name="sample" /> but all of its tokens compare equal to corresponding tokens from the beginning of <paramref name="sample" />, a negative number is returned. If all tokens compare equal and the subrange from <paramref name="tokens" /> is the same length (in the number of tokens) as <paramref name="sample" />, <c>0</c> is returned.
+        ///         Values from the subrange of <paramref name="tokens" /> and <paramref name="sampleCycle" /> are compared in order by calling <see cref="StringComparer.Compare(String, String)" /> method on <paramref name="comparer" />. If a comparison yields a non-zero value, it is returned. If the subrange from <paramref name="tokens" /> is shorter (in the number of tokens) than <paramref name="sampleCycle" /> but all of its tokens compare equal to corresponding tokens from the beginning of <paramref name="sampleCycle" />, a negative number is returned. If all tokens compare equal and the subrange from <paramref name="tokens" /> is the same length (in the number of tokens) as <paramref name="sampleCycle" />, <c>0</c> is returned.
         ///     </para>
         /// </remarks>
-        private static Int32 CompareRange(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<String?> sample, Int32 i, Int32 cycleStart)
+        private static Int32 CompareRange(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<String?> sampleCycle, Int32 i, Int32 cycleStart)
         {
             int c = 0;
 
@@ -377,9 +376,9 @@ namespace MagicText
                 int j;
 
                 // Compare tokens.
-                for (/* [`i` is set in function call,] */ j = 0; i < tokens.Count && j < sample.Count; ++i, ++j)
+                for (/* [`i` is set in function call,] */ j = 0; i < tokens.Count && j < sampleCycle.Count; ++i, ++j)
                 {
-                    c = comparer.Compare(tokens[i], sample[(cycleStart + j) % sample.Count]);
+                    c = comparer.Compare(tokens[i], sampleCycle[(cycleStart + j) % sampleCycle.Count]);
                     if (c != 0)
                     {
                         break;
@@ -387,7 +386,7 @@ namespace MagicText
                 }
 
                 // If `tokens` has reached the end, but `sample` has not, consider the subrange of `tokens` less.
-                if (c == 0 && i == tokens.Count && j < sample.Count)
+                if (c == 0 && i == tokens.Count && j < sampleCycle.Count)
                 {
                     c = -1;
                 }
@@ -398,23 +397,69 @@ namespace MagicText
 
         /// <summary>
         ///     <para>
-        ///         Find the first index and the number of occurances of <paramref name="sample" /> in <paramref name="tokens" /> sorted by <paramref name="index" />.
+        ///         Find the first index and the number of occurances of <paramref name="sampleCycle" /> in <paramref name="tokens" /> sorted by <paramref name="index" />.
         ///     </para>
         /// </summary>
         /// <param name="comparer">String comparer used for comparing.</param>
-        /// <param name="tokens">List of tokens amongst which <paramref name="sample" /> should be found.</param>
+        /// <param name="tokens">List of tokens amongst which <paramref name="sampleCycle" /> should be found.</param>
         /// <param name="index">Positional ordering of <paramref name="tokens" /> in respect of <paramref name="comparer" />.</param>
-        /// <param name="sample">Cyclical sample list of tokens to find. The list represents range <c>{ <paramref name="sample" />[<paramref name="cycleStart" />], <paramref name="sample" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sample" />[<paramref name="sample" />.Count - 1], <paramref name="sample" />[0], ..., <paramref name="sample" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
-        /// <param name="cycleStart">Starting index of the cycle in <paramref name="sample" />.</param>
-        /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sample" /> begins at <c><paramref name="tokens" />[<paramref name="index" />[i]]</c> and the total number of its occurances amongst <paramref name="tokens" />.</returns>
-        /// <exception cref="ArgumentNullException">Parameter <paramref name="comparer" /> is <c>null</c>. Parameter <paramref name="tokens" /> is <c>null</c>. Parameter <paramref name="index" /> is <c>null</c>. Parameter <paramref name="sample" /> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Parameter <paramref name="cycleStart" /> is not a valid index of <paramref name="sample" /> (it is strictly negative, i. e. less than 0, or greater than or equal to <see cref="IReadOnlyCollection{T}.Count" /> of <paramref name="sample" />).</exception>
+        /// <param name="sampleCycle">Cyclical sample list of tokens to find. The list represents range <c>{ <paramref name="sampleCycle" />[<paramref name="cycleStart" />], <paramref name="sampleCycle" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sampleCycle" />[<paramref name="sampleCycle" />.Count - 1], <paramref name="sampleCycle" />[0], ..., <paramref name="sampleCycle" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
+        /// <param name="cycleStart">Starting index of the cycle in <paramref name="sampleCycle" />.</param>
+        /// <returns>The minimal index <c>i</c> such that an occurance of <paramref name="sampleCycle" /> begins at <c><paramref name="tokens" />[<paramref name="index" />[i]]</c> and the total number of its occurances amongst <paramref name="tokens" />.</returns>
+        /// <exception cref="ArgumentNullException">Parameter <paramref name="comparer" /> is <c>null</c>. Parameter <paramref name="tokens" /> is <c>null</c>. Parameter <paramref name="index" /> is <c>null</c>. Parameter <paramref name="sampleCycle" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
-        ///         The implementation of the method <em>assumes</em> <paramref name="sample" /> actually exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" /> and that <paramref name="index" /> indeed sorts <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />. If the former is not true, the returned index shall point to the position at which <paramref name="t" />'s position should be inserted to retain the sorted order and the number of occurances shall be 0; if the latter is not true, the behaviour of the method is undefined.
+        ///         Because of performance reasons, the implementation of the method <em>assumes</em> the following without checking:
+        ///     </para>
+        ///
+        ///     <list type="bullet">
+        ///         <listheader>
+        ///             <term>
+        ///                 assumption
+        ///             </term>
+        ///             <description>
+        ///                 description
+        ///             </description>
+        ///         </listheader>
+        ///         <item>
+        ///             <term>
+        ///                 <paramref name="index" /> legality
+        ///             </term>
+        ///             <description>
+        ///                 parameter <paramref name="index" /> is of the same length as <paramref name="tokens" />, all of its values are legal indices for <paramref name="tokens" /> and each of its values appears only once (in short, <paramref name="index" /> is a permutation of the sequence <c>{ 0, 1, ..., <paramref name="tokens" />.Count - 1 }</c>),
+        ///             </description>
+        ///         </item>
+        ///         <item>
+        ///             <term>
+        ///                 <paramref name="cycleStart" /> legality
+        ///             </term>
+        ///             <description>
+        ///                 parameter <paramref name="cycleStart" /> is a legal index for <paramref name="sampleCycle"/>,
+        ///             </description>
+        ///         </item>
+        ///         <item>
+        ///             <term>
+        ///                 <paramref name="index" /> validity
+        ///             </term>
+        ///             <description>
+        ///                 parameter <paramref name="index" /> indeed sorts <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />,
+        ///             </description>
+        ///         </item>
+        ///         <item>
+        ///             <term>
+        ///                 <paramref name="sampleCycle" /> existence
+        ///             </term>
+        ///             <description>
+        ///                 parameter <paramref name="sampleCycle" /> exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" />.
+        ///             </description>
+        ///         </item>
+        ///     </list>
+        ///
+        ///     <para>
+        ///         If any of the first three assumptions is incorrect, the behaviour of the method is undefined (even <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling <see cref="IReadOnlyList{T}.this[Int32]" />). If the last assumption is incorrect, the returned index shall point to the position at which <paramref name="sampleCycle" />'s position should be inserted to retain the sorted order and the number of occurances shall be 0.
         ///     </para>
         /// </remarks>
-        protected static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IReadOnlyList<String?> sample, Int32 cycleStart)
+        protected static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IReadOnlyList<String?> sampleCycle, Int32 cycleStart)
         {
             if (comparer is null)
             {
@@ -428,13 +473,9 @@ namespace MagicText
             {
                 throw new ArgumentNullException(nameof(index), IndexNullErrorMessage);
             }
-            if (sample is null)
+            if (sampleCycle is null)
             {
-                throw new ArgumentNullException(nameof(sample), SampleNullErrorMessage);
-            }
-            if (cycleStart < 0 || cycleStart >= sample.Count)
-            {
-                throw new ArgumentOutOfRangeException(nameof(cycleStart), cycleStart, CycleStartOutOfRangeErrorMessage);
+                throw new ArgumentNullException(nameof(sampleCycle), SampleNullErrorMessage);
             }
 
             // Binary search...
@@ -449,7 +490,7 @@ namespace MagicText
                 while (l < h)
                 {
                     // Compare ranges.
-                    int c = CompareRange(comparer, tokens, sample, index[m], cycleStart);
+                    int c = CompareRange(comparer, tokens, sampleCycle, index[m], cycleStart);
 
                     // Break the loop or update positions.
                     if (c == 0)
@@ -472,11 +513,11 @@ namespace MagicText
             }
 
             // Find the minimal position index `l` and the maximal index `h` of occurances of `sample` amongst `tokens`.
-            while (l > 0 && CompareRange(comparer, tokens, sample, index[l - 1], cycleStart) == 0)
+            while (l > 0 && CompareRange(comparer, tokens, sampleCycle, index[l - 1], cycleStart) == 0)
             {
                 --l;
             }
-            while (h < tokens.Count && CompareRange(comparer, tokens, sample, index[h], cycleStart) == 0)
+            while (h < tokens.Count && CompareRange(comparer, tokens, sampleCycle, index[h], cycleStart) == 0)
             {
                 ++h;
             }
@@ -498,7 +539,46 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">Parameter <paramref name="comparer" /> is <c>null</c>. Parameter <paramref name="tokens" /> is <c>null</c>. Parameter <paramref name="index" /> is <c>null</c>. Parameter <paramref name="sample" /> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>
-        ///         The implementation of the method <em>assumes</em> <paramref name="sample" /> actually exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" /> and that <paramref name="index" /> indeed sorts <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />. If the former is not true, the returned index shall point to the position at which <paramref name="t" />'s position should be inserted to retain the sorted order and the number of occurances shall be 0; if the latter is not true, the behaviour of the method is undefined.
+        ///         Because of performance reasons, the implementation of the method <em>assumes</em> the following without checking:
+        ///     </para>
+        ///
+        ///     <list type="bullet">
+        ///         <listheader>
+        ///             <term>
+        ///                 assumption
+        ///             </term>
+        ///             <description>
+        ///                 description
+        ///             </description>
+        ///         </listheader>
+        ///         <item>
+        ///             <term>
+        ///                 <paramref name="index" /> legality
+        ///             </term>
+        ///             <description>
+        ///                 parameter <paramref name="index" /> is of the same length as <paramref name="tokens" />, all of its values are legal indices for <paramref name="tokens" /> and each of its values appears only once (in short, <paramref name="index" /> is a permutation of the sequence <c>{ 0, 1, ..., <paramref name="tokens" />.Count - 1 }</c>),
+        ///             </description>
+        ///         </item>
+        ///         <item>
+        ///             <term>
+        ///                 <paramref name="index" /> validity
+        ///             </term>
+        ///             <description>
+        ///                 parameter <paramref name="index" /> indeed sorts <paramref name="tokens" /> ascendingly in respect of <paramref name="comparer" />,
+        ///             </description>
+        ///         </item>
+        ///         <item>
+        ///             <term>
+        ///                 <paramref name="sample" /> existence
+        ///             </term>
+        ///             <description>
+        ///                 parameter <paramref name="sample" /> exists (as compared by <paramref name="comparer" />) amongst <paramref name="tokens" />.
+        ///             </description>
+        ///         </item>
+        ///     </list>
+        ///
+        ///     <para>
+        ///         If any of the first two assumptions is incorrect, the behaviour of the method is undefined (even <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling <see cref="IReadOnlyList{T}.this[Int32]" />). If the last assumption is incorrect, the returned index shall point to the position at which <paramref name="sample" />'s position should be inserted to retain the sorted order and the number of occurances shall be 0.
         ///     </para>
         /// </remarks>
         protected static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IEnumerable<String?> sample) =>
@@ -595,7 +675,7 @@ namespace MagicText
         /// <param name="comparer">String comparer. Tokens shall be compared (e. g. for equality) by <paramref name="comparer" />. If <c>null</c>, <see cref="StringComparer.Ordinal" /> is used.</param>
         /// <param name="intern">If <c>true</c>, tokens from <paramref name="context" /> shall be interned (via <see cref="String.Intern(String)" /> method) when being copied into the internal pen's container (<see cref="Context" />).</param>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="context" /> is <c>null</c>.</exception>
-        public Pen(IEnumerable<String?> context, String? sentinelToken = null, StringComparer? comparer = null, Boolean intern = false)
+        public Pen(IEnumerable<String?> context, String? sentinelToken = null, StringComparer? comparer = null, Boolean intern = false) : base()
         {
             if (context is null)
             {
@@ -825,7 +905,7 @@ namespace MagicText
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
         /// <param name="random">(Pseudo-)Random number generator.</param>
-        /// <param name="fromPosition">If set, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen as <c>{ <see cref="Context" />[<paramref name="fromPosition" />], <see cref="Context" />[<paramref name="fromPosition" /> + 1], ..., <see cref="Context" />[<paramref name="fromPosition" /> + max(<paramref name="relevantTokens" />, 1) - 1] }</c> (or fewer if the index exceeds its limitation or an ending token is reached) without calling <paramref name="picker" /> function; otherwise the first token is chosen by immediately calling <see cref="System.Random.Next(Int32)"/> method on <paramref name="random" />. The value must be greater than or equal to 0 and less than or equal to the total number of tokens in <see cref="Context" />.</param>
+        /// <param name="fromPosition">If set, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen as <c>{ <see cref="Context" />[<paramref name="fromPosition" />], <see cref="Context" />[<paramref name="fromPosition" /> + 1], ..., <see cref="Context" />[<paramref name="fromPosition" /> + max(<paramref name="relevantTokens" />, 1) - 1] }</c> (or fewer if the index exceeds its limitation or an ending token is reached) without using <paramref name="random" /> parameter; otherwise the first token is chosen by immediately calling <see cref="System.Random.Next(Int32)"/> method on <paramref name="random" />. The value must be greater than or equal to 0 and less than or equal to the total number of tokens in <see cref="Context" />.</param>
         /// <returns>Query for rendering tokens.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="random" /> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Parameter <paramref name="relevantTokens" /> is (strictly) negative, i. e. less than 0. Parameter <paramref name="fromPosition" /> is (strictly) negative or (strictly) greater than the total number of tokens in <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</exception>
@@ -900,7 +980,7 @@ namespace MagicText
         ///     </para>
         /// </summary>
         /// <param name="relevantTokens">Number of (most recent) relevant tokens.</param>
-        /// <param name="fromPosition">If set, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen as <c>{ <see cref="Context" />[<paramref name="fromPosition" />], <see cref="Context" />[<paramref name="fromPosition" /> + 1], ..., <see cref="Context" />[<paramref name="fromPosition" /> + max(<paramref name="relevantTokens" />, 1) - 1] }</c> (or fewer if the index exceeds its limitation or an ending token is reached) without calling <paramref name="picker" /> function; otherwise the first token is chosen by immediately calling <see cref="System.Random.Next(Int32)"/> method on the internal (pseudo-)random number generator (<see cref="Random" />). The value must be greater than or equal to 0 and less than or equal to the total number of tokens in <see cref="Context" />.</param>
+        /// <param name="fromPosition">If set, the first max(<paramref name="relevantTokens" />, 1) tokens are chosen as <c>{ <see cref="Context" />[<paramref name="fromPosition" />], <see cref="Context" />[<paramref name="fromPosition" /> + 1], ..., <see cref="Context" />[<paramref name="fromPosition" /> + max(<paramref name="relevantTokens" />, 1) - 1] }</c> (or fewer if the index exceeds its limitation or an ending token is reached); otherwise the first token is chosen by immediately calling <see cref="System.Random.Next(Int32)"/> method on the internal (pseudo-)random number generator (<see cref="Random" />). The value must be greater than or equal to 0 and less than or equal to the total number of tokens in <see cref="Context" />.</param>
         /// <returns>Query for rendering tokens.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Parameter <paramref name="relevantTokens" /> is (strictly) negative, i. e. less than 0. Parameter <paramref name="fromPosition" /> is (strictly) negative or (strictly) greater than the total number of tokens in <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</exception>
         /// <remarks>
