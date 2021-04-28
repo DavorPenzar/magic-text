@@ -120,7 +120,7 @@ namespace MagicText
                 throw new ArgumentNullException(nameof(tokeniser), TokeniserNullErrorMessage);
             }
 
-            List<String?> tokens = new List<String?>(tokeniser.Shatter(text, options));
+            List<String?> tokens = new List<String?>(tokeniser.Shatter(text, options) ?? throw new InvalidOperationException(TokensNullErrorMessage));
             tokens.TrimExcess();
 
             return tokens;
@@ -268,7 +268,7 @@ namespace MagicText
             }
 
             List<String?> tokens = new List<String?>();
-            await foreach (String? token in tokeniser.ShatterAsync(text, options, cancellationToken, continueTasksOnCapturedContext).ConfigureAwait(continueTasksOnCapturedContext))
+            await foreach (String? token in tokeniser.ShatterAsync(text, options, cancellationToken, continueTasksOnCapturedContext)?.ConfigureAwait(continueTasksOnCapturedContext) ?? throw new InvalidOperationException(TokensNullErrorMessage))
             {
                 tokens.Add(token);
             }

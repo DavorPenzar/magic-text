@@ -132,7 +132,7 @@ namespace MagicText
         /// <typeparam name="T">Type of the object on which <paramref name="action" /> should be applied.</typeparam>
         /// <param name="this">Object on which <paramref name="action" /> should be applied.</param>
         /// <param name="action">Action to apply on object <paramref name="this" />.</param>
-        /// <param name="continueTaskOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s should be marshalled back to the original context (via <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method).</param>
+        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s accessible to the method should be marshalled back to the original context (via <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method). However, this does not affect internal <see cref="Task" />s of <paramref name="action" />.</param>
         /// <returns>Task that represents the operation of applying <paramref name="action" /> on object <paramref name="this" />. The value of <see cref="Task{TResult}.Result" /> is object <paramref name="this" />.</returns>
         /// <exception cref="ArgumentNullException">Parameter <paramref name="action" /> is <c>null</c>.</exception>
         /// <remarks>
@@ -144,14 +144,14 @@ namespace MagicText
         ///         Exceptions thrown by <paramref name="action" /> are not caught.
         ///     </para>
         /// </remarks>
-        public static async Task<T> ApplyActionAsync<T>(this T @this, Func<T, Task> action, Boolean continueTaskOnCapturedContext)
+        public static async Task<T> ApplyActionAsync<T>(this T @this, Func<T, Task> action, Boolean continueTasksOnCapturedContext)
         {
             if (action is null)
             {
                 throw new ArgumentNullException(nameof(action), ActionNullErrorMessage);
             }
 
-            await action(@this).ConfigureAwait(continueTaskOnCapturedContext);
+            await action(@this).ConfigureAwait(continueTasksOnCapturedContext);
 
             return @this;
         }
