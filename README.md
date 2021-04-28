@@ -164,6 +164,44 @@ Do you know that there's a spark in
 
 **Nota bene.** The results above were obtained by running the code on a 64-bit version ([*x64*](http://en.wikipedia.org/wiki/X86-64)) of the [*.NET 5.0* framework](http://github.com/dotnet/core/blob/master/release-notes/5.0/README.md). Running the code in a different environment may yield different results&mdash;this has not been tested.
 
+### Further Examples
+
+The library actually enables some more sophisticated use cases than the simple example demonstrated above. For instance, to asynchronously shatter text read from the console one could use the following code:
+
+```csharp
+using MagicText; // <-- namespace of the library
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+// ...
+
+List<String?> tokens = new List<String?>();
+
+ITokeniser tokeniser = new RegexTokeniser();
+
+try
+{
+	CancellationTokenSource cancellation = new CancellationTokenSource();
+	await foreach (String? token in tokeniser.ShatterAsync(Console.In).WithCancellation(cancellation.Token).ConfigureAwait(false))
+	{
+		if (token == "#BREAK")
+		{
+			cancellation.Cancel();
+		}
+		tokens.Add(token);
+	}
+}
+catch (OperationCanceledException)
+{
+	await Console.Out.WriteLineAsync("Cancelled.").ConfigureAwait(false);
+}
+
+```
+
 ##  Remarks
 
 This library should not be used when working with large corpora of context tokens. Objects of class [```Pen```](Source/Pen.cs) store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks the possibility to work with a large number of tokens that would not fit in the internal memory all at once. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storing tokens externally.
