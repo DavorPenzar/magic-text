@@ -8,127 +8,105 @@ using System.Threading.Tasks;
 
 namespace MagicText
 {
-    /// <summary>Tokeniser which shatters text shattering its lines one by one.</summary>
+    /// <summary>Implements an <see cref="ITokeniser" /> which shatters lines of text one by one.</summary>
     /// <remarks>
-    ///     <para>
-    ///         A derived class must minimally implement <see cref="ShatterLine(String)" /> method to make a useful (non-abstract) instance of <see cref="LineByLineTokeniser" />.
-    ///     </para>
+    ///     <para>By default, empty tokens (that are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens that yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method. Derived classes may override this behaviour.</para>
+    ///     <para>Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same. These line breaks and the end of the input are considered line ends when shattering text, and are therefore substituted by a <see cref="ShatteringOptions.LineEndToken" /> if <see cref="ShatteringOptions.IgnoreLineEnds" /> is <c>false</c>. This behaviour may not be overriden by a derived class.</para>
+    ///     <para>The empty lines are substituted by a <see cref="ShatteringOptions.EmptyLineToken" /> if <see cref="ShatteringOptions.IgnoreEmptyLines" /> is <c>false</c>. This behaviour may also not be overriden by a derived class.</para>
     ///
-    ///     <para>
-    ///         By default, empty tokens (<see cref="ShatteringOptions.IgnoreEmptyTokens" />) are considered those tokens that yield <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> method. Derived classes may override this behaviour.
-    ///     </para>
-    ///
-    ///     <para>
-    ///         Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same. These + the end of the input are considered line ends and are substituted by <see cref="ShatteringOptions.LineEndToken" /> if <see cref="ShatteringOptions.IgnoreLineEnds" /> is <c>false</c>.
-    ///     </para>
-    ///
-    ///     <para>
-    ///         Empty lines are substituted by <see cref="ShatteringOptions.EmptyLineToken" /> if <see cref="ShatteringOptions.IgnoreEmptyLines" /> is <c>false</c>.
-    ///     </para>
-    ///
-    ///     <para>
-    ///         No thread safety mechanism is implemented nor assumed by the class. If the function for checking emptiness of tokens (<see cref="IsEmptyToken" />) should be thread-safe, lock the tokeniser during complete <see cref="Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.
-    ///     </para>
+    ///     <h3>Notes to Implementers</h3>
+    ///     <para>A derived class must minimally implement <see cref="ShatterLine(String)" /> method to make a useful instance of <see cref="LineByLineTokeniser" />.</para>
+    ///     <para>No thread safety mechanism is implemented nor assumed by the class. If the function for checking emptiness of tokens (<see cref="IsEmptyToken" />) should be thread-safe, lock the tokeniser during the complete <see cref="Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.</para>
     /// </remarks>
     public abstract class LineByLineTokeniser : Object, ITokeniser
     {
-        protected const string IsEmptyTokenNullErrorMessage = "Function for checking emptiness of tokens may not be `null`.";
-        private const string InputNullErrorMessage = "Input stream reader may not be `null`.";
+        protected const string IsEmptyTokenNullErrorMessage = "The function for checking emptiness of tokens may not be `null`.";
+        private const string InputNullErrorMessage = "The input stream reader may not be `null`.";
         private const string LineTokensNullErrorMessage = "Line tokens may not be `null`.";
-        protected const string LineNullErrorMessage = "Line string may not be `null`.";
+        protected const string LineNullErrorMessage = "The line string may not be `null`.";
 
-        /// <summary>Auxiliary predicate wrapper that exposes a predicate's negation.</summary>
-        /// <typeparam name="T">Type of the parameter of the predicate that this class encapsulates.</typeparam>
+        /// <summary>Exposes the negation of a simple (one argument) predicate.</summary>
+        /// <typeparam name="T">The type of the argument of the predicate.</typeparam>
         private class NegativePredicateWrapper<T> : Object
         {
-            private const string PositivePredicateNullErrorMessage = "Positive predicate may not be `null`.";
+            private const string PositivePredicateNullErrorMessage = "The positive predicate may not be `null`.";
 
             private readonly Func<T, Boolean> _positivePredicate;
 
-            /// <summary>Predicate that is negated through <see cref="EvaluateNegation(T)" /> method.</summary>
-            /// <returns>Wrapped predicate.</returns>
+            /// <summary>Gets the predicate that is negated through the <see cref="EvaluateNegation(T)" /> method.</summary>
+            /// <returns>The wrapped predicate.</returns>
             public Func<T, Boolean> PositivePredicate => _positivePredicate;
 
-            /// <summary>Create a negative wrapper of a predicate.</summary>
-            /// <param name="positivePredicate">Predicate that is negated through <see cref="EvaluateNegation(T)" /> method.</param>
-            /// <exception cref="ArgumentNullException">Parameter <paramref name="positivePredicate" /> is <c>null</c>.</exception>
+            /// <summary>Creates a negative wrapper of the <c><paramref name="positivePredicate" /></c>.</summary>
+            /// <param name="positivePredicate">The predicate that is negated through the <see cref="EvaluateNegation(T)" /> method.</param>
+            /// <exception cref="ArgumentNullException">The parameter <c><paramref name="positivePredicate" /></c> is <c>null</c>.</exception>
             public NegativePredicateWrapper(Func<T, Boolean> positivePredicate) : base()
             {
                 _positivePredicate = positivePredicate ?? throw new ArgumentNullException(nameof(positivePredicate), PositivePredicateNullErrorMessage);
             }
 
-            /// <summary>Negate the evaluation of the argument via encapsulated predicate (<see cref="PositivePredicate" />).</summary>
-            /// <param name="arg">The parameter to check.</param>
-            /// <returns>Boolean negation (<c>true</c> to <c>false</c> and vice versa) of the evaluation of <paramref name="arg" /> via encapsulated predicate (<see cref="PositivePredicate" />). Simply put, the method returns <c>!<see cref="PositivePredicate" />(<paramref name="arg" />)</c>.</returns>
+            /// <summary>Negates the evaluation of the <c><paramref name="arg" /></c> via the <see cref="PositivePredicate" /> delegate.</summary>
+            /// <param name="arg">The parameter to evaluate.</param>
+            /// <returns>The boolean negation (<c>true</c> to <c>false</c> and vice versa) of the evaluation of the <c><paramref name="arg" /></c> via the <see cref="PositivePredicate" /> delegate. Simply put, the method returns <c>!<see cref="PositivePredicate" />(<paramref name="arg" />)</c>.</returns>
             /// <remarks>
-            ///     <para>
-            ///         Exceptions thrown by the encapsuplated predicate (<see cref="PositivePredicate" />) are not caught.
-            ///     </para>
+            ///     <para>The exceptions thrown by the <see cref="PositivePredicate" /> delegate call are not caught.</para>
             /// </remarks>
             public Boolean EvaluateNegation(T arg) =>
                 !PositivePredicate(arg);
         }
 
-        /// <summary>Always indicate the token as non-empty.</summary>
-        /// <param name="token">Token to check.</param>
-        /// <returns><c>false</c></returns>
+        /// <summary>Always indicates the <c><paramref name="token" /></c> as non-empty.</summary>
+        /// <param name="token">The token to check.</param>
+        /// <returns>Always <c>false</c>.</returns>
         protected static Boolean IsEmptyTokenAlwaysFalse(String? token) =>
             false;
 
         private readonly Func<String?, Boolean> _isEmptyToken;
         private readonly Func<String?, Boolean> _isNonEmptyToken;
 
-        /// <summary>Function to check if a token is empty: it returns <c>true</c> if and only if the token to check is empty.</summary>
-        /// <returns>Token emptiness checking function.</returns>
+        /// <summary>Gets the function (predicate) to check if a token is empty: it returns <c>true</c> if and only if the token to check is empty.</summary>
+        /// <returns>The token emptiness checking function (predicate).</returns>
         protected Func<String?, Boolean> IsEmptyToken => _isEmptyToken;
 
-        /// <summary>Function to check if a token is non-empty: it returns <c>true</c> if and only if the token to check is non-empty.</summary>
-        /// <returns>Token non-emptiness checking function.</returns>
+        /// <summary>Gets the function (predicate) to check if a token is non-empty: it returns <c>true</c> if and only if the token to check is non-empty.</summary>
+        /// <returns>The token non-emptiness checking function (predicate).</returns>
         protected Func<String?, Boolean> IsNonEmptyToken => _isNonEmptyToken;
 
-        /// <summary>Create a default tokeniser.</summary>
+        /// <summary>Creates a default tokeniser.</summary>
+        /// <remarks>
+        ///     <para>The method <see cref="String.IsNullOrEmpty(String)" /> is used as the function (predicate) to check if a token is empty.</para>
+        /// </remarks>
         public LineByLineTokeniser() : this(String.IsNullOrEmpty)
         {
         }
 
-        /// <summary>Create a tokeniser with provided options.</summary>
-        /// <param name="isEmptyToken">Function to check if a token is empty.</param>
-        /// <exception cref="ArgumentNullException">Parameter <paramref name="isEmptyToken" /> is <c>null</c>.</exception>
+        /// <summary>Creates a tokeniser which uses the <c><paramref name="isEmptyToken" /></c> delegate to check if a token is empty.</summary>
+        /// <param name="isEmptyToken">The function (predicate) to check if a token is empty.</param>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="isEmptyToken" /></c> is <c>null</c>.</exception>
         protected LineByLineTokeniser(Func<String?, Boolean> isEmptyToken) : base()
         {
             _isEmptyToken = isEmptyToken ?? throw new ArgumentNullException(nameof(isEmptyToken), IsEmptyTokenNullErrorMessage);
             _isNonEmptyToken = (new NegativePredicateWrapper<String?>(IsEmptyToken)).EvaluateNegation;
         }
 
-        /// <summary>Shatter a single line into tokens.</summary>
-        /// <param name="line">Line of text to shatter.</param>
-        /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="line" />.</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="line" /> is <c>null</c>.</exception>
+        /// <summary>Shatters a single <c><paramref name="line" /></c> into tokens.</summary>
+        /// <param name="line">The line of text to shatter.</param>
+        /// <returns>The enumerable of tokens (in the order they were read) read from the <c><paramref name="line" /></c>.</returns>
         /// <remarks>
-        ///     <para>
-        ///         The method <strong>should not</strong> produce <see cref="ShatteringOptions.EmptyLineToken" />s to represent empty lines and <see cref="ShatteringOptions.LineEndToken" />s for line ends. Also, the method <strong>should not</strong> manually filter out empty tokens. Hence no <see cref="ShatteringOptions" /> are available to the method. The result of an empty line should be an empty enumerable, while empty tokens, empty lines and line ends are treated within the scope of <see cref="LineByLineTokeniser" /> parent class and its methods.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         It is guaranteed that, when called from <see cref="LineByLineTokeniser" />'s non-overridable methods, <paramref name="line" /> shall be a non-<c>null</c> string not containing a line end (CR, LF or CRLF). Nonetheless, when calling from a derived class, its programmer may call the method however they wish, but this is beyond the original programmer's scope.
-        ///     </para>
+        ///     <h3>Notes to Implementers</h3>
+        ///     <para>The method <strong>should not</strong> produce an <see cref="ShatteringOptions.EmptyLineToken" /> to represent an empty line or a <see cref="ShatteringOptions.LineEndToken" /> at the <c><paramref name="line" /></c>'s end. Also, the method <strong>should not</strong> manually filter out empty tokens. Hence no <see cref="ShatteringOptions" /> are available to the method. The result of an empty line should be an empty enumerable. Empty tokens, empty lines and the line ends are treated within the scope of the <see cref="LineByLineTokeniser" /> parent class and its methods.</para>
+        ///     <para>It is guaranteed that, when called from the <see cref="LineByLineTokeniser" />'s non-overridable methods, the <c><paramref name="line" /></c> shall be a non-<c>null</c> <see cref="String" /> not containing a line end (CR, LF or CRLF). Nonetheless, when calling from a derived class, its programmer may call the method however they wish.</para>
         /// </remarks>
         protected abstract IEnumerable<String?> ShatterLine(String line);
 
-        /// <summary>Shatter text read from <paramref name="input" /> into tokens synchronously.</summary>
-        /// <param name="input">Reader for reading the input text.</param>
+        /// <summary>Shatters the text read from the <c><paramref name="input" /></c> into tokens.</summary>
+        /// <param name="input">The reader from which the input text is read.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
-        /// <returns>Query to enumerate tokens (in the order they were read) read from <paramref name="input" />.</returns>
-        /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
-        /// <exception cref="NullReferenceException">Method <see cref="ShatterLine(String)" /> returns <c>null</c>.</exception>
+        /// <returns>The enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="input" /></c> is <c>null</c>.</exception>
+        /// <exception cref="NullReferenceException">The method <see cref="ShatterLine(String)" /> call returns <c>null</c>.</exception>
         /// <remarks>
-        ///     <para>
-        ///         Returned enumerable is merely a query for enumerating tokens (<em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from <paramref name="input" />. If a fully built container is needed, consider using <see cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" /> extension method instead to improve performance and avoid accidentally enumerating the query after disposing <paramref name="input" />.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         The method returns the equivalent enumeration of tokens as <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method called with the same parameters.
-        ///     </para>
+        ///     <para>The returned enumerable is merely a query for enumerating tokens (also known as <em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
         /// </remarks>
         /// <seealso cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
         /// <seealso cref="ShatteringOptions" />
@@ -145,7 +123,7 @@ namespace MagicText
             }
 
             // Declare:
-            bool addLineEnd = false; // indicator that a line end should be added
+            bool addLineEnd = false; // the indicator that a line end should be added
 
             // Shatter text from `input` line-by-line.
             while (true)
@@ -156,7 +134,7 @@ namespace MagicText
                     yield return options.LineEndToken;
                 }
 
-                // Read and shatter next line.
+                // Read and shatter the next line.
 
                 String? line = input.ReadLine();
                 if (line is null)
@@ -170,7 +148,7 @@ namespace MagicText
                     lineTokens = lineTokens.Where(IsNonEmptyToken);
                 }
 
-                // Return appropriate tokens and update `addLineEnd`.
+                // Return the appropriate tokens and update `addLineEnd`.
                 {
                     int i = 0;
 
@@ -205,35 +183,20 @@ namespace MagicText
             }
         }
 
-        /// <summary>Shatter text read from <paramref name="input" /> into tokens asynchronously.</summary>
-        /// <param name="input">Reader for reading the input text.</param>
-        /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
-        /// <param name="cancellationToken">Cancellation token. See <em>Remarks</em> for additional information.</param>
-        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (<see cref="TextReader.ReadLineAsync" /> method calls) is marshalled back to the original context (via <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method). See <em>Remarks</em> for additional information.</param>
-        /// <returns>Query to asynchronously enumerate tokens (in the order they were read) read from <paramref name="input" />.</returns>
-        /// <exception cref="ArgumentNullException">Parameter <paramref name="input" /> is <c>null</c>.</exception>
-        /// <exception cref="NullReferenceException">Method <see cref="ShatterLine(String)" /> returns <c>null</c>.</exception>
-        /// <exception cref="OperationCanceledException">Operation is cancelled via <paramref name="cancellationToken" />.</exception>
+        /// <summary>Shatters the text read from the <c><paramref name="input" /></c> into tokens asynchronously.</summary>
+        /// <param name="input">The reader from which the input text is read.</param>
+        /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) should be used.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
+        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method).</param>
+        /// <returns>The asynchronous enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="input" /></c> is <c>null</c>.</exception>
+        /// <exception cref="NullReferenceException">The method <see cref="ShatterLine(String)" /> call returns <c>null</c>.</exception>
+        /// <exception cref="OperationCanceledException">The operation is cancelled via the <c><paramref name="cancellationToken" /></c>.</exception>
         /// <remarks>
-        ///     <para>
-        ///         Although the method accepts <paramref name="cancellationToken" /> to support cancelling the operation, this should be used with caution. For instance, if <paramref name="input" /> is <see cref="StreamReader" />, data having already been read from underlying <see cref="Stream" /> may be irrecoverable when cancelling the operation.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         The enumeration may be cancelled via <see cref="TaskAsyncEnumerableExtensions.WithCancellation{T}(IAsyncEnumerable{T}, CancellationToken)" /> extension method as parameter <paramref name="cancellationToken" /> is set with <see cref="EnumeratorCancellationAttribute" /> attribute.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         Usually the default <c>false</c> value of <paramref name="continueTasksOnCapturedContext" /> is desirable as it may optimise the asynchronous shattering process. However, in some cases only the original context might have reading access to the resource provided by <paramref name="input" />, and thus <paramref name="continueTasksOnCapturedContext" /> should be set to <c>true</c> to avoid errors.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         Returned enumerable is merely a query for enumerating tokens (<em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from <paramref name="input" />. If a fully built container is needed, consider using <see cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> extension method instead to improve performance and avoid accidentally enumerating the query after disposing <paramref name="input" />.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         The method ultimately returns the equivalent enumeration of tokens as <see cref="Shatter(TextReader, ShatteringOptions?)" /> method called with the same parameters.
-        ///     </para>
+        ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, if the <c><paramref name="input" /></c> is a <see cref="StreamReader" />, data having already been read from the underlying <see cref="Stream" /> may be irrecoverable when cancelling the operation.</para>
+        ///     <para>The enumeration and, consequently, the shattering operation may be cancelled via the <see cref="TaskAsyncEnumerableExtensions.WithCancellation{T}(IAsyncEnumerable{T}, CancellationToken)" /> extension method as the parameter <c><paramref name="cancellationToken" /></c> is set with the <see cref="EnumeratorCancellationAttribute" /> attribute.</para>
+        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> is desirable as it may optimise the asynchronous shattering process. However, in some cases only the original context might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus <c><paramref name="continueTasksOnCapturedContext" /></c> should be set to <c>true</c> to avoid errors.</para>
+        ///     <para>The returned asynchronous enumerable is merely an asynchronous query for enumerating tokens (also known as <em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
         /// </remarks>
         /// <seealso cref="Shatter(TextReader, ShatteringOptions?)" />
         /// <seealso cref="ShatteringOptions" />
@@ -250,7 +213,7 @@ namespace MagicText
             }
 
             // Declare:
-            bool addLineEnd = false; // indicator that a line end should be added
+            bool addLineEnd = false; // the indicator that a line end should be added
 
             // Shatter text from `input` line-by-line.
             while (true)
@@ -264,7 +227,7 @@ namespace MagicText
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                // Read and shatter next line.
+                // Read and shatter the next line.
 
                 String? line = await input.ReadLineAsync().ConfigureAwait(continueTasksOnCapturedContext);
                 if (line is null)
@@ -278,7 +241,7 @@ namespace MagicText
                     lineTokens = lineTokens.Where(IsNonEmptyToken);
                 }
 
-                // Return appropriate tokens and update `addLineEnd`.
+                // Return the appropriate tokens and update `addLineEnd`.
                 {
                     int i = 0;
 

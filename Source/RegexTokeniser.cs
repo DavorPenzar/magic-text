@@ -8,174 +8,166 @@ using System.Threading;
 
 namespace MagicText
 {
-    /// <summary>Tokeniser which shatters text at specific regular expression pattern matches.</summary>
+    /// <summary>Implements a <see cref="LineByLineTokeniser" /> which shatters lines of text at specific regular expression pattern matches.</summary>
     /// <remarks>
-    ///     <para>
-    ///         Additional to shattering text into tokens, the tokeniser provides a possibility to transform tokens immediately after the extraction of regular expression matches and prior to checking for empty tokens. Initially, the idea was to use regular expressions for the transformation as regular expressions are often used for text replacement, but the tokeniser accepts any <see cref="Func{T, TResult}" /> delegate for the transformation function (<see cref="Transform" />). This way <see cref="RegexTokeniser" /> class provides a wider range of tokenising policies and, at the same time, its implementation and interface are more consistent with other libraries, most notably the standard <em>.NET</em> library (such as <see cref="Enumerable.Select{TSource, TResult}(IEnumerable{TSource}, Func{TSource, TResult})" /> extension method). Still, to use a regular expression based replacement, lambda-function <c>t => <see cref="Regex" />.Replace(t, matchPattern, replacementPattern)</c>, where <c>matchPattern</c> and <c>replacementPattern</c> are regular expressions to match and to use for replacement respectively, may be provided (amongst other solutions).
-    ///     </para>
-    ///
-    ///     <para>
-    ///         If the default regular expression break pattern (<see cref="DefaultBreakPattern" />) should be used without special <see cref="RegexOptions" />, better performance is achieved when using <see cref="RegexTokeniser.RegexTokeniser()" /> constructor, in which case a pre-built <see cref="Regex" /> object is used constructed with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" />, instead of <see cref="RegexTokeniser.RegexTokeniser(String, RegexOptions, Func{String?, String?}?)" /> constructor.
-    ///     </para>
-    ///
-    ///     <para>
-    ///         Empty tokens (<see cref="ShatteringOptions.IgnoreEmptyTokens" />) are considered those tokens that yield <c>true</c> when checked via <see cref="String.IsNullOrEmpty(String)" /> method (after the transformation).
-    ///     </para>
-    ///
-    ///     <para>
-    ///         Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same. These + the end of the input are considered line ends and are substituted by <see cref="ShatteringOptions.LineEndToken" /> if <see cref="ShatteringOptions.IgnoreLineEnds" /> is <c>false</c>.
-    ///     </para>
-    ///
-    ///     <para>
-    ///         Each line from the input is split into <em>raw</em> tokens via <see cref="Regex.Split(String)" /> method (using the internal regular expression breaker (<see cref="Break" />) defined on construction of the tokeniser). If a transformation function (<see cref="Transform" />) is set, it is then used to transform each raw token. The filtering of empty tokens is done <strong>after</strong> the transformation.
-    ///     </para>
-    ///
-    ///     <para>
-    ///         Empty lines are substituted by <see cref="ShatteringOptions.EmptyLineToken" /> if <see cref="ShatteringOptions.IgnoreEmptyLines" /> is <c>false</c>.
-    ///     </para>
-    ///
-    ///     <para>
-    ///         No thread safety mechanism is implemented nor assumed by the class. If the transformation function should be thread-safe, lock the tokeniser during complete <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.
-    ///     </para>
+    ///     <para>Additional to shattering text into tokens, <see cref="RegexTokeniser" /> provides a possibility to transform tokens immediately after the extraction of regular expression matches and prior to checking for empty tokens. Initially, the idea was to use regular expressions for the transformation as regular expressions are often used for text replacement alongside other uses (such as text breaking/splitting), but the tokeniser accepts any <see cref="Func{T, TResult}" /> delegate for the transformation function <see cref="Transform" />. This way the <see cref="RegexTokeniser" /> class provides a wider range of tokenising policies and, at the same time, its implementation and programming interface are more consistent with other libraries, most notably the standard <em>.NET</em> library (such as the <see cref="Enumerable.Select{TSource, TResult}(IEnumerable{TSource}, Func{TSource, TResult})" /> extension method). Still, to use a regular expression based replacement, a lambda-function <c>t => <see cref="Regex" />.Replace(t, matchPattern, replacementPattern)</c>, where <c>matchPattern</c> and <c>replacementPattern</c> are regular expressions to match and to use for replacement respectively, may be provided (amongst other solutions).</para>
+    ///     <para>If a default regular expression break pattern <see cref="DefaultInclusiveBreakPattern" /> or <see cref="DefaultExclusiveBreaker" /> should be used without special <see cref="RegexOptions" />, a better performance is achieved when using the default <see cref="RegexTokeniser()" /> constructor or the <see cref="RegexTokeniser(Boolean)" /> constructor, in which case a pre-built <see cref="Regex" /> object is used constructed with <see cref="Regex.Options" />, instead of the <see cref="RegexTokeniser(String, RegexOptions, Func{String?, String?}?)" /> constructor.</para>
+    ///     <para>Empty tokens (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens which yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method after possible transformation via the <see cref="Transform" /> delegate if it is set. This behaviour cannot be overriden by a derived class.</para>
+    ///     <para>No thread safety mechanism is implemented nor assumed by the class. If the transformation function (<see cref="Transform" />) should be thread-safe, lock the tokeniser during complete <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.</para>
     /// </remarks>
     public class RegexTokeniser : LineByLineTokeniser
     {
-        protected const string RegexPatternNullErrorMessage = "Regular expression pattern may not be `null`.";
-        protected const string BreakNullErrorMessage = "Regular expression breaker may not be `null`.";
+        protected const string RegexPatternNullErrorMessage = "The regular expression pattern may not be `null`.";
+        protected const string BreakNullErrorMessage = "The regular expression breaker may not be `null`.";
 
-        /// <summary>Default regular expression break pattern.</summary>
+        /// <summary>The default regular expression break pattern which includes the breaks as tokens.</summary>
         /// <remarks>
-        ///     <para>
-        ///         The pattern matches all non-empty continuous groups of white spaces (<c>"\\s"</c>), punctuation symbols (<c>"\\p{P}"</c>), mathematics symbols (<c>"\\p{Sm}"</c>) and separator characters (<c>"\\p{Z}"</c>). The pattern is enclosed in (round) brackets to be captured by <see cref="Regex.Split(String)" /> method.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         <strong>Nota bene.</strong> If a match occurs exactly at the beginning or the end of the (line of) text to split, the splitting shall yield empty strings at the corresponding end of the input. Empty strings (tokens) may be ignored by passing adequate <see cref="ShatteringOptions" /> to <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods, but this could unintentionally ignore some results of token transformation (via <see cref="Transform" /> function). Although the occurance of empty strings is the case with splitting the input using any regular expression breaking pattern in the described scenario(s), the remark is stated here since a grammatically correct text (organised in complete sentences) usually ends with a punctuation symbol, which is considered a breaking point by this breaking pattern.
-        ///     </para>
+        ///     <para>The pattern matches all non-empty continuous groups of white spaces (<c>"\\s"</c>), punctuation symbols (<c>"\\p{P}"</c>), mathematics symbols (<c>"\\p{Sm}"</c>) and separator characters (<c>"\\p{Z}"</c>). The pattern is enclosed in (round) brackets to be captured by the <see cref="Regex.Split(String)" /> method call and therefore yielded as a token by the <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" />, <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> and <see cref="ShatterLine(String)" /> method calls.</para>
+        ///     <para>If a match occurs exactly at the beginning or the end of the (line of) text to split, the splitting shall yield empty strings at the corresponding end of the input. The empty strings (tokens) may be ignored by passing the adequate <see cref="ShatteringOptions" /> to the <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls, but this could unintentionally ignore some other tokens, possibly after transformation via the <see cref="Transform" /> delegate. Although the occurance of empty strings is the case with splitting the input using any regular expression breaking pattern in the described scenario(s), the remark is stated here because a grammatically correct text (i. e. organised in complete sentences) usually ends with a punctuation symbol, which is considered a breaking point by this pattern.</para>
         /// </remarks>
         /* language = regexp | jsregexp */
         [RegexPattern]
-        public const string DefaultBreakPattern = @"([\s\p{P}\p{Sm}\p{Z}]+)";
+        public const string DefaultInclusiveBreakPattern = @"([\s\p{P}\p{Sm}\p{Z}]+)";
 
-        private static readonly Regex _defaultBreak;
-
-        /// <summary>Regular expression breaker used by tokenisers constructed with the default constructor (<see cref="RegexTokeniser.RegexTokeniser()" />).</summary>
-        /// <returns>Default regular expression breaker.</returns>
+        /// <summary>The default regular expression break pattern which excludes the breaks as tokens.</summary>
         /// <remarks>
-        ///     <para>
-        ///         The regular expression breaker is constructed using the default regular expression break pattern (<see cref="DefaultBreakPattern" />) with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" />.
-        ///     </para>
+        ///     <para>The pattern matches all non-empty continuous groups of white spaces (<c>"\\s"</c>), punctuation symbols (<c>"\\p{P}"</c>), mathematics symbols (<c>"\\p{Sm}"</c>) and separator characters (<c>"\\p{Z}"</c>). The pattern is not enclosed in (round) brackets to be skipped by the <see cref="Regex.Split(String)" /> method call and therefore not yielded as a token by the <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" />, <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> and <see cref="ShatterLine(String)" /> method calls.</para>
+        ///     <para>If a match occurs exactly at the beginning or the end of the (line of) text to split, the splitting shall yield empty strings at the corresponding end of the input. The empty strings (tokens) may be ignored by passing the adequate <see cref="ShatteringOptions" /> to the <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls, but this could unintentionally ignore some other tokens, possibly after transformation via the <see cref="Transform" /> delegate. Although the occurance of empty strings is the case with splitting the input using any regular expression breaking pattern in the described scenario(s), the remark is stated here because a grammatically correct text (i. e. organised in complete sentences) usually ends with a punctuation symbol, which is considered a breaking point by this pattern.</para>
         /// </remarks>
-        protected static Regex DefaultBreak => _defaultBreak;
+        /* language = regexp | jsregexp */
+        [RegexPattern]
+        public const string DefaultExclusiveBreakPattern = @"[\s\p{P}\p{Sm}\p{Z}]+";
 
-        /// <summary>Initialise static fields.</summary>
+        private static readonly Regex _defaultInclusiveBreaker;
+        private static readonly Regex _defaultExclusiveBreaker;
+
+        /// <summary>Gets the regular expression breaker built upon the <see cref="DefaultInclusiveBreakPattern" />.</summary>
+        /// <returns>The default inclusive regular expression breaker.</returns>
+        /// <remarks>
+        ///     <para>The regular expression breaker is constructed using the <see cref="DefaultInclusiveBreakPattern" /> with the <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" />.</para>
+        ///     <para>When constructing a <see cref="RegexTokeniser" /> using the default <see cref="RegexTokeniser()" /> constructor or the constructor <see cref="RegexTokeniser(Boolean)" /> with the parameter <c>inclusiveBreak</c> set to <c>true</c>, the <see cref="Breaker" /> shall be set to <see cref="DefaultInclusiveBreakPattern" />.</para>
+        /// </remarks>
+        protected static Regex DefaultInclusiveBreaker => _defaultInclusiveBreaker;
+
+        /// <summary>Gets the regular expression breaker built upon the <see cref="DefaultExclusiveBreakPattern" />.</summary>
+        /// <returns>The default exclusive regular expression breaker.</returns>
+        /// <remarks>
+        ///     <para>The regular expression breaker is constructed using the <see cref="DefaultExclusiveBreakPattern" /> with the <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" />.</para>
+        ///     <para>When constructing a <see cref="RegexTokeniser" /> using the constructor <see cref="RegexTokeniser(Boolean)" /> with the parameter <c>inclusiveBreak</c> set to <c>false</c>, the <see cref="Breaker" /> shall be set to <see cref="DefaultExclusiveBreakPattern" />.</para>
+        /// </remarks>
+        protected static Regex DefaultExclusiveBreaker => _defaultExclusiveBreaker;
+
+        /// <summary>Initialises static fields.</summary>
         static RegexTokeniser()
         {
-            _defaultBreak = new Regex(DefaultBreakPattern, RegexOptions.Compiled);
+            _defaultInclusiveBreaker = new Regex(DefaultInclusiveBreakPattern, RegexOptions.Compiled);
+            _defaultExclusiveBreaker = new Regex(DefaultExclusiveBreakPattern, RegexOptions.Compiled);
         }
 
-        /// <summary><em>Transform</em> <paramref name="token" /> using the identity function (return <paramref name="token" /> unchanged).</summary>
+        /// <summary>Does not tansform the <c><paramref name="token" /></c>, but returns it unchanged.</summary>
         /// <param name="token">Token to transform.</param>
-        /// <returns><paramref name="token" /></returns>
+        /// <returns>The <c><paramref name="token" /></c> unchanged.</returns>
+        /// <remarks>
+        ///     <para>Mathematically speaking, the method acts as an identity function over the set of (nullable) <see cref="String" />s.</para>
+        /// </remarks>
         protected static String? IdentityTransform(String? token) =>
             token;
 
-        private readonly Regex _break;
+        private readonly Regex _breaker;
         private readonly Func<String?, String?>? _transform;
 
-        /// <summary>Regular expression breaker used by the tokeniser.</summary>
-        /// <returns>Internal regular expression breaker.</returns>
+        /// <summary>Gets the regular expression breaker used by the tokeniser.</summary>
+        /// <returns>The internal regular expression breaker.</returns>
         /// <remarks>
-        ///     <para>
-        ///         Shattering a line of text <c>line</c> (not ending with a line end (CR, LF or CRLF)) by the tokeniser, without transformation, filtering and replacement of empty lines, is done by calling <c><see cref="Break" />.Split(line)</c>.
-        ///     </para>
+        ///     <para>Shattering a line of text <c>line</c> (not ending in a line end (CR, LF or CRLF)) by the tokeniser, without transformation, filtering and replacement of empty lines, is done by the call <c><see cref="Breaker" />.Split(line)</c>.</para>
         /// </remarks>
-        protected Regex Break => _break;
+        protected Regex Breaker => _breaker;
 
-        /// <summary>Transformation function used by the tokeniser. The value of <c>null</c> means no transformation function is used.</summary>
-        /// <returns>Internal transformation function.</returns>
+        /// <summary>Gets the token transformation function used by the tokeniser. The value of <c>null</c> indicates that no transformation function is used.</summary>
+        /// <returns>The internal transformation function.</returns>
         protected Func<String?, String?>? Transform => _transform;
 
-        /// <summary>Regular expression break pattern used by the tokeniser.</summary>
-        /// <returns>Internal regular expression break pattern.</returns>
+        /// <summary>Gets the regular expression break pattern used by the tokeniser.</summary>
+        /// <returns>The internal regular expression break pattern.</returns>
         /// <remarks>
-        ///     <para>
-        ///         Shattering a line of text <c>line</c> (not ending with a line end (CR, LF or CRLF)) by the tokeniser, without transformation, filtering and replacement of empty lines, is equivalent (performance aside) to calling <see cref="Regex.Split(String, String)" /> with <c>line</c> as the first argument and <see cref="BreakPattern" /> as the second.
-        ///     </para>
+        ///     <para>Shattering a line of text <c>line</c> (not ending with a line end (CR, LF or CRLF)) by the tokeniser, without transformation, filtering and replacement of empty lines, is equivalent (performance aside) to calling <see cref="Regex.Split(String, String)" /> with the <c>line</c> as the first argument and the <see cref="BreakPattern" /> as the second.</para>
         /// </remarks>
         [RegexPattern]
-        public String BreakPattern => Break.ToString();
+        public String BreakPattern => Breaker.ToString();
 
-        /// <summary>Create a default tokeniser.</summary>
-        public RegexTokeniser() : this(DefaultBreak)
-        {
-        }
-
-        /// <summary>Create a tokeniser with provided options.</summary>
-        /// <param name="breakPattern">Regular expression break pattern to use.</param>
-        /// <param name="options">Options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
-        /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
-        /// <exception cref="ArgumentNullException">Parameter <paramref name="breakPattern" /> is <c>null</c>.</exception>
+        /// <summary>Creates a default tokeniser.</summary>
         /// <remarks>
-        ///     <para>
-        ///         Exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.
-        ///     </para>
+        ///     <para>The <see cref="DefaultInclusiveBreakPattern" /> is used as the regular expression break pattern.</para>
+        ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultInclusiveBreaker" />) with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" /> is used. Consider using this constructor or the <see cref="RegexTokeniser(Boolean)" /> constructor if a default tokeniser should be used to improve performance.</para>
         /// </remarks>
-        public RegexTokeniser([RegexPattern] String breakPattern, RegexOptions options = RegexOptions.None, Func<String?, String?>? transform = null) : this(@break: new Regex(breakPattern ?? throw new ArgumentNullException(nameof(breakPattern), RegexPatternNullErrorMessage), options), transform: transform)
+        public RegexTokeniser() : this(true)
         {
         }
 
-        /// <summary>Create a tokeniser with provided options.</summary>
-        /// <param name="break">Regular expression breaker to use.</param>
-        /// <param name="alterOptions">If not set, <paramref name="break" />'s options (<see cref="Regex.Options" />) are used (actually, no new <see cref="Regex" /> is constructed); otherwise options passed to <see cref="Regex.Regex(String, RegexOptions)" /> constructor.</param>
-        /// <param name="transform">Optional transformation function. If <c>null</c>, no transformation function is used.</param>
-        /// <exception cref="ArgumentNullException">Parameter <paramref name="break" /> is <c>null</c>.</exception>
+        /// <summary>Creates a default tokeniser, with the inclusive break or not.</summary>
+        /// <param name="inclusiveBreak">If <c>true</c>, the <see cref="DefaultInclusiveBreakPattern" /> is used as the regular expression break pattern; otherwise the <see cref="DefaultExclusiveBreakPattern" /> is used.</param>
         /// <remarks>
-        ///     <para>
-        ///         Exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.
-        ///     </para>
-        ///
-        ///     <para>
-        ///         Calling this constructor is essentially the same (performance aside) as calling <see cref="RegexTokeniser.RegexTokeniser(String, RegexOptions, Func{String?, String?}?)" /> constructor as:
-        ///     </para>
-        ///
+        ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultInclusiveBreaker" /> or <see cref="DefaultExclusiveBreaker" />) with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" /> is used. Consider using this constructor or the default <see cref="RegexTokeniser()" /> constructor if a default tokeniser should be used to improve performance.</para>
+        /// </remarks>
+        public RegexTokeniser(Boolean inclusiveBreak) : this(inclusiveBreak ? DefaultInclusiveBreaker : DefaultExclusiveBreaker)
+        {
+        }
+
+        /// <summary>Creates a tokeniser which uses the <c><paramref name="breakPattern" /></c> as the regular expression break pattern and the <c><paramref name="transform" /></c> delegate as the transformation function.</summary>
+        /// <param name="breakPattern">The regular expression break pattern to use.</param>
+        /// <param name="options">The options passed to the <see cref="Regex(String, RegexOptions)" /> constructor.</param>
+        /// <param name="transform">The optional token transformation function. If <c>null</c>, no transformation function is used.</param>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="breakPattern" /></c> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>The exceptions thrown by the <see cref="Regex" /> class's constructor and methods are not caught.</para>
+        /// </remarks>
+        public RegexTokeniser([RegexPattern] String breakPattern, RegexOptions options = RegexOptions.None, Func<String?, String?>? transform = null) : this(breaker: breakPattern is null ? throw new ArgumentNullException(nameof(breakPattern), RegexPatternNullErrorMessage) : new Regex(breakPattern, options), transform: transform)
+        {
+        }
+
+        /// <summary>Creates a tokeniser which uses the <c><paramref name="breaker" /></c> as the regular expression breaker and the <c><paramref name="transform" /></c> delegate as the transformation function.</summary>
+        /// <param name="breaker">The regular expression breaker to use.</param>
+        /// <param name="alterOptions">If not set (if <c>null</c>), the <c><paramref name="breaker" /></c>'s <see cref="Regex.Options" /> are used (actually, no new <see cref="Regex" /> is constructed but the original <c><paramref name="breaker" /></c> is used); otherwise the options passed to the <see cref="Regex(String, RegexOptions)" /> constructor.</param>
+        /// <param name="transform">The optional token transformation function. If <c>null</c>, no transformation function is used.</param>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="breaker" /></c> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>The exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.</para>
+        ///     <para>Calling this constructor is essentially the same (performance aside) as calling the <see cref="RegexTokeniser(String, RegexOptions, Func{String?, String?}?)" /> constructor as:</para>
         ///     <code>
-        ///         <see cref="RegexTokeniser" />.RegexTokeniser(breakPattern: @<paramref name="break" />.ToString(), options: <paramref name="alterOptions" /> ?? @<paramref name="break" />.Options, transform: <paramref name="transform" />)
+        ///         <see cref="RegexTokeniser" />.RegexTokeniser(breakPattern: <paramref name="breaker" />.ToString(), options: <paramref name="alterOptions" /> ?? <paramref name="breaker" />.Options, transform: <paramref name="transform" />)
         ///     </code>
         /// </remarks>
         /// <seealso cref="RegexTokeniser(String, RegexOptions, Func{String?, String?}?)" />
-        public RegexTokeniser(Regex @break, Nullable<RegexOptions> alterOptions = default, Func<String?, String?>? transform = null) : base()
+        public RegexTokeniser(Regex breaker, Nullable<RegexOptions> alterOptions = default, Func<String?, String?>? transform = null) : base()
         {
-            if (@break is null)
+            if (breaker is null)
             {
-                throw new ArgumentNullException(nameof(@break), BreakNullErrorMessage);
+                throw new ArgumentNullException(nameof(breaker), BreakNullErrorMessage);
             }
 
-            _break = alterOptions.HasValue ? new Regex(@break.ToString(), alterOptions.Value) : @break;
+            _breaker = alterOptions.HasValue ? new Regex(breaker.ToString(), alterOptions.Value) : breaker;
             _transform = transform;
         }
 
-        /// <summary>Shatter a single line into tokens.</summary>
-        /// <param name="line">Line of text to shatter.</param>
-        /// <returns>Enumerable of tokens (in the order they were read) read from <paramref name="line" />.</returns>
-        /// <exception cref="ArgumentNullException">Parameter <paramref name="line" /> is <c>null</c>.</exception>
+        /// <summary>Shatters a single <c><paramref name="line" /></c> into tokens.</summary>
+        /// <param name="line">The line of text to shatter.</param>
+        /// <returns>The enumerable of tokens (in the order they were read) read from the <c><paramref name="line" /></c>.</returns>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="line" /></c> is <c>null</c>.</exception>
         /// <remarks>
-        ///     <para>
-        ///         After splitting <paramref name="line" /> using the internal regular expression breaker (<see cref="Break" />), the transformation of tokens is done using the transformation function (<see cref="Transform" />) if it is set.
-        ///     </para>
+        ///     <para>After splitting the <c><paramref name="line" /></c> using the <see cref="Breaker" />, the transformation of tokens is done using the <see cref="Transform" /> delegate if it is set.</para>
+        ///     <para>The returned enumerable is merely a query for enumerating tokens (also known as <em>deferred execution</em>). If multiple enumeration processes over the enumerable should be performed, it is advisable to convert it to a fully built container beforehand, such as a <see cref="List{T}" /> via the <see cref="List{T}.List(IEnumerable{T})" /> constructor or the <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.</para>
         ///
-        ///     <para>
-        ///         The returned enumerable is merely a query. If multiple enumerations over it should be performed, it is advisable to convert it to a fully built container beforehand, such as <see cref="List{T}" /> via <see cref="List{T}.List(IEnumerable{T})" /> constructor or <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.
-        ///     </para>
+        ///     <h3>Notes to Implementers</h3>
+        ///     <para>This method cannot be overriden.</para>
         /// </remarks>
-        protected override IEnumerable<String?> ShatterLine(String line)
+        protected sealed override IEnumerable<String?> ShatterLine(String line)
         {
             if (line is null)
             {
                 throw new ArgumentNullException(nameof(line), LineNullErrorMessage);
             }
 
-            IEnumerable<String?> tokens = Break.Split(line);
+            IEnumerable<String?> tokens = Breaker.Split(line);
             if (!(Transform is null))
             {
                 tokens = tokens.Select(Transform);
