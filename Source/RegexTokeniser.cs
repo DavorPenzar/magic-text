@@ -17,13 +17,13 @@ namespace MagicText
     /// </remarks>
     public class RegexTokeniser : LineByLineTokeniser
     {
-        protected const string RegexPatternNullErrorMessage = "The regular expression pattern may not be `null`.";
-        protected const string BreakNullErrorMessage = "The regular expression breaker may not be `null`.";
+        protected const string RegexPatternNullErrorMessage = "Regular expression pattern cannot be null.";
+        protected const string BreakNullErrorMessage = "Regular expression breaker cannot be null.";
 
         /// <summary>The default regular expression break pattern which includes the breaks as tokens.</summary>
         /// <remarks>
         ///     <para>The pattern matches all non-empty continuous groups of white spaces (<c>"\\s"</c>), punctuation symbols (<c>"\\p{P}"</c>), mathematics symbols (<c>"\\p{Sm}"</c>) and separator characters (<c>"\\p{Z}"</c>). The pattern is enclosed in (round) brackets to be captured by the <see cref="Regex.Split(String)" /> method call and therefore yielded as a token by the <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" />, <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> and <see cref="ShatterLine(String)" /> method calls.</para>
-        ///     <para>If a match occurs exactly at the beginning or the end of the (line of) text to split, the splitting shall yield empty strings at the corresponding end of the input. The empty strings (tokens) may be ignored by passing the adequate <see cref="ShatteringOptions" /> to the <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls, but this could unintentionally ignore some other tokens, possibly after transformation via the <see cref="Transform" /> delegate. Although the occurance of empty strings is the case with splitting the input using any regular expression breaking pattern in the described scenario(s), the remark is stated here because a grammatically correct text (i. e. organised in complete sentences) usually ends with a punctuation symbol, which is considered a breaking point by this pattern.</para>
+        ///     <para>If a match occurs exactly at the beginning or the end of the (line of) text to split, the splitting shall yield an empty <see cref="String" /> at the corresponding end of the input. The empty <see cref="String" />s (tokens) may be ignored by passing the adequate <see cref="ShatteringOptions" /> to the <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls, but this could unintentionally ignore some other tokens, possibly after transformation via the <see cref="Transform" /> delegate. Although the occurance of empty strings is the case with splitting the input using any regular expression breaking pattern in the described scenario(s), the remark is stated here because a grammatically correct text (i. e. organised in complete sentences) usually ends with a punctuation symbol, which is considered a breaking point by this pattern.</para>
         /// </remarks>
         /* language = regexp | jsregexp */
         [RegexPattern]
@@ -32,7 +32,7 @@ namespace MagicText
         /// <summary>The default regular expression break pattern which excludes the breaks as tokens.</summary>
         /// <remarks>
         ///     <para>The pattern matches all non-empty continuous groups of white spaces (<c>"\\s"</c>), punctuation symbols (<c>"\\p{P}"</c>), mathematics symbols (<c>"\\p{Sm}"</c>) and separator characters (<c>"\\p{Z}"</c>). The pattern is not enclosed in (round) brackets to be skipped by the <see cref="Regex.Split(String)" /> method call and therefore not yielded as a token by the <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" />, <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> and <see cref="ShatterLine(String)" /> method calls.</para>
-        ///     <para>If a match occurs exactly at the beginning or the end of the (line of) text to split, the splitting shall yield empty strings at the corresponding end of the input. The empty strings (tokens) may be ignored by passing the adequate <see cref="ShatteringOptions" /> to the <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls, but this could unintentionally ignore some other tokens, possibly after transformation via the <see cref="Transform" /> delegate. Although the occurance of empty strings is the case with splitting the input using any regular expression breaking pattern in the described scenario(s), the remark is stated here because a grammatically correct text (i. e. organised in complete sentences) usually ends with a punctuation symbol, which is considered a breaking point by this pattern.</para>
+        ///     <para>If a match occurs exactly at the beginning or the end of the (line of) text to split, the splitting shall yield an empty <see cref="String" /> at the corresponding end of the input. The empty <see cref="String" />s (tokens) may be ignored by passing the adequate <see cref="ShatteringOptions" /> to the <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls, but this could unintentionally ignore some other tokens, possibly after transformation via the <see cref="Transform" /> delegate. Although the occurance of empty strings is the case with splitting the input using any regular expression breaking pattern in the described scenario(s), the remark is stated here because a grammatically correct text (i. e. organised in complete sentences) usually ends with a punctuation symbol, which is considered a breaking point by this pattern.</para>
         /// </remarks>
         /* language = regexp | jsregexp */
         [RegexPattern]
@@ -105,11 +105,11 @@ namespace MagicText
         }
 
         /// <summary>Creates a default tokeniser, with the inclusive break or not.</summary>
-        /// <param name="inclusiveBreak">If <c>true</c>, the <see cref="DefaultInclusiveBreakPattern" /> is used as the regular expression break pattern; otherwise the <see cref="DefaultExclusiveBreakPattern" /> is used.</param>
+        /// <param name="inclusiveBreaker">If <c>true</c>, the <see cref="DefaultInclusiveBreakPattern" /> is used as the regular expression break pattern; otherwise the <see cref="DefaultExclusiveBreakPattern" /> is used.</param>
         /// <remarks>
         ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultInclusiveBreaker" /> or <see cref="DefaultExclusiveBreaker" />) with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" /> is used. Consider using this constructor or the default <see cref="RegexTokeniser()" /> constructor if a default tokeniser should be used to improve performance.</para>
         /// </remarks>
-        public RegexTokeniser(Boolean inclusiveBreak) : this(inclusiveBreak ? DefaultInclusiveBreaker : DefaultExclusiveBreaker)
+        public RegexTokeniser(Boolean inclusiveBreaker) : this(inclusiveBreaker ? DefaultInclusiveBreaker : DefaultExclusiveBreaker)
         {
         }
 

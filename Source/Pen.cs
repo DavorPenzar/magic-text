@@ -9,7 +9,7 @@ namespace MagicText
     /// <summary>Provides methods for (pseudo-)random text generation.</summary>
     /// <remarks>
     ///     <para>If the <see cref="Pen" /> should choose from tokens from multiple sources, the tokens should be concatenated into a single enumerable <c>context</c> passed to the constructor. To prevent overflowing from one source to another (e. g. if the last token from the first source is not a contextual predecessor of the first token from the second source), an ending token (<see cref="SentinelToken" />) should be put between the sources' tokens in the final enumerable <c>tokens</c>. Choosing an ending token in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, Random, Nullable{Int32})" /> or <see cref="Render(Int32, Nullable{Int32})" /> method calls shall cause the rendering to stop—the same as when a <em>successor</em> of the last entry in tokens is chosen.</para>
-    ///     <para>A complete deep copy of the enumerable <c>context</c> (passed to the constructor) is created and stored by the pen. Memory errors may occur if the number of tokens in the enumerable is too large. To reduce memory usage and even time consumption, <c>true</c> may be passed as the parameter <c>intern</c> to the constructor; however, other side effects of string interning via the <see cref="String.Intern(String)" /> method should be considered as well.</para>
+    ///     <para>A complete deep copy of the enumerable <c>context</c> (passed to the constructor) is created and stored by the pen. Memory errors may occur if the number of tokens in the enumerable is too large. To reduce memory usage and even time consumption, <c>true</c> may be passed as the parameter <c>intern</c> to the constructor; however, other side effects of <see cref="String" /> interning via the <see cref="String.Intern(String)" /> method should be considered as well.</para>
     ///     <para>Changing any of the properties—public or protected—breaks the functionality of the <see cref="Pen" />. By doing so, the behaviour of the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods is unexpected and no longer guaranteed.</para>
     ///
     ///     <h3>Notes to Implementers</h3>
@@ -18,16 +18,16 @@ namespace MagicText
     /// </remarks>
     public class Pen : Object
     {
-        protected const string ComparerNullErrorMessage = "The string comparer may not be `null`.";
-        private const string TokensNullErrorMessage = "The token list may not be `null`.";
-        private const string IndexNullErrorMessage = "The index may not be `null`.";
-        private const string SampleNullErrorMessage = "The sample tokens may not be `null`.";
-        protected const string ContextNullErrorMessage = "The context token enumerable may not be `null`.";
-        protected const string PickerNullErrorMessage = @"The ""random"" number generator function (picker function) may not be `null`.";
-        private const string RandomNullErrorMessage = "The (pseudo-)Random number generator may not be `null`.";
-        protected const string RelevantTokensOutOfRangeErrorMessage = "The number of relevant tokens must be non-negative (greater than or equal to 0).";
-        protected const string FromPositionOutOfRangeErrorMessage = "The index of the first token must be between 0 and the total number of tokens inclusively.";
-        protected const string PickOutOfRangeErrorMessage = "The picker function must return an integer from [0, n) including 0 (even if `n == 0`).";
+        protected const string ComparerNullErrorMessage = "String comparer cannot be null.";
+        private const string TokensNullErrorMessage = "Token list cannot be null.";
+        private const string IndexNullErrorMessage = "Index cannot be null.";
+        private const string SampleNullErrorMessage = "Token sample cannot be null.";
+        protected const string ContextNullErrorMessage = "Context token enumerable cannot be null.";
+        protected const string PickerNullErrorMessage = "Picking function cannot be null.";
+        private const string RandomNullErrorMessage = "(Pseudo-)Random number generatorcannot be null.";
+        protected const string RelevantTokensOutOfRangeErrorMessage = "Relevant tokens number is out of range. Must be non-negative.";
+        protected const string FromPositionOutOfRangeErrorMessage = "First token index is out of range. Must be non-negative and less than or equal to the size of the context.";
+        protected const string PickOutOfRangeErrorMessage = "Picking function returned a pick out of range. Must return a non-negative pick less than the parameter given; however, if the parameter equals 0, 0 must be returned.";
 
         /// <summary>Provides methods for <see cref="Int32" /> comparison as comparing indices of the <see cref="Pen.Context" /> tokens.</summary>
         /// <remarks>
@@ -35,8 +35,8 @@ namespace MagicText
         /// </remarks>
         private class IndexComparer : Object, IEqualityComparer<Int32>, IComparer<Int32>
         {
-            private const string ComparerNullErrorMessage = "The string comparer may not be `null`.";
-            private const string TokensNullErrorMessage = "The token list may not be `null`.";
+            private const string ComparerNullErrorMessage = "String comparer cannot be null.";
+            private const string TokensNullErrorMessage = "Token list cannot be null.";
 
             private readonly StringComparer _comparer;
             private readonly IReadOnlyList<String?> _tokens;
@@ -87,7 +87,7 @@ namespace MagicText
             public Int32 Compare(Int32 x, Int32 y)
             {
                 // Compare the indices. If not equal, compare the tokens (if possible).
-                int c = y.CompareTo(x);
+                Int32 c = y.CompareTo(x);
                 if (c != 0 && x >= 0 && y >= 0)
                 {
                     while (x < Tokens.Count && y < Tokens.Count)
@@ -98,7 +98,7 @@ namespace MagicText
 
                         // Compare the tokens. If not equal, return the result.
                         {
-                            int ct = Comparer.Compare(t1, t2);
+                            Int32 ct = Comparer.Compare(t1, t2);
                             if (ct != 0)
                             {
                                 c = ct;
@@ -124,8 +124,8 @@ namespace MagicText
         /// </remarks>
         private class IndexFinder : Object
         {
-            private const string IndexNullErrorMessage = "The index may not be `null`.";
-            private const string IgnoreTokensNullErrorMessage = "The ignored token list may not be `null`.";
+            private const string IndexNullErrorMessage = "Index cannot be null.";
+            private const string IgnoreTokensNullErrorMessage = "Ignored token collection cannot be null.";
 
             /// <summary>Checks if the <c><paramref name="index" /></c> is valid.</summary>
             /// <param name="index">The index to check.</param>
@@ -143,7 +143,7 @@ namespace MagicText
             /// <summary>Gets the collection of tokens to ignore used by the finder.</summary>
             /// <returns>The tokens to ignore.</returns>
             /// <remarks>
-            ///     <para>If a token is found amongst the <see cref="IgnoreTokens" /> via the <see cref="Enumerable.Contains{TSource}(IEnumerable{TSource}, TSource)" /> extension method, the search in the <see cref="FindIndex(String?, Int32)" /> method is immediately terminated and -1 is returned. Note that the <see cref="Enumerable.Contains{TSource}(IEnumerable{TSource}, TSource)" /> extension method actually calls the <see cref="ICollection{T}.Contains(T)" /> method if the source enumerable implements the <see cref="ICollection{T}" /> interface, which may be useful if a special <see cref="String" /> comparison should be used (for instance, pass a <see cref="HashSet{T}" /> of strings constructed with a desired <see cref="StringComparer" />).</para>
+            ///     <para>If a token is found amongst the <see cref="IgnoreTokens" /> via the <see cref="Enumerable.Contains{TSource}(IEnumerable{TSource}, TSource)" /> extension method, the search in the <see cref="FindIndex(String?, Int32)" /> method is immediately terminated and -1 is returned. Note that the <see cref="Enumerable.Contains{TSource}(IEnumerable{TSource}, TSource)" /> extension method actually calls the <see cref="ICollection{T}.Contains(T)" /> method if the source enumerable implements the <see cref="ICollection{T}" /> interface, which may be useful if a special <see cref="String" /> comparison should be used (for instance, pass a <see cref="HashSet{T}" /> of <see cref="String" />s constructed with a desired <see cref="StringComparer" />).</para>
             /// </remarks>
             public IReadOnlyCollection<String?> IgnoreTokens => _ignoreTokens;
 
@@ -281,10 +281,10 @@ namespace MagicText
         /// </remarks>
         private static Int32 CompareRange(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<String?> sampleCycle, Int32 i, Int32 cycleStart)
         {
-            int c = 0;
+            Int32 c = 0;
 
             {
-                int j;
+                Int32 j;
 
                 // Compare the tokens.
                 for (/* [`i` is set in function call,] */ j = 0; i < tokens.Count && j < sampleCycle.Count; ++i, ++j)
@@ -362,16 +362,16 @@ namespace MagicText
             // Binary search...
 
             // Initialise the lower, upper and middle positions.
-            int l = 0;
-            int h = tokens.Count;
-            int m = h >> 1;
+            Int32 l = 0;
+            Int32 h = tokens.Count;
+            Int32 m = h >> 1;
 
             // Loop until found.
             {
                 while (l < h)
                 {
                     // Compare the ranges.
-                    int c = CompareRange(comparer, tokens, sampleCycle, index[m], cycleStart);
+                    Int32 c = CompareRange(comparer, tokens, sampleCycle, index[m], cycleStart);
 
                     // Break the loop or update the positions.
                     if (c == 0)
@@ -434,7 +434,7 @@ namespace MagicText
         ///             <description>the <c><paramref name="sample" /></c> exists amongst the <c><paramref name="tokens" /></c> (when compared by the <c><paramref name="comparer" /></c>).</description>
         ///         </item>
         ///     </list>
-        ///     <para>If any of the first two assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="sampleCycle" /></c>'s position should be inserted to retain the sorted order but the number of occurances shall be 0.</para>
+        ///     <para>If any of the first two assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="sample" /></c>'s position should be inserted to retain the sorted order but the number of occurances shall be 0.</para>
         /// </remarks>
         protected static ValueTuple<Int32, Int32> FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IEnumerable<String?> sample) =>
             FindPositionIndexAndCount(
@@ -466,7 +466,7 @@ namespace MagicText
         /// <returns>The sorting positions of tokens in <see cref="Context" />.</returns>
         /// <remarks>
         ///     <para>The order is actually determined by the complete sequence of tokens, and not just by single tokens. For instance, if <c>i != j</c>, but <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Index" />[i]], <see cref="Context" />[<see cref="Index" />[j]]) == 0</c> (<c><see cref="Comparer" />.Equals(<see cref="Context" />[<see cref="Index" />[i]], <see cref="Context" />[<see cref="Index" />[j]])</c>), then the result of <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Index" />[i] + 1], <see cref="Context" />[<see cref="Index" />[j] + 1])</c> is used; if it also evaluates to 0, <c><see cref="Index" />[i] + 2</c> and <c><see cref="Index" />[j] + 2</c> are checked, and so on. The first position to reach the end (when <c>max(<see cref="Index" />[i] + n, <see cref="Index" />[j] + n) == <see cref="Context" />.Count</c> for a non-negative integer <c>n</c>), if all previous positions compared equal, is considered less. Hence the <see cref="Index" /> defines a total (linear) lexicographic ordering of the <see cref="Context" /> in respect of the <see cref="Comparer" />, which may be useful in search algorithms, such as the binary search, for finding the position of any non-empty finite sequence of tokens.</para>
-        ///     <para>The position(s) of ending tokens' (<see cref="SentinelToken" />) indices, if there are any in <see cref="Context" />, are not fixed nor guaranteed (for instance, they are not necessarily at the beginning or the end of <see cref="Index" />). If the ending token is <c>null</c> or an empty string (<see cref="String.Empty" />), then ending tokens shall be compared less than any other tokens and their indices shall be <em>pushed</em> to the beginning, provided there are no <c>null</c>s in <see cref="Context" /> in the latter case. But, generally speaking, ending tokens' indices are determined by <see cref="Comparer" /> and the values of other tokens in <see cref="Context" />.</para>
+        ///     <para>The position(s) of ending tokens' (<see cref="SentinelToken" />) indices, if there are any in <see cref="Context" />, are not fixed nor guaranteed (for instance, they are not necessarily at the beginning or the end of <see cref="Index" />). If the ending token is <c>null</c> or an empty <see cref="String" /> (<see cref="String.Empty" />), then ending tokens shall be compared less than any other tokens and their indices shall be <em>pushed</em> to the beginning, provided there are no <c>null</c>s in <see cref="Context" /> in the latter case. But, generally speaking, ending tokens' indices are determined by <see cref="Comparer" /> and the values of other tokens in <see cref="Context" />.</para>
         /// </remarks>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
@@ -496,7 +496,7 @@ namespace MagicText
         /// <returns>The ending token.</returns>
         /// <remarks>
         ///     <para>The ending token (<see cref="SentinelToken" />), or any other token comparing equal to it in respect of the <see cref="Comparer" />, shall never be rendered.</para>
-        ///     <para>If the ending token is <c>null</c>, it <strong>does not</strong> mean that no token is considered an ending token. It simply means that <c>null</c>s are considered ending tokens. Moreover, the ending token <strong>cannot</strong> be ignored (not used)—if no token should be considered an ending token, set the ending token to a value not appearing in the <see cref="Context" /> (which can be found via an adaptation of the <a href="http://en.wikipedia.org/wiki/Cantor%27s_diagonal_argument">Cantor's diagonal method</a>). Note, however, that comparing long strings is expensive in time resources, and therefore <em>short</em> ending tokens should be preferred: <c>null</c>, <c><see cref="String.Empty" /></c>, <c>"\0"</c> etc. (depending on the values in the <see cref="Context" />).</para>
+        ///     <para>If the ending token is <c>null</c>, it <strong>does not</strong> mean that no token is considered an ending token. It simply means that <c>null</c>s are considered ending tokens. Moreover, the ending token <strong>cannot</strong> be ignored (not used)—if no token should be considered an ending token, set the ending token to a value not appearing in the <see cref="Context" /> (which can be found via an adaptation of the <a href="http://en.wikipedia.org/wiki/Cantor%27s_diagonal_argument">Cantor's diagonal method</a>). Note, however, that comparing long <see cref="String" /> is expensive in time resources, and therefore <em>short</em> ending tokens should be preferred: <c>null</c>, <c><see cref="String.Empty" /></c>, <c>"\0"</c> etc. (depending on the values in the <see cref="Context" />).</para>
         /// </remarks>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
@@ -546,7 +546,7 @@ namespace MagicText
 
             // Find the position of the first (non-ending) token.
             {
-                int firstIndexPositionVar;
+                Int32 firstIndexPositionVar;
                 try
                 {
                     firstIndexPositionVar = Context.Select((new IndexFinder(Index, new HashSet<String?>(1, comparer) { SentinelToken })).FindIndex).Where(IndexFinder.IsIndexValid).First();
@@ -681,8 +681,9 @@ namespace MagicText
                 {
                     throw new ArgumentOutOfRangeException(nameof(picker), pick, PickOutOfRangeErrorMessage);
                 }
+                pick += p;
 
-                Int32 next = Index[p + pick] + d;
+                Int32 next = pick < Context.Count ? Index[pick] + d : Context.Count;
                 String? nextToken = next < Context.Count ? Context[next] : SentinelToken;
                 if (Comparer.Equals(nextToken, SentinelToken))
                 {
@@ -697,7 +698,7 @@ namespace MagicText
                 else
                 {
                     text[c] = nextToken;
-                    c = (c + 1) % text.Count; // <-- cyclicity of list `text`
+                    c = (c + 1) % text.Count; // <-- cyclicity of the list `text`
                 }
             }
         }
@@ -705,7 +706,7 @@ namespace MagicText
         /// <summary>Renders (generates) a block of text from the <see cref="Context" />.</summary>
         /// <param name="relevantTokens">The number of (most recent) relevant tokens. The value must be greater than or equal to 0.</param>
         /// <param name="random">The (pseudo-)random number generator.</param>
-        /// <param name="fromPosition">If set, the first max(<c><paramref name="relevantTokens" /></c>, 1) tokens are chosen as <c>{ <see cref="Context" />[<paramref name="fromPosition" />], <see cref="Context" />[<paramref name="fromPosition" /> + 1], ..., <see cref="Context" />[<paramref name="fromPosition" /> + max(<paramref name="relevantTokens" />, 1) - 1] }</c> (or fewer if the index exceeds its limitation or an ending token is reached) without calling the <c><paramref name="random" /></c>; otherwise the first token is chosen by immediately calling the <see cref="System.Random.Next(Int32)" /> method on the <c><paramref name="random" /></c>. The value must be greater than or equal to 0 but less than or equal to the total number of tokens in the <see cref="Context" />.</param>
+        /// <param name="fromPosition">If set, the first max(<c><paramref name="relevantTokens" /></c>, 1) tokens are chosen as <c>{ <see cref="Context" />[<paramref name="fromPosition" />], <see cref="Context" />[<paramref name="fromPosition" /> + 1], ..., <see cref="Context" />[<paramref name="fromPosition" /> + max(<paramref name="relevantTokens" />, 1) - 1] }</c> (or fewer if the index exceeds its limitation or an ending token is reached) without calling the <see cref="System.Random.Next(Int32)" /> method on the <c><paramref name="random" /></c>; otherwise the first token is chosen by immediately calling the <see cref="System.Random.Next(Int32)" /> method on the <c><paramref name="random" /></c>. The value must be greater than or equal to 0 but less than or equal to the total number of tokens in the <see cref="Context" />.</param>
         /// <returns>The enumerable of tokens generated from the <see cref="Context" />.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="random" /></c> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">The parameter <c><paramref name="relevantTokens" /></c> is less than 0. The parameter <c><paramref name="fromPosition" /></c> is less than 0 or greater than the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</exception>

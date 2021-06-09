@@ -10,8 +10,8 @@ namespace MagicText
     /// <summary>Provides useful extension methods used in the library.</summary>
     internal static class ObjectExtensions
     {
-        private const string ValuesNullErrorMessage = "The value enumerable may not be `null`.";
-        private const string ActionNullErrorMessage = "The action to apply may not be `null`.";
+        private const string ValuesNullErrorMessage = "Value enumerable cannot be null.";
+        private const string ActionNullErrorMessage = "Action cannot be null.";
 
         /// <summary>Retrieves the index of the value <c><paramref name="x" /></c> amongst the <c><paramref name="values" /></c>.</summary>
         /// <param name="values">The enumerable of values amongst which <c><paramref name="x" /></c> should be found.</param>
@@ -76,11 +76,11 @@ namespace MagicText
                 comparer = EqualityComparer<T>.Default;
             }
 
-            int index = -1;
+            Int32 index = -1;
 
             await using (ConfiguredCancelableAsyncEnumerable<T>.Enumerator enumerator = values.WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext).GetAsyncEnumerator())
             {
-                for (int i = 0; await enumerator.MoveNextAsync(); ++i)
+                for (Int32 i = 0; await enumerator.MoveNextAsync(); ++i)
                 {
                     if (comparer.Equals(enumerator.Current, x))
                     {

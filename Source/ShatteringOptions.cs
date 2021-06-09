@@ -13,9 +13,9 @@ namespace MagicText
     [Serializable]
     public class ShatteringOptions : Object, IEquatable<ShatteringOptions>, ICloneable, ISerializable
     {
-        protected const string SerialisationInfoNullErrorMessage = "The serialisation info may not be `null`.";
-        private const string OtherNullErrorMessage = "The shattering options to copy may not be `null`.";
-        protected const string StringComparerNullErrorMessage = "The string comparer may not be `null`.";
+        protected const string SerialisationInfoNullErrorMessage = "Serialisation info cannot be null.";
+        private const string OtherNullErrorMessage = "Shattering options to copy cannot be null.";
+        protected const string StringComparerNullErrorMessage = "String comparer cannot be null.";
 
         /// <summary>Indicates whether the <c><paramref name="left" /></c> <see cref="ShatteringOptions" /> are equal to the <c><paramref name="right" /></c> or not.</summary>
         /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>
@@ -31,17 +31,17 @@ namespace MagicText
         public static Boolean operator !=(ShatteringOptions? left, ShatteringOptions? right) =>
             !(left == right);
 
-        /// <summary>Gets the default shattering options to use when no options are set.</summary>
-        /// <returns>The default shattering options.</returns>
+        /// <summary>Gets the default <see cref="ShatteringOptions" /> to use when no options are set.</summary>
+        /// <returns>The default <see cref="ShatteringOptions" />.</returns>
         /// <remarks>
-        ///     <para>Retrieving the value of this property is <strong>exactly the same</strong> as creating new shattering options using the default <see cref="ShatteringOptions()" /> constructor. The property is provided merely to enable a more readable and explicit code when handling <c>null</c>-options in the implementation of the <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods.</para>
-        ///     <para>The property always returns a new reference (to the newly constructed default shattering options). Hence changes made to one options returned by the property do not affect the others. Also, <c><see cref="Object" />.ReferenceEquals(<see cref="Default" />, <see cref="Default" />)</c> never evaluates to <c>true</c>, although both <c><see cref="Default" />.Equals(<see cref="Default" />)</c> and <c><see cref="Default" /> == <see cref="Default" /></c> evaluate to <c>true</c> because of the overloads of methods and operators.</para>
+        ///     <para>Retrieving the value of this property is <strong>exactly the same</strong> as creating new <see cref="ShatteringOptions" /> using the default <see cref="ShatteringOptions()" /> constructor. The property is provided merely to enable a more readable and explicit code when handling <c>null</c>-options in the implementations of the <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods.</para>
+        ///     <para>The property always returns a new reference (to the newly constructed default <see cref="ShatteringOptions" />). Hence changes made to one <see cref="ShatteringOptions" /> returned by the property do not affect the others. Also, <c><see cref="Object" />.ReferenceEquals(<see cref="Default" />, <see cref="Default" />)</c> never evaluates to <c>true</c>, although both <c><see cref="Default" />.Equals(<see cref="Default" />)</c> and <c><see cref="Default" /> == <see cref="Default" /></c> evaluate to <c>true</c> because of the overloads of methods and operators.</para>
         /// </remarks>
         public static ShatteringOptions Default => new ShatteringOptions();
 
-        private bool ignoreEmptyTokens;
-        private bool ignoreLineEnds;
-        private bool ignoreEmptyLines;
+        private Boolean ignoreEmptyTokens;
+        private Boolean ignoreLineEnds;
+        private Boolean ignoreEmptyLines;
 
         private String? lineEndToken;
         private String? emptyLineToken;
@@ -50,7 +50,7 @@ namespace MagicText
         /// <returns>If empty tokens should be ignored, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <value>The new ignoring empty tokens policy value.</value>
         /// <remarks>
-        ///     <para>Actual implementations of the <see cref="ITokeniser" /> interface may define what exactly an <em>empty</em> token means, but usually this would be a <c>null</c> or a <see cref="String" /> yielding <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> or <see cref="String.IsNullOrWhiteSpace(String)" /> method calls.</para>
+        ///     <para>The actual implementations of the <see cref="ITokeniser" /> interface may define what exactly an <em>empty</em> token means, but usually this would be a <c>null</c> or a <see cref="String" /> yielding <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> or <see cref="String.IsNullOrWhiteSpace(String)" /> method calls.</para>
         /// </remarks>
         [DisplayName("Ignore empty tokens")]
         [Display(Name = "Ignore empty tokens", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "IgnoreEmptyTokens", Order = 0)]
@@ -69,7 +69,7 @@ namespace MagicText
         /// <value>The new ignoring line ends policy value.</value>
         /// <remarks>
         ///     <para>If the value is <c>false</c>, then line ends should be copied or represented by <see cref="LineEndToken" />s.</para>
-        ///     <para>Actual implementations of the <see cref="ITokeniser" /> interface may define what exactly a <em>line end</em> means, but usually this would be the new line characters and sequences of characters (CR, LF and CRLF) and/or the end of the input.</para>
+        ///     <para>The actual implementations of the <see cref="ITokeniser" /> interface may define what exactly a <em>line end</em> means, but usually this would be the new line characters and sequences of characters (CR, LF and CRLF) and/or the end of the input.</para>
         /// </remarks>
         /// <seealso cref="IgnoreEmptyLines" />
         /// <seealso cref="LineEndToken" />
@@ -91,7 +91,7 @@ namespace MagicText
         /// <value>The new ignoring empty lines policy value.</value>
         /// <remarks>
         ///     <para>If the value is <c>true</c>, empty lines might not produce even <see cref="LineEndToken" />s (it depends on the <see cref="ITokeniser" /> interface implementation used); if <c>false</c>, they should be represented by <see cref="EmptyLineToken" />s.</para>
-        ///     <para>A <em>line</em> should be considered the string of text spanned between two consecutive line ends, whereas the definition of a <em>line end</em> is left to the actual implementation of the <see cref="ITokeniser" /> interface (v. <see cref="IgnoreLineEnds" /> and <see cref="LineEndToken" />). Of course, a line's border may also be the beginning and/or the end of the text.</para>
+        ///     <para>A <em>line</em> should be considered a <see cref="String" /> of text spanned between two consecutive line ends, whereas the definition of a <em>line end</em> is left to the actual implementation of the <see cref="ITokeniser" /> interface (v. <see cref="IgnoreLineEnds" /> and <see cref="LineEndToken" />). Of course, a line's border may also be the beginning and/or the end of the text.</para>
         ///     <para>Empty lines should be considered those lines that produce no tokens. This should be checked <strong>after</strong> filtering the empty tokens out from the line if <see cref="IgnoreEmptyTokens" /> is <c>true</c>.</para>
         /// </remarks>
         /// <seealso cref="IgnoreLineEnds" />
@@ -113,7 +113,7 @@ namespace MagicText
         /// <returns>The line end token.</returns>
         /// <value>The new line end token value.</value>
         /// <remarks>
-        ///     <para>Actual implementations of the <see cref="ITokeniser" /> interface may define what exactly a <em>line end</em> means, but usually this would be the new line characters and sequences of characters (CR, LF and CRLF) and/or the end of the input. Furthermore, an actual implementation of the <see cref="ITokeniser" /> interface at hand may as well choose to merely copy the line end, and not replace it with a <see cref="LineEndToken" />. The property is given only to allow the standardisation of line ends when shattering text, but not to force it.</para>
+        ///     <para>The actual implementations of the <see cref="ITokeniser" /> interface may define what exactly a <em>line end</em> means, but usually this would be the new line characters and sequences of characters (CR, LF and CRLF) and/or the end of the input. Furthermore, an actual implementation of the <see cref="ITokeniser" /> interface at hand may as well choose to merely copy the line end, and not replace it with a <see cref="LineEndToken" />. The property is given only to allow the standardisation of line ends when shattering text, but not to force it.</para>
         ///     <para>If a line is discarded as empty (when <see cref="IgnoreEmptyLines" /> is <c>true</c>), it might not produce <see cref="LineEndToken" />—it depends on the <see cref="ITokeniser" /> interface implementation used.</para>
         /// </remarks>
         /// <seealso cref="IgnoreLineEnds" />
@@ -137,7 +137,7 @@ namespace MagicText
         /// <value>The new empty line token value.</value>
         /// <remarks>
         ///     <para>If a line is empty but should not be discarded (if <see cref="IgnoreEmptyLines" /> is <c>false</c>), it might be be represented by a <see cref="EmptyLineToken" />. If empty lines are substituted by <see cref="EmptyLineToken" />s, it should be done even if the <see cref="EmptyLineToken" /> would be considered an empty token and empty tokens should be ignored (if <see cref="IgnoreEmptyTokens" /> is <c>true</c>). However, an actual implementation of the <see cref="ITokeniser" /> interface at hand may choose to simply yield 0 tokens for an empty line instead of the <see cref="EmptyLineToken" />. The property is given only to allow using empty lines as special parts of text (such as paragraph breaks), but not to force it.</para>
-        ///     <para>A <em>line</em> should be considered the string of text between two consecutive line ends, whereas the definition of a <em>line end</em> is left to the actual implementation of the <see cref="ITokeniser" /> interface (v. <see cref="IgnoreLineEnds" /> and <see cref="LineEndToken" />). Of course, a line's border may also be the beginning and/or the end of the text.</para>
+        ///     <para>A <em>line</em> should be considered a <see cref="String" /> of text between two consecutive line ends, whereas the definition of a <em>line end</em> is left to the actual implementation of the <see cref="ITokeniser" /> interface (v. <see cref="IgnoreLineEnds" /> and <see cref="LineEndToken" />). Of course, a line's border may also be the beginning and/or the end of the text.</para>
         ///     <para>Empty lines should be considered those lines that produce no tokens. This should be checked <strong>after</strong> filtering the empty tokens out from the line if <see cref="IgnoreEmptyTokens" /> is <c>true</c>.</para>
         /// </remarks>
         /// <seealso cref="IgnoreLineEnds" />
@@ -224,7 +224,7 @@ namespace MagicText
         }
 
         /// <summary>Returns the hash code of the current options according to the <c><paramref name="stringComparer" /></c>.</summary>
-        /// <param name="stringComparer">The <see cref="String" /> comparer used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
+        /// <param name="stringComparer">The <see cref="StringComparer" /> used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>The hash code of the current <see cref="ShatteringOptions" /> according to the <c><paramref name="stringComparer" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringComparer" /></c> is <c>null</c>.</exception>
         public virtual Int32 GetHashCode(IEqualityComparer<String?> stringComparer)
@@ -252,7 +252,7 @@ namespace MagicText
 
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="other" /></c> options according to the <c><paramref name="stringComparer" /></c> or not.</summary>
         /// <param name="other">The other <see cref="ShatteringOptions" /> to compare with these options.</param>
-        /// <param name="stringComparer">The comparer used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
+        /// <param name="stringComparer">The <see cref="StringComparer" /> used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c> according to the <c><paramref name="stringComparer" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringComparer" /></c> is <c>null</c>.</exception>
         public virtual Boolean Equals(ShatteringOptions? other, IEqualityComparer<String?> stringComparer) =>
@@ -277,7 +277,7 @@ namespace MagicText
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="obj" /></c> or not.</summary>
         /// <param name="obj">The <see cref="Object" /> to compare with these <see cref="ShatteringOptions" />.</param>
         /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it, <c>true</c>; <c>false</c>otherwise.</returns>
-        public override bool Equals(Object? obj)
+        public override Boolean Equals(Object? obj)
         {
             try
             {

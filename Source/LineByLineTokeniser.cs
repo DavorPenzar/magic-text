@@ -20,16 +20,16 @@ namespace MagicText
     /// </remarks>
     public abstract class LineByLineTokeniser : Object, ITokeniser
     {
-        protected const string IsEmptyTokenNullErrorMessage = "The function for checking emptiness of tokens may not be `null`.";
-        private const string InputNullErrorMessage = "The input stream reader may not be `null`.";
-        private const string LineTokensNullErrorMessage = "Line tokens may not be `null`.";
-        protected const string LineNullErrorMessage = "The line string may not be `null`.";
+        protected const string IsEmptyTokenNullErrorMessage = "Token emptiness checking function cannot be null.";
+        private const string InputNullErrorMessage = "Input reader cannot be null.";
+        private const string LineTokensNullErrorMessage = "Line tokens cannot be null.";
+        protected const string LineNullErrorMessage = "Line string cannot be null.";
 
         /// <summary>Exposes the negation of a simple (one argument) predicate.</summary>
         /// <typeparam name="T">The type of the argument of the predicate.</typeparam>
         private class NegativePredicateWrapper<T> : Object
         {
-            private const string PositivePredicateNullErrorMessage = "The positive predicate may not be `null`.";
+            private const string PositivePredicateNullErrorMessage = "Positive predicate cannot be null.";
 
             private readonly Func<T, Boolean> _positivePredicate;
 
@@ -47,7 +47,7 @@ namespace MagicText
 
             /// <summary>Negates the evaluation of the <c><paramref name="arg" /></c> via the <see cref="PositivePredicate" /> delegate.</summary>
             /// <param name="arg">The parameter to evaluate.</param>
-            /// <returns>The boolean negation (<c>true</c> to <c>false</c> and vice versa) of the evaluation of the <c><paramref name="arg" /></c> via the <see cref="PositivePredicate" /> delegate. Simply put, the method returns <c>!<see cref="PositivePredicate" />(<paramref name="arg" />)</c>.</returns>
+            /// <returns>The <see cref="Boolean" /> negation (<c>true</c> to <c>false</c> and vice versa) of the evaluation of the <c><paramref name="arg" /></c> via the <see cref="PositivePredicate" /> delegate. Simply put, the method returns <c>!<see cref="PositivePredicate" />(<paramref name="arg" />)</c>.</returns>
             /// <remarks>
             ///     <para>The exceptions thrown by the <see cref="PositivePredicate" /> delegate call are not caught.</para>
             /// </remarks>
@@ -123,7 +123,7 @@ namespace MagicText
             }
 
             // Declare:
-            bool addLineEnd = false; // the indicator that a line end should be added
+            Boolean addLineEnd = false; // the indicator that a line end should be added
 
             // Shatter text from `input` line-by-line.
             while (true)
@@ -150,7 +150,7 @@ namespace MagicText
 
                 // Return the appropriate tokens and update `addLineEnd`.
                 {
-                    int i = 0;
+                    Int32 i = 0;
 
                     using (IEnumerator<String?> en = lineTokens.GetEnumerator())
                     {
@@ -213,7 +213,7 @@ namespace MagicText
             }
 
             // Declare:
-            bool addLineEnd = false; // the indicator that a line end should be added
+            Boolean addLineEnd = false; // the indicator that a line end should be added
 
             // Shatter text from `input` line-by-line.
             while (true)
@@ -243,7 +243,7 @@ namespace MagicText
 
                 // Return the appropriate tokens and update `addLineEnd`.
                 {
-                    int i = 0;
+                    Int32 i = 0;
 
                     using (IEnumerator<String?> en = lineTokens.GetEnumerator())
                     {

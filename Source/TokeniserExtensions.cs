@@ -10,9 +10,9 @@ namespace MagicText
     /// <summary>Provides auxiliary extension methods for the instances of the <see cref="ITokeniser" /> interface.</summary>
     public static class TokeniserExtensions
     {
-        private const string TokeniserNullErrorMessage = "Tokeniser instance may not be `null`.";
-        private const string TextNullErrorMessage = "Input text string may not be `null`.";
-        private const string TokensNullErrorMessage = "Token enumerable returned by shattering may not be `null`.";
+        private const string TokeniserNullErrorMessage = "Tokeniser cannot be null.";
+        private const string TextNullErrorMessage = "Input string cannot be null.";
+        private const string TokensNullErrorMessage = "Shattering result token enumerable cannot be null.";
 
         /// <summary>Shatters <c><paramref name="text" /></c> into tokens.</summary>
         /// <param name="tokeniser">The tokeniser used for shattering.</param>
