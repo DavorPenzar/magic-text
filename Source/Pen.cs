@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -33,10 +34,11 @@ namespace MagicText
         /// <remarks>
         ///     <para>Only the reference to the list <c>tokens</c> passed to the constructor is stored by the comparer in the <see cref="Tokens" /> property. Changing the content of the enumerable externally, or even its order, results in unconsitent behaviour of comparison via the <see cref="IComparer{T}.Compare(T, T)" /> method.</para>
         /// </remarks>
-        private class IndexComparer : Object, IEqualityComparer<Int32>, IComparer<Int32>
+        private class IndexComparer : Object, IComparer<Int32>, IEqualityComparer<Int32>, IComparer, IEqualityComparer
         {
             private const string ComparerNullErrorMessage = "String comparer cannot be null.";
             private const string TokensNullErrorMessage = "Token list cannot be null.";
+            private const string ObjectNotInt32ErrorMessage = "Object must be a 32-bit integer.";
 
             private readonly StringComparer _comparer;
             private readonly IReadOnlyList<String?> _tokens;
@@ -53,7 +55,7 @@ namespace MagicText
             /// <seealso cref="Comparer" />
             public IReadOnlyList<String?> Tokens => _tokens;
 
-            /// <summary>Creates a comparer which compares indices of the <c><paramref name="tokens" /></c> using the <c><paramref name="comparer" /></c>.</summary>
+            /// <summary>Creates a comparer.</summary>
             /// <param name="comparer">The <see cref="StringComparer" /> used to compare tokens.</param>
             /// <param name="tokens">The reference tokens. The indices shall be compared by comparing elements of the <c><paramref name="tokens" /></c>.</param>
             /// <exception cref="ArgumentNullException">The parameter <c><paramref name="comparer" /></c> is <c>null</c>. The parameter <c><paramref name="tokens" /></c> is <c>null</c>.</exception>
@@ -66,24 +68,80 @@ namespace MagicText
             /// <summary>Returns the hash code for the <c><paramref name="obj" /></c>.</summary>
             /// <param name="obj">The index for which the hash code is to be returned.</param>
             /// <returns>The hash code for the <c><paramref name="obj" /></c>.</returns>
+            /// <seealso cref="Tokens" />
+            /// <seealso cref="GetHashCode(Object?)" />
+            /// <seealso cref="Equals(Int32, Int32)" />
+            /// <seealso cref="Equals(Object?, Object?)" />
+            /// <seealso cref="Compare(Int32, Int32)" />
+            /// <seealso cref="Compare(Object?, Object?)" />
             public Int32 GetHashCode(Int32 obj) =>
                 obj.GetHashCode();
+
+            /// <summary>Returns the hash code for the <c><paramref name="obj" /></c>.</summary>
+            /// <param name="obj">The index for which the hash code is to be returned.</param>
+            /// <returns>The hash code for the <c><paramref name="obj" /></c>.</returns>
+            /// <exception cref="ArgumentException">The parameter <c><paramref name="obj" /></c> is not an <see cref="Int32" />.</exception>
+            /// <seealso cref="Tokens" />
+            /// <seealso cref="GetHashCode(Int32)" />
+            /// <seealso cref="Equals(Object?, Object?)" />
+            /// <seealso cref="Equals(Int32, Int32)" />
+            /// <seealso cref="Compare(Object?, Object?)" />
+            /// <seealso cref="Compare(Int32, Int32)" />
+            public Int32 GetHashCode(Object? obj) =>
+                obj is Int32 objInt ? GetHashCode(objInt) : throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(obj));
 
             /// <summary>Determines whether <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal.</summary>
             /// <param name="x">The first index to compare.</param>
             /// <param name="y">The second index to compare.</param>
             /// <returns>If <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
+            /// <seealso cref="Tokens" />
+            /// <seealso cref="Equals(Object?, Object?)" />
+            /// <seealso cref="GetHashCode(Int32)" />
+            /// <seealso cref="GetHashCode(Object?)" />
+            /// <seealso cref="Compare(Int32, Int32)" />
+            /// <seealso cref="Compare(Object?, Object?)" />
             public Boolean Equals(Int32 x, Int32 y) =>
                 (x == y);
+
+            /// <summary>Determines whether <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal.</summary>
+            /// <param name="x">The first <see cref="Object" /> to compare.</param>
+            /// <param name="y">The second <see cref="Object" /> to compare.</param>
+            /// <returns>If <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal as indices, <c>true</c>; <c>false</c> otherwise.</returns>
+            /// <exception cref="ArgumentException">The parameter <c><paramref name="x" /></c> is not an <see cref="Int32" />. The parameter <c><paramref name="x" /></c> is not an <see cref="Int32" />.</exception>
+            /// <seealso cref="Tokens" />
+            /// <seealso cref="Equals(Int32, Int32)" />
+            /// <seealso cref="GetHashCode(Object?)" />
+            /// <seealso cref="GetHashCode(Int32)" />
+            /// <seealso cref="Compare(Object?, Object?)" />
+            /// <seealso cref="Compare(Int32, Int32)" />
+            public new Boolean Equals(Object? x, Object? y)
+            {
+                if (!(x is Int32 xInt))
+                {
+                    throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(x));
+                }
+
+                if (!(y is Int32 yInt))
+                {
+                    throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(y));
+                }
+
+                return Equals(xInt, yInt);
+            }
 
             /// <summary>Compares <c><paramref name="x" /></c> and <c><paramref name="y" /></c>, and returns a value indicating whether one is less than, equal to or greater than the other.</summary>
             /// <param name="x">The first index to compare.</param>
             /// <param name="y">The second index to compare.</param>
-            /// <returns>A strictly negative value, i. e. less than 0, if <c><paramref name="x" /></c> is less than <c><paramref name="y" /></c>; a strictly positive value, i. e. greater than 0, value if <c><paramref name="x" /></c> is greater than <c><paramref name="y" /></c>; 0 if <c><paramref name="x" /></c> is equal to <c><paramref name="y" /></c>.</returns>
+            /// <returns>If <c><paramref name="x" /></c> is less than <c><paramref name="y" /></c>, a value less than 0; if <c><paramref name="x" /></c> is greater than <c><paramref name="y" /></c>, a value greater than 0; if <c><paramref name="x" /></c> is equal to <c><paramref name="y" /></c>, 0.</returns>
             /// <remarks>
             ///     <para>See the <see cref="Tokens" /> property's description to understand how (legal) indices are compared. If any of <c><paramref name="x" /></c> and <c><paramref name="y" /></c> is out of range as an index of the <see cref="Tokens" />, simply the <see cref="Int32.CompareTo(Int32)" /> method is used for comparison, although in the opposite order (i. e. the greater value shall be considered the less).</para>
             /// </remarks>
             /// <seealso cref="Tokens" />
+            /// <seealso cref="Compare(Object?, Object?)" />
+            /// <seealso cref="Equals(Int32, Int32)" />
+            /// <seealso cref="Equals(Object?, Object?)" />
+            /// <seealso cref="GetHashCode(Int32)" />
+            /// <seealso cref="GetHashCode(Object?)" />
             public Int32 Compare(Int32 x, Int32 y)
             {
                 // Compare the indices. If not equal, compare the tokens (if possible).
@@ -116,52 +174,125 @@ namespace MagicText
                 // Return the comparison results.  If all tokens compared equal, the greater index has reached the end of `Context` first, implying the shorter (sub)sequence.
                 return c;
             }
+
+            /// <summary>Compares <c><paramref name="x" /></c> and <c><paramref name="y" /></c>, and returns a value indicating whether one is less than, equal to or greater than the other.</summary>
+            /// <param name="x">The first <see cref="Object" /> to compare.</param>
+            /// <param name="y">The second <see cref="Object" /> to compare.</param>
+            /// <returns>If <c><paramref name="x" /></c> as an index is less than <c><paramref name="y" /></c> as an index, a value less than 0; if <c><paramref name="x" /></c> as an index is greater than <c><paramref name="y" /></c> as an index, a value greater than 0; if <c><paramref name="x" /></c> as an index is equal to <c><paramref name="y" /></c> as an index, 0.</returns>
+            /// <exception cref="ArgumentException">The parameter <c><paramref name="x" /></c> is not an <see cref="Int32" />. The parameter <c><paramref name="x" /></c> is not an <see cref="Int32" />.</exception>
+            /// <remarks>
+            ///     <para>See the <see cref="Tokens" /> property's description to understand how (legal) indices are compared. If any of <c><paramref name="x" /></c> and <c><paramref name="y" /></c> is out of range as an index of the <see cref="Tokens" />, simply the <see cref="Int32.CompareTo(Int32)" /> method is used for comparison, although in the opposite order (i. e. the greater value shall be considered the less).</para>
+            /// </remarks>
+            /// <seealso cref="Tokens" />
+            /// <seealso cref="Compare(Int32, Int32)" />
+            /// <seealso cref="Equals(Object?, Object?)" />
+            /// <seealso cref="Equals(Int32, Int32)" />
+            /// <seealso cref="GetHashCode(Object?)" />
+            /// <seealso cref="GetHashCode(Int32)" />
+            public Int32 Compare(Object? x, Object? y)
+            {
+                if (!(x is Int32 xInt))
+                {
+                    throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(x));
+                }
+
+                if (!(y is Int32 yInt))
+                {
+                    throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(y));
+                }
+
+                return Compare(xInt, yInt);
+            }
         }
 
-        /// <summary>Provides methods for finding indices of the <see cref="Pen.Context" /> tokens.</summary>
-        /// <remarks>
-        ///     <para>Only the references to the enumerables <c>index</c> and <c>ignoreTokens</c> passed to the constructor are stored by the finder in the <see cref="Index" /> and <see cref="IgnoreTokens" /> properties respectively. Changing the content of the enumerables externally, or even their order, results in unconsitent behaviour of search via the <see cref="FindIndex(String?, Int32)" /> method.</para>
-        /// </remarks>
-        private class IndexFinder : Object
+        /// <summary>Provides methods for <see cref="System.String" /> comparison to a predefined reference <see cref="System.String" />.</summary>
+        private class BoundStringComparer : Object
         {
-            private const string IndexNullErrorMessage = "Index cannot be null.";
-            private const string IgnoreTokensNullErrorMessage = "Ignored token collection cannot be null.";
+            private const string ComparerNullErrorMessage = "String comparer cannot be null.";
 
-            /// <summary>Checks if the <c><paramref name="index" /></c> is valid.</summary>
-            /// <param name="index">The index to check.</param>
-            /// <returns>If <c><paramref name="index" /></c> is greater than or equal to 0, <c>true</c>; <c>false</c> otherwise.</returns>
-            public static Boolean IsIndexValid(Int32 index) =>
-                index >= 0;
+            private readonly StringComparer _comparer;
+            private readonly System.String? _string;
 
-            private readonly IReadOnlyList<Int32> _index;
-            private readonly IReadOnlyCollection<String?> _ignoreTokens;
+            /// <summary>Gets the <see cref="StringComparer" /> used by the comparer for comparing <see cref="System.String" />s.</summary>
+            /// <returns>The internal <see cref="StringComparer" />.</returns>
+            protected StringComparer Comparer => _comparer;
 
-            /// <summary>Gets the index of the reference tokens customly ordered (their ordering positions) used by the finder for finding indices.</summary>
-            /// <returns>The ordering positions of the reference tokens.</returns>
-            public IReadOnlyList<Int32> Index => _index;
-
-            /// <summary>Gets the collection of tokens to ignore used by the finder.</summary>
-            /// <returns>The tokens to ignore.</returns>
+            /// <summary>Gets the predefined reference <see cref="System.String" /> used by the comparer.</summary>
+            /// <returns>The internal predefined reference <see cref="System.String" />.</returns>
             /// <remarks>
-            ///     <para>If a token is found amongst the <see cref="IgnoreTokens" /> via the <see cref="Enumerable.Contains{TSource}(IEnumerable{TSource}, TSource)" /> extension method, the search in the <see cref="FindIndex(String?, Int32)" /> method is immediately terminated and -1 is returned. Note that the <see cref="Enumerable.Contains{TSource}(IEnumerable{TSource}, TSource)" /> extension method actually calls the <see cref="ICollection{T}.Contains(T)" /> method if the source enumerable implements the <see cref="ICollection{T}" /> interface, which may be useful if a special <see cref="String" /> comparison should be used (for instance, pass a <see cref="HashSet{T}" /> of <see cref="String" />s constructed with a desired <see cref="StringComparer" />).</para>
+            ///     <para>When passed as parameters to the <see cref="Equals(System.String?)" />, <see cref="Equals(Object?)" />, <see cref="Compare(System.String)" /> and <see cref="Compare(Object)" /> methods, <see cref="System.String" />s are compared to this <see cref="String" /> by the <see cref="Comparer" />.</para>
             /// </remarks>
-            public IReadOnlyCollection<String?> IgnoreTokens => _ignoreTokens;
+            public System.String? String => _string;
 
-            /// <summary>Creates a finder that searches indices amongst the <c><paramref name="index" /></c> by ignoring the <c><paramref name="ignoreTokens" /></c>.</summary>
-            /// <param name="index">The ordering positions of the reference tokens.</param>
-            /// <param name="ignoreTokens">The tokens to ignore.</param>
-            public IndexFinder(IReadOnlyList<Int32> index, IReadOnlyCollection<String?> ignoreTokens) : base()
+            /// <summary>Creates a comparer.</summary>
+            /// <param name="comparer">The <see cref="StringComparer" /> used to compare <see cref="System.String" />s.</param>
+            /// <param name="string">The predefined reference <see cref="System.String" />. Other <see cref="System.String" />s are compared to this <c><paramref name="string" /></c> by the <c><paramref name="comparer" /></c>.</param>
+            /// <exception cref="ArgumentNullException">The parameter <c><paramref name="comparer" /></c> is <c>null</c>.</exception>
+            public BoundStringComparer(StringComparer comparer, System.String? @string)
             {
-                _index = index ?? throw new ArgumentNullException(nameof(index), IndexNullErrorMessage);
-                _ignoreTokens = ignoreTokens ?? throw new ArgumentNullException(nameof(ignoreTokens), IgnoreTokensNullErrorMessage);
+                _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer), ComparerNullErrorMessage);
+                _string = @string;
             }
 
-            /// <summary>Finds the position of the <c><paramref name="token" /></c>'s <c><paramref name="index" /></c> in the <see cref="Index" />.</summary>
-            /// <param name="token">The token whose <c><paramref name="index" /></c> should be found.</param>
-            /// <param name="index">The index as a potential element in the <see cref="Index" />.</param>
-            /// <returns>If the <c><paramref name="token" /></c> should be ignored (if the <see cref="IgnoreTokens" /> collection contains it), -1; otherwise the minimal index <c>i</c> such that <c><see cref="Index" />[i] == <paramref name="index" /></c>. If <c><paramref name="index" /></c> is not found in the latter case, -1 is returned as well.</returns>
-            public Int32 FindIndex(String? token, Int32 index) =>
-                IgnoreTokens.Contains(token) ? -1 : Index.IndexOf(index);
+            /// <summary>Returns the hash code for the <see cref="String" />.</summary>
+            /// <returns>The hash code for the <see cref="String" />.</returns>
+            /// <seealso cref="String" />
+            /// <seealso cref="Equals(System.String?)" />
+            /// <seealso cref="Equals(Object?)" />
+            /// <seealso cref="Compare(System.String)" />
+            /// <seealso cref="Compare(Object)" />
+            public new Int32 GetHashCode() =>
+                Comparer.GetHashCode(String);
+
+            /// <summary>Determines whether the <see cref="String" /> and <c><paramref name="y" /></c> are equal.</summary>
+            /// <param name="y">The <see cref="System.String" /> to compare.</param>
+            /// <returns>If the <see cref="String" /> and <c><paramref name="y" /></c> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
+            /// <seealso cref="String" />
+            /// <seealso cref="Equals(Object?)" />
+            /// <seealso cref="GetHashCode()" />
+            /// <seealso cref="Compare(System.String)" />
+            /// <seealso cref="Compare(Object)" />
+            public Boolean Equals(System.String? y) =>
+                Comparer.Equals(String, y);
+
+            /// <summary>Determines whether the <see cref="String" /> and <c><paramref name="y" /></c> are equal.</summary>
+            /// <param name="y">The <see cref="System.String" /> to compare.</param>
+            /// <returns>If the <see cref="String" /> and <c><paramref name="y" /></c> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
+            /// <seealso cref="String" />
+            /// <seealso cref="Equals(System.String?)" />
+            /// <seealso cref="GetHashCode()" />
+            /// <seealso cref="Compare(Object)" />
+            /// <seealso cref="Compare(System.String)" />
+            public new Boolean Equals(Object? y) =>
+                Comparer.Equals(String, y);
+
+            /// <summary>Compares <c><paramref name="y" /></c> to the <see cref="String" /> and returns a value indicating whether one is less than, equal to or greater than the other.</summary>
+            /// <param name="y">The <see cref="System.String" /> to compare.</param>
+            /// <returns>If the <see cref="String" /> is less than <c><paramref name="y" /></c>, a value less than 0; if the <see cref="String" /> is greater than <c><paramref name="y" /></c>, a value greater than 0; if the <see cref="String" /> is equal to <c><paramref name="y" /></c>, 0.</returns>
+            /// <remarks>
+            ///     <para>The exceptions thrown by the <see cref="StringComparer.Compare(System.String, System.String)" /> method call (notably the <see cref="ArgumentNullException" />) are not caught.</para>
+            /// </remarks>
+            /// <seealso cref="String" />
+            /// <seealso cref="Compare(Object)" />
+            /// <seealso cref="Equals(System.String?)" />
+            /// <seealso cref="Equals(Object?)" />
+            /// <seealso cref="GetHashCode()" />
+            public Int32 Compare(System.String y) =>
+                Comparer.Compare(String, y);
+
+            /// <summary>Compares <c><paramref name="y" /></c> to the <see cref="String" /> and returns a value indicating whether one is less than, equal to or greater than the other.</summary>
+            /// <param name="y">The <see cref="System.String" /> to compare.</param>
+            /// <returns>If the <see cref="String" /> is less than <c><paramref name="y" /></c>, a value less than 0; if the <see cref="String" /> is greater than <c><paramref name="y" /></c>, a value greater than 0; if the <see cref="String" /> is equal to <c><paramref name="y" /></c>, 0.</returns>
+            /// <remarks>
+            ///     <para>The exceptions thrown by the <see cref="StringComparer.Compare(Object, Object)" /> method call (notably the <see cref="ArgumentNullException" /> and the <see cref="ArgumentException" />) are not caught.</para>
+            /// </remarks>
+            /// <seealso cref="String" />
+            /// <seealso cref="Compare(System.String)" />
+            /// <seealso cref="Equals(Object?)" />
+            /// <seealso cref="Equals(System.String?)" />
+            /// <seealso cref="GetHashCode()" />
+            public Int32 Compare(Object y) =>
+                Comparer.Compare(String, y);
         }
 
         private static readonly Object _locker;
@@ -455,7 +586,6 @@ namespace MagicText
         private readonly IReadOnlyList<String?> _context;
         private readonly IReadOnlyList<Int32> _index;
         private readonly String? _sentinelToken;
-        private readonly Int32 _firstIndexPosition;
         private readonly Boolean _allSentinels;
 
         /// <summary>Gets the <see cref="StringComparer" /> used by the pen for comparing tokens.</summary>
@@ -473,17 +603,6 @@ namespace MagicText
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32)" />
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?})" />
         protected IReadOnlyList<Int32> Index => _index;
-
-        /// <summary>Gets the position of the first non-ending token's (<see cref="SentinelToken" />) index in the <see cref="Context" /> (the index of the <see cref="Index" />). If such a token does not exist, the <see cref="FirstIndexPosition" /> evaluates to the total number of elements in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</summary>
-        /// <returns>The first non-ending token's (<see cref="SentinelToken" />) index position.</returns>
-        /// <remarks>
-        ///     <para>This index position points to the index of the <strong>actual</strong> first non-ending token (<see cref="SentinelToken" />) in the <see cref="Context" />, even though there may exist other tokens comparing equal to it in respect of the <see cref="Comparer" />. Hence <c>{ <see cref="Index" />[<see cref="FirstIndexPosition" />], <see cref="Index" />[<see cref="FirstIndexPosition" />] + 1, ..., <see cref="Index" />[<see cref="FirstIndexPosition" />] + n, ... }</c> enumerates the <see cref="Context" /> from the beginning by ignoring potential initial ending tokens (<see cref="SentinelToken" />).</para>
-        /// </remarks>
-        /// <seealso cref="Context" />
-        /// <seealso cref="Comparer" />
-        /// <seealso cref="SentinelToken" />
-        /// <seealso cref="Index" />
-        protected Int32 FirstIndexPosition => _firstIndexPosition;
 
         /// <summary>Gets the reference token context used by the pen.</summary>
         /// <returns>The reference context.</returns>
@@ -512,7 +631,7 @@ namespace MagicText
         /// <seealso cref="Comparer" />
         public Boolean AllSentinels => _allSentinels;
 
-        /// <summary>Creates a pen using the tokens <c><paramref name="context" /></c>, with <c><paramref name="sentinelToken" /></c> being the ending token, and compared by the <c><paramref name="comparer" /></c>.</summary>
+        /// <summary>Creates a pen.</summary>
         /// <param name="context">The input tokens. All random text shall be generated based on the <c><paramref name="context" /></c>: both by picking only from the <c><paramref name="context" /></c> and by using the order from it.</param>
         /// <param name="sentinelToken">The ending token.</param>
         /// <param name="comparer">The <see cref="StringComparer" /> used by the <see cref="Pen" />. Tokens shall be compared (e. g. for equality) by the <c><paramref name="comparer" /></c>. If <c>null</c>, the <see cref="StringComparer.Ordinal" /> is used.</param>
@@ -544,22 +663,8 @@ namespace MagicText
                 _index = indexList.AsReadOnly();
             }
 
-            // Find the position of the first (non-ending) token.
-            {
-                Int32 firstIndexPositionVar;
-                try
-                {
-                    firstIndexPositionVar = Context.Select((new IndexFinder(Index, new HashSet<String?>(1, comparer) { SentinelToken })).FindIndex).Where(IndexFinder.IsIndexValid).First();
-                }
-                catch (InvalidOperationException)
-                {
-                    firstIndexPositionVar = Context.Count;
-                }
-                _firstIndexPosition = firstIndexPositionVar;
-            }
-
             // Check if all tokens are ending tokens.
-            _allSentinels = (FirstIndexPosition == Context.Count);
+            _allSentinels = Context.All((new BoundStringComparer(Comparer, SentinelToken)).Equals);
         }
 
         /// <summary>Renders (generates) a block of text from the <see cref="Context" />.</summary>
@@ -572,7 +677,7 @@ namespace MagicText
         /// <remarks>
         ///     <para>If <c><paramref name="fromPosition" /></c> is set, the first max(<c><paramref name="relevantTokens" /></c>, 1) tokens are chosen accordingly; otherwise they are chosen by calling the <c><paramref name="picker" /></c> delegate. Each consecutive token is chosen by observing the most recent <c><paramref name="relevantTokens" /></c> tokens (or the number of generated tokens if <c><paramref name="relevantTokens" /></c> tokens have not yet been generated) and choosing one of the possible successors by calling the <c><paramref name="picker" /></c> delegate. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="SentinelToken" />) is chosen—the ending tokens are not rendered.</para>
         ///     <para>An extra copy of <c><paramref name="relevantTokens" /></c> tokens is kept when generating new tokens. Memory errors may occur if the parameter <c><paramref name="relevantTokens" /></c> is too large.</para>
-        ///     <para>The returned enumerable is merely a query for enumerating tokens (also known as <em>deferred execution</em>). The query returned is not run until enumerating it, such as via explicit calls to the <see cref="IEnumerable{T}.GetEnumerator" /> method, a <c>foreach</c> loop, a call to the <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method etc. If the <c><paramref name="picker" /></c> is not a deterministic function, two distinct enumerators over the query may return different results.</para>
+        ///     <para>The returned enumerable is merely a query for enumerating tokens (also known as <em>deferred execution</em>). The query returned is not run until enumerating it, such as via explicit calls to the <see cref="IEnumerable{T}.GetEnumerator()" /> method, a <c>foreach</c> loop, a call to the <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method etc. If the <c><paramref name="picker" /></c> is not a deterministic function, two distinct enumerators over the query may return different results.</para>
         ///     <para>It is advisable to manually set the upper bound of tokens to render if they are to be stored in a container, such as the <see cref="List{T}" />, or concatenated together into a <see cref="String" /> to avoid memory errors. This may be done by calling the <see cref="Enumerable.Take{TSource}(IEnumerable{TSource}, Int32)" /> extension method or by iterating a loop with a counter.</para>
         ///     <para>The enumeration of tokens shall immediately stop, without rendering any tokens, if:</para>
         ///     <list type="number">
@@ -713,8 +818,8 @@ namespace MagicText
         /// <remarks>
         ///     <para>If no specific <see cref="System.Random" /> object or seed should be used, tne <see cref="Render(Int32, Nullable{Int32})" /> method could be used instead.</para>
         ///     <para>If <c><paramref name="fromPosition" /></c> is set, the first max(<c><paramref name="relevantTokens" /></c>, 1) tokens are chosen accordingly; otherwise they are chosen by calling the <see cref="System.Random.Next(Int32)" /> method of the <c><paramref name="random" /></c>. Each consecutive token is chosen by observing the most recent <c><paramref name="relevantTokens" /></c> tokens (or the number of generated tokens if <c><paramref name="relevantTokens" /></c> tokens have not yet been generated) and choosing the next one by calling the <see cref="System.Random.Next(Int32)" /> method of the <c><paramref name="random" /></c>. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="SentinelToken" />) is chosen—the ending tokens are not rendered.</para>
-        ///     <para>An extra copy of <c><paramref name="relevantTokens" /></c> tokens might be kept when generating new tokens. Memory errors may occur if the <c><paramref name="relevantTokens" /></c> is too large.</para>
-        ///     <para>The returned enumerable might merely be a query for enumerating tokens (also known as <em>deferred execution</em>). The query returned is then not run until enumerating it, such as via explicit calls to the <see cref="IEnumerable{T}.GetEnumerator" /> method, a <c>foreach</c> loop, a call to the <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method etc. Since the point of <see cref="System.Random" /> class is to provide a (pseudo-)random number generato, two distinct enumerators over the query may return different results.</para>
+        ///     <para>Depending on the behaviour of the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" /> method, an extra copy of <c><paramref name="relevantTokens" /></c> tokens might be kept when generating new tokens. Memory errors may occur if the <c><paramref name="relevantTokens" /></c> is too large.</para>
+        ///     <para>Furthermore, the returned enumerable might merely be a query for enumerating tokens (also known as <em>deferred execution</em>) if such is the behaviour of the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" /> method. The query returned is then not run until enumerating it, such as via explicit calls to the <see cref="IEnumerable{T}.GetEnumerator()" /> method, a <c>foreach</c> loop, a call to the <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method etc. Since the point of <see cref="System.Random" /> class is to provide a (pseudo-)random number generato, two distinct enumerators over the query may return different results.</para>
         ///     <para>It is advisable to manually set the upper bound of tokens to render if they are to be stored in a container, such as the <see cref="List{T}" />, or concatenated together into a <see cref="String" /> to avoid memory errors. This may be done by calling the <see cref="Enumerable.Take{TSource}(IEnumerable{TSource}, Int32)" /> extension method or by iterating a loop with a counter.</para>
         ///     <para>The enumeration of tokens shall immediately stop, without rendering any tokens, if:</para>
         ///     <list type="number">
@@ -748,8 +853,8 @@ namespace MagicText
         /// <exception cref="ArgumentOutOfRangeException">The parameter <c><paramref name="relevantTokens" /></c> is less than 0. The parameter <c><paramref name="fromPosition" /></c> is less than 0 or greater than the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</exception>
         /// <remarks>
         ///     <para>If <c><paramref name="fromPosition" /></c> is set, the first max(<c><paramref name="relevantTokens" /></c>, 1) tokens are chosen accordingly; otherwise they are chosen (pseudo-)randomly. Each consecutive token is chosen by observing the most recent <c><paramref name="relevantTokens" /></c> tokens (or the number of generated tokens if <c><paramref name="relevantTokens" /></c> tokens have not yet been generated) and choosing the next one (pseudo-)randomly. The process is repeated until the <em>successor</em> of the last token would be chosen or until the ending token (<see cref="SentinelToken" />) is chosen—the ending tokens are not rendered.</para>
-        ///     <para>An extra copy of <c><paramref name="relevantTokens" /></c> tokens might be kept when generating new tokens. Memory errors may occur if the <c><paramref name="relevantTokens" /></c> is too large.</para>
-        ///     <para>The returned enumerable might merely be a query for enumerating tokens (also known as <em>deferred execution</em>). The query returned is then not run until enumerating it, such as via explicit calls to the <see cref="IEnumerable{T}.GetEnumerator" /> method, a <c>foreach</c> loop, a call to the <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method etc. Since the point of <see cref="System.Random" /> class is to provide a (pseudo-)random number generato, two distinct enumerators over the query may return different results.</para>
+        ///     <para>Depending on the behaviour of the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" /> method, an extra copy of <c><paramref name="relevantTokens" /></c> tokens might be kept when generating new tokens. Memory errors may occur if the <c><paramref name="relevantTokens" /></c> is too large.</para>
+        ///     <para>Furthermore, the returned enumerable might merely be a query for enumerating tokens (also known as <em>deferred execution</em>) if such is the behaviour of the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" /> method. The query returned is then not run until enumerating it, such as via explicit calls to the <see cref="IEnumerable{T}.GetEnumerator()" /> method, a <c>foreach</c> loop, a call to the <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method etc. Since the point of <see cref="System.Random" /> class is to provide a (pseudo-)random number generato, two distinct enumerators over the query may return different results.</para>
         ///     <para>It is advisable to manually set the upper bound of tokens to render if they are to be stored in a container, such as the <see cref="List{T}" />, or concatenated together into a <see cref="String" /> to avoid memory errors. This may be done by calling the <see cref="Enumerable.Take{TSource}(IEnumerable{TSource}, Int32)" /> extension method or by iterating a loop with a counter.</para>
         ///     <para>The enumeration of tokens shall immediately stop, without rendering any tokens, if:</para>
         ///     <list type="number">

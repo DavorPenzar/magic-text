@@ -10,7 +10,7 @@ namespace MagicText
     /// </remarks>
     public class CharTokeniser : LineByLineTokeniser
     {
-        /// <summary>Creates a tokeniser.</summary>
+        /// <summary>Creates a default tokeniser.</summary>
         public CharTokeniser() : base()
         {
         }

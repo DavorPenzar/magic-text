@@ -113,7 +113,7 @@ namespace MagicText
         {
         }
 
-        /// <summary>Creates a tokeniser which uses the <c><paramref name="breakPattern" /></c> as the regular expression break pattern and the <c><paramref name="transform" /></c> delegate as the transformation function.</summary>
+        /// <summary>Creates a tokeniser.</summary>
         /// <param name="breakPattern">The regular expression break pattern to use.</param>
         /// <param name="options">The options passed to the <see cref="Regex(String, RegexOptions)" /> constructor.</param>
         /// <param name="transform">The optional token transformation function. If <c>null</c>, no transformation function is used.</param>
@@ -125,7 +125,7 @@ namespace MagicText
         {
         }
 
-        /// <summary>Creates a tokeniser which uses the <c><paramref name="breaker" /></c> as the regular expression breaker and the <c><paramref name="transform" /></c> delegate as the transformation function.</summary>
+        /// <summary>Creates a tokeniser.</summary>
         /// <param name="breaker">The regular expression breaker to use.</param>
         /// <param name="alterOptions">If not set (if <c>null</c>), the <c><paramref name="breaker" /></c>'s <see cref="Regex.Options" /> are used (actually, no new <see cref="Regex" /> is constructed but the original <c><paramref name="breaker" /></c> is used); otherwise the options passed to the <see cref="Regex(String, RegexOptions)" /> constructor.</param>
         /// <param name="transform">The optional token transformation function. If <c>null</c>, no transformation function is used.</param>
