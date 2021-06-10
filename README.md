@@ -10,9 +10,9 @@ The library provides simple interfaces and classes for tokenising existing text 
 
 Tokens extracted from a text block are usually words + punctuation + white spaces, or single characters. It should not be considered a good practice to mix *apples and oranges*, i. e. to have some tokens in form of complete words, while others as single characters (except for words such as the pronoun *I* or the article *a*, for example, in English). Both tokenisation policies mentioned are implemented in the librabry, while additional policies may be obtained by:
 
-1.  passing desired [```ShatteringOptions```](Source/ShatteringOptions.cs) to tokenisation methods,
-2.  constructing a [```RegexTokeniser```](Source/RegexTokeniser.cs) with a custom regular expression break pattern and potentially with a transformation function,
-3.  implementing a custom extension of [```LineByLineTokeniser```](Source/LineByLineTokeniser.cs) abstract class or implementing complete [```ITokeniser```](Source/ITokeniser.cs) interface.
+1.  passing desired [`ShatteringOptions`](Source/ShatteringOptions.cs) to tokenisation methods,
+2.  constructing a [`RegexTokeniser`](Source/RegexTokeniser.cs) with a custom regular expression break pattern and potentially with a transformation function,
+3.  implementing a custom extension of [`LineByLineTokeniser`](Source/LineByLineTokeniser.cs) abstract class or implementing complete [`ITokeniser`](Source/ITokeniser.cs) interface.
 
 Once extracted, the collection of tokens (in the order as read from the input) is called ***context*** in the rest of this document. The terminology is inspired by actual context of words in usual forms of text.
 
@@ -25,16 +25,16 @@ In the author's opinion, the library does not seem to provide any actually usefu
 The (non-deterministic) *algorithm* for generating text blocks implemented by the library is the following:
 
 1.  A **context** of tokens is set.
-2.  Input: *number of relevant tokens* ```n >= 0```.
+2.  Input: *number of relevant tokens* `n >= 0`.
 3.  Do:
     1.  Randomly choose a token from the context.
     2.  Repeat:
-        1.  Find all occurances of the ```n``` most recent tokens chosen (if ```n``` tokens have not yet been chosen, substitute it by the number of tokens chosen) as subcollections in the context.
+        1.  Find all occurances of the `n` most recent tokens chosen (if `n` tokens have not yet been chosen, substitute it by the number of tokens chosen) as subcollections in the context.
         2.  Randomly choose one of the occurances.
         3.  For the next token, choose the token immediately following the tokens from the chosen occurance. If no token follows the occurance (if the occurance is at the very end of the context), stop the algorithm.
 4.  Output: collection of chosen tokens (in the order as chosen).
 
-For example, if the context is acquired by slicing the string *aaaabaaac* at each character, the context is the collection ```{'a', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'c'}```. Suppose ```n = 3```. A possible line of steps is given bellow:
+For example, if the context is acquired by slicing the string *aaaabaaac* at each character, the context is the collection `{'a', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'c'}`. Suppose `n = 3`. A possible line of steps is given bellow:
 
 1.  The letter *a* is chosen.
 2.  All occurances of *a* are the following:
@@ -46,17 +46,17 @@ For example, if the context is acquired by slicing the string *aaaabaaac* at eac
     6.  *aaaaba**a**ac*
     7.  *aaaabaa**a**c*
 3.  Occurance 2 is chosen. Therefore the next token chosen is (also) the letter *a*. Note that the same would happen if any occurance except occurances 4 and 7 were chosen.
-4.  The string *aa* (still shorter than ```n == 3``` characters) must now be found. All occurances of the string are the following:
+4.  The string *aa* (still shorter than `n == 3` characters) must now be found. All occurances of the string are the following:
     1.  ***aa**aabaaac*
     2.  *a**aa**abaaac*
     3.  *aa**aa**baaac*
     4.  *aaaab**aa**ac*
     5.  *aaaaba**aa**c*
 5.  Occurance 3 is chosen meaning the next token is the letter *b*. This makes the following steps uniquely determined.
-6.  The string *aab* (exactly ```n == 3``` characters) must now be found. All occurances of the string are the following:
+6.  The string *aab* (exactly `n == 3` characters) must now be found. All occurances of the string are the following:
     1.  *aa**aab**aaac*
 7.  The next token chosen is the letter *a*.
-8.  The string *aba* (the first letter *a* is discarded because otherwise more than the most recent ```n == 3``` characters would be considered) must now be found. All occurances of the string are the following:
+8.  The string *aba* (the first letter *a* is discarded because otherwise more than the most recent `n == 3` characters would be considered) must now be found. All occurances of the string are the following:
     1.  *aaa**aba**aac*
 9.  The next token chosen is the letter *a*.
 10. The string *baa* must now be found. All occurances of the string are the following:
@@ -73,7 +73,7 @@ For example, if the context is acquired by slicing the string *aaaabaaac* at eac
 
 The steps explained above produce *aabaaac* as the output. Although this is indeed shorter than the input text and also a substring of it, that is not necessarily the case.
 
-A subsequence of 0 tokens is assumed to precede every token. In other words, if ```n == 0``` (if there are no most recent relevant tokens), all tokens are chosen in the same way as the first one: by choosing randomly from the complete context. Moreover, a subsequence of 0 tokens is also assumed to precede the *end of the context*, in the sense that the occurance of the range of 0 tokens following the last token may also be chosen, in which case the algorithm terminates. This can be identified with [null-terminated strings](http://en.wikipedia.org/wiki/Null-terminated_string), such as in [*C* programming language](http://www.iso.org/standard/74528.html), where the null character at the end of the string is a single independent (not *glued together* with its predecessor) token.
+A subsequence of 0 tokens is assumed to precede every token. In other words, if `n == 0` (if there are no most recent relevant tokens), all tokens are chosen in the same way as the first one: by choosing randomly from the complete context. Moreover, a subsequence of 0 tokens is also assumed to precede the *end of the context*, in the sense that the occurance of the range of 0 tokens following the last token may also be chosen, in which case the algorithm terminates. This can be identified with [null-terminated strings](http://en.wikipedia.org/wiki/Null-terminated_string), such as in [*C* programming language](http://www.iso.org/standard/74528.html), where the null character at the end of the string is a single independent (not *glued together* with its predecessor) token.
 
 ##  Code Example
 
@@ -124,7 +124,7 @@ Console.WriteLine();
 
 ```
 
-The code above uses [```Pen```](Source/Pen.cs) class and [```ITokeniser```](Source/ITokeniser.cs) interface (implemented through [```RegexTokeniser```](Source/RegexTokeniser.cs) class) provided by the library and outputs:
+The code above uses [`Pen`](Source/Pen.cs) class and [`ITokeniser`](Source/ITokeniser.cs) interface (implemented through [`RegexTokeniser`](Source/RegexTokeniser.cs) class) provided by the library and outputs:
 
 ```
  deep?
@@ -147,7 +147,7 @@ Do you know that there
 
 ```
 
-Alternatively, if [```CharTokeniser```](Source/CharTokeniser.cs) is used instead of [```RegexTokeniser```](Source/RegexTokeniser.cs), the code outputs:
+Alternatively, if [`CharTokeniser`](Source/CharTokeniser.cs) is used instead of [`RegexTokeniser`](Source/RegexTokeniser.cs), the code outputs:
 
 ```
  deep?
@@ -202,9 +202,13 @@ catch (OperationCanceledException)
 
 ```
 
+Obviously, this is an *overkill*, as, instead of `cancellation.Cancel()`, one could simply `break` the `foreach`-loop; not to mention that reading from the console may be done synchronously. However, the example above illustrates the power and possibilities provided by the library which might come useful in other real-life scenarios.
+
+Note that [`LineByLineTokeniser`](Source/LineByLineTokeniser.cs)&mdash;the base class of [`RegexTokeniser`](Source/RegexTokeniser.cs) and [`CharTokeniser`](Source/CharTokeniser.cs)&mdash;does not necessarily cancel the shattering operation immediately, meaning that additional iterations in the `foreach`-loop above may be run even after the `"#BREAK"` token is found. However, no new lines will be read from the underlying input (the `Console.In` in the example above) after cancelling the operation. Actually, no additional bytes shall be read appart from those having already been irrecoverably read.
+
 ##  Remarks
 
-This library should not be used when working with large corpora of context tokens. Objects of class [```Pen```](Source/Pen.cs) store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks the possibility to work with a large number of tokens that would not fit in the internal memory all at once. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storing tokens externally.
+This library should not be used when working with large corpora of context tokens. Objects of class [`Pen`](Source/Pen.cs) store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks the possibility to work with a large number of tokens that would not fit in the internal memory all at once. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storing tokens externally.
 
 ##  References
 
