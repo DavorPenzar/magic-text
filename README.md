@@ -24,7 +24,7 @@ In the author's opinion, the library does not seem to provide any actually usefu
 
 ### Algorithm Explanation
 
-The (non-deterministic) *algorithm* for generating text blocks implemented by the library is the following:
+The ([*nondeterministic*](http://en.wikipedia.org/wiki/Nondeterministic_programming)) *algorithm* for generating text blocks implemented by the library is the following:
 
 1.  A **context** of tokens is set.
 2.  Input: *number of relevant tokens* `n >= 0`.
