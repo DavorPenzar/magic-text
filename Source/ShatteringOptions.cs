@@ -156,6 +156,21 @@ namespace MagicText
             }
         }
 
+        /// <summary>Creates options.</summary>
+        /// <param name="ignoreEmptyTokens">The indicator if empty tokens should be ignored.</param>
+        /// <param name="ignoreLineEnds">The indicator if line ends should be ignored.</param>
+        /// <param name="ignoreEmptyLines">The inidcator if empty lines should be ignored.</param>
+        /// <param name="lineEndToken">The token to represent a line end.</param>
+        /// <param name="emptyLineToken">The token to represent an empty line.</param>
+        public ShatteringOptions(Boolean ignoreEmptyTokens, Boolean ignoreLineEnds, Boolean ignoreEmptyLines, String? lineEndToken, String? emptyLineToken) : base()
+        {
+            this.ignoreEmptyTokens = ignoreEmptyTokens;
+            this.ignoreLineEnds = ignoreLineEnds;
+            this.ignoreEmptyLines = ignoreEmptyLines;
+            this.lineEndToken = lineEndToken;
+            this.emptyLineToken = emptyLineToken;
+        }
+
         /// <summary>Creates default options.</summary>
         public ShatteringOptions() : this(false, false, false, Environment.NewLine, String.Empty)
         {
@@ -173,21 +188,6 @@ namespace MagicText
                 other?.EmptyLineToken
             )
         {
-        }
-
-        /// <summary>Creates options.</summary>
-        /// <param name="ignoreEmptyTokens">The indicator if empty tokens should be ignored.</param>
-        /// <param name="ignoreLineEnds">The indicator if line ends should be ignored.</param>
-        /// <param name="ignoreEmptyLines">The inidcator if empty lines should be ignored.</param>
-        /// <param name="lineEndToken">The token to represent a line end.</param>
-        /// <param name="emptyLineToken">The token to represent an empty line.</param>
-        public ShatteringOptions(Boolean ignoreEmptyTokens, Boolean ignoreLineEnds, Boolean ignoreEmptyLines, String? lineEndToken, String? emptyLineToken) : base()
-        {
-            this.ignoreEmptyTokens = ignoreEmptyTokens;
-            this.ignoreLineEnds = ignoreLineEnds;
-            this.ignoreEmptyLines = ignoreEmptyLines;
-            this.lineEndToken = lineEndToken;
-            this.emptyLineToken = emptyLineToken;
         }
 
         /// <summary>Creates options by retrieving the serialisation <c><paramref name="info" /></c>.</summary>

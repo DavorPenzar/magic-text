@@ -26,10 +26,10 @@ namespace MagicText
         private const string LineTokensNullErrorMessage = "Line tokens cannot be null.";
         protected const string LineNullErrorMessage = "Line string cannot be null.";
 
-        /// <summary>Always indicates the <c><paramref name="token" /></c> as non-empty.</summary>
-        /// <param name="token">The token to check.</param>
+        /// <summary>Always indicates the <c><paramref name="_" /></c> as non-empty.</summary>
+        /// <param name="_">The token to check.</param>
         /// <returns>Always <c>false</c>.</returns>
-        protected static Boolean IsEmptyTokenAlwaysFalse(String? token) =>
+        protected static Boolean IsEmptyTokenAlwaysFalse(String? _) =>
             false;
 
         private readonly Func<String?, Boolean> _isEmptyToken;
@@ -43,14 +43,6 @@ namespace MagicText
         /// <returns>The token non-emptiness checking function (predicate).</returns>
         protected Func<String?, Boolean> IsNonEmptyToken => _isNonEmptyToken;
 
-        /// <summary>Creates a default tokeniser.</summary>
-        /// <remarks>
-        ///     <para>The method <see cref="String.IsNullOrEmpty(String)" /> is used as the function (predicate) to check if a token is empty.</para>
-        /// </remarks>
-        public LineByLineTokeniser() : this(String.IsNullOrEmpty)
-        {
-        }
-
         /// <summary>Creates a tokeniser.</summary>
         /// <param name="isEmptyToken">The function (predicate) to check if a token is empty.</param>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="isEmptyToken" /></c> is <c>null</c>.</exception>
@@ -58,6 +50,14 @@ namespace MagicText
         {
             _isEmptyToken = isEmptyToken ?? throw new ArgumentNullException(nameof(isEmptyToken), IsEmptyTokenNullErrorMessage);
             _isNonEmptyToken = (new NegativePredicateWrapper<String?>(IsEmptyToken)).EvaluateNegation;
+        }
+
+        /// <summary>Creates a default tokeniser.</summary>
+        /// <remarks>
+        ///     <para>The method <see cref="String.IsNullOrEmpty(String)" /> is used as the function (predicate) to check if a token is empty.</para>
+        /// </remarks>
+        public LineByLineTokeniser() : this(String.IsNullOrEmpty)
+        {
         }
 
         /// <summary>Shatters a single <c><paramref name="line" /></c> into tokens.</summary>
@@ -93,10 +93,10 @@ namespace MagicText
             // Declare:
             Boolean addLineEnd = false; // the indicator that a line end should be added
 
-            // Shatter text from `input` line-by-line.
+            // Shatter text from the `input` line-by-line.
             while (true)
             {
-                // Add `options.LineEndToken` to `tokens` if necessary.
+                // Return the `options.LineEndToken` if necessary.
                 if (!options.IgnoreLineEnds && addLineEnd)
                 {
                     yield return options.LineEndToken;
@@ -118,7 +118,7 @@ namespace MagicText
 
                 // Return the appropriate tokens and update `addLineEnd`.
                 {
-                    Int32 i = 0;
+                    Int32 i;
 
                     using (IEnumerator<String?> en = lineTokens.GetEnumerator())
                     {
@@ -180,10 +180,10 @@ namespace MagicText
             // Declare:
             Boolean addLineEnd = false; // the indicator that a line end should be added
 
-            // Shatter text from `input` line-by-line.
+            // Shatter text from the `input` line-by-line.
             while (true)
             {
-                // Add `options.LineEndToken` to `tokens` if necessary.
+                // Return the `options.LineEndToken` if necessary.
                 if (!options.IgnoreLineEnds && addLineEnd)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -208,7 +208,7 @@ namespace MagicText
 
                 // Return the appropriate tokens and update `addLineEnd`.
                 {
-                    Int32 i = 0;
+                    Int32 i;
 
                     using (IEnumerator<String?> en = lineTokens.GetEnumerator())
                     {

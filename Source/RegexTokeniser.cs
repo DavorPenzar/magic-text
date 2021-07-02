@@ -95,12 +95,15 @@ namespace MagicText
         [RegexPattern]
         public String BreakPattern => Breaker.ToString();
 
-        /// <summary>Creates a default tokeniser.</summary>
+        /// <summary>Creates a tokeniser.</summary>
+        /// <param name="breakPattern">The regular expression break pattern to use.</param>
+        /// <param name="options">The options passed to the <see cref="Regex(String, RegexOptions)" /> constructor.</param>
+        /// <param name="transform">The optional token transformation function. If <c>null</c>, no transformation function is used.</param>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="breakPattern" /></c> is <c>null</c>.</exception>
         /// <remarks>
-        ///     <para>The <see cref="DefaultInclusiveBreakPattern" /> is used as the regular expression break pattern.</para>
-        ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultInclusiveBreaker" />) with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" /> is used. Consider using this constructor or the <see cref="RegexTokeniser(Boolean)" /> constructor if a default tokeniser should be used to improve performance.</para>
+        ///     <para>The exceptions thrown by the <see cref="Regex" /> class's constructor and methods are not caught.</para>
         /// </remarks>
-        public RegexTokeniser() : this(true)
+        public RegexTokeniser([RegexPattern] String breakPattern, RegexOptions options = RegexOptions.None, Func<String?, String?>? transform = null) : this(breaker: breakPattern is null ? throw new ArgumentNullException(nameof(breakPattern), RegexPatternNullErrorMessage) : new Regex(breakPattern, options), transform: transform)
         {
         }
 
@@ -113,15 +116,12 @@ namespace MagicText
         {
         }
 
-        /// <summary>Creates a tokeniser.</summary>
-        /// <param name="breakPattern">The regular expression break pattern to use.</param>
-        /// <param name="options">The options passed to the <see cref="Regex(String, RegexOptions)" /> constructor.</param>
-        /// <param name="transform">The optional token transformation function. If <c>null</c>, no transformation function is used.</param>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="breakPattern" /></c> is <c>null</c>.</exception>
+        /// <summary>Creates a default tokeniser.</summary>
         /// <remarks>
-        ///     <para>The exceptions thrown by the <see cref="Regex" /> class's constructor and methods are not caught.</para>
+        ///     <para>The <see cref="DefaultInclusiveBreakPattern" /> is used as the regular expression break pattern.</para>
+        ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultInclusiveBreaker" />) with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" /> is used. Consider using this constructor or the <see cref="RegexTokeniser(Boolean)" /> constructor if a default tokeniser should be used to improve performance.</para>
         /// </remarks>
-        public RegexTokeniser([RegexPattern] String breakPattern, RegexOptions options = RegexOptions.None, Func<String?, String?>? transform = null) : this(breaker: breakPattern is null ? throw new ArgumentNullException(nameof(breakPattern), RegexPatternNullErrorMessage) : new Regex(breakPattern, options), transform: transform)
+        public RegexTokeniser() : this(true)
         {
         }
 
@@ -155,11 +155,12 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="line" /></c> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>After splitting the <c><paramref name="line" /></c> using the <see cref="Breaker" />, the transformation of tokens is done using the <see cref="Transform" /> delegate if it is set.</para>
-        ///     <para>The returned enumerable is merely a query for enumerating tokens (also known as <em>deferred execution</em>). If multiple enumeration processes over the enumerable should be performed, it is advisable to convert it to a fully built container beforehand, such as a <see cref="List{T}" /> via the <see cref="List{T}.List(IEnumerable{T})" /> constructor or the <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.</para>
+        ///     <para>The returned enumerable might merely be a query for enumerating tokens (also known as <em>deferred execution</em>). If multiple enumeration processes over the enumerable should be performed, it is advisable to convert it to a fully built container beforehand, such as a <see cref="List{T}" /> via the <see cref="List{T}.List(IEnumerable{T})" /> constructor or the <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.</para>
         ///
         ///     <h3>Notes to Implementers</h3>
         ///     <para>This method cannot be overriden.</para>
         /// </remarks>
+        /// <seealso cref="Transform" />
         protected sealed override IEnumerable<String?> ShatterLine(String line)
         {
             if (line is null)
