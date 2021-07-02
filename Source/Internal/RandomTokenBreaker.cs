@@ -87,6 +87,6 @@ namespace MagicText.Internal
         /// </remarks>
         /// <seealso cref="Bias" />
         public Boolean BreakToken(Int32 n, Int32 i, Int32 j) =>
-            Random.NextDouble() * (n - i) < Bias * n + i - j;
+            (Random.NextDouble() * (n - i) < Bias * n + i - j);
     }
 }
