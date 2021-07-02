@@ -12,13 +12,15 @@ Tokens extracted from a text block are usually words + punctuation + white space
 
 1.  passing desired [`ShatteringOptions`](Source/ShatteringOptions.cs) to tokenisation methods,
 2.  constructing a [`RegexTokeniser`](Source/RegexTokeniser.cs) with a custom regular expression break pattern and potentially with a transformation function,
-3.  implementing a custom extension of [`LineByLineTokeniser`](Source/LineByLineTokeniser.cs) abstract class or implementing complete [`ITokeniser`](Source/ITokeniser.cs) interface.
+3.  implementing a custom extension of the [`LineByLineTokeniser`](Source/LineByLineTokeniser.cs) abstract class or implementing complete [`ITokeniser`](Source/ITokeniser.cs) interface.
 
-Once extracted, the collection of tokens (in the order as read from the input) is called ***context*** in the rest of this document. The terminology is inspired by actual context of words in usual forms of text.
+Additionally, the library provides a [`RandomTokeniser`](Source/RandomTokeniser.cs), which chooses token breaking points at *random*. However, the tokeniser is not very useful as it is, obviously, unpredictable ([*nondeterministic*](http://en.wikipedia.org/wiki/Nondeterministic_programming)). It is especially useless for the process of generating new text (v. [*Algorithm Explanation*](#Algorithm-Explanation) and [*Code Example*](#Code-Example)) because the resulting tokens would probably be mutually very different, even if they occur in otherwise *similar* parts of text. For instance, the string `"lorem ipsum"` may once be tokenised by a [`RandomTokeniser`](Source/RandomTokeniser.cs) into tokens `{ "lor", "em ipsum" }`, and another time tokenised by the same [`RandomTokeniser`](Source/RandomTokeniser.cs) into tokens `{ "lore", "m ips", "um" }`. On the other hand, a default [`RegexTokeniser`](Source/RegexTokeniser.cs) would always yield tokens `{ "lorem", " ", "ispum" }`, while a [`CharTokeniser`](Source/CharTokeniser.cs) would always yield tokens `{ "l", "o", ..., "m" }`.
+
+Once extracted, the collection of tokens (in the order as read from the input) is called ***context*** in the rest of this document (the tokenisation process is called ***shattering*** in the library). The terminology is inspired by actual context of words in usual forms of text.
 
 ### Possible Use Cases
 
-In the author's opinion, the library does not seem to provide any actually useful functionality for applications built using [*.NET*](http://dotnet.microsoft.com/). However, it may be used in self-educational purposes (for understanding some algorithm principles such as text tokenisation, sorting, searching etc.&mdash;although nested classes, private fields, inline documentation and comments are, addmitingly, not very *neat* hear and there, and, as a result, a powerful user-friendly [IDE](http://en.wikipedia.org/wiki/Integrated_development_environment) (such as [*Visual Studio*](http://visualstudio.microsoft.com/)) would help greatly in navigating the source code), for various unit testing (to generate [mock objects](http://en.wikipedia.org/wiki/Mock_object)) or maybe even for implementation of some parts of [*chatbots*](http://en.wikipedia.org/wiki/Chatbot). The main idea, though, behind writing this library was (the author's) self-training in programming [*C#*](http://docs.microsoft.com/en-us/dotnet/csharp/) + [*.NET*](http://dotnet.microsoft.com/) applications through implementing an application for generating random blocks of text *for fun*.
+In the author's opinion, the library does not seem to provide any actually useful functionality for applications built using [*.NET*](http://dotnet.microsoft.com/). However, it may be used in self-educational purposes (for understanding some algorithm principles such as text tokenisation, sorting, searching etc.&mdash;although private fields, inline documentation and comments are, addmitingly, not very *neat* hear and there, and, as a result, a powerful user-friendly [IDE](http://en.wikipedia.org/wiki/Integrated_development_environment) (such as [*Visual Studio*](http://visualstudio.microsoft.com/)) would help greatly in navigating the source code), for various unit testing (to generate [mock objects](http://en.wikipedia.org/wiki/Mock_object)) or maybe even for the implementation of some parts of [*chatbots*](http://en.wikipedia.org/wiki/Chatbot). The main idea, though, behind writing this library was (the author's) self-training in programming [*C#*](http://docs.microsoft.com/en-us/dotnet/csharp/) + [*.NET*](http://dotnet.microsoft.com/) applications through implementing an application for generating random blocks of text *for fun*.
 
 ### Algorithm Explanation
 
@@ -124,7 +126,7 @@ Console.WriteLine();
 
 ```
 
-The code above uses [`Pen`](Source/Pen.cs) class and [`ITokeniser`](Source/ITokeniser.cs) interface (implemented through [`RegexTokeniser`](Source/RegexTokeniser.cs) class) provided by the library and outputs:
+The code above uses the [`Pen`](Source/Pen.cs) class and the [`ITokeniser`](Source/ITokeniser.cs) interface (implemented through the [`RegexTokeniser`](Source/RegexTokeniser.cs) class) provided by the library and outputs:
 
 ```
  deep?
@@ -147,7 +149,7 @@ Do you know that there
 
 ```
 
-Alternatively, if [`CharTokeniser`](Source/CharTokeniser.cs) is used instead of [`RegexTokeniser`](Source/RegexTokeniser.cs), the code outputs:
+Alternatively, if a [`CharTokeniser`](Source/CharTokeniser.cs) is used instead of the [`RegexTokeniser`](Source/RegexTokeniser.cs), the code outputs:
 
 ```
  deep?
@@ -166,7 +168,7 @@ Do you know that there's a spark in
 
 ### Further Examples
 
-The library actually enables some more sophisticated use cases than the simple example demonstrated above. For instance, to asynchronously shatter text read from the console one could use the following code:
+The library actually enables some more sophisticated use cases than the simple example demonstrated above. For instance, to asynchronously tokenise text read from the console one could use the following code:
 
 ```csharp
 using MagicText; // <-- namespace of the library
@@ -204,7 +206,9 @@ catch (OperationCanceledException)
 
 Obviously, this is an *overkill*, as, instead of `cancellation.Cancel()`, one could simply `break` the `foreach`-loop; not to mention that reading from the console may be done synchronously. However, the example above illustrates the power and possibilities provided by the library which might come useful in other real-life scenarios.
 
-Note that [`LineByLineTokeniser`](Source/LineByLineTokeniser.cs)&mdash;the base class of [`RegexTokeniser`](Source/RegexTokeniser.cs) and [`CharTokeniser`](Source/CharTokeniser.cs)&mdash;does not necessarily cancel the shattering operation immediately, meaning that additional iterations in the `foreach`-loop above may be run even after the `"#BREAK"` token is found. However, no new lines will be read from the underlying input (the `Console.In` in the example above) after cancelling the operation. Actually, no additional bytes shall be read appart from those having already been irrecoverably read.
+Note that [`LineByLineTokeniser`](Source/LineByLineTokeniser.cs)&mdash;the base class of [`RegexTokeniser`](Source/RegexTokeniser.cs) and [`CharTokeniser`](Source/CharTokeniser.cs)&mdash;does not necessarily cancel the tokenising operation immediately, meaning that some additional iterations in the `foreach`-loop above may be run even after the `"#BREAK"` token is found. However, no new lines will be read from the underlying input (the `Console.In` in the example above) after cancelling the operation. Actually, no additional bytes shall be read appart from those having already been irrecoverably read.
+
+All tokenisers provided by the library tokenise text using [*deferred execution*](http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-example) (therefore similar example could have been written using a [`CharTokeniser`](Source/CharTokeniser.cs) or a [`RandomTokeniser`](Source/RandomTokeniser.cs)). In fact, this is the recommended behaviour of all classes implementing the [`ITokeniser`](Source/ITokeniser.cs) interface. Such implementation enables simultaneous tokenising and reading operations, which may come in useful when reading from sources such as the console or a network channel. On the other hand, [`TokeniserExtensions`](Source/TokeniserExtensions.cs) class provides extension methods for tokenising into lists (fully built containers instead of the [*deferred execution*](http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-example)), which is useful when reading from strings and read-only text files. If the latter was the default, simultaneous reading and tokenising would be impossible because the input would have to be read and tokenised until the end before accessing any of the tokens.
 
 ##  Remarks
 
