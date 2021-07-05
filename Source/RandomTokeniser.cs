@@ -58,7 +58,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="breakToken" /></c> is <c>null</c>.</exception>
         /// <see cref="BreakToken" />
         /// <see cref="ShatterLine(String)" />
-        public RandomTokeniser(Func<Int32, Int32, Int32, Boolean> breakToken)
+        public RandomTokeniser(Func<Int32, Int32, Int32, Boolean> breakToken) : base()
         {
             _breakToken = breakToken ?? throw new ArgumentNullException(nameof(breakToken), BreakTokenNullErrorMessage);
         }

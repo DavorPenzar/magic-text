@@ -25,7 +25,7 @@ namespace MagicText.Internal
         /// <param name="comparer">The <see cref="StringComparer" /> used to compare <see cref="System.String" />s.</param>
         /// <param name="string">The predefined reference <see cref="System.String" />. Other <see cref="System.String" />s are compared to this <c><paramref name="string" /></c> by the <c><paramref name="comparer" /></c>.</param>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="comparer" /></c> is <c>null</c>.</exception>
-        public BoundStringComparer(StringComparer comparer, System.String? @string)
+        public BoundStringComparer(StringComparer comparer, System.String? @string) : base()
         {
             _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer), ComparerNullErrorMessage);
             _string = @string;
