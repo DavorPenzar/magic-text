@@ -183,7 +183,7 @@ using System.Threading.Tasks;
 
 List<String?> tokens = new List<String?>();
 
-ITokeniser tokeniser = new RegexTokeniser();
+ITokeniser tokeniser = new RegexTokeniser(false);
 
 try
 {
