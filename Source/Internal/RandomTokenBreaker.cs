@@ -3,7 +3,7 @@ using System;
 namespace MagicText.Internal
 {
     /// <summary>Provides a method for the <see cref="RandomTokeniser" /> to choose token breaking points based using a <see cref="System.Random" />.</summary>
-    public class RandomTokenBreaker : Object
+    internal class RandomTokenBreaker : Object
     {
         protected const string BiasOutOfRangeErrorMessage = "Bias is out of range. Must be greater than 0 and less than or equal to 1.";
         protected const string RandomNullErrorMessage = "(Pseudo-)Random number generator cannot be null.";

@@ -65,7 +65,7 @@ namespace MagicText
 
         /// <summary>Creates a default tokeniser.</summary>
         /// <remarks>
-        ///     <para>Each position has a 50 % chance of being a token break point or not. More precisely, each <see cref="BreakToken" /> function call has, on average, a 50 % chance of returnig <c>true</c> or <c>false</c> (the <em>average</em> assumes using the function only through the <see cref="ShatterLine(String)" /> method with completely enumerating tokens of non-empty lines).</para>
+        ///     <para>Each position in the input text lines has a 50 % chance of being a token break point or not. More precisely, each <see cref="BreakToken" /> function call has, on average, a 50 % chance of returnig <c>true</c> or <c>false</c> (the <em>average</em> assumes using the function only through the <see cref="ShatterLine(String)" /> method with completely enumerating tokens of non-empty lines).</para>
         /// </remarks>
         /// <seealso cref="BreakToken" />
         public RandomTokeniser() : this((new RandomTokenBreaker()).BreakToken)
@@ -76,7 +76,7 @@ namespace MagicText
         /// <param name="bias">The breaking point bias. The <c><paramref name="bias" /></c> must be greater than 0 and less than or equal to 1.</param>
         /// <exception cref="ArgumentOutOfRangeException">The parameter <c><paramref name="bias" /></c> is <c>NaN</c>, infinite, less than or equal to 0, or greater than 1.</exception>
         /// <remarks>
-        ///     <para>Each position becomes a breaking point with probability <c><paramref name="bias" /></c> and does not become one with probability <c>1 - <paramref name="bias" /></c>. More precisely, each <see cref="BreakToken" /> function call returns <c>true</c> with average probability <c><paramref name="bias" /></c> or <c>false</c> with average probability <c>1 - <paramref name="bias" /></c> (the <em>average</em> assumes using the function only through the <see cref="ShatterLine(String)" /> method with completely enumerating tokens of non-empty lines).</para>
+        ///     <para>Each position in the input text lines becomes a breaking point with probability <c><paramref name="bias" /></c> and does not become one with probability <c>1 - <paramref name="bias" /></c>. More precisely, each <see cref="BreakToken" /> function call returns <c>true</c> with average probability <c><paramref name="bias" /></c> or <c>false</c> with average probability <c>1 - <paramref name="bias" /></c>.</para>
         /// </remarks>
         /// <seealso cref="BreakToken" />
         public RandomTokeniser(Double bias) : this((new RandomTokenBreaker(bias)).BreakToken)
@@ -88,7 +88,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="random" /></c> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>If no specific <see cref="Random" /> object or seed should be used, the <see cref="RandomTokeniser()" /> constructor could be used instead. The <c><paramref name="random" /></c> is used for deciding about token breaking points via the <see cref="BreakToken" /> function.</para>
-        ///     <para>Each position has a 50 % chance of being a token break point or not. More precisely, each <see cref="BreakToken" /> function call has, on average, a 50 % chance of returnig <c>true</c> or <c>false</c> (the <em>average</em> assumes using the function only through the <see cref="ShatterLine(String)" /> method with completely enumerating tokens of non-empty lines).</para>
+        ///     <para>Each position in the input text lines has a 50 % chance of being a token break point or not. More precisely, each <see cref="BreakToken" /> function call has, on average, a 50 % chance of returnig <c>true</c> or <c>false</c>.</para>
         /// </remarks>
         /// <seealso cref="BreakToken" />
         public RandomTokeniser(Random random) : this((new RandomTokenBreaker(random)).BreakToken)
@@ -102,7 +102,7 @@ namespace MagicText
         /// <exception cref="ArgumentOutOfRangeException">The parameter <c><paramref name="bias" /></c> is <c>NaN</c>, infinite, less than or equal to 0, or greater than 1.</exception>
         /// <remarks>
         ///     <para>If no specific <see cref="Random" /> object or seed should be used, the <see cref="RandomTokeniser(Double)" /> constructor could be used instead. The <c><paramref name="random" /></c> is used for deciding about token breaking points via the <see cref="BreakToken" /> function.</para>
-        ///     <para>Each position becomes a breaking point with probability <c><paramref name="bias" /></c> and does not become one with probability <c>1 - <paramref name="bias" /></c>. More precisely, each <see cref="BreakToken" /> function call returns <c>true</c> with average probability <c><paramref name="bias" /></c> or <c>false</c> with average probability <c>1 - <paramref name="bias" /></c> (the <em>average</em> assumes using the function only through the <see cref="ShatterLine(String)" /> method with completely enumerating tokens of non-empty lines).</para>
+        ///     <para>Each position in the input text lines becomes a breaking point with probability <c><paramref name="bias" /></c> and does not become one with probability <c>1 - <paramref name="bias" /></c>. More precisely, each <see cref="BreakToken" /> function call returns <c>true</c> with average probability <c><paramref name="bias" /></c> or <c>false</c> with average probability <c>1 - <paramref name="bias" /></c>.</para>
         /// </remarks>
         /// <seealso cref="BreakToken" />
         public RandomTokeniser(Random random, Double bias) : this((new RandomTokenBreaker(random, bias)).BreakToken)
