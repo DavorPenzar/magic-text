@@ -31,7 +31,7 @@ namespace MagicText.Internal
         /// <summary>Get's the breaker's (pseudo-)random number generator.</summary>
         /// <returns>The internal (pseudo-)random number generator.</returns>
         /// <remarks>
-        ///     <para>This (pseudo-)random number generator is used in the <see cref="BreakToken(Int32, Int32, Int32)" /> method for undeterministic and biased deciding.</para>
+        ///     <para>This (pseudo-)random number generator is used in the <see cref="BreakToken(Int32, Int32, Int32)" /> method for nondeterministic and biased deciding.</para>
         /// </remarks>
         /// <seealso cref="Bias" />
         /// <seealso cref="BreakToken(Int32, Int32, Int32)" />

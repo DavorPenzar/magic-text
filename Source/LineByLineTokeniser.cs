@@ -12,8 +12,8 @@ namespace MagicText
     /// <summary>Implements an <see cref="ITokeniser" /> which shatters lines of text one by one.</summary>
     /// <remarks>
     ///     <para>By default, empty tokens (that are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens that yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method. Derived classes may override this behaviour.</para>
-    ///     <para>Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same. These line breaks and the end of the input are considered line ends when shattering text, and are therefore substituted by a <see cref="ShatteringOptions.LineEndToken" /> if <see cref="ShatteringOptions.IgnoreLineEnds" /> is <c>false</c>. This behaviour may not be overriden by a derived class.</para>
-    ///     <para>The empty lines are substituted by a <see cref="ShatteringOptions.EmptyLineToken" /> if <see cref="ShatteringOptions.IgnoreEmptyLines" /> is <c>false</c>. This behaviour may also not be overriden by a derived class.</para>
+    ///     <para>Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same. These line breaks and the end of the input are considered line ends when shattering text, and are therefore substituted by a <see cref="ShatteringOptions.LineEndToken" /> if <see cref="ShatteringOptions.IgnoreLineEnds" /> is <c>false</c>. This behaviour may not be overridden by a derived class.</para>
+    ///     <para>The empty lines are substituted by a <see cref="ShatteringOptions.EmptyLineToken" /> if <see cref="ShatteringOptions.IgnoreEmptyLines" /> is <c>false</c>. This behaviour may also not be overridden by a derived class.</para>
     ///
     ///     <h3>Notes to Implementers</h3>
     ///     <para>A derived class must minimally implement <see cref="ShatterLine(String)" /> method to make a useful instance of <see cref="LineByLineTokeniser" />.</para>

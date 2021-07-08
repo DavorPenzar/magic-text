@@ -159,7 +159,7 @@ namespace MagicText
         /// <summary>Creates options.</summary>
         /// <param name="ignoreEmptyTokens">The indicator if empty tokens should be ignored.</param>
         /// <param name="ignoreLineEnds">The indicator if line ends should be ignored.</param>
-        /// <param name="ignoreEmptyLines">The inidcator if empty lines should be ignored.</param>
+        /// <param name="ignoreEmptyLines">The indicator if empty lines should be ignored.</param>
         /// <param name="lineEndToken">The token to represent a line end.</param>
         /// <param name="emptyLineToken">The token to represent an empty line.</param>
         public ShatteringOptions(Boolean ignoreEmptyTokens, Boolean ignoreLineEnds, Boolean ignoreEmptyLines, String? lineEndToken, String? emptyLineToken) : base()
@@ -211,7 +211,7 @@ namespace MagicText
         /// <summary>Deconstructs the current options.</summary>
         /// <param name="ignoreEmptyTokens">The indicator if empty tokens should be ignored.</param>
         /// <param name="ignoreLineEnds">The indicator if line ends should be ignored.</param>
-        /// <param name="ignoreEmptyLines">The inidcator if empty lines should be ignored.</param>
+        /// <param name="ignoreEmptyLines">The indicator if empty lines should be ignored.</param>
         /// <param name="lineEndToken">The token to represent a line end.</param>
         /// <param name="emptyLineToken">The token to represent an empty line.</param>
         public virtual void Deconstruct(out Boolean ignoreEmptyTokens, out Boolean ignoreLineEnds, out Boolean ignoreEmptyLines, out String? lineEndToken, out String? emptyLineToken)
