@@ -218,14 +218,6 @@ Another limitation of the functionality provided by the library is the fact that
 
 On the other hand, [`Pen`](Source/Pen.cs) class implements the [`System.Runtime.Serialization.ISerializable`](http://docs.microsoft.com/en-gb/dotnet/api/system.runtime.serialization.iserializable) interface and is implemented with the [`System.SerializableAttribute`](https://docs.microsoft.com/en-gb/dotnet/api/system.serializableattribute) attribute. In other words, it is serialisable and can be persisted through multiple instances of the application process. This may speed up the application startup as expensive [`Pen`](Source/Pen.cs) construction may be avoided.
 
-The second problem, on the other hand, might be an issue given that the complete context of tokens must be contained in the internal memory, but cannot be persisted through multiple application processes. A large text corpus would mean a long startup time of the application, which might be unacceptable.
-
-In the future, the following changes may and may not be expected, but are not guaranteed:
-
-1.  Moving the context from the internal memory to an external resource, or at least providing the possibility to move it, **is not expected**.
-2.  Allowing changing the context of an already initialised [`Pen`](Source/Pen.cs) *on the run* **is not expected**.
-3.  Enabling serialisation/deserialisation of instances of [`Pen`](Source/Pen.cs) class, to avoid expensive construction, **may be expected**, but without a fixed due date.
-
 ##  References
 
 The complete library is customly written by a single author&mdash;me&mdash;but the logic behind it is widely known and is used in many applications (at least I have come accross it a few times throughout my student days). As I consider the logic as general knowledge in the field, I did not use any extraneous sources of knowledge for implementing the library and therefore do not feel a moral or any other obligation to cite sources and references.
