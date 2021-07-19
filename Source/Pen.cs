@@ -3,7 +3,10 @@ using MagicText.Internal;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 using System.Threading;
 
 namespace MagicText
@@ -13,13 +16,18 @@ namespace MagicText
     ///     <para>If the <see cref="Pen" /> should choose from tokens from multiple sources, the tokens should be concatenated into a single enumerable <c>context</c> passed to the constructor. To prevent overflowing from one source to another (e. g. if the last token from the first source is not a contextual predecessor of the first token from the second source), an ending token (<see cref="SentinelToken" />) should be put between the sources' tokens in the final enumerable <c>tokens</c>. Choosing an ending token in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, Random, Nullable{Int32})" /> or <see cref="Render(Int32, Nullable{Int32})" /> method calls shall cause the rendering to stop—the same as when a <em>successor</em> of the last entry in tokens is chosen.</para>
     ///     <para>A complete deep copy of the enumerable <c>context</c> (passed to the constructor) is created and stored by the pen. Memory errors may occur if the number of tokens in the enumerable is too large. To reduce memory usage and even time consumption, <c>true</c> may be passed as the parameter <c>intern</c> to the constructor; however, other side effects of <see cref="String" /> interning via the <see cref="String.Intern(String)" /> method should be considered as well.</para>
     ///     <para>Changing any of the properties—public or protected—breaks the functionality of the <see cref="Pen" />. By doing so, the behaviour of the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods is unexpected and no longer guaranteed.</para>
+    ///     <para>To learn about serialisation and deserialisation of <see cref="Pen" />s, see <see cref="Pen(SerializationInfo, StreamingContext)" /> and <see cref="GetObjectData(SerializationInfo, StreamingContext)" />.</para>
     ///
     ///     <h3>Notes to Implementers</h3>
     ///     <para>To implement a custom <see cref="Pen" /> subclass with a custom text generation algorithm, only the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" /> method should be overridden. In fact, the other rendering methods (<see cref="Render(Int32, Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" />) may not be overriden, but they rely on the implementation of the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" /> method.</para>
     ///     <para>When implementing a subclass, consider using the protected <see cref="Index" /> property as well as the convenient protected static methods such as the <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />, <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" /> and <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" /> methods which are designed to optimise the corpus analysis of the <see cref="Context" />. Note, however, that the methods assume proper usage to enhance performance.</para>
     /// </remarks>
-    public class Pen : Object
+    [Serializable]
+    public class Pen : Object, ISerializable
     {
+        public const string InternSerialisationName = "Intern";
+        private const string TokensCountSerialisationName = "Count";
+        protected const string SerialisationInfoNullErrorMessage = "Serialisation info cannot be null.";
         protected const string ComparerNullErrorMessage = "String comparer cannot be null.";
         private const string TokensNullErrorMessage = "Token list cannot be null.";
         private const string IndexNullErrorMessage = "Index cannot be null.";
@@ -437,6 +445,97 @@ namespace MagicText
 
             // Check if all tokens are ending tokens.
             _allSentinels = Context.All((new BoundStringComparer(Comparer, SentinelToken)).Equals);
+        }
+
+        /// <summary>Creates a pen by retrieving the serialisation <c><paramref name="info" /></c>.</summary>
+        /// <param name="info">The <see cref="SerializationInfo" /> from which to read data.</param>
+        /// <param name="context">The source of this deserialisation.</param>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="info" /></c> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>The exceptions thrown by the <c><paramref name="info" /></c>'s methods (most notably the <see cref="SerializationException" /> and <see cref="InvalidCastException" />) are not caught.</para>
+        ///     <para>To intern tokens (via the <see cref="String.Intern(String)" /> method) when reading them from the <c><paramref name="info" /></c>, a <see cref="Boolean" /> value of <c>true</c> named by the value of <see cref="InternSerialisationName" /> must be set in the <c><paramref name="info" /></c>. If no such <see cref="Boolean" /> is present, <c>false</c> is assumed.</para>
+        ///     <para>Serialising and deserialising <see cref="StringComparer" />s other than the <see cref="StringComparer.InvariantCultureIgnoreCase" />, <see cref="StringComparer.InvariantCulture" />, <see cref="StringComparer.OrdinalIgnoreCase" /> and <see cref="StringComparer.Ordinal" /> may yield unexpected results. If a custom <see cref="StringComparer" /> is used, make sure it may be fully serialised/deserialised. This is important for proper serialisation/deserialisation of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction of the original <see cref="Pen" />).</para>
+        ///     <para>Because of performance reasons, no value is checked when deserialising data from the <c><paramref name="info" /></c>—it is assumed all values are <em>legal</em> and <em>valid</em>. Deserialising data retrieved by actually serialising a <see cref="Pen" /> shall result in a valid <see cref="Pen" /> equivalent to the original; any other deserialisation would probably fail or result in a <see cref="Pen" /> with unexpected behaviour.</para>
+        /// </remarks>
+        /// <seealso cref="GetObjectData(SerializationInfo, StreamingContext)" />
+        protected Pen(SerializationInfo info, StreamingContext context) : base()
+        {
+            if (info is null)
+            {
+                throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage);
+            }
+
+            CultureInfo culture = CultureInfo.InvariantCulture;
+
+            // Deserialise whether or not the tokens should be interned.
+            Boolean intern;
+            try
+            {
+                intern = info.GetBoolean(InternSerialisationName);
+            }
+            catch (SerializationException)
+            {
+                intern = false;
+            }
+
+            // Deserialise the total number of tokens in the `Context`.
+            Int32 n = info.GetInt32(TokensCountSerialisationName);
+
+            // Deserialise the `Comparer`.
+            {
+                StringComparer comparer;
+                try
+                {
+                    comparer = (StringComparer)info.GetValue(nameof(Comparer), typeof(StringComparer));
+                }
+                catch (Exception ex) when (ex is SerializationException || ex is InvalidCastException)
+                {
+                    StringComparison comparison = (StringComparison)info.GetInt32(nameof(Comparer));
+                    comparer = StringComparer.FromComparison(comparison);
+                }
+                _comparer = comparer;
+            }
+
+            // Deserialise the ending token.
+            {
+                String? sentinelToken = info.GetString(nameof(SentinelToken));
+                if (intern)
+                {
+                    sentinelToken = StringExtensions.InternNullable(sentinelToken);
+                }
+                _sentinelToken = sentinelToken;
+            }
+
+            // Deserialise the `Context`.
+            {
+                List<String?> contextList = new List<String?>(n);
+                for (Int32 i = 0; i < n; ++i)
+                {
+                    String? token = info.GetString(String.Concat(nameof(Context), i.ToString(culture)));
+                    if (intern)
+                    {
+                        token = StringExtensions.InternNullable(token);
+                    }
+                    contextList.Add(token);
+                }
+                contextList.TrimExcess();
+                _context = contextList.AsReadOnly();
+            }
+
+            // Deserialise the `Index`.
+            {
+                List<Int32> indexList = new List<Int32>(n);
+                for (Int32 i = 0; i < n; ++i)
+                {
+                    Int32 ind = info.GetInt32(String.Concat(nameof(Index), i.ToString(culture)));
+                    indexList.Add(ind);
+                }
+                indexList.TrimExcess();
+                _index = indexList.AsReadOnly();
+            }
+
+            // Deserialise whether or not all tokens are ending tokens.
+            _allSentinels = info.GetBoolean(nameof(AllSentinels));
         }
 
         /// <summary>Finds the positions of the <c><paramref name="sample" /></c> in the <see cref="Context" />.</summary>
@@ -893,5 +992,73 @@ namespace MagicText
         /// <seealso cref="Render(Int32, Random, Nullable{Int32})" />
         public IEnumerable<String?> Render(Int32 relevantTokens, Nullable<Int32> fromPosition = default) =>
             Render(relevantTokens, RandomNext, fromPosition); // not `Render(relevantTokens, Random, fromPosition)` to avoid accessing the thread-static (pseudo-)random number generator (`Pen.Random`) from multiple threads if the returned query (enumerable) is enumerated from multiple threads
+
+        /// <summary>Populates the serialisation <c><paramref name="info" /></c> with data needed to serialise the current pen.</summary>
+        /// <param name="info">The <see cref="SerializationInfo" /> to populate with data.</param>
+        /// <param name="context">The destination for this serialisation.</param>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="info" /></c> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>The exceptions thrown by the <c><paramref name="info" /></c>'s methods (most notably the <see cref="SerializationException" />) are not caught.</para>
+        ///     <para>To intern tokens (via the <see cref="String.Intern(String)" /> method) when reading them from the <c><paramref name="info" /></c>, a <see cref="Boolean" /> value of <c>true</c> named by the value of <see cref="InternSerialisationName" /> must be set in the <c><paramref name="info" /></c>. If no such <see cref="Boolean" /> is present, <c>false</c> is assumed.</para>
+        ///     <para>Serialising and deserialising <see cref="StringComparer" />s other than <see cref="StringComparer.InvariantCultureIgnoreCase" />, <see cref="StringComparer.InvariantCulture" />, <see cref="StringComparer.OrdinalIgnoreCase" /> and <see cref="StringComparer.Ordinal" /> may yield unexpected results. If a custom <see cref="StringComparer" /> is used, make sure it may be fully serialised/deserialised. This is important for proper serialisation/deserialisation of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction of the original <see cref="Pen" />).</para>
+        ///     <para>Because of performance reasons, no value is checked when deserialising data from the <c><paramref name="info" /></c>—it is assumed all values are <em>legal</em> and <em>valid</em>. Deserialising data retrieved by actually serialising a <see cref="Pen" /> shall result in a valid <see cref="Pen" /> equivalent to the original; any other deserialisation would probably fail or result in a <see cref="Pen" /> with unexpected behaviour.</para>
+        /// </remarks>
+        /// <seealso cref="Pen(SerializationInfo, StreamingContext)" />
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info is null)
+            {
+                throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage);
+            }
+
+            CultureInfo culture = CultureInfo.InvariantCulture;
+
+            // Serialise the total number of tokens in the `Context`.
+            info.AddValue(TokensCountSerialisationName, Context.Count);
+
+            // Serialise the `Comparer`.
+            {
+                Type comparerType = Comparer.GetType();
+                if (comparerType.Equals(StringComparer.InvariantCultureIgnoreCase.GetType()))
+                {
+                    info.AddValue(nameof(Comparer), Convert.ToInt32(StringComparison.InvariantCultureIgnoreCase));
+                }
+                else if (comparerType.Equals(StringComparer.InvariantCulture.GetType()))
+                {
+                    info.AddValue(nameof(Comparer), Convert.ToInt32(StringComparison.InvariantCulture));
+                }
+                else if (comparerType.Equals(StringComparer.OrdinalIgnoreCase.GetType()))
+                {
+                    info.AddValue(nameof(Comparer), Convert.ToInt32(StringComparison.OrdinalIgnoreCase));
+                }
+                else if (comparerType.Equals(StringComparer.Ordinal.GetType()))
+                {
+                    info.AddValue(nameof(Comparer), Convert.ToInt32(StringComparison.Ordinal));
+                }
+                else
+                {
+                    info.AddValue(nameof(Comparer), Comparer, Comparer.GetType() ?? typeof(StringComparer));
+                }
+            }
+
+            // Serialise the ending token.
+            info.AddValue(nameof(SentinelToken), SentinelToken);
+
+            // Serialise the `Context`.
+            for (Int32 i = 0; i < Context.Count; ++i)
+            {
+                info.AddValue(String.Concat(nameof(Context), i.ToString(culture)), Context[i], typeof(String));
+            }
+
+            // Serialise the `Index`.
+            for (Int32 i = 0; i < Index.Count; ++i)
+            {
+                info.AddValue(String.Concat(nameof(Index), i.ToString(culture)), Index[i]);
+            }
+
+            // Serialise whether or not all tokens are ending tokens.
+            info.AddValue(nameof(AllSentinels), AllSentinels);
+        }
     }
 }
