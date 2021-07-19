@@ -223,7 +223,7 @@ The first problem is somewhat justified by the fact that text corpora are relati
 
 In the future, the following changes may and may not be expected, but are not guaranteed:
 
-1.  Moving the context from the inernal memory to an external resource, or at least providing the possibility to move it, **is not expected**.
+1.  Moving the context from the internal memory to an external resource, or at least providing the possibility to move it, **is not expected**.
 2.  Allowing changing the context of an already initialised [`Pen`](Source/Pen.cs) *on the run* **is not expected**.
 3.  Enabling serialisation/deserialisation of instances of [`Pen`](Source/Pen.cs) class, to avoid expensive construction, **may be expected**, but without a fixed due date.
 
