@@ -78,6 +78,7 @@ namespace MagicText
         /// <exception cref="NullReferenceException">The method <see cref="ShatterLine(String)" /> call returns <c>null</c>.</exception>
         /// <remarks>
         ///     <para>The returned enumerable is merely a query for enumerating tokens (also known as <em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
+        ///     <para>The exceptions thrown by the <see cref="TextReader.ReadLine()" /> method call are not caught.</para>
         /// </remarks>
         /// <seealso cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
         /// <seealso cref="ShatteringOptions" />
@@ -165,6 +166,7 @@ namespace MagicText
         ///     <para>The enumeration and, consequently, the shattering operation may be cancelled via the <see cref="TaskAsyncEnumerableExtensions.WithCancellation{T}(IAsyncEnumerable{T}, CancellationToken)" /> extension method as the parameter <c><paramref name="cancellationToken" /></c> is set with the <see cref="EnumeratorCancellationAttribute" /> attribute.</para>
         ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> is desirable as it may optimise the asynchronous shattering process. However, in some cases only the original context might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus <c><paramref name="continueTasksOnCapturedContext" /></c> should be set to <c>true</c> to avoid errors.</para>
         ///     <para>The returned asynchronous enumerable is merely an asynchronous query for enumerating tokens (also known as <em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
+        ///     <para>The exceptions thrown by the <see cref="TextReader.ReadLineAsync()" /> method call are not caught.</para>
         /// </remarks>
         /// <seealso cref="Shatter(TextReader, ShatteringOptions?)" />
         /// <seealso cref="ShatteringOptions" />

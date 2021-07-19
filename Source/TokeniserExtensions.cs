@@ -63,7 +63,7 @@ namespace MagicText
         /// <seealso cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
         /// <seealso cref="ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
         /// <seealso cref="ShatteringOptions" />
-        public static IReadOnlyList<String?> ShatterToList(this ITokeniser tokeniser, TextReader input, ShatteringOptions? options = null)
+        public static IList<String?> ShatterToList(this ITokeniser tokeniser, TextReader input, ShatteringOptions? options = null)
         {
             if (tokeniser is null)
             {
@@ -73,7 +73,7 @@ namespace MagicText
             List<String?> tokens = new List<String?>(tokeniser.Shatter(input, options));
             tokens.TrimExcess();
 
-            return tokens.AsReadOnly();
+            return tokens;
         }
 
         /// <summary>Shatters <c><paramref name="text" /></c> into a token list.</summary>
@@ -93,7 +93,7 @@ namespace MagicText
         /// <seealso cref="ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" />
         /// <seealso cref="ShatterToListAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean)" />
         /// <seealso cref="ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
-        public static IReadOnlyList<String?> ShatterToList(this ITokeniser tokeniser, String text, ShatteringOptions? options = null)
+        public static IList<String?> ShatterToList(this ITokeniser tokeniser, String text, ShatteringOptions? options = null)
         {
             if (tokeniser is null)
             {
@@ -103,7 +103,7 @@ namespace MagicText
             List<String?> tokens = new List<String?>(tokeniser.Shatter(text, options));
             tokens.TrimExcess();
 
-            return tokens.AsReadOnly();
+            return tokens;
         }
 
         /// <summary>Shatters <c><paramref name="text" /></c> into tokens asynchronously.</summary>
@@ -141,7 +141,7 @@ namespace MagicText
             }
 
             using TextReader textReader = new StringReader(text);
-            await foreach (String? token in tokeniser.ShatterAsync(textReader, options, cancellationToken, continueTasksOnCapturedContext).ConfigureAwait(continueTasksOnCapturedContext))
+            await foreach (String? token in tokeniser.ShatterAsync(textReader, options, cancellationToken, continueTasksOnCapturedContext).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
             {
                 yield return token;
             }
@@ -166,7 +166,7 @@ namespace MagicText
         /// <seealso cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" />
         /// <seealso cref="ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" />
         /// <seealso cref="ShatteringOptions" />
-        public static async ValueTask<IReadOnlyList<String?>> ShatterToListAsync(this ITokeniser tokeniser, TextReader input, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
+        public static async ValueTask<IList<String?>> ShatterToListAsync(this ITokeniser tokeniser, TextReader input, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
         {
             if (tokeniser is null)
             {
@@ -174,13 +174,13 @@ namespace MagicText
             }
 
             List<String?> tokens = new List<String?>();
-            await foreach (String? token in tokeniser.ShatterAsync(input, options, cancellationToken, continueTasksOnCapturedContext).ConfigureAwait(continueTasksOnCapturedContext))
+            await foreach (String? token in tokeniser.ShatterAsync(input, options, cancellationToken, continueTasksOnCapturedContext).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
             {
                 tokens.Add(token);
             }
             tokens.TrimExcess();
 
-            return tokens.AsReadOnly();
+            return tokens;
         }
 
         /// <summary>Shatters <c><paramref name="text" /></c> into a token list asynchronously.</summary>
@@ -206,7 +206,7 @@ namespace MagicText
         /// <seealso cref="ShatterToList(ITokeniser, String, ShatteringOptions?)" />
         /// <seealso cref="ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" />
         /// <seealso cref="ShatteringOptions" />
-        public static async ValueTask<IReadOnlyList<String?>> ShatterToListAsync(this ITokeniser tokeniser, String text, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
+        public static async ValueTask<IList<String?>> ShatterToListAsync(this ITokeniser tokeniser, String text, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
         {
             if (tokeniser is null)
             {
@@ -214,13 +214,13 @@ namespace MagicText
             }
 
             List<String?> tokens = new List<String?>();
-            await foreach (String? token in tokeniser.ShatterAsync(text, options, cancellationToken, continueTasksOnCapturedContext).ConfigureAwait(continueTasksOnCapturedContext))
+            await foreach (String? token in tokeniser.ShatterAsync(text, options, cancellationToken, continueTasksOnCapturedContext).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
             {
                 tokens.Add(token);
             }
             tokens.TrimExcess();
 
-            return tokens.AsReadOnly();
+            return tokens;
         }
     }
 }
