@@ -262,7 +262,7 @@ Console.WriteLine("E = {0:N4}", entropy);
 
 ```
 
-Using the same initialisation of the `pen` as in the first example, the code would output the following [empirical probabilities (frequencies)](https://e.wikipedia.org/wiki/Empirical_probability) `P (...)`, [information contents](http://en.wikipedia.org/wiki/Information_content) `I (...)` and [`entropy`](http://en.wikipedia.org/wiki/Entropy_(information_theory)) (only the top and the bottom 3 tokens are displayed):
+Using the same initialisation of the `pen` as in the first example, the code would output the following [empirical probabilities (frequencies)](https://e.wikipedia.org/wiki/Empirical_probability) `P (...)`, [information contents](http://en.wikipedia.org/wiki/Information_content) `I (...)` and [entropy](http://en.wikipedia.org/wiki/Entropy_(information_theory)) `E` (only the top and the bottom 3 tokens are displayed):
 
 ```
 P ("\u0027 ") = 0,68 %
@@ -330,11 +330,11 @@ Console.WriteLine("P (Israel | God of ...) = {0:P2}", p3 / p2);
 
 ```
 
-The program above computes the following probabilities:
+The program above computes the following [probabilities](https://e.wikipedia.org/wiki/Empirical_probability):
 
-1.  probability/frequency of the token `"Israel"` &ndash; `p1`,
-2.  probability/frequency of the token [quadrigram](http://en.wikipedia.org/wiki/N-gram) `{ "God", " ", "of", " " }` &ndash; `p2`,
-3.  probability/frequency of the token [quinquegram](http://en.wikipedia.org/wiki/N-gram) `{ "God", " ", "of", " ", "Israel" }` &ndash; `p3`.
+1.  of the token `"Israel"` &ndash; `p1`,
+2.  of the token [quadrigram](http://en.wikipedia.org/wiki/N-gram) `{ "God", " ", "of", " " }` &ndash; `p2`,
+3.  of the token [quinquegram](http://en.wikipedia.org/wiki/N-gram) `{ "God", " ", "of", " ", "Israel" }` &ndash; `p3`.
 
 It will take some time to finish, but in the end it should output the following values:
 
@@ -344,7 +344,7 @@ P (Israel | God of ...) = 40,85 %
 
 ```
 
-The above probabilities mean that the token `"Israel"` appears with only 0,15 % of chance, but, following the tokens `{ "God", " ", "of", " " }`, the probability of the next token being `"Israel"` rises up to 40,85 %&mdash;more than 270 times! Although, it is worth mentioning that token comparison is actually case-insensitive and that some tokens are not really part of the [*Bible*](http://en.wikipedia.org/wiki/Bible), such as the preamble:
+The above [probabilities](https://e.wikipedia.org/wiki/Empirical_probability) mean that the token `"Israel"` appears with only 0,15 % of chance, but, following the tokens `{ "God", " ", "of", " " }`, the [probabilities](https://e.wikipedia.org/wiki/Empirical_probability) of the next token being `"Israel"` rises up to 40,85 %&mdash;more than 270 times! Although, it is worth mentioning that token comparison is actually case-insensitive and that some tokens are not really part of the [*Bible*](http://en.wikipedia.org/wiki/Bible), such as the preamble:
 
 ```
 The Project Gutenberg eBook of The King James Bible
@@ -370,7 +370,7 @@ Character set encoding: UTF-8
 
 ```
 
-Also, note that the [information theory](http://en.wikipedia.org/wiki/Information_theory) analysis examples displayed above considered equally both words and word delimiters as tokens. However, when analysing words only, delimiters would have to be disregarded (e. g. when calculating the probability/frequency of a word). The simplest solution would be to use a [`RegexTokeniser`](Source/RegexTokeniser.cs), which does not yield delimiters as tokens, but some word [bigrams](http://en.wikipedia.org/wiki/Bigram) and other [*n*-grams](http://en.wikipedia.org/wiki/N-gram) could then be misidentified. For instance, by shattering the sentence *Although I am hungry, people don't seem to care.*, the words `"hungry"` and `"people"` would appear as neighbouring therefore generating the [bigram](http://en.wikipedia.org/wiki/Bigram) `{ "hungry", "people" }`, inspite of them clearly being parts of different clauses.
+Also, note that the [information theory](http://en.wikipedia.org/wiki/Information_theory) analysis examples displayed above considered equally both words and word delimiters as tokens. However, when analysing words only, delimiters would have to be disregarded (e. g. when calculating the [empirical probability](https://e.wikipedia.org/wiki/Empirical_probability) of a word). The simplest solution would be to use a [`RegexTokeniser`](Source/RegexTokeniser.cs), which does not yield delimiters as tokens, but some word [bigrams](http://en.wikipedia.org/wiki/Bigram) and other [*n*-grams](http://en.wikipedia.org/wiki/N-gram) could then be misidentified. For instance, by shattering the sentence *Although I am hungry, people don't seem to care.*, the words `"hungry"` and `"people"` would appear as neighbouring therefore generating the [bigram](http://en.wikipedia.org/wiki/Bigram) `{ "hungry", "people" }`, inspite of them clearly being parts of different clauses.
 
 ##  Remarks
 
