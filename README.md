@@ -210,7 +210,7 @@ Note that [`LineByLineTokeniser`](Source/LineByLineTokeniser.cs)&mdash;the base 
 
 All tokenisers provided by the library tokenise text using [*deferred execution*](http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-example) (therefore similar examples could have been written using a [`CharTokeniser`](Source/CharTokeniser.cs) or a [`RandomTokeniser`](Source/RandomTokeniser.cs)). In fact, this is the recommended behaviour of all classes implementing the [`ITokeniser`](Source/ITokeniser.cs) interface. Such implementation enables simultaneous tokenising and reading operations, which may come in useful when reading from sources such as the console or a network channel. On the other hand, [`TokeniserExtensions`](Source/TokeniserExtensions.cs) class provides extension methods for tokenising into lists (fully built containers instead of the [*deferred execution*](http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-example)), which is useful when reading from strings and read-only text files. If the latter was the default, simultaneous reading and tokenising would be impossible because the input would have to be read and tokenised until the end before accessing any of the tokens.
 
-####    Simple Information Theory Analysis
+####    Simple [Information Theory](http://en.wikipedia.org/wiki/Information_theory) Analysis
 
 The [`Pen`](Source/Pen.cs) class may be used to perform some analysis of the context tokens in a probably more efficient way than simply iterating over its `Context` property and counting values, without creating an auxiliary index (such as the `Index` property). For instance, one could execute a code such as the following:
 
@@ -262,7 +262,7 @@ Console.WriteLine("E = {0:N4}", entropy);
 
 ```
 
-Using the same initialisation of the `pen` as in the first example, the code would output the following lines (only the top and the bottom 3 tokens are displayed):
+Using the same initialisation of the `pen` as in the first example, the code would output the following [empirical probabilities (frequencies)](https://e.wikipedia.org/wiki/Empirical_probability) `P (...)`, [information contents](http://en.wikipedia.org/wiki/Information_content) `I (...)` and [`entropy`](http://en.wikipedia.org/wiki/Entropy_(information_theory)) (only the top and the bottom 3 tokens are displayed):
 
 ```
 P ("\u0027 ") = 0,68 %
@@ -333,8 +333,8 @@ Console.WriteLine("P (Israel | God of ...) = {0:P2}", p3 / p2);
 The program above computes the following probabilities:
 
 1.  probability/frequency of the token `"Israel"` &ndash; `p1`,
-2.  probability/frequency of the token tetragram `{ "God", " ", "of", " " }` &ndash; `p2`,
-3.  probability/frequency of the token pentagram `{ "God", " ", "of", " ", "Israel" }` &ndash; `p3`.
+2.  probability/frequency of the token [quadrigram](http://en.wikipedia.org/wiki/N-gram) `{ "God", " ", "of", " " }` &ndash; `p2`,
+3.  probability/frequency of the token [quinquegram](http://en.wikipedia.org/wiki/N-gram) `{ "God", " ", "of", " ", "Israel" }` &ndash; `p3`.
 
 It will take some time to finish, but in the end it should output the following values:
 
@@ -344,7 +344,7 @@ P (Israel | God of ...) = 40,85 %
 
 ```
 
-The above probabilities mean that the token `"Israel"` appears with only 0,15 % of chance, but, following the tokens `{ "God", " ", "of", " " }`, the probability of the next token being `"Israel"` rises to 40,85 %&mdash;more than 270 times! Although, it is worth mentioning that token comparison is actually case-insensitive and that some tokens are not really part of the bible, such as the preamble:
+The above probabilities mean that the token `"Israel"` appears with only 0,15 % of chance, but, following the tokens `{ "God", " ", "of", " " }`, the probability of the next token being `"Israel"` rises up to 40,85 %&mdash;more than 270 times! Although, it is worth mentioning that token comparison is actually case-insensitive and that some tokens are not really part of the [*Bible*](http://en.wikipedia.org/wiki/Bible), such as the preamble:
 
 ```
 The Project Gutenberg eBook of The King James Bible
@@ -370,7 +370,7 @@ Character set encoding: UTF-8
 
 ```
 
-Also, note that the information theory analysis examples displayed above considered equally both words and word delimiters as tokens. However, when analysing words only, delimiters would have to be disregarded (e. g. when calculating the probability/frequency of a word). The simplest solution would be to use a [`RegexTokeniser`](Source/RegexTokeniser.cs), which does not yield delimiters as tokens, but some word digrams and other *n*-grams could then be misidentified. For instance, by shattering the sentence *Although I am hungry, people don't seem to care.*, the words `"hungry"` and `"people"` would appear as neighbouring therefore generating the digram `{ "hungry", "people" }`, inspite of them clearly being parts of different clauses.
+Also, note that the [information theory](http://en.wikipedia.org/wiki/Information_theory) analysis examples displayed above considered equally both words and word delimiters as tokens. However, when analysing words only, delimiters would have to be disregarded (e. g. when calculating the probability/frequency of a word). The simplest solution would be to use a [`RegexTokeniser`](Source/RegexTokeniser.cs), which does not yield delimiters as tokens, but some word [bigrams](http://en.wikipedia.org/wiki/Bigram) and other [*n*-grams](http://en.wikipedia.org/wiki/N-gram) could then be misidentified. For instance, by shattering the sentence *Although I am hungry, people don't seem to care.*, the words `"hungry"` and `"people"` would appear as neighbouring therefore generating the [bigram](http://en.wikipedia.org/wiki/Bigram) `{ "hungry", "people" }`, inspite of them clearly being parts of different clauses.
 
 ##  Remarks
 
