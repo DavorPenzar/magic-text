@@ -3,7 +3,6 @@ using MagicText.Internal;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
@@ -23,11 +22,10 @@ namespace MagicText
     ///     <para>When implementing a subclass, consider using the protected <see cref="Index" /> property as well as the convenient protected static methods such as the <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />, <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" /> and <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" /> methods which are designed to optimise the corpus analysis of the <see cref="Context" />. Note, however, that the methods assume proper usage to enhance performance.</para>
     /// </remarks>
     [Serializable]
-    public class Pen : Object, ISerializable
+    public class Pen : Object, ICloneable, ISerializable
     {
-        public const string InternSerialisationName = "Intern";
-        private const string TokensCountSerialisationName = "Count";
         protected const string SerialisationInfoNullErrorMessage = "Serialisation info cannot be null.";
+        private const string OtherNullErrorMessage = "Pen to copy cannot be null.";
         protected const string ComparerNullErrorMessage = "String comparer cannot be null.";
         private const string TokensNullErrorMessage = "Token list cannot be null.";
         private const string IndexNullErrorMessage = "Index cannot be null.";
@@ -362,27 +360,39 @@ namespace MagicText
         protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, String? token, out Int32 count) =>
             FindPositionIndexAndCount(comparer, tokens, index, Enumerable.Repeat(token, 1), out count);
 
+        private readonly Boolean _interned;
         private readonly StringComparer _comparer;
         private readonly IReadOnlyList<String?> _context;
         private readonly IReadOnlyList<Int32> _index;
         private readonly String? _sentinelToken;
         private readonly Boolean _allSentinels;
 
+        /// <summary>Gets the policy of interning all non-<c>null</c> tokens from the <see cref="Context" />, as well as the ending token (<see cref="SentinelToken" />): <c>true</c> if interning, <c>false</c> otherwise.</summary>
+        /// <returns>If all tokens in the <see cref="Context" />, as well as the ending token (<see cref="SentinelToken" />), are interned, <c>true</c>; <c>false</c> otherwise.</returns>
+        /// <remarks>
+        ///     <para>Tokens are interned using the <see cref="String.Intern(String)" /> method.</para>
+        ///     <para>If the <see cref="Context" /> is empty and the ending token (<see cref="SentinelToken" />) is <c>null</c>, the value of the <see cref="Interned" /> may still be both <c>true</c> and <c>false</c>. It actually depends on the value of the <c>intern</c> parameter in the <see cref="Pen(IEnumerable{String?}, String?, StringComparer?, Boolean)" /> or the <see cref="Pen(Pen, Boolean)" /> constructor.</para>
+        /// </remarks>
+        /// <seealso cref="Context" />
+        /// <seealso cref="SentinelToken" />
+        /// <seealso cref="Pen(IEnumerable{String?}, String?, StringComparer?, Boolean)" />
+        public Boolean Interned => _interned;
+
         /// <summary>Gets the <see cref="StringComparer" /> used by the pen for comparing tokens.</summary>
         /// <returns>The internal <see cref="StringComparer" />.</returns>
-        protected StringComparer Comparer => _comparer;
+        protected internal StringComparer Comparer => _comparer;
 
         /// <summary>Gets the index of entries in the <see cref="Context" /> sorted ascendingly (their sorting positions): if <c>i &lt; j</c>, then <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Index" />[i]], <see cref="Context" />[<see cref="Index" />[j]]) &lt;= 0</c>.</summary>
         /// <returns>The sorting positions of tokens in <see cref="Context" />.</returns>
         /// <remarks>
         ///     <para>The order is actually determined by the complete sequence of tokens, and not just by single tokens. For instance, if <c>i != j</c>, but <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Index" />[i]], <see cref="Context" />[<see cref="Index" />[j]]) == 0</c> (<c><see cref="Comparer" />.Equals(<see cref="Context" />[<see cref="Index" />[i]], <see cref="Context" />[<see cref="Index" />[j]])</c>), then the result of <c><see cref="Comparer" />.Compare(<see cref="Context" />[<see cref="Index" />[i] + 1], <see cref="Context" />[<see cref="Index" />[j] + 1])</c> is used; if it also evaluates to 0, <c><see cref="Index" />[i] + 2</c> and <c><see cref="Index" />[j] + 2</c> are checked, and so on. The first position to reach the end (when <c>max(<see cref="Index" />[i] + n, <see cref="Index" />[j] + n) == <see cref="Context" />.Count</c> for a non-negative integer <c>n</c>), if all previous positions compared equal, is considered less. Hence the <see cref="Index" /> defines a total (linear) lexicographic ordering of the <see cref="Context" /> in respect of the <see cref="Comparer" />, which may be useful in search algorithms, such as the binary search, for finding the position of any non-empty finite sequence of tokens.</para>
-        ///     <para>The position(s) of ending tokens' (<see cref="SentinelToken" />) indices, if there are any in <see cref="Context" />, are not fixed nor guaranteed (for instance, they are not necessarily at the beginning or the end of <see cref="Index" />). If the ending token is <c>null</c> or an empty <see cref="String" /> (<see cref="String.Empty" />), then ending tokens shall be compared less than any other tokens and their indices shall be <em>pushed</em> to the beginning, provided there are no <c>null</c>s in <see cref="Context" /> in the latter case. But, generally speaking, ending tokens' indices are determined by <see cref="Comparer" /> and the values of other tokens in <see cref="Context" />.</para>
+        ///     <para>The position(s) of ending tokens' (<see cref="SentinelToken" />) indices, if there are any in the <see cref="Context" />, are not fixed nor guaranteed (for instance, they are not necessarily at the beginning or the end of <see cref="Index" />). If the ending token is <c>null</c> or an empty <see cref="String" /> (<see cref="String.Empty" />), then ending tokens shall be compared less than any other tokens and their indices shall be <em>pushed</em> to the beginning, provided there are no <c>null</c>s in <see cref="Context" /> in the latter case. But, generally speaking, ending tokens' indices are determined by <see cref="Comparer" /> and the values of other tokens in <see cref="Context" />.</para>
         /// </remarks>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
-        protected IReadOnlyList<Int32> Index => _index;
+        protected internal IReadOnlyList<Int32> Index => _index;
 
         /// <summary>Gets the reference token context used by the pen.</summary>
         /// <returns>The reference context.</returns>
@@ -424,13 +434,14 @@ namespace MagicText
                 throw new ArgumentNullException(nameof(context), ContextNullErrorMessage);
             }
 
-            // Copy the comparer and the ending token.
+            // Copy the interning policy, the comparer and the ending token.
+            _interned = intern;
             _comparer = comparer ?? StringComparer.Ordinal;
-            _sentinelToken = intern ? StringExtensions.InternNullable(sentinelToken) : sentinelToken;
+            _sentinelToken = Interned ? StringExtensions.InternNullable(sentinelToken) : sentinelToken;
 
             // Copy the context.
             {
-                List<String?> contextList = new List<String?>(intern ? context.Select(StringExtensions.InternNullable) : context);
+                List<String?> contextList = new List<String?>(Interned ? context.Select(StringExtensions.InternNullable) : context);
                 contextList.TrimExcess();
                 _context = contextList.AsReadOnly();
             }
@@ -447,13 +458,68 @@ namespace MagicText
             _allSentinels = Context.All((new BoundStringComparer(Comparer, SentinelToken)).Equals);
         }
 
+        /// <summary>Copies the <c><paramref name="other" /></c> pen.</summary>
+        /// <param name="other">The <see cref="Pen" /> to copy.</param>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="other" /></c> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>The new <see cref="Pen" /> shall be a shallow copy of the <c><paramref name="other" /></c>.</para>
+        /// </remarks>
+        /// <seealso cref="Pen(Pen, Boolean)" />
+        public Pen(Pen other) : this(other, other is null ? throw new ArgumentNullException(nameof(other), OtherNullErrorMessage) : other.Interned)
+        {
+        }
+
+        /// <summary>Copies the <c><paramref name="other" /></c> pen with a custom interning policy.</summary>
+        /// <param name="other">The <see cref="Pen" /> to copy.</param>
+        /// <param name="intern">If <c>true</c>, non-<c>null</c> tokens from the <c><paramref name="other" /></c>'s <see cref="Context" /> shall be interned (via the <see cref="String.Intern(String)" /> method) when being copied.</param>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="other" /></c> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>If <c><paramref name="intern" /></c> is <c>false</c> or the same as the <c><paramref name="other" /></c>'s <see cref="Interned" />, the new <see cref="Pen" /> shall be a shallow copy of the <c><paramref name="other" /></c>. Otherwise the copy will be partly shallow (for those fields that are not affected by the interning policy) and partly deep (for those fields that require token copying and interning).</para>
+        /// </remarks>
+        /// <seealso cref="Pen(Pen)" />
+        public Pen(Pen other, Boolean intern) : base()
+        {
+            if (other is null)
+            {
+                throw new ArgumentNullException(nameof(other), OtherNullErrorMessage);
+            }
+
+            // Copy the interning policy and the comparer.
+            _interned = intern;
+            _comparer = other.Comparer;
+
+            // Copy the ending token and the `Context`.
+            if (Interned && !other.Interned)
+            {
+                _sentinelToken = StringExtensions.InternNullable(other.SentinelToken);
+
+                {
+                    List<String?> contextList = new List<String?>(other.Context.Select(StringExtensions.InternNullable));
+                    contextList.TrimExcess();
+                    _context = contextList.AsReadOnly();
+                }
+            }
+            else
+            {
+                _sentinelToken = other.SentinelToken;
+
+                _context = other.Context;
+            }
+
+            // Copy the `Index`.
+            _index = other.Index;
+
+            // Copy whether or not all tokens are ending tokens.
+            _allSentinels = other.AllSentinels;
+        }
+
         /// <summary>Creates a pen by retrieving the serialisation <c><paramref name="info" /></c>.</summary>
         /// <param name="info">The <see cref="SerializationInfo" /> from which to read data.</param>
         /// <param name="context">The source of this deserialisation.</param>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="info" /></c> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>The exceptions thrown by the <c><paramref name="info" /></c>'s methods (most notably the <see cref="SerializationException" /> and <see cref="InvalidCastException" />) are not caught.</para>
-        ///     <para>To intern tokens (via the <see cref="String.Intern(String)" /> method) when reading them from the <c><paramref name="info" /></c>, a <see cref="Boolean" /> value of <c>true</c> named by the value of <see cref="InternSerialisationName" /> must be set in the <c><paramref name="info" /></c>. If no such <see cref="Boolean" /> is present, <c>false</c> is assumed.</para>
+        ///     <para>If the original <see cref="Pen" /> 's tokens were all interned (<see cref="Interned" />), the deserialised <see cref="Pen" />'s tokens are also going to be interned; and vice versa. To avoid this, use the <see cref="Pen(Pen, Boolean)" /> constructor before the serialisation to create a new <see cref="Pen" /> with different interning policy.</para>
         ///     <para>Serialising and deserialising <see cref="StringComparer" />s other than the <see cref="StringComparer.InvariantCultureIgnoreCase" />, <see cref="StringComparer.InvariantCulture" />, <see cref="StringComparer.OrdinalIgnoreCase" /> and <see cref="StringComparer.Ordinal" /> may yield unexpected results. If a custom <see cref="StringComparer" /> is used, make sure it may be fully serialised/deserialised. This is important for proper serialisation/deserialisation of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction of the original <see cref="Pen" />).</para>
         ///     <para>Because of performance reasons, no value is checked when deserialising data from the <c><paramref name="info" /></c>—it is assumed all values are <em>legal</em> and <em>valid</em>. Deserialising data retrieved by actually serialising a <see cref="Pen" /> shall result in a valid <see cref="Pen" /> equivalent to the original; any other deserialisation would probably fail or result in a <see cref="Pen" /> with unexpected behaviour.</para>
         /// </remarks>
@@ -465,21 +531,8 @@ namespace MagicText
                 throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage);
             }
 
-            CultureInfo culture = CultureInfo.InvariantCulture;
-
-            // Deserialise whether or not the tokens should be interned.
-            Boolean intern;
-            try
-            {
-                intern = info.GetBoolean(InternSerialisationName);
-            }
-            catch (SerializationException)
-            {
-                intern = false;
-            }
-
-            // Deserialise the total number of tokens in the `Context`.
-            Int32 n = info.GetInt32(TokensCountSerialisationName);
+            // Deserialise the interning policy.
+            _interned = info.GetBoolean(nameof(Interned));
 
             // Deserialise the `Comparer`.
             {
@@ -499,7 +552,7 @@ namespace MagicText
             // Deserialise the ending token.
             {
                 String? sentinelToken = info.GetString(nameof(SentinelToken));
-                if (intern)
+                if (Interned)
                 {
                     sentinelToken = StringExtensions.InternNullable(sentinelToken);
                 }
@@ -508,28 +561,16 @@ namespace MagicText
 
             // Deserialise the `Context`.
             {
-                List<String?> contextList = new List<String?>(n);
-                for (Int32 i = 0; i < n; ++i)
-                {
-                    String? token = info.GetString(String.Concat(nameof(Context), i.ToString(culture)));
-                    if (intern)
-                    {
-                        token = StringExtensions.InternNullable(token);
-                    }
-                    contextList.Add(token);
-                }
+                String?[] contextArray = (String?[])info.GetValue(nameof(Context), typeof(String?[]));
+                List<String?> contextList = new List<String?>(contextArray);
                 contextList.TrimExcess();
                 _context = contextList.AsReadOnly();
             }
 
             // Deserialise the `Index`.
             {
-                List<Int32> indexList = new List<Int32>(n);
-                for (Int32 i = 0; i < n; ++i)
-                {
-                    Int32 ind = info.GetInt32(String.Concat(nameof(Index), i.ToString(culture)));
-                    indexList.Add(ind);
-                }
+                Int32[] indexArray = (Int32[])info.GetValue(nameof(Index), typeof(Int32[]));
+                List<Int32> indexList = new List<Int32>(indexArray);
                 indexList.TrimExcess();
                 _index = indexList.AsReadOnly();
             }
@@ -538,13 +579,33 @@ namespace MagicText
             _allSentinels = info.GetBoolean(nameof(AllSentinels));
         }
 
+        /// <summary>Creates a pen from externally initialised values.</summary>
+        /// <param name="interned">The interning policy.</param>
+        /// <param name="comparer">The <see cref="StringComparer" />.</param>
+        /// <param name="sentinelToken">The ending token.</param>
+        /// <param name="context">The token context.</param>
+        /// <param name="index">The sorting index of the <c><paramref name="context" /></c> in respect of the <c><paramref name="comparer" /></c>.</param>
+        /// <param name="allSentinels">The indicator of all tokens in the <c><paramref name="context" /></c> being the ending token (<c><paramref name="sentinelToken" /></c>).</param>
+        /// <remarks>
+        ///     <para>This constructor is intended for <strong>internal use only</strong> (hence the access modifier <em><c>internal</c></em>). It is used for serialisation and deserialisation of instances of class <see cref="Pen" />.</para>
+        /// </remarks>
+        internal Pen(Boolean interned, StringComparer comparer, String? sentinelToken, IReadOnlyList<String?> context, IReadOnlyList<Int32> index, Boolean allSentinels) : base()
+        {
+            _interned = interned;
+            _comparer = comparer;
+            _sentinelToken = sentinelToken;
+            _context = context;
+            _index = index;
+            _allSentinels = allSentinels;
+        }
+
         /// <summary>Finds the positions of the <c><paramref name="sample" /></c> in the <see cref="Context" />.</summary>
         /// <param name="sample">The sample enumerable of tokens to find.</param>
         /// <returns>The collection of positions in the <see cref="Context" /> at which all of the occurrences of the <c><paramref name="sample" /></c> begin.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="sample" /></c> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>For each position <c>p</c> in the returned collection, the collection <c>{ <see cref="Context" />[p], <see cref="Context" />[p + 1], ..., <see cref="Context" />[p + n] }</c>, where <c>n</c> is the length of the <c><paramref name="sample" /></c>, corresponds to the <c><paramref name="sample" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). All such positions are contained in the returned collection (no position is disregarded). Therefore, if the returned collection is empty, the <c><paramref name="sample" /></c> does not occur in the <see cref="Context" />.</para>
-        ///     <para>The returned collection of positions is sorted ascendingly when enumerated.</para>
+        ///     <para>When enumerated, the returned collection of positions is unordered (no particular order of positions is guaranteed).</para>
         ///     <para>The method always returns a newly constructed collection of positions, even if the <c><paramref name="sample" /></c> is the same between two calls. Moreover, changes made to the returned collection affect neither the state of the <see cref="Pen" /> nor any other collection of positions returned by the method, past or future.</para>
         /// </remarks>
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
@@ -563,13 +624,12 @@ namespace MagicText
             Int32 p = FindPositionIndexAndCount(Comparer, Context, Index, sample, out Int32 n);
             Int32 P = p + n;
 
-            // List<Int32> positions = new List<Int32>(Index.Skip(p).Take(n));
-            List<Int32> positions = new List<Int32>(n);
+            // HashSet<Int32> positions = new HashSet<Int32>(Index.Skip(p).Take(n));
+            HashSet<Int32> positions = new HashSet<Int32>(n);
             for (Int32 i = p; i < P; ++i)
             {
                 positions.Add(Index[i]);
             }
-            positions.Sort();
             positions.TrimExcess();
 
             return positions;
@@ -581,7 +641,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="token" /></c> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>For each position <c>p</c> in the returned collection, <c><see cref="Context" />[p]</c> corresponds to the <c><paramref name="token" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). All such positions are contained in the returned collection (no position is disregarded). Therefore, if the returned collection is empty, the <c><paramref name="token" /></c> does not occur in the <see cref="Context" />.</para>
-        ///     <para>The returned collection of positions is sorted ascendingly when enumerated.</para>
+        ///     <para>When enumerated, the returned collection of positions is unordered (no particular order of positions is guaranteed).</para>
         ///     <para>The method always returns a newly constructed collection of positions, even if the <c><paramref name="token" /></c> is the same between two calls. Moreover, changes made to the returned collection affect neither the state of the <see cref="Pen" /> nor any other collection of positions returned by the method, past or future.</para>
         /// </remarks>
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
@@ -604,7 +664,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="sample" /></c> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>For each position <c>p</c> in the returned collection, the collection <c>{ <see cref="Context" />[p], <see cref="Context" />[p + 1], ..., <see cref="Context" />[p + n] }</c>, where <c>n</c> is the length of the <c><paramref name="sample" /></c>, corresponds to the <c><paramref name="sample" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). All such positions are contained in the returned collection (no position is disregarded). Therefore, if the returned collection is empty, the <c><paramref name="sample" /></c> does not occur in the <see cref="Context" />.</para>
-        ///     <para>The returned collection of positions is sorted ascendingly when enumerated.</para>
+        ///     <para>When enumerated, the returned collection of positions is unordered (no particular order of positions is guaranteed).</para>
         ///     <para>The method always returns a newly constructed collection of positions, even if the <c><paramref name="sample" /></c> is the same between two calls. Moreover, changes made to the returned collection affect neither the state of the <see cref="Pen" /> nor any other collection of positions returned by the method, past or future.</para>
         /// </remarks>
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
@@ -643,12 +703,8 @@ namespace MagicText
         /// <seealso cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />
         /// <seealso cref="Render(Int32, System.Random, Nullable{Int32})" />
         /// <seealso cref="Render(Int32, Nullable{Int32})" />
-        public Int32 FirstPositionOf(IEnumerable<String?> sample)
-        {
-            List<Int32> positions = (List<Int32>)PositionsOf(sample);
-
-            return positions.Any() ? positions[0] : Context.Count; // positions.DefaultIfEmpty(Context.Count).First()
-        }
+        public Int32 FirstPositionOf(IEnumerable<String?> sample) =>
+            PositionsOf(sample).DefaultIfEmpty(Context.Count).Min();
 
         /// <summary>Finds the first position of the <c><paramref name="token" /></c> in the <see cref="Context" />.</summary>
         /// <param name="token">The token to find.</param>
@@ -658,9 +714,9 @@ namespace MagicText
         ///     <para>If the <c><paramref name="token" /></c> is found in the <see cref="Context" />, <c><see cref="Context" />[p]</c>, where <c>p</c> is the returned position, corresponds to the first occurrence of the <c><paramref name="token" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). An occurrence is considered <em>first</em> if the value of the position <c>p</c> is minimal.</para>
         ///     <para>Unlike the <see cref="String.IndexOf(Char)" />, <see cref="Array.IndexOf{T}(T[], T)" />, <see cref="List{T}.IndexOf(T)" /> etc. methods, the method <strong>does not</strong> return -1 if the <c><paramref name="token" /></c> is not found, but instead returns the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). This way the value returned by the method may be used as the parameter <c>fromPosition</c> in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, System.Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods to achieve a somewhat expected result (no tokens shall be rendered) without causing any exceptions.</para>
         /// </remarks>
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
         /// <seealso cref="FirstPositionOf(String?[])" />
         /// <seealso cref="FirstPositionOf(String?)" />
         /// <seealso cref="LastPositionOf(IEnumerable{String?})" />
@@ -722,12 +778,8 @@ namespace MagicText
         /// <seealso cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />
         /// <seealso cref="Render(Int32, System.Random, Nullable{Int32})" />
         /// <seealso cref="Render(Int32, Nullable{Int32})" />
-        public Int32 LastPositionOf(IEnumerable<String?> sample)
-        {
-            List<Int32> positions = (List<Int32>)PositionsOf(sample);
-
-            return positions.Any() ? positions[^1] : Context.Count; // positions.DefaultIfEmpty(Context.Count).Last()
-        }
+        public Int32 LastPositionOf(IEnumerable<String?> sample) =>
+            PositionsOf(sample).DefaultIfEmpty(Context.Count).Max();
 
         /// <summary>Finds the last position of the <c><paramref name="token" /></c> in the <see cref="Context" />.</summary>
         /// <param name="token">The token to find.</param>
@@ -737,9 +789,9 @@ namespace MagicText
         ///     <para>If the <c><paramref name="token" /></c> is found in the <see cref="Context" />, <c><see cref="Context" />[p]</c>, where <c>p</c> is the returned position, corresponds to the last occurrence of the <c><paramref name="token" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). An occurrence is considered <em>last</em> if the value of the position <c>p</c> is maximal.</para>
         ///     <para>Unlike the <see cref="String.LastIndexOf(Char)" />, <see cref="Array.LastIndexOf{T}(T[], T)" />, <see cref="List{T}.LastIndexOf(T)" /> etc. methods, the method <strong>does not</strong> return -1 if the <c><paramref name="token" /></c> is not found, but instead returns the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). This way the value returned by the method may be used as the parameter <c>fromPosition</c> in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, System.Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods to achieve a somewhat expected result (no tokens shall be rendered) without causing any exceptions.</para>
         /// </remarks>
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
         /// <seealso cref="LastPositionOf(String?[])" />
         /// <seealso cref="LastPositionOf(String?)" />
         /// <seealso cref="FirstPositionOf(IEnumerable{String?})" />
@@ -778,6 +830,63 @@ namespace MagicText
         /// <seealso cref="Render(Int32, Nullable{Int32})" />
         public Int32 LastPositionOf(params String?[] sample) =>
             LastPositionOf((IEnumerable<String?>)sample);
+
+        /// <summary>Finds the total number of occurrences of the <c><paramref name="sample" /></c> in the <see cref="Context" />.</summary>
+        /// <param name="sample">The sample enumerable of tokens to find.</param>
+        /// <returns>The total number of occurrences of the <c><paramref name="sample" /></c> in the <see cref="Context" />.</returns>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="sample" /></c> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>Calling this method is slightly faster and more memory efficient than counting the number of elements in the collection returned by the <see cref="PositionsOf(IEnumerable{String?})" /> method (even if using the <see cref="ICollection{T}.Count" /> property) because no actual collection needs to be created. However, the values are ultimately the same—for instance, prefer the <see cref="PositionsOf(IEnumerable{String?})" /> method if both the positions and their quantity is needed.</para>
+        /// </remarks>
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
+        /// <seealso cref="Count(String?[])" />
+        /// <seealso cref="Count(String?)" />
+        /// <seealso cref="PositionsOf(IEnumerable{String?})" />
+        /// <seealso cref="PositionsOf(String?[])" />
+        /// <seealso cref="PositionsOf(String?)" />
+        public Int32 Count(IEnumerable<String?> sample)
+        {
+            Int32 _ = FindPositionIndexAndCount(Comparer, Context, Index, sample, out Int32 n);
+
+            return n;
+        }
+
+        /// <summary>Finds the total number of occurrences of the <c><paramref name="token" /></c> in the <see cref="Context" />.</summary>
+        /// <param name="token">The token to find.</param>
+        /// <returns>The total number of occurrences of the <c><paramref name="token" /></c> in the <see cref="Context" />.</returns>
+        /// <remarks>
+        ///     <para>Calling this method is slightly faster and more memory efficient than counting the number of elements in the collection returned by the <see cref="PositionsOf(String?)" /> method (even if using the <see cref="ICollection{T}.Count" /> property) because no actual collection needs to be created. However, the values are ultimately the same—for instance, prefer the <see cref="PositionsOf(String?)" /> method if both the positions and their quantity is needed.</para>
+        /// </remarks>
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="Count(IEnumerable{String?})" />
+        /// <seealso cref="Count(String?[])" />
+        /// <seealso cref="PositionsOf(String?)" />
+        /// <seealso cref="PositionsOf(IEnumerable{String?})" />
+        /// <seealso cref="PositionsOf(String?[])" />
+        public Int32 Count(String? token) =>
+            Count(Enumerable.Repeat(token, 1));
+
+        /// <summary>Finds the total number of occurrences of the <c><paramref name="sample" /></c> in the <see cref="Context" />.</summary>
+        /// <param name="sample">The sample enumerable of tokens to find.</param>
+        /// <returns>The total number of occurrences of the <c><paramref name="sample" /></c> in the <see cref="Context" />.</returns>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="sample" /></c> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>Calling this method is slightly faster and more memory efficient than counting the number of elements in the collection returned by the <see cref="PositionsOf(String?[])" /> method (even if using the <see cref="ICollection{T}.Count" /> property) because no actual collection needs to be created. However, the values are ultimately the same—for instance, prefer the <see cref="PositionsOf(String?[])" /> method if both the positions and their quantity is needed.</para>
+        /// </remarks>
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
+        /// <seealso cref="Count(IEnumerable{String?})" />
+        /// <seealso cref="Count(String?)" />
+        /// <seealso cref="PositionsOf(String?[])" />
+        /// <seealso cref="PositionsOf(IEnumerable{String?})" />
+        /// <seealso cref="PositionsOf(String?)" />
+        public Int32 Count(params String?[] sample) =>
+            Count((IEnumerable<String?>)sample);
 
         /// <summary>Renders (generates) a block of text from the <see cref="Context" />.</summary>
         /// <param name="relevantTokens">The number of (most recent) relevant tokens. The value must be greater than or equal to 0.</param>
@@ -999,7 +1108,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="info" /></c> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>The exceptions thrown by the <c><paramref name="info" /></c>'s methods (most notably the <see cref="SerializationException" />) are not caught.</para>
-        ///     <para>To intern tokens (via the <see cref="String.Intern(String)" /> method) when reading them from the <c><paramref name="info" /></c>, a <see cref="Boolean" /> value of <c>true</c> named by the value of <see cref="InternSerialisationName" /> must be set in the <c><paramref name="info" /></c>. If no such <see cref="Boolean" /> is present, <c>false</c> is assumed.</para>
+        ///     <para>If the current <see cref="Pen" /> 's tokens are all interned (<see cref="Interned" />), the deserialised <see cref="Pen" />'s tokens are also going to be interned; and vice versa. To avoid this, use the <see cref="Pen(Pen, Boolean)" /> constructor before the serialisation to create a new <see cref="Pen" /> with different interning policy.</para>
         ///     <para>Serialising and deserialising <see cref="StringComparer" />s other than <see cref="StringComparer.InvariantCultureIgnoreCase" />, <see cref="StringComparer.InvariantCulture" />, <see cref="StringComparer.OrdinalIgnoreCase" /> and <see cref="StringComparer.Ordinal" /> may yield unexpected results. If a custom <see cref="StringComparer" /> is used, make sure it may be fully serialised/deserialised. This is important for proper serialisation/deserialisation of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction of the original <see cref="Pen" />).</para>
         ///     <para>Because of performance reasons, no value is checked when deserialising data from the <c><paramref name="info" /></c>—it is assumed all values are <em>legal</em> and <em>valid</em>. Deserialising data retrieved by actually serialising a <see cref="Pen" /> shall result in a valid <see cref="Pen" /> equivalent to the original; any other deserialisation would probably fail or result in a <see cref="Pen" /> with unexpected behaviour.</para>
         /// </remarks>
@@ -1012,10 +1121,8 @@ namespace MagicText
                 throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage);
             }
 
-            CultureInfo culture = CultureInfo.InvariantCulture;
-
-            // Serialise the total number of tokens in the `Context`.
-            info.AddValue(TokensCountSerialisationName, Context.Count);
+            // Serialise the interning policy.
+            info.AddValue(nameof(Interned), Interned);
 
             // Serialise the `Comparer`.
             {
@@ -1046,19 +1153,33 @@ namespace MagicText
             info.AddValue(nameof(SentinelToken), SentinelToken);
 
             // Serialise the `Context`.
-            for (Int32 i = 0; i < Context.Count; ++i)
             {
-                info.AddValue(String.Concat(nameof(Context), i.ToString(culture)), Context[i], typeof(String));
+                String?[] contextArray = new String?[Context.Count];
+                for (Int32 i = 0; i < Context.Count; ++i)
+                {
+                    contextArray[i] = Context[i];
+                }
+                info.AddValue(nameof(Context), contextArray, typeof(String?[]));
             }
 
             // Serialise the `Index`.
-            for (Int32 i = 0; i < Index.Count; ++i)
             {
-                info.AddValue(String.Concat(nameof(Index), i.ToString(culture)), Index[i]);
+                Int32[] indexArray = new Int32[Index.Count];
+                for (Int32 i = 0; i < Index.Count; ++i)
+                {
+                    indexArray[i] = Index[i];
+                }
+                info.AddValue(nameof(Index), indexArray, typeof(Int32[]));
             }
 
             // Serialise whether or not all tokens are ending tokens.
             info.AddValue(nameof(AllSentinels), AllSentinels);
         }
+
+        /// <summary>Creates a new <see cref="Object" /> that is a copy of the current pen.</summary>
+        /// <returns>The new <see cref="Pen" /> with the same values.</returns>
+        /// <seealso cref="Pen(Pen)" />
+        public virtual Object Clone() =>
+            new Pen(this);
     }
 }

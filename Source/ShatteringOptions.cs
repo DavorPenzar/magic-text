@@ -379,6 +379,7 @@ namespace MagicText
 
         /// <summary>Creates a new <see cref="Object" /> that is a copy of the current options.</summary>
         /// <returns>The new <see cref="ShatteringOptions" /> with the same values.</returns>
+        /// <seealso cref="ShatteringOptions(ShatteringOptions)" />
         public virtual Object Clone() =>
             new ShatteringOptions(this);
     }
