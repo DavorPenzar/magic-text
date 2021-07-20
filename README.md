@@ -210,11 +210,173 @@ Note that [`LineByLineTokeniser`](Source/LineByLineTokeniser.cs)&mdash;the base 
 
 All tokenisers provided by the library tokenise text using [*deferred execution*](http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-example) (therefore similar examples could have been written using a [`CharTokeniser`](Source/CharTokeniser.cs) or a [`RandomTokeniser`](Source/RandomTokeniser.cs)). In fact, this is the recommended behaviour of all classes implementing the [`ITokeniser`](Source/ITokeniser.cs) interface. Such implementation enables simultaneous tokenising and reading operations, which may come in useful when reading from sources such as the console or a network channel. On the other hand, [`TokeniserExtensions`](Source/TokeniserExtensions.cs) class provides extension methods for tokenising into lists (fully built containers instead of the [*deferred execution*](http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-example)), which is useful when reading from strings and read-only text files. If the latter was the default, simultaneous reading and tokenising would be impossible because the input would have to be read and tokenised until the end before accessing any of the tokens.
 
+####    Simple Information Theory Analysis
+
+The [`Pen`](Source/Pen.cs) class may be used to perform some analysis of the context tokens in a probably more efficient way than simply iterating over its `Context` property and counting values, without creating an auxiliary index (such as the `Index` property). For instance, one could execute a code such as the following:
+
+```csharp
+using MagicText; // <-- namespace of the library
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+
+// ...
+
+Pen pen;
+
+// initialise the `pen`...
+
+ICollection<String?> tokens = new HashSet<String?>(pen.Context);
+
+IDictionary<String, Double> probability = new Dictionary<String, Double>();
+IDictionary<String, Double> informationContent = new Dictionary<String, Double>();
+Double entropy;
+
+foreach (String? token in tokens)
+{
+	String? tokenRep = JsonSerializer.Serialize(token);
+
+	Double prob = Convert.ToDouble(pen.Count(token)) / pen.Context.Count;
+	Double inf = -Math.Log2(prob);
+
+	probability.Add(tokenRep, prob);
+	informationContent.Add(tokenRep, inf);
+}
+
+entropy = probability.Select(e => e.Value * informationContent[e.Key]).Sum();
+
+foreach (KeyValuePair<String, Double> entry in probability.OrderBy(e => e.Value).ThenBy(e => e.Key))
+{
+	Console.WriteLine("P ({0}) = {1:P2}", entry.Key, entry.Value);
+}
+Console.WriteLine();
+
+foreach (KeyValuePair<String, Double> entry in informationContent.OrderByDescending(e => e.Value).ThenBy(e => e.Key))
+{
+	Console.WriteLine("I ({0}) = {1:N4}", entry.Key, entry.Value);
+}
+Console.WriteLine();
+
+Console.WriteLine("E = {0:N4}", entropy);
+
+```
+
+Using the same initialisation of the `pen` as in the first example, the code would output the following lines (only the top and the bottom 3 tokens are displayed):
+
+```
+P ("\u0027 ") = 0,68 %
+P ("again") = 0,68 %
+P ("already") = 0,68 %
+...
+P ("you") = 4,08 %
+P ("\r\n") = 5,44 %
+P (" ") = 38,10 %
+
+I ("\u0027 ") = 7,1997
+I ("again") = 7,1997
+I ("already") = 7,1997
+...
+I ("you") = 4,6147
+I ("\r\n") = 4,1997
+I (" ") = 1,3923
+
+E = 4,2892
+
+```
+
+A little more interesting would be an analysis of a longer text, such as the [*Bible*](http://en.wikipedia.org/wiki/Bible). For instance, download the text [**here**](http://gutenberg.org/ebooks/10) ([*Project Gutenberg*](http://gutenberg.org/)) and rename it to `Bible.txt`, then run the code as below:
+
+```csharp
+using MagicText; // <-- namespace of the library
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+// ...
+
+// Initialisation of the `pen`:
+
+IEnumerable<String?> tokens;
+Pen pen;
+
+using (Stream fileStream = File.OpenRead("Bible.txt"))
+using (TextReader fileReader = new StreamReader(fileStream))
+{
+	ITokeniser tokeniser = new RegexTokeniser();
+	tokens = tokeniser.ShatterToList(
+		fileReader,
+		new ShatteringOptions()
+		{
+			IgnoreEmptyTokens = true,
+			IgnoreLineEnds = false,
+			IgnoreEmptyLines = true,
+			LineEndToken = " "
+		}
+	);
+}
+
+pen = new Pen(context: tokens, comparer: StringComparer.InvariantCultureIgnoreCase);
+
+// Information Theory Analysis:
+
+Double p1 = Convert.ToDouble(pen.Count("Israel")) / pen.Context.Count;
+Double p2 = Convert.ToDouble(pen.Count("God", " ", "of", " ")) / (pen.Context.Count - 3);
+Double p3 = Convert.ToDouble(pen.Count("God", " ", "of", " ", "Israel")) / (pen.Context.Count - 4);
+
+Console.WriteLine("P (Israel) = {0:P2}", p1);
+Console.WriteLine("P (Israel | God of ...) = {0:P2}", p3 / p2);
+
+```
+
+The program above computes the following probabilities:
+
+1.  probability/frequency of the token `"Israel"` &ndash; `p1`,
+2.  probability/frequency of the token tetragram `{ "God", " ", "of", " " }` &ndash; `p2`,
+3.  probability/frequency of the token pentagram `{ "God", " ", "of", " ", "Israel" }` &ndash; `p3`.
+
+It will take some time to finish, but in the end it should output the following values:
+
+```
+P (Israel) = 0,15 %
+P (Israel | God of ...) = 40,85 %
+
+```
+
+The above probabilities mean that the token `"Israel"` appears with only 0,15 % of chance, but, following the tokens `{ "God", " ", "of", " " }`, the probability of the next token being `"Israel"` rises to 40,85 %&mdash;more than 270 times! Although, it is worth mentioning that token comparison is actually case-insensitive and that some tokens are not really part of the bible, such as the preamble:
+
+```
+The Project Gutenberg eBook of The King James Bible
+
+This eBook is for the use of anyone anywhere in the United States and
+most other parts of the world at no cost and with almost no restrictions
+whatsoever. You may copy it, give it away or re-use it under the terms
+of the Project Gutenberg License included with this eBook or online at
+www.gutenberg.org. If you are not located in the United States, you
+will have to check the laws of the country where you are located before
+using this eBook.
+
+Title: The King James Bible
+
+Release Date: August, 1989 [eBook #10]
+[Most recently updated: ...]
+
+Language: English
+
+Character set encoding: UTF-8
+
+*** START OF THE PROJECT GUTENBERG EBOOK THE KING JAMES BIBLE ***
+
+```
+
+Also, note that the information theory analysis examples displayed above considered equally both words and word delimiters as tokens. However, when analysing words only, delimiters would have to be disregarded (e. g. when calculating the probability/frequency of a word). The simplest solution would be to use a [`RegexTokeniser`](Source/RegexTokeniser.cs), which does not yield delimiters as tokens, but some word digrams and other *n*-grams could then be misidentified. For instance, by shattering the sentence *Although I am hungry, people don't seem to care.*, the words `"hungry"` and `"people"` would appear as neighbouring therefore generating the digram `{ "hungry", "people" }`, inspite of them clearly being parts of different clauses.
+
 ##  Remarks
 
 This library should not be used when working with large corpora of context tokens. Objects of class [`Pen`](Source/Pen.cs) store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks the possibility to work with a large number of tokens that would not fit in the internal memory all at once. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storing tokens externally.
 
-Another limitation of the functionality provided by the library is the fact that objects of class [`Pen`](Source/Pen.cs) are immutable.  Consequently, once a [`Pen`](Source/Pen.cs) is initialised, its context cannot be updated. Each update applied to the corpus of context tokens requires initialising a new instance of [`Pen`](Source/Pen.cs) class, which in turn executes a relatively expensive process of sorting the context. The larger the context, the more expensive the process. The problem is somewhat justified by the fact that text corpora are relatively rarely updated compared to the frequency of other, read-only operations conducted on them. The complete functionality of [`Pen`](Source/Pen.cs) class is in fact read-only in terms of the resources used, which is compatible with the intended use implied by the name of the class.
+Another limitation of the functionality provided by the library is the fact that objects of class [`Pen`](Source/Pen.cs) are immutable. Consequently, once a [`Pen`](Source/Pen.cs) is initialised, its context cannot be updated. Each update applied to the corpus of context tokens requires initialising a new instance of [`Pen`](Source/Pen.cs) class, which in turn executes a relatively expensive process of sorting the context. The larger the context, the more expensive the process. The problem is somewhat justified by the fact that text corpora are relatively rarely updated compared to the frequency of other, read-only operations conducted on them. The complete functionality of [`Pen`](Source/Pen.cs) class is in fact read-only in terms of the resources used, which is compatible with the intended use implied by the name of the class.
 
 On the other hand, [`Pen`](Source/Pen.cs) class implements the [`System.Runtime.Serialization.ISerializable`](http://docs.microsoft.com/en-gb/dotnet/api/system.runtime.serialization.iserializable) interface and is implemented with the [`System.SerializableAttribute`](https://docs.microsoft.com/en-gb/dotnet/api/system.serializableattribute) attribute. In other words, it is serialisable and can be persisted through multiple instances of the application process. This may speed up the application startup as expensive [`Pen`](Source/Pen.cs) construction may be avoided.
 
