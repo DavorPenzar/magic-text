@@ -10,6 +10,8 @@ using System.Threading;
 
 namespace MagicText
 {
+    // TODO: Enable JSON and XML serialisation/deserialisation via the standard interface.
+
     /// <summary>Provides methods for (pseudo-)random text generation.</summary>
     /// <remarks>
     ///     <para>If the <see cref="Pen" /> should choose from tokens from multiple sources, the tokens should be concatenated into a single enumerable <c>context</c> passed to the constructor. To prevent overflowing from one source to another (e. g. if the last token from the first source is not a contextual predecessor of the first token from the second source), an ending token (<see cref="SentinelToken" />) should be put between the sources' tokens in the final enumerable <c>tokens</c>. Choosing an ending token in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, Random, Nullable{Int32})" /> or <see cref="Render(Int32, Nullable{Int32})" /> method calls shall cause the rendering to stop—the same as when a <em>successor</em> of the last entry in tokens is chosen.</para>
@@ -539,12 +541,12 @@ namespace MagicText
                 StringComparer comparer;
                 try
                 {
-                    comparer = (StringComparer)info.GetValue(nameof(Comparer), typeof(StringComparer));
+                    StringComparison comparison = (StringComparison)info.GetInt32(nameof(Comparer));
+                    comparer = StringComparer.FromComparison(comparison);
                 }
                 catch (Exception ex) when (ex is SerializationException || ex is InvalidCastException)
                 {
-                    StringComparison comparison = (StringComparison)info.GetInt32(nameof(Comparer));
-                    comparer = StringComparer.FromComparison(comparison);
+                    comparer = (StringComparer)info.GetValue(nameof(Comparer), typeof(StringComparer));
                 }
                 _comparer = comparer;
             }
@@ -552,17 +554,13 @@ namespace MagicText
             // Deserialise the ending token.
             {
                 String? sentinelToken = info.GetString(nameof(SentinelToken));
-                if (Interned)
-                {
-                    sentinelToken = StringExtensions.InternNullable(sentinelToken);
-                }
-                _sentinelToken = sentinelToken;
+                _sentinelToken = Interned ? StringExtensions.InternNullable(sentinelToken) : sentinelToken;
             }
 
             // Deserialise the `Context`.
             {
                 String?[] contextArray = (String?[])info.GetValue(nameof(Context), typeof(String?[]));
-                List<String?> contextList = new List<String?>(contextArray);
+                List<String?> contextList = new List<String?>(Interned ? contextArray.Select(StringExtensions.InternNullable) : contextArray);
                 contextList.TrimExcess();
                 _context = contextList.AsReadOnly();
             }
