@@ -31,15 +31,15 @@ The ([*nondeterministic*](http://en.wikipedia.org/wiki/Nondeterministic_programm
 3.  Do:
     1.  Randomly choose a token from the context.
     2.  Repeat:
-        1.  Find all occurances of the `n` most recent tokens chosen (if `n` tokens have not yet been chosen, substitute it by the number of tokens chosen) as subcollections in the context.
-        2.  Randomly choose one of the occurances.
-        3.  For the next token, choose the token immediately following the tokens from the chosen occurance. If no token follows the occurance (if the occurance is at the very end of the context), stop the algorithm.
+        1.  Find all occurrences of the `n` most recent tokens chosen (if `n` tokens have not yet been chosen, substitute it by the number of tokens chosen) as subcollections in the context.
+        2.  Randomly choose one of the occurrences.
+        3.  For the next token, choose the token immediately following the tokens from the chosen occurrence. If no token follows the occurrence (if the occurrence is at the very end of the context), stop the algorithm.
 4.  Output: collection of chosen tokens (in the order as chosen).
 
 For example, if the context is acquired by slicing the string *aaaabaaac* at each character, the context is the collection `{'a', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'c'}`. Suppose `n = 3`. A possible line of steps is given bellow:
 
 1.  The letter *a* is chosen.
-2.  All occurances of *a* are the following:
+2.  All occurrences of *a* are the following:
     1.  ***a**aaabaaac*
     2.  *a**a**aabaaac*
     3.  *aa**a**abaaac*
@@ -47,35 +47,35 @@ For example, if the context is acquired by slicing the string *aaaabaaac* at eac
     5.  *aaaab**a**aac*
     6.  *aaaaba**a**ac*
     7.  *aaaabaa**a**c*
-3.  Occurance 2 is chosen. Therefore the next token chosen is (also) the letter *a*. Note that the same would happen if any occurance except occurances 4 and 7 were chosen.
-4.  The string *aa* (still shorter than `n == 3` characters) must now be found. All occurances of the string are the following:
+3.  occurrence 2 is chosen. Therefore the next token chosen is (also) the letter *a*. Note that the same would happen if any occurrence except occurrences 4 and 7 were chosen.
+4.  The string *aa* (still shorter than `n == 3` characters) must now be found. All occurrences of the string are the following:
     1.  ***aa**aabaaac*
     2.  *a**aa**abaaac*
     3.  *aa**aa**baaac*
     4.  *aaaab**aa**ac*
     5.  *aaaaba**aa**c*
-5.  Occurance 3 is chosen meaning the next token is the letter *b*. This makes the following steps uniquely determined.
-6.  The string *aab* (exactly `n == 3` characters) must now be found. All occurances of the string are the following:
+5.  occurrence 3 is chosen meaning the next token is the letter *b*. This makes the following steps uniquely determined.
+6.  The string *aab* (exactly `n == 3` characters) must now be found. All occurrences of the string are the following:
     1.  *aa**aab**aaac*
 7.  The next token chosen is the letter *a*.
-8.  The string *aba* (the first letter *a* is discarded because otherwise more than the most recent `n == 3` characters would be considered) must now be found. All occurances of the string are the following:
+8.  The string *aba* (the first letter *a* is discarded because otherwise more than the most recent `n == 3` characters would be considered) must now be found. All occurrences of the string are the following:
     1.  *aaa**aba**aac*
 9.  The next token chosen is the letter *a*.
-10. The string *baa* must now be found. All occurances of the string are the following:
+10. The string *baa* must now be found. All occurrences of the string are the following:
     1.  *aaaa**baa**ac*
 11. The next token chosen is the letter *a*.
-12. The string *aaa* must now be found. All occurances of the string are the following:
+12. The string *aaa* must now be found. All occurrences of the string are the following:
     1.  ***aaa**abaaac*
     2.  *a**aaa**baaac*
     3.  *aaaab**aaa**c*
-13. Unique determination of steps breaks here. If the letter *a* is chosen, the next state is the same as the state in the previous step (12). If the letter *b* is chosen, the next state is the same as in the step 6. If the letter *c* is chosen, the algorithm is uniquely determined until the end. For the sake of brevity, let us say the letter *c* is chosen, i. e. occurance 3.
-14. The string *aac* must now be found. All occurances of the string are the following:
+13. Unique determination of steps breaks here. If the letter *a* is chosen, the next state is the same as the state in the previous step (12). If the letter *b* is chosen, the next state is the same as in the step 6. If the letter *c* is chosen, the algorithm is uniquely determined until the end. For the sake of brevity, let us say the letter *c* is chosen, i. e. occurrence 3.
+14. The string *aac* must now be found. All occurrences of the string are the following:
     1.  *aaaaba**aac***
-15. No token follows the chosen (actually, the only one possible) occurance. The algorithm stops here.
+15. No token follows the chosen (actually, the only one possible) occurrence. The algorithm stops here.
 
 The steps explained above produce *aabaaac* as the output. Although this is indeed shorter than the input text and also a substring of it, that is not necessarily the case.
 
-A subsequence of 0 tokens is assumed to precede every token. In other words, if `n == 0` (if there are no most recent relevant tokens), all tokens are chosen in the same way as the first one: by choosing randomly from the complete context. Moreover, a subsequence of 0 tokens is also assumed to precede the *end of the context*, in the sense that the occurance of the range of 0 tokens following the last token may also be chosen, in which case the algorithm terminates. This can be identified with [null-terminated strings](http://en.wikipedia.org/wiki/Null-terminated_string), such as in [*C* programming language](http://www.iso.org/standard/74528.html), where the null character at the end of the string is a single independent (not *glued together* with its predecessor) token.
+A subsequence of 0 tokens is assumed to precede every token. In other words, if `n == 0` (if there are no most recent relevant tokens), all tokens are chosen in the same way as the first one: by choosing randomly from the complete context. Moreover, a subsequence of 0 tokens is also assumed to precede the *end of the context*, in the sense that the occurrence of the range of 0 tokens following the last token may also be chosen, in which case the algorithm terminates. This can be identified with [null-terminated strings](http://en.wikipedia.org/wiki/Null-terminated_string), such as in [*C* programming language](http://www.iso.org/standard/74528.html), where the null character at the end of the string is a single independent (not *glued together* with its predecessor) token.
 
 ##  Code Example
 
@@ -374,7 +374,7 @@ Also, note that the [information theory](http://en.wikipedia.org/wiki/Informatio
 
 ##  Remarks
 
-This library should not be used when working with large corpora of context tokens. Objects of the [`Pen`](Source/Pen.cs) class store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks the possibility to work with a large number of tokens that would not fit in the internal memory all at once. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storing tokens externally.
+This library should not be used when working with large corpora of context. Objects of the [`Pen`](Source/Pen.cs) class store complete context using an in-memory container, rather than reading tokens from external memory or a network resource. The implemented approach is much simpler and faster, but lacks the possibility to work with a large number of tokens that would not fit in the internal memory all at once. However, logic used in the library may be generalised to implement a more sophisticated programs able to handle storing tokens externally.
 
 Another limitation of the functionality provided by the library is the fact that objects of the [`Pen`](Source/Pen.cs) class are immutable. Consequently, once a [`Pen`](Source/Pen.cs) is initialised, its context cannot be updated. Each update applied to the corpus of the tokens (context) requires initialising a new [`Pen`](Source/Pen.cs), which in turn executes a relatively expensive process of sorting the context. The larger the context, the more expensive the process. The problem is somewhat justified by the fact that text corpora are relatively rarely updated compared to the frequency of other, read-only operations conducted on them. The complete functionality of the [`Pen`](Source/Pen.cs) class is in fact read-only in terms of the resources used, which is compatible with the intended use implied by the name of the class.
 
