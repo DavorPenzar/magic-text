@@ -262,7 +262,7 @@ Console.WriteLine("E = {0:N4}", entropy);
 
 ```
 
-Using the same initialisation of the `pen` as in the first example, the code would output the following [empirical probabilities (frequencies)](https://e.wikipedia.org/wiki/Empirical_probability) `P (...)`, [information contents](http://en.wikipedia.org/wiki/Information_content) `I (...)` and [entropy](http://en.wikipedia.org/wiki/Entropy_(information_theory)) `E` (only the top and the bottom 3 tokens are displayed):
+Using the same initialisation of the `pen` as in the first example, the code would output the following [empirical probabilities (frequencies)](http://en.wikipedia.org/wiki/Empirical_probability) `P (...)`, [information contents](http://en.wikipedia.org/wiki/Information_content) `I (...)` and [entropy](http://en.wikipedia.org/wiki/Entropy_(information_theory)) `E` (only the top and the bottom 3 tokens are displayed):
 
 ```
 P ("\u0027 ") = 0,68 %
@@ -330,7 +330,7 @@ Console.WriteLine("P (Israel | God of ...) = {0:P2}", p3 / p2);
 
 ```
 
-The program above computes the following [probabilities](https://e.wikipedia.org/wiki/Empirical_probability):
+The program above computes the following [probabilities](http://en.wikipedia.org/wiki/Empirical_probability):
 
 1.  of the token `"Israel"` &ndash; `p1`,
 2.  of the token [quadrigram](http://en.wikipedia.org/wiki/N-gram) `{ "God", " ", "of", " " }` &ndash; `p2`,
@@ -344,7 +344,7 @@ P (Israel | God of ...) = 40,85 %
 
 ```
 
-The above [probabilities](https://e.wikipedia.org/wiki/Empirical_probability) mean that the token `"Israel"` appears with only 0,15 % of chance, but, following the tokens `{ "God", " ", "of", " " }`, the [probabilities](https://e.wikipedia.org/wiki/Empirical_probability) of the next token being `"Israel"` rises up to 40,85 %&mdash;more than 270 times! Although, it is worth mentioning that token comparison is actually case-insensitive and that some tokens are not really part of the [*Bible*](http://en.wikipedia.org/wiki/Bible), such as the preamble:
+The above [probabilities](http://en.wikipedia.org/wiki/Empirical_probability) mean that the token `"Israel"` appears with only 0,15 % of chance, but, following the tokens `{ "God", " ", "of", " " }`, the [probabilities](http://en.wikipedia.org/wiki/Empirical_probability) of the next token being `"Israel"` rises up to 40,85 %&mdash;more than 270 times! Although, it is worth mentioning that token comparison is actually case-insensitive and that some tokens are not really part of the [*Bible*](http://en.wikipedia.org/wiki/Bible), such as the preamble:
 
 ```
 The Project Gutenberg eBook of The King James Bible
@@ -370,7 +370,7 @@ Character set encoding: UTF-8
 
 ```
 
-Also, note that the [information theory](http://en.wikipedia.org/wiki/Information_theory) analysis examples displayed above considered equally both words and word delimiters as tokens. However, when analysing words only, delimiters would have to be disregarded (e. g. when calculating the [empirical probability](https://e.wikipedia.org/wiki/Empirical_probability) of a word). The simplest solution would be to use a [`RegexTokeniser`](Source/RegexTokeniser.cs), which does not yield delimiters as tokens, but some word [bigrams](http://en.wikipedia.org/wiki/Bigram) and other [*n*-grams](http://en.wikipedia.org/wiki/N-gram) could then be misidentified. For instance, by shattering the sentence *Although I am hungry, people don't seem to care.*, the words `"hungry"` and `"people"` would appear as neighbouring therefore generating the [bigram](http://en.wikipedia.org/wiki/Bigram) `{ "hungry", "people" }`, inspite of them clearly being parts of different clauses.
+Also, note that the [information theory](http://en.wikipedia.org/wiki/Information_theory) analysis examples displayed above considered equally both words and word delimiters as tokens. However, when analysing words only, delimiters would have to be disregarded (e. g. when calculating the [empirical probability](http://en.wikipedia.org/wiki/Empirical_probability) of a word). The simplest solution would be to use a [`RegexTokeniser`](Source/RegexTokeniser.cs), which does not yield delimiters as tokens, but some word [bigrams](http://en.wikipedia.org/wiki/Bigram) and other [*n*-grams](http://en.wikipedia.org/wiki/N-gram) could then be misidentified. For instance, by shattering the sentence *Although I am hungry, people don't seem to care.*, the words `"hungry"` and `"people"` would appear as neighbouring therefore generating the [bigram](http://en.wikipedia.org/wiki/Bigram) `{ "hungry", "people" }`, inspite of them clearly being parts of different clauses.
 
 ##  Remarks
 
@@ -378,7 +378,7 @@ This library should not be used when working with large corpora of context token
 
 Another limitation of the functionality provided by the library is the fact that objects of class [`Pen`](Source/Pen.cs) are immutable. Consequently, once a [`Pen`](Source/Pen.cs) is initialised, its context cannot be updated. Each update applied to the corpus of context tokens requires initialising a new instance of [`Pen`](Source/Pen.cs) class, which in turn executes a relatively expensive process of sorting the context. The larger the context, the more expensive the process. The problem is somewhat justified by the fact that text corpora are relatively rarely updated compared to the frequency of other, read-only operations conducted on them. The complete functionality of [`Pen`](Source/Pen.cs) class is in fact read-only in terms of the resources used, which is compatible with the intended use implied by the name of the class.
 
-On the other hand, [`Pen`](Source/Pen.cs) class implements the [`System.Runtime.Serialization.ISerializable`](http://docs.microsoft.com/en-gb/dotnet/api/system.runtime.serialization.iserializable) interface and is implemented with the [`System.SerializableAttribute`](https://docs.microsoft.com/en-gb/dotnet/api/system.serializableattribute) attribute. In other words, it is serialisable and can be persisted through multiple instances of the application process. This may speed up the application startup as expensive [`Pen`](Source/Pen.cs) construction may be avoided.
+On the other hand, [`Pen`](Source/Pen.cs) class implements the [`System.Runtime.Serialization.ISerializable`](http://docs.microsoft.com/en-gb/dotnet/api/system.runtime.serialization.iserializable) interface and is implemented with the [`System.SerializableAttribute`](http://docs.microsoft.com/en-gb/dotnet/api/system.serializableattribute) attribute. In other words, it is serialisable and can be persisted through multiple instances of the application process. This may speed up the application startup as expensive [`Pen`](Source/Pen.cs) construction may be avoided.
 
 ##  References
 
