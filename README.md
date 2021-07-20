@@ -20,11 +20,11 @@ Once extracted, the collection of tokens (in the order as read from the input) i
 
 ### Possible Use Cases
 
-In the author's opinion, the library does not seem to provide any actually useful functionality for applications built using [*.NET*](http://dotnet.microsoft.com/). However, it may be used in self-educational purposes (for understanding some algorithm principles such as text tokenisation, sorting, searching etc.&mdash;although private fields, inline documentation and comments are, addmitingly, not very *neat* hear and there, and, as a result, a powerful user-friendly [IDE](http://en.wikipedia.org/wiki/Integrated_development_environment) (such as [*Visual Studio*](http://visualstudio.microsoft.com/)) would help greatly in navigating the source code), for various unit testing (to generate [mock objects](http://en.wikipedia.org/wiki/Mock_object)) or maybe even for the implementation of some parts of [*chatbots*](http://en.wikipedia.org/wiki/Chatbot). The main idea, though, behind writing this library was (the author's) self-training in programming [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) + [*.NET*](http://dotnet.microsoft.com/) applications through implementing an application for generating random blocks of text *for fun*.
+In the author's opinion, the library does not seem to provide any actually useful functionality for applications built using [*.NET*](http://dotnet.microsoft.com/). However, it may be used in self-educational purposes (for understanding some [algorithm](http://en.wikipedia.org/wiki/Algorithm) principles such as text tokenisation, sorting, searching etc.&mdash;although private fields, inline documentation and comments are, addmitingly, not very *neat* hear and there, and, as a result, a powerful user-friendly [IDE](http://en.wikipedia.org/wiki/Integrated_development_environment) (such as [*Visual Studio*](http://visualstudio.microsoft.com/)) would help greatly in navigating the source code), for various unit testing (to generate [mock objects](http://en.wikipedia.org/wiki/Mock_object)) or maybe even for the implementation of some parts of [*chatbots*](http://en.wikipedia.org/wiki/Chatbot). The main idea, though, behind writing this library was (the author's) self-training in programming [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) + [*.NET*](http://dotnet.microsoft.com/) applications through implementing an application for generating random blocks of text *for fun*.
 
-### Algorithm Explanation
+### [Algorithm](http://en.wikipedia.org/wiki/Algorithm) Explanation
 
-The ([*nondeterministic*](http://en.wikipedia.org/wiki/Nondeterministic_programming)) *algorithm* for generating text blocks implemented by the library is the following:
+The ([*nondeterministic*](http://en.wikipedia.org/wiki/Nondeterministic_programming)) [*algorithm*](http://en.wikipedia.org/wiki/Algorithm) for generating text blocks implemented by the library is the following:
 
 1.  A **context** of tokens is set.
 2.  Input: *number of relevant tokens* `n >= 0`.
@@ -33,7 +33,7 @@ The ([*nondeterministic*](http://en.wikipedia.org/wiki/Nondeterministic_programm
     2.  Repeat:
         1.  Find all occurrences of the `n` most recent tokens chosen (if `n` tokens have not yet been chosen, substitute it by the number of tokens chosen) as subcollections in the context.
         2.  Randomly choose one of the occurrences.
-        3.  For the next token, choose the token immediately following the tokens from the chosen occurrence. If no token follows the occurrence (if the occurrence is at the very end of the context), stop the algorithm.
+        3.  For the next token, choose the token immediately following the tokens from the chosen occurrence. If no token follows the occurrence (if the occurrence is at the very end of the context), stop the [algorithm](http://en.wikipedia.org/wiki/Algorithm).
 4.  Output: collection of chosen tokens (in the order as chosen).
 
 For example, if the context is acquired by slicing the string *aaaabaaac* at each character, the context is the collection `{'a', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'c'}`. Suppose `n = 3`. A possible line of steps is given bellow:
@@ -68,14 +68,14 @@ For example, if the context is acquired by slicing the string *aaaabaaac* at eac
     1.  ***aaa**abaaac*
     2.  *a**aaa**baaac*
     3.  *aaaab**aaa**c*
-13. Unique determination of steps breaks here. If the letter *a* is chosen, the next state is the same as the state in the previous step (12). If the letter *b* is chosen, the next state is the same as in the step 6. If the letter *c* is chosen, the algorithm is uniquely determined until the end. For the sake of brevity, let us say the letter *c* is chosen, i. e. occurrence 3.
+13. Unique determination of steps breaks here. If the letter *a* is chosen, the next state is the same as the state in the previous step (12). If the letter *b* is chosen, the next state is the same as in the step 6. If the letter *c* is chosen, the [algorithm](http://en.wikipedia.org/wiki/Algorithm) is uniquely determined until the end. For the sake of brevity, let us say the letter *c* is chosen, i. e. occurrence 3.
 14. The string *aac* must now be found. All occurrences of the string are the following:
     1.  *aaaaba**aac***
-15. No token follows the chosen (actually, the only one possible) occurrence. The algorithm stops here.
+15. No token follows the chosen (actually, the only one possible) occurrence. The [algorithm](http://en.wikipedia.org/wiki/Algorithm) stops here.
 
 The steps explained above produce *aabaaac* as the output. Although this is indeed shorter than the input text and also a substring of it, that is not necessarily the case.
 
-A subsequence of 0 tokens is assumed to precede every token. In other words, if `n == 0` (if there are no most recent relevant tokens), all tokens are chosen in the same way as the first one: by choosing randomly from the complete context. Moreover, a subsequence of 0 tokens is also assumed to precede the *end of the context*, in the sense that the occurrence of the range of 0 tokens following the last token may also be chosen, in which case the algorithm terminates. This can be identified with [null-terminated strings](http://en.wikipedia.org/wiki/Null-terminated_string), such as in [*C* programming language](http://www.iso.org/standard/74528.html), where the null character at the end of the string is a single independent (not *glued together* with its predecessor) token.
+A subsequence of 0 tokens is assumed to precede every token. In other words, if `n == 0` (if there are no most recent relevant tokens), all tokens are chosen in the same way as the first one: by choosing randomly from the complete context. Moreover, a subsequence of 0 tokens is also assumed to precede the *end of the context*, in the sense that the occurrence of the range of 0 tokens following the last token may also be chosen, in which case the [algorithm](http://en.wikipedia.org/wiki/Algorithm) terminates. This can be identified with [null-terminated strings](http://en.wikipedia.org/wiki/Null-terminated_string), such as in [*C* programming language](http://www.iso.org/standard/74528.html), where the null character at the end of the string is a single independent (not *glued together* with its predecessor) token.
 
 ##  Code Example
 
