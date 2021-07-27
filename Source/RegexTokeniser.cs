@@ -104,7 +104,7 @@ namespace MagicText
         ///     <para>The exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.</para>
         ///     <para>Calling this constructor is essentially the same (performance aside) as calling the <see cref="RegexTokeniser(String, RegexOptions, Func{String?, String?}?)" /> constructor as:</para>
         ///     <code>
-        ///         <see cref="RegexTokeniser" />.RegexTokeniser(breakPattern: <paramref name="breaker" />.ToString(), options: <paramref name="alterOptions" /> ?? <paramref name="breaker" />.Options, transform: <paramref name="transform" />)
+        ///         <see cref="RegexTokeniser" />(breakPattern: <paramref name="breaker" />.ToString(), options: <paramref name="alterOptions" /> ?? <paramref name="breaker" />.Options, transform: <paramref name="transform" />)
         ///     </code>
         /// </remarks>
         /// <seealso cref="RegexTokeniser(String, RegexOptions, Func{String?, String?}?)" />

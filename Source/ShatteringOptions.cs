@@ -72,8 +72,6 @@ namespace MagicText
         [DisplayName("Ignore empty tokens")]
         [Display(Name = "Ignore empty tokens", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "IgnoreEmptyTokens", Order = 0)]
         [DefaultValue(false)]
-        [XmlAttribute(AttributeName = "ignore_empty_tokens")]
-        [JsonPropertyName("ignore_empty_tokens")]
         public Boolean IgnoreEmptyTokens
         {
             get => ignoreEmptyTokens;
@@ -96,8 +94,6 @@ namespace MagicText
         [DisplayName("Ignore line ends")]
         [Display(Name = "Ignore line ends", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "IgnoreLineEnds", Order = 1)]
         [DefaultValue(false)]
-        [XmlAttribute(AttributeName = "ignore_line_ends")]
-        [JsonPropertyName("ignore_line_ends")]
         public Boolean IgnoreLineEnds
         {
             get => ignoreLineEnds;
@@ -121,8 +117,6 @@ namespace MagicText
         [DisplayName("Ignore empty lines")]
         [Display(Name = "Ignore empty lines", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "IgnoreEmptyLines", Order = 2)]
         [DefaultValue(false)]
-        [XmlAttribute(AttributeName = "ignore_empty_lines")]
-        [JsonPropertyName("ignore_empty_lines")]
         public Boolean IgnoreEmptyLines
         {
             get => ignoreEmptyLines;
@@ -146,8 +140,6 @@ namespace MagicText
         [Display(Name = "Line end token", Description = "Token to represent a line end.", GroupName = "Tokens", ShortName = "LineEndToken", Order = 3)]
         [DisplayFormat(ConvertEmptyStringToNull = false)]
         [DefaultValue("\n")] // <-- this may be different from the `System.Environment.NewLine`
-        [XmlElement(ElementName = "line_end_token", IsNullable = true)]
-        [JsonPropertyName("line_end_token")]
         public String? LineEndToken
         {
             get => lineEndToken;
@@ -172,8 +164,6 @@ namespace MagicText
         [Display(Name = "Empty line token", Description = "Token to represent an empty line.", GroupName = "Tokens", ShortName = "EmptyLineToken", Order = 4)]
         [DisplayFormat(ConvertEmptyStringToNull = false)]
         [DefaultValue("")]
-        [XmlElement(ElementName = "empty_line_token", IsNullable = true)]
-        [JsonPropertyName("empty_line_token")]
         public String? EmptyLineToken
         {
             get => emptyLineToken;
