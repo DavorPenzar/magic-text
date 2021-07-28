@@ -11,7 +11,7 @@ namespace MagicText.Internal
         private readonly Func<T, Boolean> _positivePredicate;
 
         /// <summary>Gets the predicate that is negated through the <see cref="EvaluateNegation(T)" /> method.</summary>
-        /// <returns>The wrapped predicate.</returns>
+        /// <returns>The internal wrapped predicate.</returns>
         public Func<T, Boolean> PositivePredicate => _positivePredicate;
 
         /// <summary>Creates a negative wrapper of the <c><paramref name="positivePredicate" /></c>.</summary>

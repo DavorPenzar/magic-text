@@ -83,8 +83,8 @@ namespace MagicText
         /// </remarks>
         protected Regex Breaker => _breaker;
 
-        /// <summary>Gets the token transformation function used by the tokeniser. The value of <c>null</c> indicates that no transformation function is used.</summary>
-        /// <returns>The internal transformation function.</returns>
+        /// <summary>Gets the token transformation function used by the tokeniser or <c>null</c> if no transformation function is used.</summary>
+        /// <returns>If a transformation function is used, the internal transformation function is returned; otherwise <c>null</c> is returned.</returns>
         protected Func<String?, String?>? Transform => _transform;
 
         /// <summary>Gets the regular expression break pattern used by the tokeniser.</summary>
@@ -119,7 +119,7 @@ namespace MagicText
             _transform = transform;
         }
 
-        /// <summary>Creates a default tokeniser, with the inclusive break or not.</summary>
+        /// <summary>Creates a default tokeniser with the inclusive break or not.</summary>
         /// <param name="inclusiveBreaker">If <c>true</c>, the <see cref="DefaultInclusiveBreakPattern" /> is used as the regular expression break pattern; otherwise the <see cref="DefaultExclusiveBreakPattern" /> is used.</param>
         /// <remarks>
         ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultInclusiveBreaker" /> or <see cref="DefaultExclusiveBreaker" />) with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" /> is used. Consider using this constructor or the default <see cref="RegexTokeniser()" /> constructor if a default tokeniser should be used to improve performance.</para>

@@ -168,7 +168,6 @@ namespace MagicText.Internal
             {
                 throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(x));
             }
-
             if (!(y is Int32 yInt))
             {
                 throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(y));

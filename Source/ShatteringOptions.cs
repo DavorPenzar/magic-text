@@ -240,7 +240,7 @@ namespace MagicText
             emptyLineToken = EmptyLineToken;
         }
 
-        /// <summary>Returns the hash code of the current options according to the <c><paramref name="stringComparer" /></c>.</summary>
+        /// <summary>Returns the hash code of the current options.</summary>
         /// <param name="stringComparer">The <see cref="StringComparer" /> used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>The hash code of the current <see cref="ShatteringOptions" /> according to the <c><paramref name="stringComparer" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringComparer" /></c> is <c>null</c>.</exception>
@@ -277,7 +277,7 @@ namespace MagicText
         public override Int32 GetHashCode() =>
             GetHashCode(EqualityComparer<String?>.Default);
 
-        /// <summary>Indicates whether the current options are equal to the <c><paramref name="other" /></c> options according to the <c><paramref name="stringComparer" /></c> or not.</summary>
+        /// <summary>Indicates whether the current options are equal to the <c><paramref name="other" /></c> options or not.</summary>
         /// <param name="other">The other <see cref="ShatteringOptions" /> to compare with these options.</param>
         /// <param name="stringComparer">The <see cref="StringComparer" /> used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c> according to the <c><paramref name="stringComparer" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
@@ -311,7 +311,7 @@ namespace MagicText
         public virtual Boolean Equals(ShatteringOptions? other) =>
             Equals(other, EqualityComparer<String?>.Default);
 
-        /// <summary>Indicates whether the current options are equal to the <c><paramref name="obj" /></c> according to the <c><paramref name="stringComparer" /></c> or not.</summary>
+        /// <summary>Indicates whether the current options are equal to the <c><paramref name="obj" /></c> or not.</summary>
         /// <param name="obj">The <see cref="Object" /> to compare with these <see cref="ShatteringOptions" />.</param>
         /// <param name="stringComparer">The <see cref="StringComparer" /> used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it according to the <c><paramref name="stringComparer" /></c>, <c>true</c>; <c>false</c>otherwise.</returns>

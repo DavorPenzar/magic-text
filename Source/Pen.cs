@@ -156,7 +156,7 @@ namespace MagicText
                 _ => new List<T>(enumerable)
             };
 
-        /// <summary>Compares a subrange of <c><paramref name="tokens" /></c> with the sample of tokens <c><paramref name="sampleCycle" /></c> in respect of the <c><paramref name="comparer" /></c>.</summary>
+        /// <summary>Compares a subrange of <c><paramref name="tokens" /></c> with the sample of tokens <c><paramref name="sampleCycle" /></c>.</summary>
         /// <param name="comparer">The <see cref="StringComparer" /> used for comparing.</param>
         /// <param name="tokens">The list of tokens whose subrange is compared to the <c><paramref name="sampleCycle" /></c>.</param>
         /// <param name="sampleCycle">The cyclical sample list of tokens. The list represents the range <c>{ <paramref name="sampleCycle" />[<paramref name="cycleStart" />], <paramref name="sampleCycle" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sampleCycle" />[<paramref name="sampleCycle" />.Count - 1], <paramref name="sampleCycle" />[0], ..., <paramref name="sampleCycle" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
@@ -193,7 +193,7 @@ namespace MagicText
             return c;
         }
 
-        /// <summary>Finds the first index and the number of occurrences of the <c><paramref name="sampleCycle" /></c> amongst the <c><paramref name="tokens" /></c> sorted by the <c><paramref name="comparer" /></c> into the <c><paramref name="index" /></c>.</summary>
+        /// <summary>Finds the first index and the number of occurrences of the <c><paramref name="sampleCycle" /></c> amongst the <c><paramref name="tokens" /></c>.</summary>
         /// <param name="comparer">The <see cref="StringComparer" /> used for comparing.</param>
         /// <param name="tokens">The list of tokens whose subrange is compared to the <c><paramref name="sampleCycle" /></c>.</param>
         /// <param name="index">The positional ordering of the <c><paramref name="tokens" /></c> in respect of the <c><paramref name="comparer" /></c>.</param>
@@ -300,7 +300,7 @@ namespace MagicText
             return l;
         }
 
-        /// <summary>Finds the first index and the number of occurrences of the <c><paramref name="sample" /></c> amongst the <c><paramref name="tokens" /></c> sorted by the <c><paramref name="comparer" /></c> into the <c><paramref name="index" /></c>.</summary>
+        /// <summary>Finds the first index and the number of occurrences of the <c><paramref name="sample" /></c> amongst the <c><paramref name="tokens" /></c>.</summary>
         /// <param name="comparer">The <see cref="StringComparer" /> used for comparing.</param>
         /// <param name="tokens">The list of tokens whose subrange is compared to the <c><paramref name="sample" /></c>.</param>
         /// <param name="index">The positional ordering of the <c><paramref name="tokens" /></c> in respect of the <c><paramref name="comparer" /></c>.</param>
@@ -335,7 +335,7 @@ namespace MagicText
         protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IEnumerable<String?> sample, out Int32 count) =>
             FindPositionIndexAndCount(comparer, tokens, index, ConvertToReadOnlyList(sample), 0, out count);
 
-        /// <summary>Finds the first index and the number of occurrences of the <c><paramref name="token" /></c> amongst the <c><paramref name="tokens" /></c> sorted by the <c><paramref name="comparer" /></c> into the <c><paramref name="index" /></c>.</summary>
+        /// <summary>Finds the first index and the number of occurrences of the <c><paramref name="token" /></c> amongst the <c><paramref name="tokens" /></c>.</summary>
         /// <param name="comparer">The <see cref="StringComparer" /> used for comparing.</param>
         /// <param name="tokens">The list of tokens compared to the <c><paramref name="token" /></c>.</param>
         /// <param name="index">The positional ordering of the <c><paramref name="tokens" /></c> in respect of the <c><paramref name="comparer" /></c>.</param>
@@ -483,6 +483,16 @@ namespace MagicText
 
             // Check if all tokens are ending tokens.
             _allSentinels = Context.All((new BoundStringComparer(Comparer, SentinelToken)).Equals);
+        }
+
+        /// <summary>Creates an empty pen.</summary>
+        /// <remarks>
+        ///     <para>Other than setting the <see cref="Context" /> to an empty token list, this constructor uses the same default as the <see cref="Pen(IEnumerable{String?}, String?, StringComparer?, Boolean)" /> constructor.</para>
+        ///     <para><strong>Nota bene.</strong> This constructor was introduced to allow some operations that would be impossible if a parameterless constructor did not exist. It is strongly advised not to use this constructor because the resulting <see cref="Pen" /> is useless—objects of the <see cref="Pen" /> class are immutable and an empty <see cref="Context" /> cannot be used for any text generation or corpus analysis.</para>
+        /// </remarks>
+        /// <seealso cref="Pen(IEnumerable{String?}, String?, StringComparer?, Boolean)" />
+        public Pen() : this(Enumerable.Empty<String?>())
+        {
         }
 
         /// <summary>Copies the <c><paramref name="other" /></c> pen with a custom interning policy.</summary>
