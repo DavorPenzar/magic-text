@@ -13,7 +13,7 @@ using System.Xml.Serialization;
 
 namespace MagicText
 {
-    // TODO: Enable XML and JSON serialisation/deserialisation via the standard interface.
+    // TODO: Enable *XML* and *JSON* serialisation/deserialisation via the standard interface.
 
     /// <summary>Provides methods for (pseudo-)random text generation.</summary>
     /// <remarks>
@@ -623,7 +623,7 @@ namespace MagicText
         /// <param name="index">The sorting index of the <c><paramref name="context" /></c> in respect of the <c><paramref name="comparer" /></c>.</param>
         /// <param name="allSentinels">The indicator of all tokens in the <c><paramref name="context" /></c> being the ending token (<c><paramref name="sentinelToken" /></c>).</param>
         /// <remarks>
-        ///     <para>This constructor is intended for <strong>internal use only</strong> (hence the access modifier <em><c>internal</c></em>). It is supposed to be used for XML and JSON serialisation and deserialisation of instances of class <see cref="Pen" />.</para>
+        ///     <para>This constructor is intended for <strong>internal use only</strong> (hence the access modifier <em><c>internal</c></em>). It is supposed to be used for <em>XML</em> and <em>JSON</em> serialisation and deserialisation of instances of class <see cref="Pen" />.</para>
         /// </remarks>
         internal Pen(Boolean interned, StringComparer comparer, String? sentinelToken, IReadOnlyList<String?> context, IReadOnlyList<Int32> index, Boolean allSentinels) : base()
         {
