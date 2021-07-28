@@ -25,7 +25,7 @@ namespace MagicText
     ///     <h3>Notes to Implementers</h3>
     ///     <para>To implement a custom <see cref="Pen" /> subclass with a custom text generation algorithm, only the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" /> method should be overridden. In fact, the other rendering methods (<see cref="Render(Int32, Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" />) may not be overriden, but they rely on the implementation of the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" /> method.</para>
     ///     <para>When implementing a subclass, consider using the protected <see cref="Index" /> property as well as the convenient protected static methods such as the <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />, <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" /> and <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" /> methods which are designed to optimise the corpus analysis of the <see cref="Context" />. Note, however, that the methods assume proper usage to enhance performance. There are a few additional public member methods, such as the <see cref="PositionsOf(IEnumerable{String?})" /> or the <see cref="Count(IEnumerable{String?})" /> methods, that may be used as well. These methods are not as flexible as the protected static ones and are suboptimal for some use cases: for instance, the <see cref="PositionsOf(IEnumerable{String?})" /> method creates a new <see cref="ICollection{T}" /> to store the positions, while the <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" /> method return two integers (one via the <c>out</c> parameter) which merely indicate where in the <c>index</c> (the method's input parameter) the sought positions are.</para>
-    ///     <para>If the derived class provides additional fields or properties, to enable serialisation/deserialisation consider overriding the <see cref="GetObjectData(SerializationInfo, StreamingContext)" /> method. Also, implement a proper constructor, such as the <see cref="Pen(SerializationInfo, StreamingContext)" /> constructor.</para>
+    ///     <para>If the derived class provides additional fields or properties, to enable serialisation/deserialisation override the <see cref="GetObjectData(SerializationInfo, StreamingContext)" /> method. Also, implement a proper constructor, such as the <see cref="Pen(SerializationInfo, StreamingContext)" /> constructor.</para>
     /// </remarks>
     [Serializable]
     public class Pen : Object, ICloneable, ISerializable
@@ -288,7 +288,7 @@ namespace MagicText
             {
                 --l;
             }
-            while (h + sampleCycle.Count <= tokens.Count && CompareRange(comparer, tokens, sampleCycle, h < tokens.Count ? index[h] : tokens.Count, cycleStart) == 0)
+            while (h <= tokens.Count && CompareRange(comparer, tokens, sampleCycle, h < tokens.Count ? index[h] : tokens.Count, cycleStart) == 0)
             {
                 ++h;
             }
@@ -597,7 +597,7 @@ namespace MagicText
 
             // Deserialise the `Context`.
             {
-                String?[] contextArray = (String?[])info.GetValue(nameof(Context), typeof(String?[]));
+                String?[] contextArray = (String[])info.GetValue(nameof(Context), typeof(String[]));
                 List<String?> contextList = new List<String?>(Interned ? contextArray.Select(StringExtensions.InternNullable) : contextArray);
                 contextList.TrimExcess();
                 _context = contextList.AsReadOnly();
@@ -989,7 +989,7 @@ namespace MagicText
         /// <seealso cref="PositionsOf(String?[])" />
         public Int32 Count(IEnumerable<String?> sample)
         {
-            Int32 _ = FindPositionIndexAndCount(Comparer, Context, Index, sample, out Int32 n);
+            FindPositionIndexAndCount(Comparer, Context, Index, sample, out Int32 n);
 
             return n;
         }
@@ -1318,7 +1318,7 @@ namespace MagicText
             }
 
             // Serialise the ending token.
-            info.AddValue(nameof(SentinelToken), SentinelToken);
+            info.AddValue(nameof(SentinelToken), SentinelToken, typeof(String));
 
             // Serialise the `Context`.
             {
@@ -1327,7 +1327,7 @@ namespace MagicText
                 {
                     contextArray[i] = Context[i];
                 }
-                info.AddValue(nameof(Context), contextArray, typeof(String?[]));
+                info.AddValue(nameof(Context), contextArray, typeof(String[]));
             }
 
             // Serialise the `Index`.
