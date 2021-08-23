@@ -1,6 +1,6 @@
 #   MagicText
 
-[*.NET Standard*](http://docs.microsoft.com/en-gb/dotnet/standard/net-standard) library written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) for generating random text.
+[*.NET Standard*](http://docs.microsoft.com/en-gb/dotnet/standard/net-standard) library ([CLS compliant](http://docs.microsoft.com/en-gb/dotnet/standard/language-independence#cls-compliance-rules)) written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) for generating random text.
 
 **Author**: Davor Penzar (July 2021)
 
