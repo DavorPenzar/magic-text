@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 namespace MagicText
 {
     /// <summary>Provides auxiliary extension methods for the instances of the <see cref="ITokeniser" /> interface.</summary>
+    [CLSCompliant(true)]
     public static class TokeniserExtensions
     {
         private const string TokeniserNullErrorMessage = "Tokeniser cannot be null.";

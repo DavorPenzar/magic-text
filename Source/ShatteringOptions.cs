@@ -12,6 +12,7 @@ using System.Xml.Serialization;
 namespace MagicText
 {
     /// <summary>Defines the options for the <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods and for the extension methods from <see cref="TokeniserExtensions" />.</summary>
+    [CLSCompliant(true)]
     [Serializable]
     [XmlRoot(ElementName = "shattering_options", IsNullable = true)]
     [XmlType(TypeName = "shattering_options")]

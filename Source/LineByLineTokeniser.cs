@@ -19,6 +19,7 @@ namespace MagicText
     ///     <para>A derived class must minimally implement <see cref="ShatterLine(String)" /> method to make a useful instance of <see cref="LineByLineTokeniser" />.</para>
     ///     <para>No thread safety mechanism is implemented nor assumed by the class. If the function for checking emptiness of tokens (<see cref="IsEmptyToken" />) should be thread-safe, lock the tokeniser during the complete <see cref="Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.</para>
     /// </remarks>
+    [CLSCompliant(true)]
     public abstract class LineByLineTokeniser : Object, ITokeniser
     {
         protected const string IsEmptyTokenNullErrorMessage = "Token emptiness checking function cannot be null.";

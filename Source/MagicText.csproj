@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <Authors>Davor Penzar</Authors>
+    <Company>PenzART</Company>
+    <!--<Copyright>Copyright © Davor Penzar 2021</Copyright>-->
+    <NeutralLanguage>en-GB</NeutralLanguage>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>

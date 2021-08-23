@@ -24,9 +24,10 @@ namespace MagicText
     ///
     ///     <h3>Notes to Implementers</h3>
     ///     <para>To implement a custom <see cref="Pen" /> subclass with a custom text generation algorithm, only the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" /> method should be overridden. In fact, the other rendering methods (<see cref="Render(Int32, Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" />) may not be overriden, but they rely on the implementation of the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" /> method.</para>
-    ///     <para>When implementing a subclass, consider using the protected <see cref="Index" /> property as well as the convenient protected static methods such as the <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />, <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" /> and <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" /> methods which are designed to optimise the corpus analysis of the <see cref="Context" />. Note, however, that the methods assume proper usage to enhance performance. There are a few additional public member methods, such as the <see cref="PositionsOf(IEnumerable{String?})" /> or the <see cref="Count(IEnumerable{String?})" /> methods, that may be used as well. These methods are not as flexible as the protected static ones and are suboptimal for some use cases: for instance, the <see cref="PositionsOf(IEnumerable{String?})" /> method creates a new <see cref="ICollection{T}" /> to store the positions, while the <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" /> method return two integers (one via the <c>out</c> parameter) which merely indicate where in the <c>index</c> (the method's input parameter) the sought positions are.</para>
+    ///     <para>When implementing a subclass, consider using the protected <see cref="Index" /> property as well as the convenient protected static methods such as the <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />, <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" /> and <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" /> methods which are designed to optimise the corpus analysis of the <see cref="Context" />. Note, however, that the methods assume proper usage to enhance performance. There are a few additional public member methods, such as the <see cref="PositionsOf(IEnumerable{String?})" /> or the <see cref="Count(IEnumerable{String?})" /> methods, that may be used as well. These methods are not as flexible as the protected static ones and are suboptimal for some use cases: for instance, the <see cref="PositionsOf(IEnumerable{String?})" /> method creates a new <see cref="ICollection{T}" /> to store the positions, while the <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" /> method return two integers (one via the <c>out</c> parameter) which merely indicate where in the <c>index</c> (the method's input parameter) the sought positions are.</para>
     ///     <para>If the derived class provides additional fields or properties, to enable serialisation/deserialisation override the <see cref="GetObjectData(SerializationInfo, StreamingContext)" /> method. Also, implement a proper constructor, such as the <see cref="Pen(SerializationInfo, StreamingContext)" /> constructor.</para>
     /// </remarks>
+    [CLSCompliant(true)]
     [Serializable]
     public class Pen : Object, ICloneable, ISerializable
     {
@@ -200,9 +201,12 @@ namespace MagicText
         /// <param name="sampleCycle">The cyclical sample list of tokens to find. The list represents the range <c>{ <paramref name="sampleCycle" />[<paramref name="cycleStart" />], <paramref name="sampleCycle" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sampleCycle" />[<paramref name="sampleCycle" />.Count - 1], <paramref name="sampleCycle" />[0], ..., <paramref name="sampleCycle" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
         /// <param name="cycleStart">The starting index of the <c><paramref name="sampleCycle" /></c>.</param>
         /// <param name="count">The total number of occurrences of the <c><paramref name="sampleCycle" /></c> amongst the <c><paramref name="tokens" /></c>.</param>
+        /// <param name="limits">If set, defines the initial lower and upper bound of a matching position index.</param>
         /// <returns>The minimal index <c>i</c> such that an occurrence of the <c><paramref name="sampleCycle" /></c> begins at <c><paramref name="tokens" />[<paramref name="index" />[i]]</c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="comparer" /></c> is <c>null</c>. The parameter <c><paramref name="tokens" /></c> is <c>null</c>. The parameter <c><paramref name="index" /></c> is <c>null</c>. The parameter <c><paramref name="sampleCycle" /></c> is <c>null</c>.</exception>
         /// <remarks>
+        ///     <para>The parameter <c><paramref name="limits" /></c> should be used only if the range of a possible position index match is known. For instance, if it is known that the <c><paramref name="sampleCycle" /></c> occurs between <c><paramref name="index" />[m]</c> and <c><paramref name="index" />[n]</c> inclusively (it starts at at least one of <c>{ <paramref name="tokens" />[<paramref name="index" />[m]], <paramref name="tokens" />[<paramref name="index" />[m + 1]], ..., <paramref name="tokens" />[<paramref name="index" />[n]] }</c>), where <c>m</c> and <c>n</c> are some legal and valid integers, then <c>(m, n)</c> may be passed to the method call as the parameter <c><paramref name="limits" /></c>. The most common scenario for this would probably be when the position index and count of a shorter sample, which is at the very beginning of the actual <c><paramref name="sampleCycle" /></c>, is known: e. g. the position index and count of <c>{ "lorem", " " }</c> in the search for <c>{ "lorem", " ", "ipsum" }</c>.</para>
+        ///     <para>It is sufficient that the <c><paramref name="limits" /></c> cover at least one matching position index, even if not all of them are covered (all matches are still going to be identified). However, if no position index is covered but the <c><paramref name="sampleCycle" /></c> exists amongst the <c><paramref name="tokens" /></c>, then the match shall not be found.</para>
         ///     <para>Because of performance reasons, the implementation of the method <em>assumes</em> the following without checking:</para>
         ///     <list type="bullet">
         ///         <listheader>
@@ -222,15 +226,19 @@ namespace MagicText
         ///             <description>the <c><paramref name="index" /></c> indeed sorts the <c><paramref name="tokens" /></c> ascendingly in respect of the <c><paramref name="comparer" /></c>,</description>
         ///         </item>
         ///         <item>
+        ///             <term><c><paramref name="limits" /></c> legality &amp; validity</term>
+        ///             <description>if the <c><paramref name="limits" /></c> are set—let us denote them as <c>(low, high)</c>—then all inequalities in the chained expression <c>0 &lt;= low &lt;= high &lt;= <paramref name="tokens" />.Count</c> are true,</description>
+        ///         </item>
+        ///         <item>
         ///             <term><c><paramref name="sampleCycle" /></c> existence</term>
         ///             <description>the <c><paramref name="sampleCycle" /></c> exists amongst the <c><paramref name="tokens" /></c> (when compared by the <c><paramref name="comparer" /></c>).</description>
         ///         </item>
         ///     </list>
-        ///     <para>If any of the first three assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="sampleCycle" /></c>'s position should be inserted to retain the sorted order but the number of occurrences (<c><paramref name="count" /></c>) shall be 0.</para>
+        ///     <para>If any of the first four assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="sampleCycle" /></c>'s position should be inserted to retain the sorted order but the number of occurrences (<c><paramref name="count" /></c>) shall be 0. However, if the <c><paramref name="limits" /></c> are set but the <c><paramref name="sampleCycle" /></c> is not found in the specified range, the latter may not be true.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IReadOnlyList<String?> sampleCycle, Int32 cycleStart, out Int32 count)
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IReadOnlyList<String?> sampleCycle, Int32 cycleStart, out Int32 count, Nullable<ValueTuple<Int32, Int32>> limits = default)
         {
             if (comparer is null)
             {
@@ -252,14 +260,27 @@ namespace MagicText
             // Binary search...
 
             // Initialise the lower, upper and middle positions.
-            Int32 l = 0;
-            Int32 h = tokens.Count;
-            Int32 m = h >> 1;
+            Int32 l;
+            Int32 h;
+            if (limits.HasValue)
+            {
+                l = limits.Value.Item1;
+                h = limits.Value.Item2;
+            }
+            else
+            {
+                l = 0;
+                h = tokens.Count;
+            }
 
             // Loop until found.
             {
-                while (l < h)
+                Int32 m;
+
+                while (l < h - 1)
                 {
+                    m = (l + h) >> 1;
+
                     // Compare the ranges.
                     Int32 c = CompareRange(comparer, tokens, sampleCycle, index[m], cycleStart);
 
@@ -267,20 +288,23 @@ namespace MagicText
                     if (c == 0)
                     {
                         l = m;
-                        h = m + 1;
+                        h = m;
 
                         break;
                     }
                     else if (c < 0)
                     {
-                        l = m;
+                        l = m + 1;
                     }
                     else if (c > 0)
                     {
                         h = m;
                     }
-                    m = (l + h) >> 1;
                 }
+            }
+            if (l < h && CompareRange(comparer, tokens, sampleCycle, index[l], cycleStart) < 0)
+            {
+                l = h;
             }
 
             // Find the minimal position index `l` and the maximal index `h` of occurrences of the `sampleCycle` amongst the `tokens`.
@@ -306,9 +330,12 @@ namespace MagicText
         /// <param name="index">The positional ordering of the <c><paramref name="tokens" /></c> in respect of the <c><paramref name="comparer" /></c>.</param>
         /// <param name="sample">The sample enumerable of tokens to find.</param>
         /// <param name="count">The total number of occurrences of the <c><paramref name="sample" /></c> amongst the <c><paramref name="tokens" /></c>.</param>
+        /// <param name="limits">If set, defines the initial lower and upper bound of a matching position index.</param>
         /// <returns>The minimal index <c>i</c> such that an occurrence of the <c><paramref name="sample" /></c> begins at <c><paramref name="tokens" />[<paramref name="index" />[i]]</c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="comparer" /></c> is <c>null</c>. The parameter <c><paramref name="tokens" /></c> is <c>null</c>. The parameter <c><paramref name="index" /></c> is <c>null</c>. The parameter <c><paramref name="sample" /></c> is <c>null</c>.</exception>
         /// <remarks>
+        ///     <para>The parameter <c><paramref name="limits" /></c> should be used only if the range of a possible position index match is known. For instance, if it is known that the <c><paramref name="sample" /></c> occurs between <c><paramref name="index" />[m]</c> and <c><paramref name="index" />[n]</c> inclusively (it starts at at least one of <c>{ <paramref name="tokens" />[<paramref name="index" />[m]], <paramref name="tokens" />[<paramref name="index" />[m + 1]], ..., <paramref name="tokens" />[<paramref name="index" />[n]] }</c>), where <c>m</c> and <c>n</c> are some legal and valid integers, then <c>(m, n)</c> may be passed to the method call as the parameter <c><paramref name="limits" /></c>. The most common scenario for this would probably be when the position index and count of a shorter sample, which is at the very beginning of the actual <c><paramref name="sample" /></c>, is known: e. g. the position index and count of <c>{ "lorem", " " }</c> in the search for <c>{ "lorem", " ", "ipsum" }</c>.</para>
+        ///     <para>It is sufficient that the <c><paramref name="limits" /></c> cover at least one matching position index, even if not all of them are covered (all matches are still going to be identified). However, if no position index is covered but the <c><paramref name="sample" /></c> exists amongst the <c><paramref name="tokens" /></c>, then the match shall not be found.</para>
         ///     <para>Because of performance reasons, the implementation of the method <em>assumes</em> the following without checking:</para>
         ///     <list type="bullet">
         ///         <listheader>
@@ -324,16 +351,20 @@ namespace MagicText
         ///             <description>the <c><paramref name="index" /></c> indeed sorts the <c><paramref name="tokens" /></c> ascendingly in respect of the <c><paramref name="comparer" /></c>,</description>
         ///         </item>
         ///         <item>
+        ///             <term><c><paramref name="limits" /></c> legality &amp; validity</term>
+        ///             <description>if the <c><paramref name="limits" /></c> are set—let us denote them as <c>(low, high)</c>—then all inequalities in the chained expression <c>0 &lt;= low &lt;= high &lt;= <paramref name="tokens" />.Count</c> are true,</description>
+        ///         </item>
+        ///         <item>
         ///             <term><c><paramref name="sample" /></c> existence</term>
         ///             <description>the <c><paramref name="sample" /></c> exists amongst the <c><paramref name="tokens" /></c> (when compared by the <c><paramref name="comparer" /></c>).</description>
         ///         </item>
         ///     </list>
-        ///     <para>If any of the first two assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="sample" /></c>'s position should be inserted to retain the sorted order but the number of occurrences (<c><paramref name="count" /></c>) shall be 0.</para>
+        ///     <para>If any of the first three assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="sample" /></c>'s position should be inserted to retain the sorted order but the number of occurrences (<c><paramref name="count" /></c>) shall be 0. However, if the <c><paramref name="limits" /></c> are set but the <c><paramref name="sample" /></c> is not found in the specified range, the latter may not be true.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IEnumerable<String?> sample, out Int32 count) =>
-            FindPositionIndexAndCount(comparer, tokens, index, ConvertToReadOnlyList(sample), 0, out count);
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IEnumerable<String?> sample, out Int32 count, Nullable<ValueTuple<Int32, Int32>> limits = default) =>
+            FindPositionIndexAndCount(comparer, tokens, index, ConvertToReadOnlyList(sample), 0, out count, limits);
 
         /// <summary>Finds the first index and the number of occurrences of the <c><paramref name="token" /></c> amongst the <c><paramref name="tokens" /></c>.</summary>
         /// <param name="comparer">The <see cref="StringComparer" /> used for comparing.</param>
@@ -341,9 +372,12 @@ namespace MagicText
         /// <param name="index">The positional ordering of the <c><paramref name="tokens" /></c> in respect of the <c><paramref name="comparer" /></c>.</param>
         /// <param name="token">The token to find.</param>
         /// <param name="count">The total number of occurrences of the <c><paramref name="token" /></c> amongst the <c><paramref name="tokens" /></c>.</param>
+        /// <param name="limits">If set, defines the initial lower and upper bound of a matching position index.</param>
         /// <returns>The minimal index <c>i</c> such that <c><paramref name="tokens" />[<paramref name="index" />[i]]</c> is the <c><paramref name="token" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="comparer" /></c> is <c>null</c>. The parameter <c><paramref name="tokens" /></c> is <c>null</c>. The parameter <c><paramref name="index" /></c> is <c>null</c>.</exception>
         /// <remarks>
+        ///     <para>The parameter <c><paramref name="limits" /></c> should be used only if the range of a possible position index match is known. For instance, if it is known that the <c><paramref name="token" /></c> occurs between <c><paramref name="index" />[m]</c> and <c><paramref name="index" />[n]</c> inclusively (it starts at at least one of <c>{ <paramref name="tokens" />[<paramref name="index" />[m]], <paramref name="tokens" />[<paramref name="index" />[m + 1]], ..., <paramref name="tokens" />[<paramref name="index" />[n]] }</c>), where <c>m</c> and <c>n</c> are some legal and valid integers, then <c>(m, n)</c> may be passed to the method call as the parameter <c><paramref name="limits" /></c>.</para>
+        ///     <para>It is sufficient that the <c><paramref name="limits" /></c> cover at least one matching position index, even if not all of them are covered (all matches are still going to be identified). However, if no position index is covered but the <c><paramref name="token" /></c> exists amongst the <c><paramref name="tokens" /></c>, then the match shall not be found.</para>
         ///     <para>Because of performance reasons, the implementation of the method <em>assumes</em> the following without checking:</para>
         ///     <list type="bullet">
         ///         <listheader>
@@ -359,16 +393,20 @@ namespace MagicText
         ///             <description>the <c><paramref name="index" /></c> indeed sorts the <c><paramref name="tokens" /></c> ascendingly in respect of the <c><paramref name="comparer" /></c>,</description>
         ///         </item>
         ///         <item>
+        ///             <term><c><paramref name="limits" /></c> legality &amp; validity</term>
+        ///             <description>if the <c><paramref name="limits" /></c> are set—let us denote them as <c>(low, high)</c>—then all inequalities in the chained expression <c>0 &lt;= low &lt;= high &lt;= <paramref name="tokens" />.Count</c> are true,</description>
+        ///         </item>
+        ///         <item>
         ///             <term><c><paramref name="token" /></c> existence</term>
         ///             <description>the <c><paramref name="token" /></c> exists amongst the <c><paramref name="tokens" /></c> (when compared by the <c><paramref name="comparer" /></c>).</description>
         ///         </item>
         ///     </list>
-        ///     <para>If any of the first two assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="token" /></c>'s position should be inserted to retain the sorted order but the number of occurrences (<c><paramref name="count" /></c>) shall be 0.</para>
+        ///     <para>If any of the first three assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="token" /></c>'s position should be inserted to retain the sorted order but the number of occurrences (<c><paramref name="count" /></c>) shall be 0. However, if the <c><paramref name="limits" /></c> are set but the <c><paramref name="token" /></c> is not found in the specified range, the latter may not be true.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
-        protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, String? token, out Int32 count) =>
-            FindPositionIndexAndCount(comparer, tokens, index, Enumerable.Repeat(token, 1), out count);
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, String? token, out Int32 count, Nullable<ValueTuple<Int32, Int32>> limits = default) =>
+            FindPositionIndexAndCount(comparer, tokens, index, Enumerable.Repeat(token, 1), out count, limits);
 
         [XmlIgnore]
         [JsonIgnore]
@@ -417,8 +455,8 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="Context" />
         /// <seealso cref="Comparer" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         protected internal IReadOnlyList<Int32> Index => _index;
 
         /// <summary>Gets the reference token context used by the pen.</summary>
@@ -654,9 +692,9 @@ namespace MagicText
         ///     <para>When enumerated, the returned collection of positions is unordered (no particular order of positions is guaranteed).</para>
         ///     <para>The method always returns a newly constructed collection of positions, even if the <c><paramref name="sample" /></c> is the same between two calls. Moreover, changes made to the returned collection affect neither the state of the <see cref="Pen" /> nor any other collection of positions returned by the method, past or future.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="PositionsOf()" />
         /// <seealso cref="PositionsOf(String?)" />
         /// <seealso cref="PositionsOf(String?[])" />
@@ -691,9 +729,9 @@ namespace MagicText
         ///     <para>When enumerated, the returned collection of positions is unordered (no particular order of positions is guaranteed).</para>
         ///     <para>The method always returns a newly constructed collection of positions. Moreover, changes made to the returned collection affect neither the state of the <see cref="Pen" /> nor any other collection of positions returned by the method, past or future.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="PositionsOf(String?)" />
         /// <seealso cref="PositionsOf(String?[])" />
         /// <seealso cref="PositionsOf(IEnumerable{String?})" />
@@ -717,9 +755,9 @@ namespace MagicText
         ///     <para>When enumerated, the returned collection of positions is unordered (no particular order of positions is guaranteed).</para>
         ///     <para>The method always returns a newly constructed collection of positions, even if the <c><paramref name="token" /></c> is the same between two calls. Moreover, changes made to the returned collection affect neither the state of the <see cref="Pen" /> nor any other collection of positions returned by the method, past or future.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="PositionsOf()" />
         /// <seealso cref="PositionsOf(String?[])" />
         /// <seealso cref="PositionsOf(IEnumerable{String?})" />
@@ -743,9 +781,9 @@ namespace MagicText
         ///     <para>When enumerated, the returned collection of positions is unordered (no particular order of positions is guaranteed).</para>
         ///     <para>The method always returns a newly constructed collection of positions, even if the <c><paramref name="sample" /></c> is the same between two calls. Moreover, changes made to the returned collection affect neither the state of the <see cref="Pen" /> nor any other collection of positions returned by the method, past or future.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="PositionsOf()" />
         /// <seealso cref="PositionsOf(String?)" />
         /// <seealso cref="PositionsOf(IEnumerable{String?})" />
@@ -768,9 +806,9 @@ namespace MagicText
         ///     <para>If the <c><paramref name="sample" /></c> is found in the <see cref="Context" />, the collection <c>{ <see cref="Context" />[p], <see cref="Context" />[p + 1], ..., <see cref="Context" />[p + n] }</c>, where <c>p</c> is the returned position and <c>n</c> is the length of the <c><paramref name="sample" /></c>, corresponds to the first occurrence of the <c><paramref name="sample" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). An occurrence is considered <em>first</em> if the value of the position <c>p</c> is minimal.</para>
         ///     <para>Unlike the <see cref="String.IndexOf(Char)" />, <see cref="Array.IndexOf{T}(T[], T)" />, <see cref="List{T}.IndexOf(T)" /> etc. methods, the method <strong>does not</strong> return -1 if the <c><paramref name="sample" /></c> is not found, but instead returns the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). This way the value returned by the method may be used as the parameter <c>fromPosition</c> in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, System.Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods to achieve a somewhat expected result (no tokens shall be rendered) without causing any exceptions.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="FirstPositionOf()" />
         /// <seealso cref="FirstPositionOf(String?)" />
         /// <seealso cref="FirstPositionOf(String?[])" />
@@ -794,9 +832,9 @@ namespace MagicText
         ///     <para>The empty token sample precedes <c><see cref="Context" />[p]</c> and/or succeeds <c><see cref="Context" />[p - 1]</c>, where <c>p</c> is the returned position. The returned position <c>p</c> is <em>first</em> in the sense that it is the minimal such position.</para>
         ///     <para>Unlike the <see cref="String.IndexOf(Char)" />, <see cref="Array.IndexOf{T}(T[], T)" />, <see cref="List{T}.IndexOf(T)" /> etc. methods, the method <strong>does not</strong> return -1 if the empty token sample is not found, but instead returns the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). This way the value returned by the method may be used as the parameter <c>fromPosition</c> in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, System.Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods to achieve a somewhat expected result (no tokens shall be rendered) without causing any exceptions.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="FirstPositionOf(String?)" />
         /// <seealso cref="FirstPositionOf(String?[])" />
         /// <seealso cref="FirstPositionOf(IEnumerable{String?})" />
@@ -822,9 +860,9 @@ namespace MagicText
         ///     <para>If the <c><paramref name="token" /></c> is found in the <see cref="Context" />, <c><see cref="Context" />[p]</c>, where <c>p</c> is the returned position, corresponds to the first occurrence of the <c><paramref name="token" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). An occurrence is considered <em>first</em> if the value of the position <c>p</c> is minimal.</para>
         ///     <para>Unlike the <see cref="String.IndexOf(Char)" />, <see cref="Array.IndexOf{T}(T[], T)" />, <see cref="List{T}.IndexOf(T)" /> etc. methods, the method <strong>does not</strong> return -1 if the <c><paramref name="token" /></c> is not found, but instead returns the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). This way the value returned by the method may be used as the parameter <c>fromPosition</c> in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, System.Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods to achieve a somewhat expected result (no tokens shall be rendered) without causing any exceptions.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="FirstPositionOf()" />
         /// <seealso cref="FirstPositionOf(String?[])" />
         /// <seealso cref="FirstPositionOf(IEnumerable{String?})" />
@@ -850,9 +888,9 @@ namespace MagicText
         ///     <para>If the <c><paramref name="sample" /></c> is found in the <see cref="Context" />, the collection <c>{ <see cref="Context" />[p], <see cref="Context" />[p + 1], ..., <see cref="Context" />[p + n] }</c>, where <c>p</c> is the returned position and <c>n</c> is the length of the <c><paramref name="sample" /></c>, corresponds to the first occurrence of the <c><paramref name="sample" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). An occurrence is considered <em>first</em> if the value of the position <c>p</c> is minimal.</para>
         ///     <para>Unlike the <see cref="String.IndexOf(Char)" />, <see cref="Array.IndexOf{T}(T[], T)" />, <see cref="List{T}.IndexOf(T)" /> etc. methods, the method <strong>does not</strong> return -1 if the <c><paramref name="sample" /></c> is not found, but instead returns the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). This way the value returned by the method may be used as the parameter <c>fromPosition</c> in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, System.Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods to achieve a somewhat expected result (no tokens shall be rendered) without causing any exceptions.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="FirstPositionOf()" />
         /// <seealso cref="FirstPositionOf(String?)" />
         /// <seealso cref="FirstPositionOf(IEnumerable{String?})" />
@@ -878,9 +916,9 @@ namespace MagicText
         ///     <para>If the <c><paramref name="sample" /></c> is found in the <see cref="Context" />, the collection <c>{ <see cref="Context" />[p], <see cref="Context" />[p + 1], ..., <see cref="Context" />[p + n] }</c>, where <c>p</c> is the returned position and <c>n</c> is the length of the <c><paramref name="sample" /></c>, corresponds to the last occurrence of the <c><paramref name="sample" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). An occurrence is considered <em>last</em> if the value of the position <c>p</c> is maximal.</para>
         ///     <para>Unlike the <see cref="String.LastIndexOf(Char)" />, <see cref="Array.LastIndexOf{T}(T[], T)" />, <see cref="List{T}.LastIndexOf(T)" /> etc. methods, the method <strong>does not</strong> return -1 if the <c><paramref name="sample" /></c> is not found, but instead returns the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). This way the value returned by the method may be used as the parameter <c>fromPosition</c> in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, System.Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods to achieve a somewhat expected result (no tokens shall be rendered) without causing any exceptions.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="LastPositionOf()" />
         /// <seealso cref="LastPositionOf(String?)" />
         /// <seealso cref="LastPositionOf(String?[])" />
@@ -904,9 +942,9 @@ namespace MagicText
         ///     <para>The empty token sample precedes <c><see cref="Context" />[p]</c> and/or succeeds <c><see cref="Context" />[p - 1]</c>, where <c>p</c> is the returned position. The returned position <c>p</c> is <em>last</em> in the sense that it is the maximal such position.</para>
         ///     <para>Unlike the <see cref="String.LastIndexOf(Char)" />, <see cref="Array.LastIndexOf{T}(T[], T)" />, <see cref="List{T}.LastIndexOf(T)" /> etc. methods, the method <strong>does not</strong> return -1 if the empty token sample is not found, but instead returns the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). This way the value returned by the method may be used as the parameter <c>fromPosition</c> in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, System.Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods to achieve a somewhat expected result (no tokens shall be rendered) without causing any exceptions.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="LastPositionOf(String?)" />
         /// <seealso cref="LastPositionOf(String?[])" />
         /// <seealso cref="LastPositionOf(IEnumerable{String?})" />
@@ -932,9 +970,9 @@ namespace MagicText
         ///     <para>If the <c><paramref name="token" /></c> is found in the <see cref="Context" />, <c><see cref="Context" />[p]</c>, where <c>p</c> is the returned position, corresponds to the last occurrence of the <c><paramref name="token" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). An occurrence is considered <em>last</em> if the value of the position <c>p</c> is maximal.</para>
         ///     <para>Unlike the <see cref="String.LastIndexOf(Char)" />, <see cref="Array.LastIndexOf{T}(T[], T)" />, <see cref="List{T}.LastIndexOf(T)" /> etc. methods, the method <strong>does not</strong> return -1 if the <c><paramref name="token" /></c> is not found, but instead returns the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). This way the value returned by the method may be used as the parameter <c>fromPosition</c> in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, System.Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods to achieve a somewhat expected result (no tokens shall be rendered) without causing any exceptions.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="LastPositionOf()" />
         /// <seealso cref="LastPositionOf(String?[])" />
         /// <seealso cref="LastPositionOf(IEnumerable{String?})" />
@@ -960,9 +998,9 @@ namespace MagicText
         ///     <para>If the <c><paramref name="sample" /></c> is found in the <see cref="Context" />, the collection <c>{ <see cref="Context" />[p], <see cref="Context" />[p + 1], ..., <see cref="Context" />[p + n] }</c>, where <c>p</c> is the returned position and <c>n</c> is the length of the <c><paramref name="sample" /></c>, corresponds to the last occurrence of the <c><paramref name="sample" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). An occurrence is considered <em>last</em> if the value of the position <c>p</c> is maximal.</para>
         ///     <para>Unlike the <see cref="String.LastIndexOf(Char)" />, <see cref="Array.LastIndexOf{T}(T[], T)" />, <see cref="List{T}.LastIndexOf(T)" /> etc. methods, the method <strong>does not</strong> return -1 if the <c><paramref name="sample" /></c> is not found, but instead returns the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). This way the value returned by the method may be used as the parameter <c>fromPosition</c> in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, System.Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods to achieve a somewhat expected result (no tokens shall be rendered) without causing any exceptions.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="LastPositionOf()" />
         /// <seealso cref="LastPositionOf(String?)" />
         /// <seealso cref="LastPositionOf(IEnumerable{String?})" />
@@ -987,9 +1025,9 @@ namespace MagicText
         /// <remarks>
         ///     <para>Calling this method is slightly faster and more memory efficient than counting the number of elements in the collection returned by the <see cref="PositionsOf(IEnumerable{String?})" /> method (even if using the <see cref="ICollection{T}.Count" /> property) because no actual collection needs to be created. However, the values are ultimately the same—for instance, prefer the <see cref="PositionsOf(IEnumerable{String?})" /> method if both the positions and their quantity is needed.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="Count()" />
         /// <seealso cref="Count(String?)" />
         /// <seealso cref="Count(String?[])" />
@@ -1009,9 +1047,9 @@ namespace MagicText
         /// <remarks>
         ///     <para>Calling this method is slightly faster and more memory efficient than counting the number of elements in the collection returned by the <see cref="PositionsOf()" /> method (even if using the <see cref="ICollection{T}.Count" /> property) because no actual collection needs to be created. However, the values are ultimately the same—for instance, prefer the <see cref="PositionsOf()" /> method if both the positions and their quantity is needed.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="Count(String?)" />
         /// <seealso cref="Count(String?[])" />
         /// <seealso cref="Count(IEnumerable{String?})" />
@@ -1028,9 +1066,9 @@ namespace MagicText
         /// <remarks>
         ///     <para>Calling this method is slightly faster and more memory efficient than counting the number of elements in the collection returned by the <see cref="PositionsOf(String?)" /> method (even if using the <see cref="ICollection{T}.Count" /> property) because no actual collection needs to be created. However, the values are ultimately the same—for instance, prefer the <see cref="PositionsOf(String?)" /> method if both the positions and their quantity is needed.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="Count()" />
         /// <seealso cref="Count(String?[])" />
         /// <seealso cref="Count(IEnumerable{String?})" />
@@ -1048,9 +1086,9 @@ namespace MagicText
         /// <remarks>
         ///     <para>Calling this method is slightly faster and more memory efficient than counting the number of elements in the collection returned by the <see cref="PositionsOf(String?[])" /> method (even if using the <see cref="ICollection{T}.Count" /> property) because no actual collection needs to be created. However, the values are ultimately the same—for instance, prefer the <see cref="PositionsOf(String?[])" /> method if both the positions and their quantity is needed.</para>
         /// </remarks>
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32)" />
-        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32)" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
+        /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="Count()" />
         /// <seealso cref="Count(String?)" />
         /// <seealso cref="Count(IEnumerable{String?})" />

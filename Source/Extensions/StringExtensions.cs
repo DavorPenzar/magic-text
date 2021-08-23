@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace MagicText.Extensions
 {
     /// <summary>Provides auxiliary extension methods for <see cref="String" />s.</summary>
+    [CLSCompliant(true)]
     public static class StringExtensions
     {
         /// <summary>Retrieves the system's reference to the specified nullable <see cref="String" />.</summary>
