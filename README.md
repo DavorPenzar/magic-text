@@ -345,7 +345,7 @@ P (Israel | God of ...) = 40,85 %
 
 ```
 
-The above [probabilities](http://en.wikipedia.org/wiki/Empirical_probability) mean that the token `"Israel"` appears with only 0,15 % of chance, but, following the tokens `{ "God", " ", "of", " " }`, the [probability](http://en.wikipedia.org/wiki/Empirical_probability) of the next token being `"Israel"` rises up to 40,85 %&mdash;more than 270 times! Although, it is worth mentioning that token comparison is actually case-insensitive and that some tokens are not really part of the [*Bible*](http://en.wikipedia.org/wiki/Bible), such as the preamble:
+The above [probabilities](http://en.wikipedia.org/wiki/Empirical_probability) mean that the token `"Israel"` appears with only 0,15 % of chance, but, following the tokens `{ "God", " ", "of", " " }`, the [probability](http://en.wikipedia.org/wiki/Empirical_probability) of the next token being `"Israel"` rises up to 40,85 %&mdash;more than 270 times more! Although, it is worth mentioning that token comparison is actually case-insensitive and that some tokens are not really part of the [*Bible*](http://en.wikipedia.org/wiki/Bible), such as the preamble:
 
 ```
 The Project Gutenberg eBook of The King James Bible
