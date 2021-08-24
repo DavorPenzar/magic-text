@@ -154,7 +154,7 @@ namespace MagicText
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
         /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method).</param>
-        /// <returns>The value task that represents the asynchronous shattering operation. Its value of the <see cref="ValueTask{TResult}.Result" /> property is the list of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
+        /// <returns>The task that represents the asynchronous shattering operation. Its value of the <see cref="Task{TResult}.Result" /> property is the list of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="tokeniser" /></c> is <c>null</c>. The parameter <c><paramref name="input" /></c> is <c>null.</c></exception>
         /// <exception cref="OperationCanceledException">The operation is cancelled via the <c><paramref name="cancellationToken" /></c>.</exception>
         /// <remarks>
@@ -167,7 +167,7 @@ namespace MagicText
         /// <seealso cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" />
         /// <seealso cref="ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" />
         /// <seealso cref="ShatteringOptions" />
-        public static async ValueTask<IList<String?>> ShatterToListAsync(this ITokeniser tokeniser, TextReader input, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
+        public static async Task<IList<String?>> ShatterToListAsync(this ITokeniser tokeniser, TextReader input, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
         {
             if (tokeniser is null)
             {
@@ -190,7 +190,7 @@ namespace MagicText
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
         /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method).</param>
-        /// <returns>The value task that represents the asynchronous shattering operation. Its value of the <see cref="ValueTask{TResult}.Result" /> property is the list of tokens (in the order they were read) read from the <c><paramref name="text" /></c>.</returns>
+        /// <returns>The task that represents the asynchronous shattering operation. Its value of the <see cref="Task{TResult}.Result" /> property is the list of tokens (in the order they were read) read from the <c><paramref name="text" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="tokeniser" /></c> is <c>null</c>. The parameter <c><paramref name="text" /></c> is <c>null.</c></exception>
         /// <exception cref="OperationCanceledException">The operation is cancelled via the <c><paramref name="cancellationToken" /></c>.</exception>
         /// <remarks>
@@ -207,7 +207,7 @@ namespace MagicText
         /// <seealso cref="ShatterToList(ITokeniser, String, ShatteringOptions?)" />
         /// <seealso cref="ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" />
         /// <seealso cref="ShatteringOptions" />
-        public static async ValueTask<IList<String?>> ShatterToListAsync(this ITokeniser tokeniser, String text, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
+        public static async Task<IList<String?>> ShatterToListAsync(this ITokeniser tokeniser, String text, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false)
         {
             if (tokeniser is null)
             {
