@@ -24,7 +24,7 @@ namespace MagicText
     ///
     ///     <h3>Notes to Implementers</h3>
     ///     <para>To implement a custom <see cref="Pen" /> subclass with a custom text generation algorithm, only the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" /> method should be overridden. In fact, the other rendering methods (<see cref="Render(Int32, Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" />) may not be overriden, but they rely on the implementation of the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" /> method.</para>
-    ///     <para>When implementing a subclass, consider using the protected <see cref="Index" /> property as well as the convenient protected static methods such as the <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />, <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" /> and <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" /> methods which are designed to optimise the corpus analysis of the <see cref="Context" />. Note, however, that the methods assume proper usage to enhance performance. There are a few additional public member methods, such as the <see cref="PositionsOf(IEnumerable{String?})" /> or the <see cref="Count(IEnumerable{String?})" /> methods, that may be used as well. These methods are not as flexible as the protected static ones and are suboptimal for some use cases: for instance, the <see cref="PositionsOf(IEnumerable{String?})" /> method creates a new <see cref="ICollection{T}" /> to store the positions, while the <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" /> method return two integers (one via the <c>out</c> parameter) which merely indicate where in the <c>index</c> (the method's input parameter) the sought positions are.</para>
+    ///     <para>When implementing a subclass, consider using the protected <see cref="Index" /> property as well as the convenient protected static methods such as the <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />, <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" /> and <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" /> methods which are designed to optimise the corpus analysis of the <see cref="Context" />. Note, however, that the methods assume proper usage to enhance performance. There are a few additional public member methods, such as the <see cref="PositionsOf(IEnumerable{String?})" /> or the <see cref="Count(IEnumerable{String?})" /> methods, that may be used as well. These methods are not as flexible as the protected static ones and are suboptimal for some use cases: for instance, the <see cref="PositionsOf(IEnumerable{String?})" /> method creates a new <see cref="ICollection{T}" /> to store the positions, while the <see cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" /> method returns two integers (one via the <c>out</c> parameter) which merely indicate where in the <c>index</c> (the method's input parameter) the sought positions are.</para>
     ///     <para>If the derived class provides additional fields or properties, to enable serialisation/deserialisation override the <see cref="GetObjectData(SerializationInfo, StreamingContext)" /> method. Also, implement a proper constructor, such as the <see cref="Pen(SerializationInfo, StreamingContext)" /> constructor.</para>
     /// </remarks>
     [CLSCompliant(true)]
@@ -276,23 +276,17 @@ namespace MagicText
             // Loop until found.
             {
                 Int32 m;
+                Int32 c;
 
-                while (l < h - 1)
+                while (l != h)
                 {
                     m = (l + h) >> 1;
 
                     // Compare the ranges.
-                    Int32 c = CompareRange(comparer, tokens, sampleCycle, index[m], cycleStart);
+                    c = CompareRange(comparer, tokens, sampleCycle, index[m], cycleStart);
 
                     // Break the loop or update the positions.
-                    if (c == 0)
-                    {
-                        l = m;
-                        h = m;
-
-                        break;
-                    }
-                    else if (c < 0)
+                    if (c < 0)
                     {
                         l = m + 1;
                     }
@@ -300,11 +294,14 @@ namespace MagicText
                     {
                         h = m;
                     }
+                    else
+                    {
+                        l = m;
+                        h = m;
+
+                        break;
+                    }
                 }
-            }
-            if (l < h && CompareRange(comparer, tokens, sampleCycle, index[l], cycleStart) < 0)
-            {
-                l = h;
             }
 
             // Find the minimal position index `l` and the maximal index `h` of occurrences of the `sampleCycle` amongst the `tokens`.
@@ -598,9 +595,10 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="info" /></c> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>The exceptions thrown by the <c><paramref name="info" /></c>'s methods (most notably the <see cref="SerializationException" /> and <see cref="InvalidCastException" />) are not caught.</para>
-        ///     <para>If the original <see cref="Pen" /> 's tokens were all interned (<see cref="Interned" />), the deserialised <see cref="Pen" />'s tokens are also going to be interned; and vice versa. To avoid this, use the <see cref="Pen(Pen, Boolean)" /> constructor before the serialisation to create a new <see cref="Pen" /> with a different interning policy.</para>
+        ///     <para>If the original <see cref="Pen" />'s tokens were all interned (<see cref="Interned" />), the deserialised <see cref="Pen" />'s tokens are also going to be interned; and vice versa. To avoid this, use the <see cref="Pen(Pen, Boolean)" /> constructor before the serialisation to create a new <see cref="Pen" /> with a different interning policy.</para>
         ///     <para>Serialising and deserialising <see cref="StringComparer" />s other than <see cref="StringComparer.InvariantCultureIgnoreCase" />, <see cref="StringComparer.InvariantCulture" />, <see cref="StringComparer.OrdinalIgnoreCase" /> and <see cref="StringComparer.Ordinal" /> may yield unexpected results. If a custom <see cref="StringComparer" /> is used, make sure it may be fully serialised/deserialised. This is important for proper serialisation/deserialisation of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction of the original <see cref="Pen" />).</para>
         ///     <para>Because of performance reasons, no value is checked when deserialising data from the <c><paramref name="info" /></c>—it is assumed that all values are <em>legal</em> and <em>valid</em>. Deserialising data retrieved by actually serialising a <see cref="Pen" /> shall result in a valid <see cref="Pen" /> equivalent to the original (provided the <see cref="StringComparer" /> was successfully serialised and deserialised); any other deserialisation would probably fail or result in a <see cref="Pen" /> with unexpected behaviour.</para>
+        ///     <para><strong>Nota bene.</strong> Only member properties are serialised/deserialised. Random state of the internal (pseudo-)random number generator, which is used in the <see cref="Pen.Render(Int32, Nullable{Int32})" /> method, is not serialised/deserialised.</para>
         ///
         ///     <h3>Notes to Implementers</h3>
         ///     <para>To deserialise a derived class, call the base class's <see cref="Pen(SerializationInfo, StreamingContext)" /> constructor first:</para>
@@ -632,7 +630,8 @@ namespace MagicText
                 }
                 catch (Exception ex) when (ex is SerializationException || ex is InvalidCastException)
                 {
-                    comparer = (StringComparer)info.GetValue(nameof(Comparer), typeof(StringComparer));
+                    String comparerType = info.GetString(nameof(StringComparer));
+                    comparer = (StringComparer)info.GetValue(nameof(Comparer), Type.GetType(comparerType) ?? typeof(StringComparer));
                 }
                 _comparer = comparer;
             }
@@ -1321,6 +1320,7 @@ namespace MagicText
         ///     <para>The exceptions thrown by the <c><paramref name="info" /></c>'s methods (most notably the <see cref="SerializationException" />) are not caught.</para>
         ///     <para>If the current <see cref="Pen" /> 's tokens are all interned (<see cref="Interned" />), the deserialised <see cref="Pen" />'s tokens are also going to be interned; and vice versa. To avoid this, use the <see cref="Pen(Pen, Boolean)" /> constructor before the serialisation to create a new <see cref="Pen" /> with a different interning policy.</para>
         ///     <para>Serialising and deserialising <see cref="StringComparer" />s other than <see cref="StringComparer.InvariantCultureIgnoreCase" />, <see cref="StringComparer.InvariantCulture" />, <see cref="StringComparer.OrdinalIgnoreCase" /> and <see cref="StringComparer.Ordinal" /> may yield unexpected results. If a custom <see cref="StringComparer" /> is used, make sure it may be fully serialised/deserialised. This is important for proper serialisation/deserialisation of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction of the original <see cref="Pen" />).</para>
+        ///     <para><strong>Nota bene.</strong> Only member properties are serialised/deserialised. Random state of the internal (pseudo-)random number generator, which is used in the <see cref="Pen.Render(Int32, Nullable{Int32})" /> method, is not serialised/deserialised.</para>
         ///
         ///     <h3>Notes to Implementers</h3>
         ///     <para>If the derived class provides additional fields or properties, override this method to enable serialisation/deserialisation. To fully serialise the <see cref="Pen" />, however, make sure the base class's <see cref="GetObjectData(SerializationInfo, StreamingContext)" /> method is invoked:</para>
@@ -1342,7 +1342,7 @@ namespace MagicText
 
             // Serialise the `Comparer`.
             {
-                Type comparerType = Comparer.GetType();
+                Type comparerType = Comparer.GetType() ?? typeof(StringComparer);
                 if (comparerType.Equals(StringComparer.InvariantCultureIgnoreCase.GetType()))
                 {
                     info.AddValue(nameof(Comparer), Convert.ToInt32(StringComparison.InvariantCultureIgnoreCase));
@@ -1361,7 +1361,8 @@ namespace MagicText
                 }
                 else
                 {
-                    info.AddValue(nameof(Comparer), Comparer, Comparer.GetType() ?? typeof(StringComparer));
+                    info.AddValue(nameof(StringComparer), comparerType?.FullName, typeof(String));
+                    info.AddValue(nameof(Comparer), Comparer, comparerType);
                 }
             }
 
@@ -1381,7 +1382,7 @@ namespace MagicText
             // Serialise the `Index`.
             {
                 Int32[] indexArray = new Int32[Index.Count];
-                for (Int32 i = 0; i < Index.Count; ++i)
+                for (Int32 i = 0; i < Context.Count; ++i)
                 {
                     indexArray[i] = Index[i];
                 }

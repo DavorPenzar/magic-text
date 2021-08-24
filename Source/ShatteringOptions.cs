@@ -26,21 +26,28 @@ namespace MagicText
         /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>
         /// <param name="right">The right <see cref="ShatteringOptions" /> to compare.</param>
         /// <returns>If the <see cref="ShatteringOptions" /> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
-        public static Boolean operator ==(ShatteringOptions? left, ShatteringOptions? right) =>
+        public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right) =>
             left is null ? right is null : left.Equals(right);
+
+        /// <summary>Indicates whether the <c><paramref name="left" /></c> <see cref="ShatteringOptions" /> are equal to the <c><paramref name="right" /></c> or not.</summary>
+        /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>
+        /// <param name="right">The right <see cref="ShatteringOptions" /> to compare.</param>
+        /// <returns>If the <see cref="ShatteringOptions" /> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
+        public static Boolean operator ==(ShatteringOptions? left, ShatteringOptions? right) =>
+            Equals(left, right);
 
         /// <summary>Indicates whether the <c><paramref name="left" /></c> <see cref="ShatteringOptions" /> are not equal to the <c><paramref name="right" /></c>.</summary>
         /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>
         /// <param name="right">The right <see cref="ShatteringOptions" /> to compare.</param>
         /// <returns>If the <see cref="ShatteringOptions" /> are not equal, <c>true</c>; <c>false</c> otherwise.</returns>
         public static Boolean operator !=(ShatteringOptions? left, ShatteringOptions? right) =>
-            !(left == right);
+            !Equals(left, right);
 
         /// <summary>Gets the default <see cref="ShatteringOptions" /> to use when no options are set.</summary>
         /// <returns>The default <see cref="ShatteringOptions" />.</returns>
         /// <remarks>
         ///     <para>Retrieving the value of this property is <strong>exactly the same</strong> as creating new <see cref="ShatteringOptions" /> using the default <see cref="ShatteringOptions()" /> constructor. The property is provided merely to enable a more readable and explicit code when handling <c>null</c>-options in the implementations of the <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods.</para>
-        ///     <para>The property always returns a new reference (to the newly constructed default <see cref="ShatteringOptions" />). Hence changes made to one <see cref="ShatteringOptions" /> returned by the property do not affect the others. Also, <c><see cref="Object" />.ReferenceEquals(<see cref="Default" />, <see cref="Default" />)</c> never evaluates to <c>true</c>, although both <c><see cref="Default" />.Equals(<see cref="Default" />)</c> and <c><see cref="Default" /> == <see cref="Default" /></c> evaluate to <c>true</c> because of the overloads of methods and operators.</para>
+        ///     <para>The property always returns a new reference (to the newly constructed default <see cref="ShatteringOptions" />). Hence changes made to one <see cref="ShatteringOptions" /> returned by the property do not affect the others. Also, <c><see cref="Object" />.ReferenceEquals(<see cref="Default" />, <see cref="Default" />)</c> never evaluates to <c>true</c>, although all <c><see cref="Default" />.Equals(<see cref="Default" />)</c>, <c><see cref="ShatteringOptions" />.Equals(<see cref="Default" />, <see cref="Default" />)</c> and <c><see cref="Default" /> == <see cref="Default" /></c> evaluate to <c>true</c> because of the overloads of methods and operators (operator overloading may not work in some languages).</para>
         /// </remarks>
         public static ShatteringOptions Default => new ShatteringOptions();
 
