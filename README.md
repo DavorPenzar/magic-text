@@ -334,7 +334,8 @@ The program above computes the following [probabilities](http://en.wikipedia.org
 
 1.  of the token `"Israel"` &ndash; `p1`,
 2.  of the token [quadrigram](http://en.wikipedia.org/wiki/N-gram) `{ "God", " ", "of", " " }` &ndash; `p2`,
-3.  of the token [quinquegram](http://en.wikipedia.org/wiki/N-gram) `{ "God", " ", "of", " ", "Israel" }` &ndash; `p3`.
+3.  of the token [quinquegram](http://en.wikipedia.org/wiki/N-gram) `{ "God", " ", "of", " ", "Israel" }` &ndash; `p3`,
+4.  of the token `"Israel"` under the condition of the token [quadrigram](http://en.wikipedia.org/wiki/N-gram) `{ "God", " ", "of", " " }` ([conditional probability](http://en.wikipedia.org/wiki/Conditional_probability)) &ndash; `p3 / p2`.
 
 It will take some time to finish, but in the end it should output the following values:
 
