@@ -11,7 +11,7 @@ namespace MagicText
     /// <summary>Implements a <see cref="LineByLineTokeniser" /> which shatters lines of text at specific regular expression pattern matches.</summary>
     /// <remarks>
     ///     <para>Additional to shattering text into tokens, <see cref="RegexTokeniser" /> provides a possibility to transform tokens immediately after the extraction of regular expression matches and prior to checking for empty tokens. Initially, the idea was to use regular expressions for the transformation as regular expressions are often used for text replacement alongside other uses (such as text breaking/splitting), but the tokeniser accepts any <see cref="Func{T, TResult}" /> delegate for the transformation function <see cref="Transform" />. This way the <see cref="RegexTokeniser" /> class provides a wider range of tokenising policies and, at the same time, its implementation and programming interface are more consistent with other libraries, most notably the standard <em>.NET</em> library (such as the <see cref="Enumerable.Select{TSource, TResult}(IEnumerable{TSource}, Func{TSource, TResult})" /> extension method). Still, to use a regular expression based replacement, a lambda-function <c>t => <see cref="Regex" />.Replace(t, matchPattern, replacementPattern)</c>, where <c>matchPattern</c> and <c>replacementPattern</c> are regular expressions to match and to use for replacement respectively, may be provided (amongst other solutions).</para>
-    ///     <para>If a default regular expression break pattern <see cref="DefaultInclusiveBreakPattern" /> or <see cref="DefaultExclusiveBreaker" /> should be used without special <see cref="RegexOptions" />, a better performance is achieved when using the default <see cref="RegexTokeniser()" /> constructor or the <see cref="RegexTokeniser(Boolean)" /> constructor, in which case a pre-built <see cref="Regex" /> object is used constructed with <see cref="Regex.Options" />, instead of the <see cref="RegexTokeniser(String, RegexOptions, Func{String?, String?}?)" /> constructor.</para>
+    ///     <para>If a default regular expression break pattern <see cref="DefaultInclusiveBreakPattern" /> or <see cref="DefaultExclusiveBreaker" /> should be used without special <see cref="RegexOptions" />, a better performance is achieved when using the default <see cref="RegexTokeniser()" /> constructor or the <see cref="RegexTokeniser(Boolean, Func{String?, String?}?)" /> constructor, in which case a pre-built <see cref="Regex" /> object is used constructed with <see cref="Regex.Options" />, instead of the <see cref="RegexTokeniser(String, RegexOptions, Func{String?, String?}?)" /> constructor.</para>
     ///     <para>Empty tokens (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens which yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method after possible transformation via the <see cref="Transform" /> delegate if it is set. This behaviour cannot be overridden by a derived class.</para>
     ///     <para>No thread safety mechanism is implemented nor assumed by the class. If the transformation function (<see cref="Transform" />) should be thread-safe, lock the tokeniser during complete <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.</para>
     /// </remarks>
@@ -46,7 +46,7 @@ namespace MagicText
         /// <returns>The default inclusive regular expression breaker.</returns>
         /// <remarks>
         ///     <para>The regular expression breaker is constructed using the <see cref="DefaultInclusiveBreakPattern" /> with the <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" />.</para>
-        ///     <para>When constructing a <see cref="RegexTokeniser" /> using the default <see cref="RegexTokeniser()" /> constructor or the constructor <see cref="RegexTokeniser(Boolean)" /> with the parameter <c>inclusiveBreak</c> set to <c>true</c>, the <see cref="Breaker" /> shall be set to <see cref="DefaultInclusiveBreakPattern" />.</para>
+        ///     <para>When constructing a <see cref="RegexTokeniser" /> using the default <see cref="RegexTokeniser()" /> constructor or the constructor <see cref="RegexTokeniser(Boolean, Func{String?, String?}?)" /> with the parameter <c>inclusiveBreak</c> set to <c>true</c>, the <see cref="Breaker" /> shall be set to <see cref="DefaultInclusiveBreakPattern" />.</para>
         /// </remarks>
         protected static Regex DefaultInclusiveBreaker => _defaultInclusiveBreaker;
 
@@ -54,7 +54,7 @@ namespace MagicText
         /// <returns>The default exclusive regular expression breaker.</returns>
         /// <remarks>
         ///     <para>The regular expression breaker is constructed using the <see cref="DefaultExclusiveBreakPattern" /> with the <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" />.</para>
-        ///     <para>When constructing a <see cref="RegexTokeniser" /> using the constructor <see cref="RegexTokeniser(Boolean)" /> with the parameter <c>inclusiveBreak</c> set to <c>false</c>, the <see cref="Breaker" /> shall be set to <see cref="DefaultExclusiveBreakPattern" />.</para>
+        ///     <para>When constructing a <see cref="RegexTokeniser" /> using the constructor <see cref="RegexTokeniser(Boolean, Func{String?, String?}?)" /> with the parameter <c>inclusiveBreak</c> set to <c>false</c>, the <see cref="Breaker" /> shall be set to <see cref="DefaultExclusiveBreakPattern" />.</para>
         /// </remarks>
         protected static Regex DefaultExclusiveBreaker => _defaultExclusiveBreaker;
 
@@ -122,17 +122,18 @@ namespace MagicText
 
         /// <summary>Creates a default tokeniser with the inclusive break or not.</summary>
         /// <param name="inclusiveBreaker">If <c>true</c>, the <see cref="DefaultInclusiveBreakPattern" /> is used as the regular expression break pattern; otherwise the <see cref="DefaultExclusiveBreakPattern" /> is used.</param>
+        /// <param name="transform">The optional token transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <remarks>
         ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultInclusiveBreaker" /> or <see cref="DefaultExclusiveBreaker" />) with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" /> is used. Consider using this constructor or the default <see cref="RegexTokeniser()" /> constructor if a default tokeniser should be used to improve performance.</para>
         /// </remarks>
-        public RegexTokeniser(Boolean inclusiveBreaker) : this(inclusiveBreaker ? DefaultInclusiveBreaker : DefaultExclusiveBreaker)
+        public RegexTokeniser(Boolean inclusiveBreaker, Func<String?, String?>? transform = null) : this(breaker: inclusiveBreaker ? DefaultInclusiveBreaker : DefaultExclusiveBreaker, transform: transform)
         {
         }
 
         /// <summary>Creates a default tokeniser.</summary>
         /// <remarks>
         ///     <para>The <see cref="DefaultInclusiveBreakPattern" /> is used as the regular expression break pattern.</para>
-        ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultInclusiveBreaker" />) with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" /> is used. Consider using this constructor or the <see cref="RegexTokeniser(Boolean)" /> constructor if a default tokeniser should be used to improve performance.</para>
+        ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultInclusiveBreaker" />) with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" /> is used. Consider using this constructor or the <see cref="RegexTokeniser(Boolean, Func{String?, String?}?)" /> constructor if a default tokeniser should be used to improve performance.</para>
         /// </remarks>
         public RegexTokeniser() : this(true)
         {
