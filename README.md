@@ -190,7 +190,7 @@ try
 	CancellationTokenSource cancellation = new CancellationTokenSource();
 	await foreach (String? token in tokeniser.ShatterAsync(Console.In).WithCancellation(cancellation.Token).ConfigureAwait(false))
 	{
-		if (token.Trim() == "###")
+		if (token?.Trim() == "###")
 		{
 			cancellation.Cancel();
 		}
