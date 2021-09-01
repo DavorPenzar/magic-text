@@ -148,7 +148,7 @@ namespace MagicText
             Int32 j; // the counter of token break point prompts
 
             // Iterate over characters in the `line`
-            for (i = 0, j = 0; i < line.Length; ++i, ++j)
+            for (i = 0, j = 0; i < line.Length; ++j)
             {
                 // Return the token, clear the `tokenBuilder` and move back a position if necessary.
                 if (BreakToken(line.Length, i, j))
@@ -156,25 +156,25 @@ namespace MagicText
                     yield return tokenBuilder.ToString();
                     tokenBuilder.Clear();
 
-                    --i;
-
                     continue;
                 }
 
                 // Add the current character to the token.
-                tokenBuilder.Append(line[i]);
+                tokenBuilder.Append(line[i++]);
             }
 
             // Create and return tokens at the end of the `line` while necessary.
             while (i <= line.Length && i >= 0)
             {
-                if (BreakToken(line.Length, i++, j++))
+                if (BreakToken(line.Length, i, j++))
                 {
                     yield return tokenBuilder.ToString();
                     tokenBuilder.Clear();
 
-                    --i;
+                    continue;
                 }
+
+                ++i;
             }
 
             // Return the final token if necessary.

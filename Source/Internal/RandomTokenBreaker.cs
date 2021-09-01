@@ -1,11 +1,12 @@
 using System;
+using System.Globalization;
 
 namespace MagicText.Internal
 {
     /// <summary>Provides a method for the <see cref="RandomTokeniser" /> to choose token breaking points based using a <see cref="System.Random" />.</summary>
     internal class RandomTokenBreaker : Object
     {
-        protected const string BiasOutOfRangeErrorMessage = "Bias is out of range. Must be greater than 0 and less than or equal to 1.";
+        protected const string BiasOutOfRangeFormatErrorMessage = "Bias is out of range. Must be greater than {0:N0} and less than or equal to {1:N0}.";
         protected const string RandomNullErrorMessage = "(Pseudo-)Random number generator cannot be null.";
 
         /// <summary>The default bias.</summary>
@@ -48,7 +49,7 @@ namespace MagicText.Internal
         /// </remarks>
         public RandomTokenBreaker(System.Random random, Double bias) : base()
         {
-            _bias = (Double.IsNaN(bias) || Double.IsInfinity(bias) || bias <= 0.0D || bias > 1.0D) ? throw new ArgumentOutOfRangeException(nameof(bias), bias, BiasOutOfRangeErrorMessage) : bias;
+            _bias = (Double.IsNaN(bias) || Double.IsInfinity(bias) || bias <= 0.0D || bias > 1.0D) ? throw new ArgumentOutOfRangeException(nameof(bias), bias, String.Format(CultureInfo.CurrentCulture, BiasOutOfRangeFormatErrorMessage, 0.0D, 1.0D)) : bias;
             _random = random ?? throw new ArgumentNullException(nameof(random), RandomNullErrorMessage);
         }
 

@@ -34,10 +34,6 @@ namespace MagicText.Internal
         /// <summary>Returns the hash code for the <see cref="String" />.</summary>
         /// <returns>The hash code for the <see cref="String" />.</returns>
         /// <seealso cref="String" />
-        /// <seealso cref="Equals(System.String?)" />
-        /// <seealso cref="Equals(Object?)" />
-        /// <seealso cref="Compare(System.String)" />
-        /// <seealso cref="Compare(Object)" />
         public new Int32 GetHashCode() =>
             Comparer.GetHashCode(String);
 
@@ -46,7 +42,6 @@ namespace MagicText.Internal
         /// <returns>If <c><paramref name="x" /></c> and the <see cref="String" /> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <seealso cref="String" />
         /// <seealso cref="Equals(Object?)" />
-        /// <seealso cref="GetHashCode()" />
         /// <seealso cref="Compare(System.String)" />
         /// <seealso cref="Compare(Object)" />
         public Boolean Equals(System.String? x) =>
@@ -57,7 +52,6 @@ namespace MagicText.Internal
         /// <returns>If <c><paramref name="x" /></c> and the <see cref="String" /> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <seealso cref="String" />
         /// <seealso cref="Equals(System.String?)" />
-        /// <seealso cref="GetHashCode()" />
         /// <seealso cref="Compare(Object)" />
         /// <seealso cref="Compare(System.String)" />
         public new Boolean Equals(Object? x) =>
@@ -73,7 +67,6 @@ namespace MagicText.Internal
         /// <seealso cref="Compare(Object)" />
         /// <seealso cref="Equals(System.String?)" />
         /// <seealso cref="Equals(Object?)" />
-        /// <seealso cref="GetHashCode()" />
         public Int32 Compare(System.String x) =>
             Comparer.Compare(x, String);
 
@@ -87,7 +80,6 @@ namespace MagicText.Internal
         /// <seealso cref="Compare(System.String)" />
         /// <seealso cref="Equals(Object?)" />
         /// <seealso cref="Equals(System.String?)" />
-        /// <seealso cref="GetHashCode()" />
         public Int32 Compare(Object x) =>
             Comparer.Compare(x, String);
     }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
@@ -40,9 +41,9 @@ namespace MagicText
         protected const string ContextNullErrorMessage = "Context token enumerable cannot be null.";
         protected const string PickerNullErrorMessage = "Picking function cannot be null.";
         private const string RandomNullErrorMessage = "(Pseudo-)Random number generator cannot be null.";
-        protected const string RelevantTokensOutOfRangeErrorMessage = "Relevant tokens number is out of range. Must be non-negative.";
-        protected const string FromPositionOutOfRangeFormatErrorMessage = "First token index is out of range. Must be non-negative and less than or equal to the size of the context ({0:D}).";
-        protected const string PickOutOfRangeFormatErrorMessage = "Picking function returned a pick out of range. Must return a non-negative pick less than the parameter given ({0:D}); however, if the parameter equals 0, 0 must be returned.";
+        protected const string RelevantTokensOutOfRangeFormatErrorMessage = "Relevant tokens number is out of range. Must be greater than {0:D}.";
+        protected const string FromPositionOutOfRangeFormatErrorMessage = "First token index is out of range. Must be greater than {0:D} and less than or equal to the size of the context ({1:D}).";
+        protected const string PickOutOfRangeFormatErrorMessage = "Picking function returned a pick out of range. Must return a pick greater than {0:D} and less than the parameter given ({1:D}); however, if the parameter equals {2:D}, {3:D} must be returned.";
 
         private static readonly Object _locker;
         private static Int32 randomSeed;
@@ -146,12 +147,13 @@ namespace MagicText
         /// <returns>If <c><paramref name="enumerable" /></c> is non-<c>null</c>, an <see cref="IReadOnlyList{T}" /> equivalent to it is returned; otherwise a <c>null</c> is returned.</returns>
         /// <remarks>
         ///     <para>This method attempts to convert the <c><paramref name="enumerable" /></c> with as little work as possible (if possible, enumeration is avoided). Namely, if the <c><paramref name="enumerable" /></c> is already an <see cref="IReadOnlyList{T}" />, it is returned without conversion; if the <c><paramref name="enumerable" /></c> is an <see cref="IList{T}" />, the wrapper <see cref="ReadOnlyCollection{T}" /> around it is returned.</para>
+        ///     <para>The method does not throw an exception (such as the <see cref="ArgumentNullException" />) if the <c><paramref name="enumerable" /></c> is <c>null</c>. Instead, <c>null</c> is simply returned. Such cases should be handled in the code surrounding the method call.</para>
         /// </remarks>
-        [return: NotNullIfNotNull("enumerable")]
-        protected static IReadOnlyList<T>? ConvertToReadOnlyList<T>(IEnumerable<T>? enumerable) =>
+        [return: MaybeNull, NotNullIfNotNull("enumerable")]
+        protected static IReadOnlyList<T> ConvertToReadOnlyList<T>([AllowNull] IEnumerable<T> enumerable) =>
             enumerable switch
             {
-                null => null,
+                null => null!,
                 IReadOnlyList<T> readOnlyList => readOnlyList,
                 IList<T> list => new ReadOnlyCollection<T>(list),
                 _ => new List<T>(enumerable)
@@ -278,9 +280,9 @@ namespace MagicText
                 Int32 m;
                 Int32 c;
 
-                while (l != h)
+                while (l < h)
                 {
-                    m = (l + h) >> 1;
+                    m = (l + h) >> 1; // (l + h) / 2
 
                     // Compare the ranges.
                     c = CompareRange(comparer, tokens, sampleCycle, index[m], cycleStart);
@@ -1140,7 +1142,7 @@ namespace MagicText
             }
             if (relevantTokens < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(relevantTokens), relevantTokens, RelevantTokensOutOfRangeErrorMessage);
+                throw new ArgumentOutOfRangeException(nameof(relevantTokens), relevantTokens, RelevantTokensOutOfRangeFormatErrorMessage);
             }
 
             // Initialise the list of the `relevantTokens` most recent tokens and its first position (the list will be cyclical after rendering `relevantTokens` tokens).
@@ -1152,7 +1154,7 @@ namespace MagicText
             {
                 if (fromPosition.Value < 0 || fromPosition.Value > Context.Count)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(fromPosition), fromPosition.Value, String.Format(FromPositionOutOfRangeFormatErrorMessage, Context.Count));
+                    throw new ArgumentOutOfRangeException(nameof(fromPosition), fromPosition.Value, String.Format(CultureInfo.CurrentCulture, FromPositionOutOfRangeFormatErrorMessage, 0, Context.Count));
                 }
 
                 Int32 next;
@@ -1174,7 +1176,7 @@ namespace MagicText
                 Int32 pick = picker(Context.Count + 1);
                 if (pick < 0 || pick > Context.Count)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(picker), pick, String.Format(PickOutOfRangeFormatErrorMessage, Context.Count + 1));
+                    throw new ArgumentOutOfRangeException(nameof(picker), pick, String.Format(CultureInfo.CurrentCulture, PickOutOfRangeFormatErrorMessage, 0, Context.Count + 1, 0, 0));
                 }
 
                 Int32 first = pick < Context.Count ? Index[pick] : Context.Count;
@@ -1215,7 +1217,7 @@ namespace MagicText
                 Int32 pick = picker(n);
                 if (pick < 0 || pick >= Math.Max(n, 1)) // actually, `n` should never be 0
                 {
-                    throw new ArgumentOutOfRangeException(nameof(picker), pick, String.Format(PickOutOfRangeFormatErrorMessage, n));
+                    throw new ArgumentOutOfRangeException(nameof(picker), pick, String.Format(CultureInfo.CurrentCulture, PickOutOfRangeFormatErrorMessage, 0, n, 0, 0));
                 }
                 pick += p;
 

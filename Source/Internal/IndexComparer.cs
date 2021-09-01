@@ -44,10 +44,6 @@ namespace MagicText.Internal
         /// <returns>The hash code for the <c><paramref name="obj" /></c>.</returns>
         /// <seealso cref="Tokens" />
         /// <seealso cref="GetHashCode(Object?)" />
-        /// <seealso cref="Equals(Int32, Int32)" />
-        /// <seealso cref="Equals(Object?, Object?)" />
-        /// <seealso cref="Compare(Int32, Int32)" />
-        /// <seealso cref="Compare(Object?, Object?)" />
         public Int32 GetHashCode(Int32 obj) =>
             obj.GetHashCode();
 
@@ -57,10 +53,6 @@ namespace MagicText.Internal
         /// <exception cref="ArgumentException">The parameter <c><paramref name="obj" /></c> is not an <see cref="Int32" />.</exception>
         /// <seealso cref="Tokens" />
         /// <seealso cref="GetHashCode(Int32)" />
-        /// <seealso cref="Equals(Object?, Object?)" />
-        /// <seealso cref="Equals(Int32, Int32)" />
-        /// <seealso cref="Compare(Object?, Object?)" />
-        /// <seealso cref="Compare(Int32, Int32)" />
         public Int32 GetHashCode(Object? obj) =>
             obj is Int32 objInt ? GetHashCode(objInt) : throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(obj));
 
@@ -70,8 +62,6 @@ namespace MagicText.Internal
         /// <returns>If <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <seealso cref="Tokens" />
         /// <seealso cref="Equals(Object?, Object?)" />
-        /// <seealso cref="GetHashCode(Int32)" />
-        /// <seealso cref="GetHashCode(Object?)" />
         /// <seealso cref="Compare(Int32, Int32)" />
         /// <seealso cref="Compare(Object?, Object?)" />
         public Boolean Equals(Int32 x, Int32 y) =>
@@ -84,8 +74,6 @@ namespace MagicText.Internal
         /// <exception cref="ArgumentException">The parameter <c><paramref name="x" /></c> is not an <see cref="Int32" />. The parameter <c><paramref name="x" /></c> is not an <see cref="Int32" />.</exception>
         /// <seealso cref="Tokens" />
         /// <seealso cref="Equals(Int32, Int32)" />
-        /// <seealso cref="GetHashCode(Object?)" />
-        /// <seealso cref="GetHashCode(Int32)" />
         /// <seealso cref="Compare(Object?, Object?)" />
         /// <seealso cref="Compare(Int32, Int32)" />
         public new Boolean Equals(Object? x, Object? y)
@@ -113,8 +101,6 @@ namespace MagicText.Internal
         /// <seealso cref="Compare(Object?, Object?)" />
         /// <seealso cref="Equals(Int32, Int32)" />
         /// <seealso cref="Equals(Object?, Object?)" />
-        /// <seealso cref="GetHashCode(Int32)" />
-        /// <seealso cref="GetHashCode(Object?)" />
         public Int32 Compare(Int32 x, Int32 y)
         {
             // Compare the indices. If not equal, compare the tokens (if possible).
@@ -160,8 +146,6 @@ namespace MagicText.Internal
         /// <seealso cref="Compare(Int32, Int32)" />
         /// <seealso cref="Equals(Object?, Object?)" />
         /// <seealso cref="Equals(Int32, Int32)" />
-        /// <seealso cref="GetHashCode(Object?)" />
-        /// <seealso cref="GetHashCode(Int32)" />
         public Int32 Compare(Object? x, Object? y)
         {
             if (!(x is Int32 xInt))
