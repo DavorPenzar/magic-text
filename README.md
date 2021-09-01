@@ -2,7 +2,7 @@
 
 [*.NET Standard*](http://docs.microsoft.com/en-gb/dotnet/standard/net-standard) library written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) for generating random text. The library's interface is [CLS compliant](http://docs.microsoft.com/en-gb/dotnet/standard/language-independence#cls-compliance-rules); however, inline documentation is written from a [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) perspective and some code excerpts (e. g. regarding operator overloading) may not be compatible with other [CLI](http://ecma-international.org/publications-and-standards/standards/ecma-335/) languages.
 
-**Author**: Davor Penzar (August 2021)
+**Author**: Davor Penzar (September 2021)
 
 ##  Quick Info
 
@@ -190,7 +190,7 @@ try
 	CancellationTokenSource cancellation = new CancellationTokenSource();
 	await foreach (String? token in tokeniser.ShatterAsync(Console.In).WithCancellation(cancellation.Token).ConfigureAwait(false))
 	{
-		if (token == "#BREAK")
+		if (token.Trim() == "###")
 		{
 			cancellation.Cancel();
 		}
@@ -204,7 +204,7 @@ catch (OperationCanceledException)
 
 ```
 
-Obviously, this is an *overkill*, as, instead of `cancellation.Cancel()`, one could simply `break` the asynchronous `foreach`-loop; not to mention that reading from the console may be done synchronously. However, the example above illustrates the power and possibilities provided by the library which might come useful in other real-life scenarios.
+Obviously, this is an *overkill*, as, instead of `cancellation.Cancel()`, one could simply `break` the asynchronous `foreach`-loop; not to mention that reading from the console may be done synchronously (and in the background it actually is, as explained [here](http://docs.microsoft.com/en-gb/dotnet/api/system.console.in#remarks)). However, the example above illustrates the power and possibilities provided by the library which might come useful in other real-life scenarios.
 
 Note that the [`LineByLineTokeniser`](Source/LineByLineTokeniser.cs)&mdash;the base class of the [`RegexTokeniser`](Source/RegexTokeniser.cs), the [`CharTokeniser`](Source/CharTokeniser.cs) and the [`RandomTokeniser`](Source/RandomTokeniser.cs) classes&mdash;does not necessarily cancel the tokenising operation immediately, meaning that some additional iterations in the `foreach`-loop above may be run even after the `"#BREAK"` token is found. However, no new lines will be read from the underlying input ([`System.Console.In`](http://docs.microsoft.com/en-gb/dotnet/api/system.console.in) in the example above) after cancelling the operation. Actually, no additional bytes shall be read appart from those having already been irrecoverably read.
 
