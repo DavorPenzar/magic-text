@@ -174,7 +174,6 @@ The library actually enables some more sophisticated use cases than the simple e
 using MagicText; // <-- namespace of the library
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -183,12 +182,12 @@ using System.Threading.Tasks;
 
 List<String?> tokens = new List<String?>();
 
-ITokeniser tokeniser = new RegexTokeniser(false);
+ITokeniser tokeniser = new RegexTokeniser(inclusiveBreaker: true);
 
 try
 {
 	CancellationTokenSource cancellation = new CancellationTokenSource();
-	await foreach (String? token in tokeniser.ShatterAsync(Console.In).WithCancellation(cancellation.Token).ConfigureAwait(false))
+	await foreach (String? token in tokeniser.ShatterAsync(input: Console.In, continueTasksOnCapturedContext: false).WithCancellation(cancellation.Token).ConfigureAwait(false))
 	{
 		if (token?.Trim() == "###")
 		{
@@ -238,10 +237,10 @@ foreach (String? token in tokens)
 	String? tokenRep = JsonSerializer.Serialize(token);
 
 	Double prob = Convert.ToDouble(pen.Count(token)) / pen.Context.Count;
-	Double inf = -Math.Log2(prob);
+	Double info = -Math.Log2(prob);
 
 	probability.Add(tokenRep, prob);
-	informationContent.Add(tokenRep, inf);
+	informationContent.Add(tokenRep, info);
 }
 
 entropy = probability.Select(e => e.Value * informationContent[e.Key]).Sum();
@@ -292,7 +291,6 @@ using MagicText; // <-- namespace of the library
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 // ...
 
