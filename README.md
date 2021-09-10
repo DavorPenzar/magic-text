@@ -1,6 +1,6 @@
 #   MagicText
 
-[*.NET Standard*](http://docs.microsoft.com/en-gb/dotnet/standard/net-standard) library written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) for generating random text. The library's interface is [CLS-compliant](http://docs.microsoft.com/en-gb/dotnet/standard/language-independence#cls-compliance-rules); however, inline documentation is written from a [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) perspective and some code excerpts (e. g. regarding operator overloading) may not be compatible with other [CLI](http://ecma-international.org/publications-and-standards/standards/ecma-335/) languages.
+`MagicText` is a[*.NET Standard*](http://docs.microsoft.com/en-gb/dotnet/standard/net-standard) library written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) for generating random text. The library's interface is [CLS-compliant](http://docs.microsoft.com/en-gb/dotnet/standard/language-independence#cls-compliance-rules); however, inline documentation is written from a [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) perspective and some code excerpts (e. g. regarding operator overloading) may not be compatible with other [CLI](http://ecma-international.org/publications-and-standards/standards/ecma-335/) languages.
 
 **Author**: Davor Penzar (September 2021)
 
