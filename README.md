@@ -36,7 +36,7 @@ The ([*nondeterministic*](http://en.wikipedia.org/wiki/Nondeterministic_programm
         3.  For the next token, choose the token immediately following the tokens from the chosen occurrence. If no token follows the occurrence (if the occurrence is at the very end of the context), stop the [algorithm](http://en.wikipedia.org/wiki/Algorithm).
 4.  Output: collection of chosen tokens (in the order as chosen).
 
-For example, if the context is acquired by slicing the string *aaaabaaac* at each character, the context is the collection `{'a', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'c'}`. Suppose `n = 3`. A possible line of steps is given bellow:
+For example, if the context is acquired by slicing the string *aaaabaaac* at each character, the context is the collection `{ "a", "a", "a", "a", "b", "a", "a", "a", "c" }`. Suppose `n = 3`. A possible line of steps is given bellow:
 
 1.  The letter *a* is chosen.
 2.  All occurrences of *a* are the following:
