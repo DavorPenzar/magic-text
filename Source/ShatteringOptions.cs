@@ -1,10 +1,10 @@
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Xml.Serialization;
@@ -12,42 +12,80 @@ using System.Xml.Serialization;
 namespace MagicText
 {
     /// <summary>Defines the options for the <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods and for the extension methods from <see cref="TokeniserExtensions" />.</summary>
+    /// <seealso cref="ITokeniser" />
+    /// <seealso cref="TokeniserExtensions" />
     [CLSCompliant(true)]
     [Serializable]
-    [XmlRoot(ElementName = "shattering_options", IsNullable = true)]
-    [XmlType(TypeName = "shattering_options")]
-    public class ShatteringOptions : Object, IEquatable<ShatteringOptions>, ICloneable, ISerializable
+    public class ShatteringOptions : Object, IEquatable<ShatteringOptions>, ICloneable
     {
         protected const string SerialisationInfoNullErrorMessage = "Serialisation info cannot be null.";
         private const string OtherNullErrorMessage = "Shattering options to copy cannot be null.";
         protected const string StringComparerNullErrorMessage = "String comparer cannot be null.";
+        protected const string StringComparisonNotSupportedErrorMessage = "The string comparison type passed in is currently not supported.";
+
 
         /// <summary>Indicates whether the <c><paramref name="left" /></c> <see cref="ShatteringOptions" /> are equal to the <c><paramref name="right" /></c> or not.</summary>
         /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>
         /// <param name="right">The right <see cref="ShatteringOptions" /> to compare.</param>
-        /// <param name="stringComparer">The <see cref="StringComparer" /> used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
+        /// <param name="stringComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>If the <see cref="ShatteringOptions" /> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringComparer" /></c> is <c>null</c>.</exception>
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?)" />
         /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(Object?, StringComparison)" />
         /// <seealso cref="Equals(Object?)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right, IEqualityComparer<String?> stringComparer) =>
             stringComparer is null ? throw new ArgumentNullException(nameof(stringComparer), StringComparerNullErrorMessage) :
-                left is null ? right is null : left.Equals(right, stringComparer);
+                left is null || right is null ? Object.ReferenceEquals(left, right) : left.Equals(right, stringComparer);
+
+#if !NETSTANDARD2_0
+        /// <summary>Indicates whether the <c><paramref name="left" /></c> <see cref="ShatteringOptions" /> are equal to the <c><paramref name="right" /></c> or not.</summary>
+        /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>
+        /// <param name="right">The right <see cref="ShatteringOptions" /> to compare.</param>
+        /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
+        /// <returns>If the <see cref="ShatteringOptions" /> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
+        /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?)" />
+        /// <seealso cref="Equals(Object?, StringComparison)"/>
+        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(Object?)" />
+        /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
+        public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right, StringComparison stringComparison)
+        {
+            try
+            {
+                return Equals(left, right, StringComparer.FromComparison(stringComparison));
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(stringComparison), ex);
+            }
+        }
+#endif
 
         /// <summary>Indicates whether the <c><paramref name="left" /></c> <see cref="ShatteringOptions" /> are equal to the <c><paramref name="right" /></c> or not.</summary>
         /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>
         /// <param name="right">The right <see cref="ShatteringOptions" /> to compare.</param>
         /// <returns>If the <see cref="ShatteringOptions" /> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?)" />
         /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(Object?)" />
         /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(Object?, StringComparison)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right) =>
@@ -60,10 +98,13 @@ namespace MagicText
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?)" />
         /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(Object?)" />
         /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(Object?, StringComparison)" />
         public static Boolean operator ==(ShatteringOptions? left, ShatteringOptions? right) =>
             Equals(left, right);
 
@@ -74,10 +115,13 @@ namespace MagicText
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?)" />
         /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(Object?)" />
         /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(Object?, StringComparison)" />
         public static Boolean operator !=(ShatteringOptions? left, ShatteringOptions? right) =>
             !Equals(left, right);
 
@@ -253,24 +297,6 @@ namespace MagicText
         {
         }
 
-        /// <summary>Creates options by retrieving the serialisation <c><paramref name="info" /></c>.</summary>
-        /// <param name="info">The <see cref="SerializationInfo" /> from which to read data.</param>
-        /// <param name="context">The source of this deserialisation.</param>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="info" /></c> is <c>null</c>.</exception>
-        /// <remarks>
-        ///     <para>The exceptions thrown by the <c><paramref name="info" /></c>'s methods (most notably the <see cref="SerializationException" /> and <see cref="InvalidCastException" />) are not caught.</para>
-        /// </remarks>
-        protected ShatteringOptions(SerializationInfo info, StreamingContext context) :
-            this(
-                info is null ? throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage) : info.GetBoolean(nameof(IgnoreEmptyTokens)),
-                info is null ? throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage) : info.GetBoolean(nameof(IgnoreLineEnds)),
-                info is null ? throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage) : info.GetBoolean(nameof(IgnoreEmptyLines)),
-                info is null ? throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage) : info.GetString(nameof(LineEndToken)),
-                info is null ? throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage) : info.GetString(nameof(EmptyLineToken))
-            )
-        {
-        }
-
         /// <summary>Deconstructs the current options.</summary>
         /// <param name="ignoreEmptyTokens">The indicator if empty tokens should be ignored.</param>
         /// <param name="ignoreLineEnds">The indicator if line ends should be ignored.</param>
@@ -287,14 +313,11 @@ namespace MagicText
         }
 
         /// <summary>Returns the hash code of the current options.</summary>
-        /// <param name="stringComparer">The <see cref="StringComparer" /> used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
+        /// <param name="stringComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>The hash code of the current <see cref="ShatteringOptions" /> according to the <c><paramref name="stringComparer" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringComparer" /></c> is <c>null</c>.</exception>
-        /// <seealso cref="GetHashCode(IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?)" />
-        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(Object?)" />
+        /// <seealso cref="GetHashCode(StringComparison)" />
+        /// <seealso cref="GetHashCode()" />
         public virtual Int32 GetHashCode(IEqualityComparer<String?> stringComparer)
         {
             if (stringComparer is null)
@@ -313,21 +336,45 @@ namespace MagicText
             return hashCode;
         }
 
+#if !NETSTANDARD2_0
+        /// <summary>Returns the hash code of the current options.</summary>
+        /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
+        /// <returns>The hash code of the current <see cref="ShatteringOptions" /> according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparison" /></c>.</returns>
+        /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
+        /// <seealso cref="GetHashCode(IEqualityComparer{String?})" />
+        /// <seealso cref="GetHashCode()" />
+        public virtual Int32 GetHashCode(StringComparison stringComparison)
+        {
+            try
+            {
+                return GetHashCode(StringComparer.FromComparison(stringComparison));
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(stringComparison), ex);
+            }
+        }
+#endif
+
         /// <summary>Returns the hash code of the current options.</summary>
         /// <returns>The hash code of the current <see cref="ShatteringOptions" />.</returns>
         /// <seealso cref="GetHashCode(IEqualityComparer{String?})" />
+        /// <seealso cref="GetHashCode(StringComparison)" />
         public override Int32 GetHashCode() =>
             GetHashCode(EqualityComparer<String?>.Default);
 
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="other" /></c> options or not.</summary>
         /// <param name="other">The other <see cref="ShatteringOptions" /> to compare with these options.</param>
-        /// <param name="stringComparer">The <see cref="StringComparer" /> used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
+        /// <param name="stringComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c> according to the <c><paramref name="stringComparer" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringComparer" /></c> is <c>null</c>.</exception>
+        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?)" />
         /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(Object?, StringComparison)" />
         /// <seealso cref="Equals(Object?)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
@@ -344,14 +391,46 @@ namespace MagicText
                         stringComparer.Equals(EmptyLineToken, other.EmptyLineToken)
                     );
 
+#if !NETSTANDARD2_0
+        /// <summary>Indicates whether the current options are equal to the <c><paramref name="other" /></c> options or not.</summary>
+        /// <param name="other">The other <see cref="ShatteringOptions" /> to compare with these options.</param>
+        /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
+        /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c> according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparison" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
+        /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
+        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?)" />
+        /// <seealso cref="Equals(Object?, StringComparison)" />
+        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(Object?)" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
+        public virtual Boolean Equals(ShatteringOptions? other, StringComparison stringComparison)
+        {
+            try
+            {
+                return Equals(other, StringComparer.FromComparison(stringComparison));
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(stringComparison), ex);
+            }
+        }
+#endif
+
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="other" /></c> options or not.</summary>
         /// <param name="other">The other <see cref="ShatteringOptions" /> to compare with these options.</param>
         /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(Object?)" />
         /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(Object?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public virtual Boolean Equals(ShatteringOptions? other) =>
@@ -359,13 +438,16 @@ namespace MagicText
 
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="obj" /></c> or not.</summary>
         /// <param name="obj">The <see cref="Object" /> to compare with these <see cref="ShatteringOptions" />.</param>
-        /// <param name="stringComparer">The <see cref="StringComparer" /> used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
+        /// <param name="stringComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it according to the <c><paramref name="stringComparer" /></c>, <c>true</c>; <c>false</c>otherwise.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringComparer" /></c> is <c>null</c>.</exception>
+        /// <seealso cref="Equals(Object?, StringComparison)" />
         /// <seealso cref="Equals(Object?)" />
         /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
@@ -382,40 +464,50 @@ namespace MagicText
             return false;
         }
 
+#if !NETSTANDARD2_0
+        /// <summary>Indicates whether the current options are equal to the <c><paramref name="obj" /></c> or not.</summary>
+        /// <param name="obj">The <see cref="Object" /> to compare with these <see cref="ShatteringOptions" />.</param>
+        /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
+        /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparison" /></c>, <c>true</c>; <c>false</c>otherwise.</returns>
+        /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
+        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(Object?)" />
+        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?)" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
+        public virtual Boolean Equals(Object? obj, StringComparison stringComparison)
+        {
+            try
+            {
+                return Equals(obj, StringComparer.FromComparison(stringComparison));
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(stringComparison), ex);
+            }
+        }
+#endif
+
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="obj" /></c> or not.</summary>
         /// <param name="obj">The <see cref="Object" /> to compare with these <see cref="ShatteringOptions" />.</param>
         /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it, <c>true</c>; <c>false</c>otherwise.</returns>
         /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(Object?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?)" />
         /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public override Boolean Equals(Object? obj) =>
             Equals(obj, EqualityComparer<String?>.Default);
-
-        /// <summary>Populates the serialisation <c><paramref name="info" /></c> with data needed to serialise the current options.</summary>
-        /// <param name="info">The <see cref="SerializationInfo" /> to populate with data.</param>
-        /// <param name="context">The destination for this serialisation.</param>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="info" /></c> is <c>null</c>.</exception>
-        /// <remarks>
-        ///     <para>The exceptions thrown by the <c><paramref name="info" /></c>'s methods (most notably the <see cref="SerializationException" />) are not caught.</para>
-        /// </remarks>
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info is null)
-            {
-                throw new ArgumentNullException(nameof(info), SerialisationInfoNullErrorMessage);
-            }
-
-            info.AddValue(nameof(IgnoreEmptyTokens), IgnoreEmptyTokens);
-            info.AddValue(nameof(IgnoreLineEnds), IgnoreLineEnds);
-            info.AddValue(nameof(IgnoreEmptyLines), IgnoreEmptyLines);
-            info.AddValue(nameof(LineEndToken), LineEndToken, typeof(String));
-            info.AddValue(nameof(EmptyLineToken), EmptyLineToken, typeof(String));
-        }
 
         /// <summary>Creates a new <see cref="Object" /> that is a copy of the current options.</summary>
         /// <returns>The new <see cref="ShatteringOptions" /> with the same values.</returns>
@@ -424,3 +516,5 @@ namespace MagicText
             new ShatteringOptions(this);
     }
 }
+
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved

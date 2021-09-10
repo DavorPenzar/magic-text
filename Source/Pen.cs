@@ -167,6 +167,7 @@ namespace MagicText
         /// <param name="cycleStart">The starting index of the <c><paramref name="sampleCycle" /></c>.</param>
         /// <returns>A signed integer that indicates the comparison of the values of the subrange from the <c><paramref name="tokens" /></c> starting from <c><paramref name="i" /></c> and the <c><paramref name="sampleCycle" /></c>.</returns>
         /// <remarks>
+        ///     <para>The method is intended for the internal use only and therefore does not make unnecessary checks of the parameters.</para>
         ///     <para>The values from the subrange of the <c><paramref name="tokens" /></c> and the <c><paramref name="sampleCycle" /></c> are compared in order by calling the <see cref="StringComparer.Compare(String, String)" /> method on the <c><paramref name="comparer" /></c>. If a comparison yields a non-zero value, it is returned. If the subrange from the <c><paramref name="tokens" /></c> is shorter (in the number of tokens) than the <c><paramref name="sampleCycle" /></c> but all of its tokens compare equal to corresponding tokens from the beginning of the <c><paramref name="sampleCycle" /></c>, a negative number is returned. If all tokens compare equal and the subrange from the <c><paramref name="tokens" /></c> is the same length (in the number of tokens) as the <c><paramref name="sampleCycle" /></c>, 0 is returned.</para>
         /// </remarks>
         private static Int32 CompareRange(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<String?> sampleCycle, Int32 i, Int32 cycleStart)
@@ -203,12 +204,12 @@ namespace MagicText
         /// <param name="sampleCycle">The cyclical sample list of tokens to find. The list represents the range <c>{ <paramref name="sampleCycle" />[<paramref name="cycleStart" />], <paramref name="sampleCycle" />[<paramref name="cycleStart" /> + 1], ..., <paramref name="sampleCycle" />[<paramref name="sampleCycle" />.Count - 1], <paramref name="sampleCycle" />[0], ..., <paramref name="sampleCycle" />[<paramref name="cycleStart" /> - 1] }</c>.</param>
         /// <param name="cycleStart">The starting index of the <c><paramref name="sampleCycle" /></c>.</param>
         /// <param name="count">The total number of occurrences of the <c><paramref name="sampleCycle" /></c> amongst the <c><paramref name="tokens" /></c>.</param>
-        /// <param name="limits">If set, defines the initial lower and upper bound of a matching position index.</param>
+        /// <param name="bounds">If set, defines the initial lower and upper bound of a matching position index.</param>
         /// <returns>The minimal index <c>i</c> such that an occurrence of the <c><paramref name="sampleCycle" /></c> begins at <c><paramref name="tokens" />[<paramref name="index" />[i]]</c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="comparer" /></c> is <c>null</c>. The parameter <c><paramref name="tokens" /></c> is <c>null</c>. The parameter <c><paramref name="index" /></c> is <c>null</c>. The parameter <c><paramref name="sampleCycle" /></c> is <c>null</c>.</exception>
         /// <remarks>
-        ///     <para>The parameter <c><paramref name="limits" /></c> should be used only if the range of a possible position index match is known. For instance, if it is known that the <c><paramref name="sampleCycle" /></c> occurs between <c><paramref name="index" />[m]</c> and <c><paramref name="index" />[n]</c> inclusively (it starts at at least one of <c>{ <paramref name="tokens" />[<paramref name="index" />[m]], <paramref name="tokens" />[<paramref name="index" />[m + 1]], ..., <paramref name="tokens" />[<paramref name="index" />[n]] }</c>), where <c>m</c> and <c>n</c> are some legal and valid integers, then <c>(m, n)</c> may be passed to the method call as the parameter <c><paramref name="limits" /></c>. The most common scenario for this would probably be when the position index and count of a shorter sample, which is at the very beginning of the actual <c><paramref name="sampleCycle" /></c>, is known: e. g. the position index and count of <c>{ "lorem", " " }</c> in the search for <c>{ "lorem", " ", "ipsum" }</c>.</para>
-        ///     <para>It is sufficient that the <c><paramref name="limits" /></c> cover at least one matching position index, even if not all of them are covered (all matches are still going to be identified). However, if no position index is covered but the <c><paramref name="sampleCycle" /></c> exists amongst the <c><paramref name="tokens" /></c>, then the match shall not be found.</para>
+        ///     <para>The parameter <c><paramref name="bounds" /></c> should be used only if the range of a possible position index match is known. For instance, if it is known that the <c><paramref name="sampleCycle" /></c> occurs between <c><paramref name="index" />[m]</c> and <c><paramref name="index" />[n]</c> inclusively (it starts at at least one of <c>{ <paramref name="tokens" />[<paramref name="index" />[m]], <paramref name="tokens" />[<paramref name="index" />[m + 1]], ..., <paramref name="tokens" />[<paramref name="index" />[n]] }</c>), where <c>m</c> and <c>n</c> are some legal and valid integers, then <c>(m, n)</c> may be passed to the method call as the parameter <c><paramref name="bounds" /></c>. The most common scenario for this would probably be when the position index and count of a shorter sample, which is at the very beginning of the actual <c><paramref name="sampleCycle" /></c>, is known: e. g. the position index and count of <c>{ "lorem", " " }</c> in the search for <c>{ "lorem", " ", "ipsum" }</c>.</para>
+        ///     <para>It is sufficient that the <c><paramref name="bounds" /></c> cover at least one matching position index, even if not all of them are covered (all matches are still going to be identified). However, if no position index is covered but the <c><paramref name="sampleCycle" /></c> exists amongst the <c><paramref name="tokens" /></c>, then the match shall not be found.</para>
         ///     <para>Because of performance reasons, the implementation of the method <em>assumes</em> the following without checking:</para>
         ///     <list type="bullet">
         ///         <listheader>
@@ -228,19 +229,19 @@ namespace MagicText
         ///             <description>the <c><paramref name="index" /></c> indeed sorts the <c><paramref name="tokens" /></c> ascendingly in respect of the <c><paramref name="comparer" /></c>,</description>
         ///         </item>
         ///         <item>
-        ///             <term><c><paramref name="limits" /></c> legality &amp; validity</term>
-        ///             <description>if the <c><paramref name="limits" /></c> are set—let us denote them as <c>(low, high)</c>—then all inequalities in the chained expression <c>0 &lt;= low &lt;= high &lt;= <paramref name="tokens" />.Count</c> are true,</description>
+        ///             <term><c><paramref name="bounds" /></c> legality &amp; validity</term>
+        ///             <description>if the <c><paramref name="bounds" /></c> are set—let us denote them as <c>(low, high)</c>—then all inequalities in the chained expression <c>0 &lt;= low &lt;= high &lt;= <paramref name="tokens" />.Count</c> are true,</description>
         ///         </item>
         ///         <item>
         ///             <term><c><paramref name="sampleCycle" /></c> existence</term>
         ///             <description>the <c><paramref name="sampleCycle" /></c> exists amongst the <c><paramref name="tokens" /></c> (when compared by the <c><paramref name="comparer" /></c>).</description>
         ///         </item>
         ///     </list>
-        ///     <para>If any of the first four assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="sampleCycle" /></c>'s position should be inserted to retain the sorted order but the number of occurrences (<c><paramref name="count" /></c>) shall be 0. However, if the <c><paramref name="limits" /></c> are set but the <c><paramref name="sampleCycle" /></c> is not found in the specified range, the latter may not be true.</para>
+        ///     <para>If any of the first four assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="sampleCycle" /></c>'s position should be inserted to retain the sorted order but the number of occurrences (<c><paramref name="count" /></c>) shall be 0. However, if the <c><paramref name="bounds" /></c> are set but the <c><paramref name="sampleCycle" /></c> is not found in the specified range, the latter may not be true.</para>
         /// </remarks>
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
-        protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IReadOnlyList<String?> sampleCycle, Int32 cycleStart, out Int32 count, Nullable<ValueTuple<Int32, Int32>> limits = default)
+        protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IReadOnlyList<String?> sampleCycle, Int32 cycleStart, out Int32 count, Nullable<ValueTuple<Int32, Int32>> bounds = default)
         {
             if (comparer is null)
             {
@@ -264,10 +265,10 @@ namespace MagicText
             // Initialise the lower, upper and middle positions.
             Int32 l;
             Int32 h;
-            if (limits.HasValue)
+            if (bounds.HasValue)
             {
-                l = limits.Value.Item1;
-                h = limits.Value.Item2;
+                l = bounds.Value.Item1;
+                h = bounds.Value.Item2;
             }
             else
             {
@@ -329,12 +330,12 @@ namespace MagicText
         /// <param name="index">The positional ordering of the <c><paramref name="tokens" /></c> in respect of the <c><paramref name="comparer" /></c>.</param>
         /// <param name="sample">The sample enumerable of tokens to find.</param>
         /// <param name="count">The total number of occurrences of the <c><paramref name="sample" /></c> amongst the <c><paramref name="tokens" /></c>.</param>
-        /// <param name="limits">If set, defines the initial lower and upper bound of a matching position index.</param>
+        /// <param name="bounds">If set, defines the initial lower and upper bound of a matching position index.</param>
         /// <returns>The minimal index <c>i</c> such that an occurrence of the <c><paramref name="sample" /></c> begins at <c><paramref name="tokens" />[<paramref name="index" />[i]]</c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="comparer" /></c> is <c>null</c>. The parameter <c><paramref name="tokens" /></c> is <c>null</c>. The parameter <c><paramref name="index" /></c> is <c>null</c>. The parameter <c><paramref name="sample" /></c> is <c>null</c>.</exception>
         /// <remarks>
-        ///     <para>The parameter <c><paramref name="limits" /></c> should be used only if the range of a possible position index match is known. For instance, if it is known that the <c><paramref name="sample" /></c> occurs between <c><paramref name="index" />[m]</c> and <c><paramref name="index" />[n]</c> inclusively (it starts at at least one of <c>{ <paramref name="tokens" />[<paramref name="index" />[m]], <paramref name="tokens" />[<paramref name="index" />[m + 1]], ..., <paramref name="tokens" />[<paramref name="index" />[n]] }</c>), where <c>m</c> and <c>n</c> are some legal and valid integers, then <c>(m, n)</c> may be passed to the method call as the parameter <c><paramref name="limits" /></c>. The most common scenario for this would probably be when the position index and count of a shorter sample, which is at the very beginning of the actual <c><paramref name="sample" /></c>, is known: e. g. the position index and count of <c>{ "lorem", " " }</c> in the search for <c>{ "lorem", " ", "ipsum" }</c>.</para>
-        ///     <para>It is sufficient that the <c><paramref name="limits" /></c> cover at least one matching position index, even if not all of them are covered (all matches are still going to be identified). However, if no position index is covered but the <c><paramref name="sample" /></c> exists amongst the <c><paramref name="tokens" /></c>, then the match shall not be found.</para>
+        ///     <para>The parameter <c><paramref name="bounds" /></c> should be used only if the range of a possible position index match is known. For instance, if it is known that the <c><paramref name="sample" /></c> occurs between <c><paramref name="index" />[m]</c> and <c><paramref name="index" />[n]</c> inclusively (it starts at at least one of <c>{ <paramref name="tokens" />[<paramref name="index" />[m]], <paramref name="tokens" />[<paramref name="index" />[m + 1]], ..., <paramref name="tokens" />[<paramref name="index" />[n]] }</c>), where <c>m</c> and <c>n</c> are some legal and valid integers, then <c>(m, n)</c> may be passed to the method call as the parameter <c><paramref name="bounds" /></c>. The most common scenario for this would probably be when the position index and count of a shorter sample, which is at the very beginning of the actual <c><paramref name="sample" /></c>, is known: e. g. the position index and count of <c>{ "lorem", " " }</c> in the search for <c>{ "lorem", " ", "ipsum" }</c>.</para>
+        ///     <para>It is sufficient that the <c><paramref name="bounds" /></c> cover at least one matching position index, even if not all of them are covered (all matches are still going to be identified). However, if no position index is covered but the <c><paramref name="sample" /></c> exists amongst the <c><paramref name="tokens" /></c>, then the match shall not be found.</para>
         ///     <para>Because of performance reasons, the implementation of the method <em>assumes</em> the following without checking:</para>
         ///     <list type="bullet">
         ///         <listheader>
@@ -350,20 +351,20 @@ namespace MagicText
         ///             <description>the <c><paramref name="index" /></c> indeed sorts the <c><paramref name="tokens" /></c> ascendingly in respect of the <c><paramref name="comparer" /></c>,</description>
         ///         </item>
         ///         <item>
-        ///             <term><c><paramref name="limits" /></c> legality &amp; validity</term>
-        ///             <description>if the <c><paramref name="limits" /></c> are set—let us denote them as <c>(low, high)</c>—then all inequalities in the chained expression <c>0 &lt;= low &lt;= high &lt;= <paramref name="tokens" />.Count</c> are true,</description>
+        ///             <term><c><paramref name="bounds" /></c> legality &amp; validity</term>
+        ///             <description>if the <c><paramref name="bounds" /></c> are set—let us denote them as <c>(low, high)</c>—then all inequalities in the chained expression <c>0 &lt;= low &lt;= high &lt;= <paramref name="tokens" />.Count</c> are true,</description>
         ///         </item>
         ///         <item>
         ///             <term><c><paramref name="sample" /></c> existence</term>
         ///             <description>the <c><paramref name="sample" /></c> exists amongst the <c><paramref name="tokens" /></c> (when compared by the <c><paramref name="comparer" /></c>).</description>
         ///         </item>
         ///     </list>
-        ///     <para>If any of the first three assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="sample" /></c>'s position should be inserted to retain the sorted order but the number of occurrences (<c><paramref name="count" /></c>) shall be 0. However, if the <c><paramref name="limits" /></c> are set but the <c><paramref name="sample" /></c> is not found in the specified range, the latter may not be true.</para>
+        ///     <para>If any of the first three assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="sample" /></c>'s position should be inserted to retain the sorted order but the number of occurrences (<c><paramref name="count" /></c>) shall be 0. However, if the <c><paramref name="bounds" /></c> are set but the <c><paramref name="sample" /></c> is not found in the specified range, the latter may not be true.</para>
         /// </remarks>
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
-        protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IEnumerable<String?> sample, out Int32 count, Nullable<ValueTuple<Int32, Int32>> limits = default) =>
-            FindPositionIndexAndCount(comparer, tokens, index, ConvertToReadOnlyList(sample), 0, out count, limits);
+        protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IEnumerable<String?> sample, out Int32 count, Nullable<ValueTuple<Int32, Int32>> bounds = default) =>
+            FindPositionIndexAndCount(comparer, tokens, index, ConvertToReadOnlyList(sample), 0, out count, bounds);
 
         /// <summary>Finds the first index and the number of occurrences of the <c><paramref name="token" /></c> amongst the <c><paramref name="tokens" /></c>.</summary>
         /// <param name="comparer">The <see cref="StringComparer" /> used for comparing.</param>
@@ -371,12 +372,12 @@ namespace MagicText
         /// <param name="index">The positional ordering of the <c><paramref name="tokens" /></c> in respect of the <c><paramref name="comparer" /></c>.</param>
         /// <param name="token">The token to find.</param>
         /// <param name="count">The total number of occurrences of the <c><paramref name="token" /></c> amongst the <c><paramref name="tokens" /></c>.</param>
-        /// <param name="limits">If set, defines the initial lower and upper bound of a matching position index.</param>
+        /// <param name="bounds">If set, defines the initial lower and upper bound of a matching position index.</param>
         /// <returns>The minimal index <c>i</c> such that <c><paramref name="tokens" />[<paramref name="index" />[i]]</c> is the <c><paramref name="token" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="comparer" /></c> is <c>null</c>. The parameter <c><paramref name="tokens" /></c> is <c>null</c>. The parameter <c><paramref name="index" /></c> is <c>null</c>.</exception>
         /// <remarks>
-        ///     <para>The parameter <c><paramref name="limits" /></c> should be used only if the range of a possible position index match is known. For instance, if it is known that the <c><paramref name="token" /></c> occurs between <c><paramref name="index" />[m]</c> and <c><paramref name="index" />[n]</c> inclusively (it starts at at least one of <c>{ <paramref name="tokens" />[<paramref name="index" />[m]], <paramref name="tokens" />[<paramref name="index" />[m + 1]], ..., <paramref name="tokens" />[<paramref name="index" />[n]] }</c>), where <c>m</c> and <c>n</c> are some legal and valid integers, then <c>(m, n)</c> may be passed to the method call as the parameter <c><paramref name="limits" /></c>.</para>
-        ///     <para>It is sufficient that the <c><paramref name="limits" /></c> cover at least one matching position index, even if not all of them are covered (all matches are still going to be identified). However, if no position index is covered but the <c><paramref name="token" /></c> exists amongst the <c><paramref name="tokens" /></c>, then the match shall not be found.</para>
+        ///     <para>The parameter <c><paramref name="bounds" /></c> should be used only if the range of a possible position index match is known. For instance, if it is known that the <c><paramref name="token" /></c> occurs between <c><paramref name="index" />[m]</c> and <c><paramref name="index" />[n]</c> inclusively (it starts at at least one of <c>{ <paramref name="tokens" />[<paramref name="index" />[m]], <paramref name="tokens" />[<paramref name="index" />[m + 1]], ..., <paramref name="tokens" />[<paramref name="index" />[n]] }</c>), where <c>m</c> and <c>n</c> are some legal and valid integers, then <c>(m, n)</c> may be passed to the method call as the parameter <c><paramref name="bounds" /></c>.</para>
+        ///     <para>It is sufficient that the <c><paramref name="bounds" /></c> cover at least one matching position index, even if not all of them are covered (all matches are still going to be identified). However, if no position index is covered but the <c><paramref name="token" /></c> exists amongst the <c><paramref name="tokens" /></c>, then the match shall not be found.</para>
         ///     <para>Because of performance reasons, the implementation of the method <em>assumes</em> the following without checking:</para>
         ///     <list type="bullet">
         ///         <listheader>
@@ -392,43 +393,49 @@ namespace MagicText
         ///             <description>the <c><paramref name="index" /></c> indeed sorts the <c><paramref name="tokens" /></c> ascendingly in respect of the <c><paramref name="comparer" /></c>,</description>
         ///         </item>
         ///         <item>
-        ///             <term><c><paramref name="limits" /></c> legality &amp; validity</term>
-        ///             <description>if the <c><paramref name="limits" /></c> are set—let us denote them as <c>(low, high)</c>—then all inequalities in the chained expression <c>0 &lt;= low &lt;= high &lt;= <paramref name="tokens" />.Count</c> are true,</description>
+        ///             <term><c><paramref name="bounds" /></c> legality &amp; validity</term>
+        ///             <description>if the <c><paramref name="bounds" /></c> are set—let us denote them as <c>(low, high)</c>—then all inequalities in the chained expression <c>0 &lt;= low &lt;= high &lt;= <paramref name="tokens" />.Count</c> are true,</description>
         ///         </item>
         ///         <item>
         ///             <term><c><paramref name="token" /></c> existence</term>
         ///             <description>the <c><paramref name="token" /></c> exists amongst the <c><paramref name="tokens" /></c> (when compared by the <c><paramref name="comparer" /></c>).</description>
         ///         </item>
         ///     </list>
-        ///     <para>If any of the first three assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="token" /></c>'s position should be inserted to retain the sorted order but the number of occurrences (<c><paramref name="count" /></c>) shall be 0. However, if the <c><paramref name="limits" /></c> are set but the <c><paramref name="token" /></c> is not found in the specified range, the latter may not be true.</para>
+        ///     <para>If any of the first three assumptions is incorrect, the behaviour of the method is undefined (even the <see cref="ArgumentOutOfRangeException" /> might be thrown and not caught when calling the <see cref="IReadOnlyList{T}.this[Int32]" /> indexer). If the last assumption is incorrect, the returned index shall point to the position at which the <c><paramref name="token" /></c>'s position should be inserted to retain the sorted order but the number of occurrences (<c><paramref name="count" /></c>) shall be 0. However, if the <c><paramref name="bounds" /></c> are set but the <c><paramref name="token" /></c> is not found in the specified range, the latter may not be true.</para>
         /// </remarks>
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IEnumerable{String?}, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
-        protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, String? token, out Int32 count, Nullable<ValueTuple<Int32, Int32>> limits = default) =>
-            FindPositionIndexAndCount(comparer, tokens, index, Enumerable.Repeat(token, 1), out count, limits);
+        protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, String? token, out Int32 count, Nullable<ValueTuple<Int32, Int32>> bounds = default) =>
+            FindPositionIndexAndCount(comparer, tokens, index, Enumerable.Repeat(token, 1), out count, bounds);
 
         [XmlIgnore]
         [JsonIgnore]
+        [NonSerialized]
         private readonly Boolean _interned;
 
         [XmlIgnore]
         [JsonIgnore]
+        [NonSerialized]
         private readonly StringComparer _comparer;
 
         [XmlIgnore]
         [JsonIgnore]
+        [NonSerialized]
         private readonly IReadOnlyList<String?> _context;
 
         [XmlIgnore]
         [JsonIgnore]
+        [NonSerialized]
         private readonly IReadOnlyList<Int32> _index;
 
         [XmlIgnore]
         [JsonIgnore]
+        [NonSerialized]
         private readonly String? _sentinelToken;
 
         [XmlIgnore]
         [JsonIgnore]
+        [NonSerialized]
         private readonly Boolean _allSentinels;
 
         /// <summary>Gets the policy of interning all non-<c>null</c> tokens from the <see cref="Context" />, as well as the ending token (<see cref="SentinelToken" />): <c>true</c> if interning, <c>false</c> otherwise.</summary>
@@ -598,7 +605,7 @@ namespace MagicText
         /// <remarks>
         ///     <para>The exceptions thrown by the <c><paramref name="info" /></c>'s methods (most notably the <see cref="SerializationException" /> and <see cref="InvalidCastException" />) are not caught.</para>
         ///     <para>If the original <see cref="Pen" />'s tokens were all interned (<see cref="Interned" />), the deserialised <see cref="Pen" />'s tokens are also going to be interned; and vice versa. To avoid this, use the <see cref="Pen(Pen, Boolean)" /> constructor before the serialisation to create a new <see cref="Pen" /> with a different interning policy.</para>
-        ///     <para>Serialising and deserialising <see cref="StringComparer" />s other than <see cref="StringComparer.InvariantCultureIgnoreCase" />, <see cref="StringComparer.InvariantCulture" />, <see cref="StringComparer.OrdinalIgnoreCase" /> and <see cref="StringComparer.Ordinal" /> may yield unexpected results. If a custom <see cref="StringComparer" /> is used, make sure it may be fully serialised/deserialised. This is important for proper serialisation/deserialisation of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction of the original <see cref="Pen" />).</para>
+        ///     <para>In <a href="http://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.1.md"><em>.NET Standard 2.1</em></a> or greater, serialising and deserialising <see cref="StringComparer" />s other than <see cref="StringComparer.InvariantCultureIgnoreCase" />, <see cref="StringComparer.InvariantCulture" />, <see cref="StringComparer.OrdinalIgnoreCase" /> and <see cref="StringComparer.Ordinal" /> may yield unexpected results. If a custom <see cref="StringComparer" /> is used, make sure it may be fully serialised/deserialised. In <a href="http://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.0.md"><em>.NET Standard 2.0</em></a>, all <see cref="StringComparer" />s are serialised/deserialised as custom <see cref="StringComparer" />s. This is important for proper serialisation/deserialisation of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction of the original <see cref="Pen" />).</para>
         ///     <para>Because of performance reasons, no value is checked when deserialising data from the <c><paramref name="info" /></c>—it is assumed that all values are <em>legal</em> and <em>valid</em>. Deserialising data retrieved by actually serialising a <see cref="Pen" /> shall result in a valid <see cref="Pen" /> equivalent to the original (provided the <see cref="StringComparer" /> was successfully serialised and deserialised); any other deserialisation would probably fail or result in a <see cref="Pen" /> with unexpected behaviour.</para>
         ///     <para><strong>Nota bene.</strong> Only member properties are serialised/deserialised. Random state of the internal (pseudo-)random number generator, which is used in the <see cref="Pen.Render(Int32, Nullable{Int32})" /> method, is not serialised/deserialised.</para>
         ///
@@ -625,6 +632,12 @@ namespace MagicText
             // Deserialise the `Comparer`.
             {
                 StringComparer comparer;
+#if NETSTANDARD2_0
+                {
+                    String comparerType = info.GetString(nameof(StringComparer));
+                    comparer = (StringComparer)info.GetValue(nameof(Comparer), Type.GetType(comparerType) ?? typeof(StringComparer));
+                }
+#else
                 try
                 {
                     StringComparison comparison = (StringComparison)info.GetInt32(nameof(Comparer));
@@ -635,6 +648,7 @@ namespace MagicText
                     String comparerType = info.GetString(nameof(StringComparer));
                     comparer = (StringComparer)info.GetValue(nameof(Comparer), Type.GetType(comparerType) ?? typeof(StringComparer));
                 }
+#endif
                 _comparer = comparer;
             }
 
@@ -713,7 +727,11 @@ namespace MagicText
             Int32 P = p + n;
 
             // HashSet<Int32> positions = new HashSet<Int32>(Index.Skip(p).Take(n));
+#if NETSTANDARD2_0
+            HashSet<Int32> positions = new HashSet<Int32>();
+#else
             HashSet<Int32> positions = new HashSet<Int32>(n);
+#endif
             for (Int32 i = p; i < P; ++i)
             {
                 positions.Add(i < Context.Count ? Index[i] : Context.Count);
@@ -1321,7 +1339,7 @@ namespace MagicText
         /// <remarks>
         ///     <para>The exceptions thrown by the <c><paramref name="info" /></c>'s methods (most notably the <see cref="SerializationException" />) are not caught.</para>
         ///     <para>If the current <see cref="Pen" /> 's tokens are all interned (<see cref="Interned" />), the deserialised <see cref="Pen" />'s tokens are also going to be interned; and vice versa. To avoid this, use the <see cref="Pen(Pen, Boolean)" /> constructor before the serialisation to create a new <see cref="Pen" /> with a different interning policy.</para>
-        ///     <para>Serialising and deserialising <see cref="StringComparer" />s other than <see cref="StringComparer.InvariantCultureIgnoreCase" />, <see cref="StringComparer.InvariantCulture" />, <see cref="StringComparer.OrdinalIgnoreCase" /> and <see cref="StringComparer.Ordinal" /> may yield unexpected results. If a custom <see cref="StringComparer" /> is used, make sure it may be fully serialised/deserialised. This is important for proper serialisation/deserialisation of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction of the original <see cref="Pen" />).</para>
+        ///     <para>In <a href="http://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.1.md"><em>.NET Standard 2.1</em></a> or greater, serialising and deserialising <see cref="StringComparer" />s other than <see cref="StringComparer.InvariantCultureIgnoreCase" />, <see cref="StringComparer.InvariantCulture" />, <see cref="StringComparer.OrdinalIgnoreCase" /> and <see cref="StringComparer.Ordinal" /> may yield unexpected results. If a custom <see cref="StringComparer" /> is used, make sure it may be fully serialised/deserialised. In <a href="http://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.0.md"><em>.NET Standard 2.0</em></a>, all <see cref="StringComparer" />s are serialised/deserialised as custom <see cref="StringComparer" />s. This is important for proper serialisation/deserialisation of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction of the original <see cref="Pen" />).</para>
         ///     <para><strong>Nota bene.</strong> Only member properties are serialised/deserialised. Random state of the internal (pseudo-)random number generator, which is used in the <see cref="Pen.Render(Int32, Nullable{Int32})" /> method, is not serialised/deserialised.</para>
         ///
         ///     <h3>Notes to Implementers</h3>
@@ -1345,6 +1363,11 @@ namespace MagicText
             // Serialise the `Comparer`.
             {
                 Type comparerType = Comparer.GetType() ?? typeof(StringComparer);
+
+#if NETSTANDARD2_0
+                info.AddValue(nameof(StringComparer), comparerType?.FullName, typeof(String));
+                info.AddValue(nameof(Comparer), Comparer, comparerType);
+#else
                 if (comparerType.Equals(StringComparer.InvariantCultureIgnoreCase.GetType()))
                 {
                     info.AddValue(nameof(Comparer), Convert.ToInt32(StringComparison.InvariantCultureIgnoreCase));
@@ -1366,6 +1389,7 @@ namespace MagicText
                     info.AddValue(nameof(StringComparer), comparerType?.FullName, typeof(String));
                     info.AddValue(nameof(Comparer), Comparer, comparerType);
                 }
+#endif
             }
 
             // Serialise the ending token.

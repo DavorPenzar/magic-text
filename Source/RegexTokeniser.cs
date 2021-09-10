@@ -15,6 +15,8 @@ namespace MagicText
     ///     <para>Empty tokens (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens which yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method after possible transformation via the <see cref="Transform" /> delegate if it is set. This behaviour cannot be overridden by a derived class.</para>
     ///     <para>No thread safety mechanism is implemented nor assumed by the class. If the transformation function (<see cref="Transform" />) should be thread-safe, lock the tokeniser during complete <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.</para>
     /// </remarks>
+    /// <seealso cref="LineByLineTokeniser" />
+    /// <seealso cref="ITokeniser" />
     [CLSCompliant(true)]
     public class RegexTokeniser : LineByLineTokeniser
     {

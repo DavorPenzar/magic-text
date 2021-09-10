@@ -1,0 +1,21 @@
+#if NETSTANDARD2_0
+
+using System;
+
+namespace System.Diagnostics.CodeAnalysis
+{
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue, AllowMultiple = true, Inherited = false)]
+    internal sealed class NotNullIfNotNullAttribute : Attribute
+    {
+        private readonly String _parameterName;
+
+        public String ParameterName => _parameterName;
+
+        public NotNullIfNotNullAttribute(String parameterName) : base()
+        {
+            _parameterName = parameterName;
+        }
+    }
+}
+
+#endif

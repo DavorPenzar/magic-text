@@ -3,7 +3,7 @@
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <RootNamespace>MagicText</RootNamespace>
     <ProjectGuid>7D19EA1D-C7D8-C6BC-8118-EE62DDD96F98</ProjectGuid>
   </PropertyGroup>
