@@ -59,8 +59,8 @@ namespace MagicText
         /// <summary>Creates a tokeniser.</summary>
         /// <param name="breakToken">The token breaking function. See the <see cref="BreakToken" /> property and the <see cref="ShatterLine(String)" /> method for more details.</param>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="breakToken" /></c> is <c>null</c>.</exception>
-        /// <see cref="BreakToken" />
-        /// <see cref="ShatterLine(String)" />
+        /// <seealso cref="BreakToken" />
+        /// <seealso cref="ShatterLine(String)" />
         public RandomTokeniser(Func<Int32, Int32, Int32, Boolean> breakToken) : base()
         {
             _breakToken = breakToken ?? throw new ArgumentNullException(nameof(breakToken), BreakTokenNullErrorMessage);
@@ -68,9 +68,13 @@ namespace MagicText
 
         /// <summary>Creates a tokeniser.</summary>
         /// <param name="randomTokenBreaker">The <see cref="RandomTokenBreaker" /> whose <see cref="RandomTokenBreaker.BreakToken(Int32, Int32, Int32)" /> method is used as the token breaking function. See the <see cref="BreakToken" /> property and the <see cref="ShatterLine(String)" /> method for more details.</param>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="breakToken" /></c> is <c>null</c>.</exception>
-        /// <see cref="BreakToken" />
-        /// <see cref="ShatterLine(String)" />
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="randomTokenBreaker" /></c> is <c>null</c>.</exception>
+        /// <seealso cref="RandomTokeniser()" />
+        /// <seealso cref="RandomTokeniser(Double)" />
+        /// <seealso cref="RandomTokeniser(Random)" />
+        /// <seealso cref="RandomTokeniser(Random, Double)" />
+        /// <seealso cref="BreakToken" />
+        /// <seealso cref="ShatterLine(String)" />
         private RandomTokeniser(RandomTokenBreaker randomTokenBreaker) : this(randomTokenBreaker.BreakToken)
         {
         }
@@ -78,8 +82,11 @@ namespace MagicText
         /// <summary>Creates a default tokeniser.</summary>
         /// <remarks>
         ///     <para>Each position in the input text lines has a 50 % chance of being a token break point or not. More precisely, each <see cref="BreakToken" /> function call has, on average, a 50 % chance of returning <c>true</c> or <c>false</c> (the <em>average</em> assumes using the function only through the <see cref="ShatterLine(String)" /> method with completely enumerating tokens of non-empty lines).</para>
-        ///     <para>Generally speaking, the average token length—in an infinite line of text—shall be 1 or 2, depending on whether or not the empty tokens are included (v. <a href="http://en.wikipedia.org/wiki/Geometric_distribution#Expected_Value_Examples">expected values of the geometric distribution</a>; note that the <em>zeroth</em> position is also tried, therefore a <em>hit</em> on the first try would result in a token length 0, and a hit on the <c>n</c>-th try would result in a token length of <c>n - 1</c>). However, finiteness of actual lines of text that are being shattered limits the length of the last token in a line, consequently the actual <em>a posteriori</em> average may differ from the theoretical value.</para>
+        ///     <para>Generally speaking, the average token length—in an infinite line of text—shall be 1 or 2, depending on whether or not the empty tokens are included (v. <a href="http://en.wikipedia.org/wiki/Geometric_distribution#Expected_Value_Examples">expected values of the geometric distribution</a>; note that the <em>zeroth</em> position is also tried, therefore a <em>hit</em> on the first try would result in a token length 0, and a hit on the <c>n</c>-th try would result in a token length of <c>n - 1</c>). However, finiteness of actual lines of text that are being shattered limits the length of the last token in a line, and consequently the actual <em>a posteriori</em> average may differ from the theoretical value.</para>
         /// </remarks>
+        /// <seealso cref="RandomTokeniser(Double)" />
+        /// <seealso cref="RandomTokeniser(Random)" />
+        /// <seealso cref="RandomTokeniser(Random, Double)" />
         /// <seealso cref="BreakToken" />
         public RandomTokeniser() : this(new RandomTokenBreaker())
         {
@@ -90,9 +97,12 @@ namespace MagicText
         /// <exception cref="ArgumentOutOfRangeException">The parameter <c><paramref name="bias" /></c> is <c>NaN</c>, infinite, less than or equal to 0, or greater than 1.</exception>
         /// <remarks>
         ///     <para>Each position in the input text lines becomes a breaking point with probability <c><paramref name="bias" /></c> and does not become one with probability <c>1 - <paramref name="bias" /></c>. More precisely, each <see cref="BreakToken" /> function call returns <c>true</c> with average probability <c><paramref name="bias" /></c> or <c>false</c> with average probability <c>1 - <paramref name="bias" /></c>.</para>
-        ///     <para>Generally speaking, the average token length—in an infinite line of text—shall be <c>1 / <paramref name="bias" /> - { 1 or 0 }</c>, depending on whether or not the empty tokens are included (v. <a href="http://en.wikipedia.org/wiki/Geometric_distribution#Expected_Value_Examples">expected values of the geometric distribution</a>; note that the <em>zeroth</em> position is also tried, therefore a <em>hit</em> on the first try would result in a token length 0, and a hit on the <c>n</c>-th try would result in a token length of <c>n - 1</c>). To achieve an average token length <c>n</c> (greater than or equal to 0, may be non-integral) with empty tokens included, set the <c><paramref name="bias" /></c> to <c>1 / (n + 1)</c>. For instance, to set the average (expected) length of a token to 4, set <c><paramref name="bias" /></c> to 0.2 (1 / 5). However, finiteness of actual lines of text that are being shattered limits the length of the last token in a line, consequently the actual <em>a posteriori</em> average may differ from the theoretical value.</para>
+        ///     <para>Generally speaking, the average token length—in an infinite line of text—shall be <c>1 / <paramref name="bias" /> - { 1 or 0 }</c>, depending on whether or not the empty tokens are included (v. <a href="http://en.wikipedia.org/wiki/Geometric_distribution#Expected_Value_Examples">expected values of the geometric distribution</a>; note that the <em>zeroth</em> position is also tried, therefore a <em>hit</em> on the first try would result in a token length 0, and a hit on the <c>n</c>-th try would result in a token length of <c>n - 1</c>). To achieve an average token length <c>n</c> (greater than or equal to 0, may be non-integral) with empty tokens included, set the <c><paramref name="bias" /></c> to <c>1 / (n + 1)</c>. For instance, to set the average (expected) length of a token to 4, set <c><paramref name="bias" /></c> to 0.2 (1 / 5). However, finiteness of actual lines of text that are being shattered limits the length of the last token in a line, and consequently the actual <em>a posteriori</em> average may differ from the theoretical value.</para>
         /// </remarks>
         /// <seealso cref="BreakToken" />
+        /// <seealso cref="RandomTokeniser()" />
+        /// <seealso cref="RandomTokeniser(Random)" />
+        /// <seealso cref="RandomTokeniser(Random, Double)" />
         public RandomTokeniser(Double bias) : this(new RandomTokenBreaker(bias))
         {
         }
@@ -103,9 +113,12 @@ namespace MagicText
         /// <remarks>
         ///     <para>If no specific <see cref="Random" /> object or seed should be used, the <see cref="RandomTokeniser()" /> constructor could be used instead. The <c><paramref name="random" /></c> is used for deciding about token breaking points via the <see cref="BreakToken" /> function.</para>
         ///     <para>Each position in the input text lines has a 50 % chance of being a token break point or not. More precisely, each <see cref="BreakToken" /> function call has, on average, a 50 % chance of returning <c>true</c> or <c>false</c>.</para>
-        ///     <para>Generally speaking, the average token length—in an infinite line of text—shall be 1 or 2, depending on whether or not the empty tokens are included (v. <a href="http://en.wikipedia.org/wiki/Geometric_distribution#Expected_Value_Examples">expected values of the geometric distribution</a>; note that the <em>zeroth</em> position is also tried, therefore a <em>hit</em> on the first try would result in a token length 0, and a hit on the <c>n</c>-th try would result in a token length of <c>n - 1</c>). However, finiteness of actual lines of text that are being shattered limits the length of the last token in a line, consequently the actual <em>a posteriori</em> average may differ from the theoretical value.</para>
+        ///     <para>Generally speaking, the average token length—in an infinite line of text—shall be 1 or 2, depending on whether or not the empty tokens are included (v. <a href="http://en.wikipedia.org/wiki/Geometric_distribution#Expected_Value_Examples">expected values of the geometric distribution</a>; note that the <em>zeroth</em> position is also tried, therefore a <em>hit</em> on the first try would result in a token length 0, and a hit on the <c>n</c>-th try would result in a token length of <c>n - 1</c>). However, finiteness of actual lines of text that are being shattered limits the length of the last token in a line, and consequently the actual <em>a posteriori</em> average may differ from the theoretical value.</para>
         /// </remarks>
         /// <seealso cref="BreakToken" />
+        /// <seealso cref="RandomTokeniser()" />
+        /// <seealso cref="RandomTokeniser(Double)" />
+        /// <seealso cref="RandomTokeniser(Random, Double)" />
         public RandomTokeniser(Random random) : this(new RandomTokenBreaker(random))
         {
         }
@@ -118,9 +131,12 @@ namespace MagicText
         /// <remarks>
         ///     <para>If no specific <see cref="Random" /> object or seed should be used, the <see cref="RandomTokeniser(Double)" /> constructor could be used instead. The <c><paramref name="random" /></c> is used for deciding about token breaking points via the <see cref="BreakToken" /> function.</para>
         ///     <para>Each position in the input text lines becomes a breaking point with probability <c><paramref name="bias" /></c> and does not become one with probability <c>1 - <paramref name="bias" /></c>. More precisely, each <see cref="BreakToken" /> function call returns <c>true</c> with average probability <c><paramref name="bias" /></c> or <c>false</c> with average probability <c>1 - <paramref name="bias" /></c>.</para>
-        ///     <para>Generally speaking, the average token length—in an infinite line of text—shall be <c>1 / <paramref name="bias" /> - { 1 or 0 }</c>, depending on whether or not the empty tokens are included (v. <a href="http://en.wikipedia.org/wiki/Geometric_distribution#Expected_Value_Examples">expected values of the geometric distribution</a>; note that the <em>zeroth</em> position is also tried, therefore a <em>hit</em> on the first try would result in a token length 0, and a hit on the <c>n</c>-th try would result in a token length of <c>n - 1</c>). To achieve an average token length <c>n</c> (greater than or equal to 0, may be non-integral) with empty tokens included, set the <c><paramref name="bias" /></c> to <c>1 / (n + 1)</c>. For instance, to set the average (expected) length of a token to 4, set <c><paramref name="bias" /></c> to 0.2 (1 / 5). However, finiteness of actual lines of text that are being shattered limits the length of the last token in a line, consequently the actual <em>a posteriori</em> average may differ from the theoretical value.</para>
+        ///     <para>Generally speaking, the average token length—in an infinite line of text—shall be <c>1 / <paramref name="bias" /> - { 1 or 0 }</c>, depending on whether or not the empty tokens are included (v. <a href="http://en.wikipedia.org/wiki/Geometric_distribution#Expected_Value_Examples">expected values of the geometric distribution</a>; note that the <em>zeroth</em> position is also tried, therefore a <em>hit</em> on the first try would result in a token length 0, and a hit on the <c>n</c>-th try would result in a token length of <c>n - 1</c>). To achieve an average token length <c>n</c> (greater than or equal to 0, may be non-integral) with empty tokens included, set the <c><paramref name="bias" /></c> to <c>1 / (n + 1)</c>. For instance, to set the average (expected) length of a token to 4, set <c><paramref name="bias" /></c> to 0.2 (1 / 5). However, finiteness of actual lines of text that are being shattered limits the length of the last token in a line, and consequently the actual <em>a posteriori</em> average may differ from the theoretical value.</para>
         /// </remarks>
         /// <seealso cref="BreakToken" />
+        /// <seealso cref="RandomTokeniser()" />
+        /// <seealso cref="RandomTokeniser(Double)" />
+        /// <seealso cref="RandomTokeniser(Random)" />
         public RandomTokeniser(Random random, Double bias) : this(new RandomTokenBreaker(random, bias))
         {
         }

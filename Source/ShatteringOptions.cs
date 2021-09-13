@@ -21,8 +21,9 @@ namespace MagicText
         protected const string SerialisationInfoNullErrorMessage = "Serialisation info cannot be null.";
         private const string OtherNullErrorMessage = "Shattering options to copy cannot be null.";
         protected const string StringComparerNullErrorMessage = "String comparer cannot be null.";
+#if !NETSTANDARD2_0
         protected const string StringComparisonNotSupportedErrorMessage = "The string comparison type passed in is currently not supported.";
-
+#endif
 
         /// <summary>Indicates whether the <c><paramref name="left" /></c> <see cref="ShatteringOptions" /> are equal to the <c><paramref name="right" /></c> or not.</summary>
         /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>

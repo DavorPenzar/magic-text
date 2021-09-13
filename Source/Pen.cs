@@ -56,7 +56,7 @@ namespace MagicText
         /// <returns>The internal locking object.</returns>
         private static Object Locker => _locker;
 
-        /// <summary>Gets or sets the seed for the internal (pseudo-)random number generator (<see cref="Random" />).</summary>
+        /// <summary>Gets or sets the seed for the <see cref="Pen" />'s internal (pseudo-)random number generator (<see cref="Random" />).</summary>
         /// <returns>The current seed.</returns>
         /// <value>The new seed. If the <c>value</c> is less than or equal to 0, the new seed is set to 1.</value>
         /// <remarks>
@@ -82,7 +82,7 @@ namespace MagicText
             }
         }
 
-        /// <summary>Gets the pen's static (pseudo-)random number generator.</summary>
+        /// <summary>Gets the <see cref="Pen" />'s static (pseudo-)random number generator.</summary>
         /// <returns>The internal (pseudo-)random number generator at the current thread.</returns>
         /// <remarks>
         ///     <para>The number generator is thread safe (actually, each thread has its own instance) and instances across multiple threads are seeded differently. However, instances across multiple processes initiated at approximately the same time could be seeded with the same value. Therefore the main purpose of the number generator is to provide a virtually unpredictable (to an unconcerned human user) implementation of the <see cref="Render(Int32, Nullable{Int32})" /> method for a single process without having to provide a custom number generator (a <see cref="Func{T, TResult}" /> delegate or a <see cref="System.Random" /> object); no other properties are guaranteed.</para>
@@ -769,7 +769,6 @@ namespace MagicText
         /// <summary>Finds the positions of the <c><paramref name="token" /></c> in the <see cref="Context" />.</summary>
         /// <param name="token">The token to find.</param>
         /// <returns>The collection of positions in the <see cref="Context" /> at which all of the occurrences of the <c><paramref name="token" /></c> begin.</returns>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="token" /></c> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>For each position <c>p</c> in the returned collection, <c><see cref="Context" />[p]</c> corresponds to the <c><paramref name="token" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). All such positions are contained in the returned collection (no position is disregarded). Therefore, if the returned collection is empty, the <c><paramref name="token" /></c> does not occur in the <see cref="Context" />.</para>
         ///     <para>When enumerated, the returned collection of positions is unordered (no particular order of positions is guaranteed).</para>
@@ -875,7 +874,6 @@ namespace MagicText
         /// <summary>Finds the first position of the <c><paramref name="token" /></c> in the <see cref="Context" />.</summary>
         /// <param name="token">The token to find.</param>
         /// <returns>If the <c><paramref name="token" /></c> is found in the <see cref="Context" />, the minimal position in the <see cref="Context" /> at which the <c><paramref name="token" /></c> occurs is returned; otherwise the total number of tokens in the <see cref="Context" />.</returns>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="token" /></c> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>If the <c><paramref name="token" /></c> is found in the <see cref="Context" />, <c><see cref="Context" />[p]</c>, where <c>p</c> is the returned position, corresponds to the first occurrence of the <c><paramref name="token" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). An occurrence is considered <em>first</em> if the value of the position <c>p</c> is minimal.</para>
         ///     <para>Unlike the <see cref="String.IndexOf(Char)" />, <see cref="Array.IndexOf{T}(T[], T)" />, <see cref="List{T}.IndexOf(T)" /> etc. methods, the method <strong>does not</strong> return -1 if the <c><paramref name="token" /></c> is not found, but instead returns the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). This way the value returned by the method may be used as the parameter <c>fromPosition</c> in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, System.Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods to achieve a somewhat expected result (no tokens shall be rendered) without causing any exceptions.</para>
@@ -985,7 +983,6 @@ namespace MagicText
         /// <summary>Finds the last position of the <c><paramref name="token" /></c> in the <see cref="Context" />.</summary>
         /// <param name="token">The token to find.</param>
         /// <returns>If the <c><paramref name="token" /></c> is found in the <see cref="Context" />, the maximal position in the <see cref="Context" /> at which an occurrence of the <c><paramref name="token" /></c> begins is returned; otherwise the total number of tokens in the <see cref="Context" />.</returns>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="token" /></c> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>If the <c><paramref name="token" /></c> is found in the <see cref="Context" />, <c><see cref="Context" />[p]</c>, where <c>p</c> is the returned position, corresponds to the last occurrence of the <c><paramref name="token" /></c> in respect of the <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />, provided at construction). An occurrence is considered <em>last</em> if the value of the position <c>p</c> is maximal.</para>
         ///     <para>Unlike the <see cref="String.LastIndexOf(Char)" />, <see cref="Array.LastIndexOf{T}(T[], T)" />, <see cref="List{T}.LastIndexOf(T)" /> etc. methods, the method <strong>does not</strong> return -1 if the <c><paramref name="token" /></c> is not found, but instead returns the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property). This way the value returned by the method may be used as the parameter <c>fromPosition</c> in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, System.Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods to achieve a somewhat expected result (no tokens shall be rendered) without causing any exceptions.</para>
@@ -1057,9 +1054,9 @@ namespace MagicText
         /// <seealso cref="PositionsOf(String?[])" />
         public Int32 Count(IEnumerable<String?> sample)
         {
-            FindPositionIndexAndCount(Comparer, Context, Index, sample, out Int32 n);
+            FindPositionIndexAndCount(Comparer, Context, Index, sample, out Int32 count);
 
-            return n;
+            return count;
         }
 
         /// <summary>Finds the total number of occurrences of an empty token sample in the <see cref="Context" />.</summary>
@@ -1363,32 +1360,34 @@ namespace MagicText
 
             // Serialise the `Comparer`.
             {
+#if NETSTANDARD2_0
                 Type comparerType = Comparer.GetType() ?? typeof(StringComparer);
 
-#if NETSTANDARD2_0
                 info.AddValue(nameof(StringComparer), comparerType?.FullName, typeof(String));
                 info.AddValue(nameof(Comparer), Comparer, comparerType);
 #else
-                if (comparerType.Equals(StringComparer.InvariantCultureIgnoreCase.GetType()))
                 {
-                    info.AddValue(nameof(Comparer), Convert.ToInt32(StringComparison.InvariantCultureIgnoreCase));
-                }
-                else if (comparerType.Equals(StringComparer.InvariantCulture.GetType()))
-                {
-                    info.AddValue(nameof(Comparer), Convert.ToInt32(StringComparison.InvariantCulture));
-                }
-                else if (comparerType.Equals(StringComparer.OrdinalIgnoreCase.GetType()))
-                {
-                    info.AddValue(nameof(Comparer), Convert.ToInt32(StringComparison.OrdinalIgnoreCase));
-                }
-                else if (comparerType.Equals(StringComparer.Ordinal.GetType()))
-                {
-                    info.AddValue(nameof(Comparer), Convert.ToInt32(StringComparison.Ordinal));
-                }
-                else
-                {
-                    info.AddValue(nameof(StringComparer), comparerType?.FullName, typeof(String));
-                    info.AddValue(nameof(Comparer), Comparer, comparerType);
+                    Boolean addedComparer = false;
+
+                    foreach (StringComparison comparison in Enum.GetValues(typeof(StringComparison)).Cast<StringComparison>())
+                    {
+                        if (Comparer.Equals(StringComparer.FromComparison(comparison)))
+                        {
+                            info.AddValue(nameof(Comparer), Convert.ToInt32(comparison));
+
+                            addedComparer = true;
+
+                            break;
+                        }
+                    }
+
+                    if (!addedComparer)
+                    {
+                        Type comparerType = Comparer.GetType() ?? typeof(StringComparer);
+
+                        info.AddValue(nameof(StringComparer), comparerType?.FullName, typeof(String));
+                        info.AddValue(nameof(Comparer), Comparer, comparerType);
+                    }
                 }
 #endif
             }

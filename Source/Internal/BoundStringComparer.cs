@@ -69,7 +69,7 @@ namespace MagicText.Internal
 
         /// <summary>Compares the <see cref="String" /> to the <c><paramref name="other" /></c> and returns a value indicating whether one is less than, equal to or greater than the other.</summary>
         /// <param name="other">The <see cref="System.String" /> to compare.</param>
-        /// <returns>If the <see cref="String" /> is less than the <c><paramref name="other" /></c>, a value less than 0; if the <see cref="String" /> is greater than the <c><paramref name="other" /></c>, a value greater than 0; if the <see cref="String" /> is equal to the <c><paramref name="str" /></c>, 0.</returns>
+        /// <returns>If the <see cref="String" /> is less than the <c><paramref name="other" /></c>, a value less than 0; if the <see cref="String" /> is greater than the <c><paramref name="other" /></c>, a value greater than 0; if the <see cref="String" /> is equal to the <c><paramref name="other" /></c>, 0.</returns>
         /// <remarks>
         ///     <para>The exceptions thrown by the <see cref="StringComparer.Compare(System.String, System.String)" /> method call (notably the <see cref="ArgumentNullException" />) are not caught.</para>
         /// </remarks>
@@ -84,7 +84,7 @@ namespace MagicText.Internal
 
         /// <summary>Compares the <see cref="String" /> to the <c><paramref name="other" /></c> and returns a value indicating whether one is less than, equal to or greater than the other.</summary>
         /// <param name="other">The <see cref="System.String" /> to compare.</param>
-        /// <returns>If the <see cref="String" /> is less than the <c><paramref name="other" /></c>, a value less than 0; if the <see cref="String" /> is greater than the <c><paramref name="other" /></c>, a value greater than 0; if the <see cref="String" /> is equal to the <c><paramref name="str" /></c>, 0.</returns>
+        /// <returns>If the <see cref="String" /> is less than the <c><paramref name="other" /></c>, a value less than 0; if the <see cref="String" /> is greater than the <c><paramref name="other" /></c>, a value greater than 0; if the <see cref="String" /> is equal to the <c><paramref name="other" /></c>, 0.</returns>
         /// <remarks>
         ///     <para>The exceptions thrown by the <see cref="StringComparer.Compare(System.String, System.String)" /> method call (notably the <see cref="ArgumentNullException" />) are not caught.</para>
         /// </remarks>

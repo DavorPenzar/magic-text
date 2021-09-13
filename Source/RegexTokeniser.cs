@@ -11,7 +11,7 @@ namespace MagicText
     /// <summary>Implements a <see cref="LineByLineTokeniser" /> which shatters lines of text at specific regular expression pattern matches.</summary>
     /// <remarks>
     ///     <para>Additional to shattering text into tokens, <see cref="RegexTokeniser" /> provides a possibility to transform tokens immediately after the extraction of regular expression matches and prior to checking for empty tokens. Initially, the idea was to use regular expressions for the transformation as regular expressions are often used for text replacement alongside other uses (such as text breaking/splitting), but the tokeniser accepts any <see cref="Func{T, TResult}" /> delegate for the transformation function <see cref="Transform" />. This way the <see cref="RegexTokeniser" /> class provides a wider range of tokenising policies and, at the same time, its implementation and programming interface are more consistent with other libraries, most notably the standard <em>.NET</em> library (such as the <see cref="Enumerable.Select{TSource, TResult}(IEnumerable{TSource}, Func{TSource, TResult})" /> extension method). Still, to use a regular expression based replacement, a lambda-function <c>t => <see cref="Regex" />.Replace(t, matchPattern, replacementPattern)</c>, where <c>matchPattern</c> and <c>replacementPattern</c> are regular expressions to match and to use for replacement respectively, may be provided (amongst other solutions).</para>
-    ///     <para>If a default regular expression break pattern <see cref="DefaultInclusiveBreakPattern" /> or <see cref="DefaultExclusiveBreaker" /> should be used without special <see cref="RegexOptions" />, a better performance is achieved when using the default <see cref="RegexTokeniser()" /> constructor or the <see cref="RegexTokeniser(Boolean, Func{String?, String?}?)" /> constructor, in which case a pre-built <see cref="Regex" /> object is used constructed with <see cref="Regex.Options" />, instead of the <see cref="RegexTokeniser(String, RegexOptions, Func{String?, String?}?)" /> constructor.</para>
+    ///     <para>If a default regular expression break pattern <see cref="DefaultInclusiveBreakPattern" /> or <see cref="DefaultExclusiveBreaker" /> should be used without special <see cref="RegexOptions" />, a better performance is achieved when using the default <see cref="RegexTokeniser()" /> constructor or the <see cref="RegexTokeniser(Boolean, Func{String?, String?}?)" /> constructor, in which case a pre-built <see cref="Regex" /> object is used constructed with <see cref="Regex.Options" />, instead of the <see cref="RegexTokeniser(String, Boolean, RegexOptions, Func{String?, String?}?)" /> constructor.</para>
     ///     <para>Empty tokens (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens which yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method after possible transformation via the <see cref="Transform" /> delegate if it is set. This behaviour cannot be overridden by a derived class.</para>
     ///     <para>No thread safety mechanism is implemented nor assumed by the class. If the transformation function (<see cref="Transform" />) should be thread-safe, lock the tokeniser during complete <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions?)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls to ensure consistent behaviour of the function over a single shattering process.</para>
     /// </remarks>
@@ -21,7 +21,9 @@ namespace MagicText
     public class RegexTokeniser : LineByLineTokeniser
     {
         protected const string RegexPatternNullErrorMessage = "Regular expression pattern cannot be null.";
-        protected const string BreakNullErrorMessage = "Regular expression breaker cannot be null.";
+        protected const string BreakerNullErrorMessage = "Regular expression breaker cannot be null.";
+        protected const string RegexOptionsOutOfRangeErrorMessage = "The regex options argument passed in is out of the range of valid values.";
+        protected const string RegexPatternErrorMessage = "The regular expression break pattern is invalid.";
 
         /// <summary>The default regular expression break pattern which includes the breaks as tokens.</summary>
         /// <remarks>
@@ -105,20 +107,34 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="breaker" /></c> is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>The exceptions thrown by <see cref="Regex" /> class's constructor and methods are not caught.</para>
-        ///     <para>Calling this constructor is essentially the same (performance aside) as calling the <see cref="RegexTokeniser(String, RegexOptions, Func{String?, String?}?)" /> constructor as:</para>
+        ///     <para>Calling this constructor is essentially the same (performance aside) as calling the <see cref="RegexTokeniser(String, Boolean, RegexOptions, Func{String?, String?}?)" /> constructor as:</para>
         ///     <code>
         ///         <see cref="RegexTokeniser" />(breakPattern: <paramref name="breaker" />.ToString(), options: <paramref name="alterOptions" /> ?? <paramref name="breaker" />.Options, transform: <paramref name="transform" />)
         ///     </code>
         /// </remarks>
-        /// <seealso cref="RegexTokeniser(String, RegexOptions, Func{String?, String?}?)" />
+        /// <seealso cref="RegexTokeniser(String, Boolean, RegexOptions, Func{String?, String?}?)" />
         public RegexTokeniser(Regex breaker, Nullable<RegexOptions> alterOptions = default, Func<String?, String?>? transform = null) : base()
         {
             if (breaker is null)
             {
-                throw new ArgumentNullException(nameof(breaker), BreakNullErrorMessage);
+                throw new ArgumentNullException(nameof(breaker), BreakerNullErrorMessage);
             }
 
-            _breaker = alterOptions.HasValue ? new Regex(breaker.ToString(), alterOptions.Value) : breaker;
+            if (alterOptions.HasValue)
+            {
+                try
+                {
+                    _breaker = new Regex(breaker.ToString(), alterOptions.Value);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(alterOptions), alterOptions.Value, RegexOptionsOutOfRangeErrorMessage);
+                }
+            }
+            else
+            {
+                _breaker = breaker;
+            }
             _transform = transform;
         }
 
@@ -128,6 +144,9 @@ namespace MagicText
         /// <remarks>
         ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultInclusiveBreaker" /> or <see cref="DefaultExclusiveBreaker" />) with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" /> is used. Consider using this constructor or the default <see cref="RegexTokeniser()" /> constructor if a default tokeniser should be used to improve performance.</para>
         /// </remarks>
+        /// <seealso cref="RegexTokeniser()" />
+        /// <seealso cref="DefaultInclusiveBreakPattern" />
+        /// <seealso cref="DefaultExclusiveBreakPattern" />
         public RegexTokeniser(Boolean inclusiveBreaker, Func<String?, String?>? transform = null) : this(breaker: inclusiveBreaker ? DefaultInclusiveBreaker : DefaultExclusiveBreaker, transform: transform)
         {
         }
@@ -137,20 +156,39 @@ namespace MagicText
         ///     <para>The <see cref="DefaultInclusiveBreakPattern" /> is used as the regular expression break pattern.</para>
         ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultInclusiveBreaker" />) with <see cref="Regex.Options" /> set to <see cref="RegexOptions.Compiled" /> is used. Consider using this constructor or the <see cref="RegexTokeniser(Boolean, Func{String?, String?}?)" /> constructor if a default tokeniser should be used to improve performance.</para>
         /// </remarks>
+        /// <seealso cref="RegexTokeniser(Boolean, Func{String?, String?}?)"/>
+        /// <seealso cref="DefaultInclusiveBreakPattern" />
+        /// <seealso cref="DefaultExclusiveBreakPattern" />
         public RegexTokeniser() : this(true)
         {
         }
 
         /// <summary>Creates a tokeniser.</summary>
         /// <param name="breakPattern">The regular expression break pattern to use.</param>
+        /// <param name="escape">If <c>true</c>, the <c><paramref name="breakPattern" /></c> is escaped using the <see cref="Regex.Escape(String)" /> method before constructing the internal regular expression breaker (<see cref="Breaker" />).</param>
         /// <param name="options">The options passed to the <see cref="Regex(String, RegexOptions)" /> constructor.</param>
         /// <param name="transform">The optional token transformation function. If <c>null</c>, no transformation function is used.</param>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="breakPattern" /></c> is <c>null</c>.</exception>
-        /// <remarks>
-        ///     <para>The exceptions thrown by the <see cref="Regex" /> class's constructor and methods are not caught.</para>
-        /// </remarks>
-        public RegexTokeniser([RegexPattern] String breakPattern, RegexOptions options = RegexOptions.None, Func<String?, String?>? transform = null) : this(breaker: breakPattern is null ? throw new ArgumentNullException(nameof(breakPattern), RegexPatternNullErrorMessage) : new Regex(breakPattern, options), transform: transform)
+        public RegexTokeniser([RegexPattern] String breakPattern, Boolean escape = false, RegexOptions options = RegexOptions.None, Func<String?, String?>? transform = null) : base()
         {
+            if (breakPattern is null)
+            {
+                throw new ArgumentNullException(nameof(breakPattern), RegexPatternNullErrorMessage);
+            }
+
+            try
+            {
+                _breaker = new Regex(escape ? Regex.Escape(breakPattern) : breakPattern, options);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                throw new ArgumentOutOfRangeException(nameof(options), options, RegexOptionsOutOfRangeErrorMessage);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(RegexPatternErrorMessage, nameof(breakPattern), ex);
+            }
+            _transform = transform;
         }
 
         /// <summary>Shatters a single <c><paramref name="line" /></c> into tokens.</summary>

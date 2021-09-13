@@ -19,6 +19,7 @@ namespace MagicText
         private const string TokeniserNullErrorMessage = "Tokeniser cannot be null.";
         private const string TextNullErrorMessage = "Input string cannot be null.";
         private const string InputNullErrorMessage = "Input stream cannot be null.";
+        private const string InvalidStreamErrorMessage = "Cannot read from the input stream.";
 
         /// <summary>Gets the default <see cref="Encoding" /> for reading and writing <see cref="Stream" />s as text resources, i. e. <see cref="Encoding.UTF8" />.</summary>
         /// <returns>The default <see cref="Encoding" />.</returns>
@@ -82,11 +83,12 @@ namespace MagicText
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <returns>The enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="tokeniser" /></c> is <c>null</c>. The parameter <c><paramref name="input" /></c> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">The <c><paramref name="input" /></c> is not readable.</exception>
         /// <remarks>
         ///     <para>The <see cref="StreamReader" /> used in the method for reading from the <c><paramref name="input" /></c> is constructed with default settings (regarding the <see cref="Encoding" /> and the buffer size). To control the settings of the <see cref="StreamReader" />, use the <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> method with a custom <see cref="StreamReader" /> instead.</para>
         ///     <para>The <c><paramref name="input" /></c> is neither disposed of nor closed in the method. This must be done manually <strong>after</strong> retrieving the tokens.</para>
         ///     <para>The returned enumerable is merely a query for enumerating tokens (also known as <em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="ShatterToList(ITokeniser, Stream, ShatteringOptions?)" /> extension method instead to improve performance.</para>
-        ///     <para>The exceptions thrown by the <see cref="StreamReader" />'s methods (including the constructor) and the <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> method calls are not caught.</para>
+        ///     <para>The exceptions thrown by the <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> method call are not caught.</para>
         /// </remarks>
         /// <seealso cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" />
         /// <seealso cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
@@ -111,11 +113,22 @@ namespace MagicText
                 throw new ArgumentNullException(nameof(input), InputNullErrorMessage);
             }
 
-            using TextReader inputReader = CreateDefaultStreamReader(input);
+            TextReader inputReader;
+            try
+            {
+                inputReader = CreateDefaultStreamReader(input);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(InvalidStreamErrorMessage, nameof(input), ex);
+            }
+
             foreach (String? token in tokeniser.Shatter(inputReader, options))
             {
                 yield return token;
             }
+
+            inputReader.Dispose();
         }
 
         /// <summary>Shatters text read from the <c><paramref name="input" /></c> into a token list.</summary>
@@ -194,11 +207,12 @@ namespace MagicText
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <returns>The list of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="tokeniser" /></c> is <c>null</c>. The parameter <c><paramref name="input" /></c> is <c>null.</c></exception>
+        /// <exception cref="ArgumentException">The <c><paramref name="input" /></c> is not readable.</exception>
         /// <remarks>
         ///     <para>The <see cref="StreamReader" /> used in the method for reading from the <c><paramref name="input" /></c> is constructed with default settings (regarding the <see cref="Encoding" /> and the buffer size). To control the settings of the <see cref="StreamReader" />, use the <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> method with a custom <see cref="StreamReader" /> instead.</para>
         ///     <para>The <c><paramref name="input" /></c> is neither disposed of nor closed in the method. This must be done manually <strong>after</strong> retrieving the tokens.</para>
         ///     <para>The returned enumerable is a fully-built container. However, as such it is impossible to enumerate it before the complete reading and shattering process is finished.</para>
-        ///     <para>The exceptions thrown by the <see cref="StreamReader" />'s methods (including the constructor) and the <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> method calls are not caught.</para>
+        ///     <para>The exceptions thrown by the <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> method call are not caught.</para>
         /// </remarks>
         /// <seealso cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" />
         /// <seealso cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
@@ -278,14 +292,15 @@ namespace MagicText
         /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method).</param>
         /// <returns>The asynchronous enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="tokeniser" /></c> is <c>null</c>. The parameter <c><paramref name="input" /></c> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">The <c><paramref name="input" /></c> is not readable.</exception>
         /// <exception cref="OperationCanceledException">The operation is cancelled via the <c><paramref name="cancellationToken" /></c>.</exception>
         /// <remarks>
         ///     <para>The <see cref="StreamReader" /> used in the method for reading from the <c><paramref name="input" /></c> is constructed with default settings (regarding the <see cref="Encoding" /> and the buffer size). To control the settings of the <see cref="StreamReader" />, use the <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> method with a custom <see cref="StreamReader" /> instead.</para>
         ///     <para>The <c><paramref name="input" /></c> is neither disposed of nor closed in the method. This must be done manually <strong>after</strong> retrieving the tokens.</para>
         ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, data having already been read from the <see cref="Stream" /> <c><paramref name="input" /></c> may be irrecoverable when cancelling the operation.</para>
         ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> is desirable as it may optimise the asynchronous shattering process. However, in some cases only the original context might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus <c><paramref name="continueTasksOnCapturedContext" /></c> should be set to <c>true</c> to avoid errors.</para>
-        ///     <para>The returned asynchronous enumerable is merely an asynchronous query for enumerating tokens (also known as <em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="text" /></c>. If a fully built container is needed, consider using the <see cref="ShatterToListAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean)" /> extension method instead to improve performance.</para>
-        ///     <para>The exceptions thrown by the <see cref="StreamReader" />'s methods (including the constructor) and the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls are not caught.</para>
+        ///     <para>The returned asynchronous enumerable is merely an asynchronous query for enumerating tokens (also known as <em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="ShatterToListAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean)" /> extension method instead to improve performance.</para>
+        ///     <para>The exceptions thrown by the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method call are not caught.</para>
         /// </remarks>
         /// <seealso cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
         /// <seealso cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" />
@@ -310,11 +325,22 @@ namespace MagicText
                 throw new ArgumentNullException(nameof(input), TextNullErrorMessage);
             }
 
-            using TextReader textReader = CreateDefaultStreamReader(input);
-            await foreach (String? token in tokeniser.ShatterAsync(textReader, options, cancellationToken, continueTasksOnCapturedContext).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
+            TextReader inputReader;
+            try
+            {
+                inputReader = CreateDefaultStreamReader(input);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(InvalidStreamErrorMessage, nameof(input), ex);
+            }
+
+            await foreach (String? token in tokeniser.ShatterAsync(inputReader, options, cancellationToken, continueTasksOnCapturedContext).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
             {
                 yield return token;
             }
+
+            inputReader.Dispose();
         }
 
         /// <summary>Shatters text read from the <c><paramref name="input" /></c> into a token list asynchronously.</summary>
@@ -413,6 +439,7 @@ namespace MagicText
         /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method).</param>
         /// <returns>The asynchronous enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="tokeniser" /></c> is <c>null</c>. The parameter <c><paramref name="input" /></c> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">The <c><paramref name="input" /></c> is not readable.</exception>
         /// <exception cref="OperationCanceledException">The operation is cancelled via the <c><paramref name="cancellationToken" /></c>.</exception>
         /// <remarks>
         ///     <para>The <see cref="StreamReader" /> used in the method for reading from the <c><paramref name="input" /></c> is constructed with default settings (regarding the <see cref="Encoding" /> and the buffer size). To control the settings of the <see cref="StreamReader" />, use the <see cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" /> method with a custom <see cref="StreamReader" /> instead.</para>
@@ -420,7 +447,7 @@ namespace MagicText
         ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, data having already been read from the <see cref="Stream" /> <c><paramref name="input" /></c> may be irrecoverable when cancelling the operation.</para>
         ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> is desirable as it may optimise the asynchronous shattering process. However, in some cases only the original context might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus <c><paramref name="continueTasksOnCapturedContext" /></c> should be set to <c>true</c> to avoid errors.</para>
         ///     <para>The ultimately returned enumerable is a fully-built container. However, as such it is impossible to enumerate it before the complete reading and shattering process is finished.</para>
-        ///     <para>The exceptions thrown by the <see cref="StreamReader" />'s methods (including the constructor) and the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method calls are not caught.</para>
+        ///     <para>The exceptions thrown by the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method call are not caught.</para>
         /// </remarks>
         /// <seealso cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
         /// <seealso cref="ITokeniser.Shatter(TextReader, ShatteringOptions?)" />

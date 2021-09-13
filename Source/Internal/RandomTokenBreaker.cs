@@ -25,7 +25,7 @@ namespace MagicText.Internal
         /// <returns>The internal bias.</returns>
         /// <remarks>
         ///     <para>The <see cref="RandomTokenBreaker" /> is biased towards deciding on creating a token breaking point with bias <see cref="Bias" />. This means that the <see cref="BreakToken(Int32, Int32, Int32)" /> method, on average, returns <c>true</c> with probability <c><see cref="Bias" /></c> and <c>false</c> with probability <c>1 - <see cref="Bias" /></c>.</para>
-        ///     <para>Generally speaking, the average length of tokens <em>cut out</em> by the <see cref="RandomTokenBreaker" />—in an infinite line of text—shall be <c>1 / <see cref="Bias" /> - { 1 or 0}</c>, depending on whether or not the empty tokens are included (v. <a href="http://en.wikipedia.org/wiki/Geometric_distribution#Expected_Value_Examples">expected values of the geometric distribution</a>; note that the <em>zeroth</em> position is also tried in the <see cref="RandomTokeniser.ShatterLine(String)" /> method, therefore a <em>hit</em> on the first try would result in a token length 0, and a hit on the <c>n</c>-th try would result in a token length of <c>n - 1</c>). To achieve an average token length <c>n</c> (greater than or equal to 0, may be non-integral) with empty tokens included, the <see cref="Bias" /> should be <c>1 / (n + 1)</c>. For instance, for the average (expected) length of a token to be 4, the <see cref="Bias" /> must be 0.2 (1 / 5). However, finiteness of actual lines of text that are being shattered limits the length of the last token in a line, consequently the actual <em>a posteriori</em> average may differ from the theoretical value.</para>
+        ///     <para>Generally speaking, the average length of tokens <em>cut out</em> by the <see cref="RandomTokenBreaker" />—in an infinite line of text—shall be <c>1 / <see cref="Bias" /> - { 1 or 0}</c>, depending on whether or not the empty tokens are included (v. <a href="http://en.wikipedia.org/wiki/Geometric_distribution#Expected_Value_Examples">expected values of the geometric distribution</a>; note that the <em>zeroth</em> position is also tried in the <see cref="RandomTokeniser.ShatterLine(String)" /> method, therefore a <em>hit</em> on the first try would result in a token length 0, and a hit on the <c>n</c>-th try would result in a token length of <c>n - 1</c>). To achieve an average token length <c>n</c> (greater than or equal to 0, may be non-integral) with empty tokens included, the <see cref="Bias" /> should be <c>1 / (n + 1)</c>. For instance, for the average (expected) length of a token to be 4, the <see cref="Bias" /> must be 0.2 (1 / 5). However, finiteness of actual lines of text that are being shattered limits the length of the last token in a line, and consequently the actual <em>a posteriori</em> average may differ from the theoretical value.</para>
         /// </remarks>
         /// <seealso cref="BreakToken(Int32, Int32, Int32)" />
         public Double Bias => _bias;
@@ -47,6 +47,11 @@ namespace MagicText.Internal
         /// <remarks>
         ///     <para>If no specific <see cref="Random" /> object or seed should be used, the <see cref="RandomTokenBreaker(Double)" /> constructor could be used instead. The <c><paramref name="random" /></c> is used for deciding about token breaking points via the <see cref="BreakToken(Int32, Int32, Int32)" /> method.</para>
         /// </remarks>
+        /// <seealso cref="RandomTokenBreaker()" />
+        /// <seealso cref="RandomTokenBreaker(Double)" />
+        /// <seealso cref="RandomTokenBreaker(System.Random)" />
+        /// <seealso cref="Bias" />
+        /// <seealso cref="Random" />
         public RandomTokenBreaker(System.Random random, Double bias) : base()
         {
             _bias = (Double.IsNaN(bias) || Double.IsInfinity(bias) || bias <= 0.0D || bias > 1.0D) ? throw new ArgumentOutOfRangeException(nameof(bias), bias, String.Format(CultureInfo.CurrentCulture, BiasOutOfRangeFormatErrorMessage, 0.0D, 1.0D)) : bias;
@@ -57,6 +62,10 @@ namespace MagicText.Internal
         /// <remarks>
         ///     <para>The breaker's bias (<see cref="Bias" />) is set to <see cref="DefaultBias" />.</para>
         /// </remarks>
+        /// <seealso cref="RandomTokenBreaker(Double)" />
+        /// <seealso cref="RandomTokenBreaker(System.Random)" />
+        /// <seealso cref="RandomTokenBreaker(System.Random, Double)" />
+        /// <seealso cref="Bias" />
         public RandomTokenBreaker() : this(new System.Random(), DefaultBias)
         {
         }
@@ -64,15 +73,25 @@ namespace MagicText.Internal
         /// <summary>Creates a biased token breaker.</summary>
         /// <param name="bias">The breaking point bias. The <c><paramref name="bias" /></c> must be greater than 0 and less than or equal to 1.</param>
         /// <exception cref="ArgumentOutOfRangeException">The parameter <c><paramref name="bias" /></c> is <c>NaN</c>, infinite, less than or equal to 0, or greater than 1.</exception>
+        /// <seealso cref="RandomTokenBreaker()" />
+        /// <seealso cref="RandomTokenBreaker(System.Random)" />
+        /// <seealso cref="RandomTokenBreaker(System.Random, Double)" />
+        /// <seealso cref="Bias" />
         public RandomTokenBreaker(Double bias) : this(new System.Random(), bias)
         {
         }
 
         /// <summary>Creates a token breaker.</summary>
+        /// <param name="random">The (pseudo-)random number generator.</param>
         /// <remarks>
         ///     <para>If no specific <see cref="Random" /> object or seed should be used, the <see cref="RandomTokenBreaker()" /> constructor could be used instead. The <c><paramref name="random" /></c> is used for deciding about token breaking points via the <see cref="BreakToken(Int32, Int32, Int32)" /> method.</para>
         ///     <para>The breaker's bias (<see cref="Bias" />) is set to <see cref="DefaultBias" />.</para>
         /// </remarks>
+        /// <seealso cref="RandomTokenBreaker()" />
+        /// <seealso cref="RandomTokenBreaker(Double)" />
+        /// <seealso cref="RandomTokenBreaker(System.Random, Double)" />
+        /// <seealso cref="Bias" />
+        /// <seealso cref="Random" />
         public RandomTokenBreaker(System.Random random) : this(random, DefaultBias)
         {
         }

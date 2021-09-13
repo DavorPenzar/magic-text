@@ -11,7 +11,7 @@ namespace MagicText
 {
     /// <summary>Implements an <see cref="ITokeniser" /> which shatters lines of text one by one.</summary>
     /// <remarks>
-    ///     <para>By default, empty tokens (that are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens that yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method. Derived classes may override this behaviour.</para>
+    ///     <para>By default, empty tokens (that are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens that yield <c>true</c> when checked via the <see cref="DefaultIsEmptyTokenPredicate" /> method. Derived classes may override this behaviour.</para>
     ///     <para>Shattering methods read and process text <em>line-by-line</em> with all CR, LF and CRLF line breaks treated the same. These line breaks and the end of the input are considered line ends when shattering text, and are therefore substituted by a <see cref="ShatteringOptions.LineEndToken" /> if <see cref="ShatteringOptions.IgnoreLineEnds" /> is <c>false</c>. This behaviour may not be overridden by a derived class.</para>
     ///     <para>The empty lines are substituted by a <see cref="ShatteringOptions.EmptyLineToken" /> if <see cref="ShatteringOptions.IgnoreEmptyLines" /> is <c>false</c>. This behaviour may also not be overridden by a derived class.</para>
     ///
@@ -29,10 +29,28 @@ namespace MagicText
         protected const string LineNullErrorMessage = "Line string cannot be null.";
 
         /// <summary>Always indicates the <c><paramref name="_" /></c> as non-empty.</summary>
-        /// <param name="_">The token to check.</param>
+        /// <param name="_">The token to check. This parameter is unused.</param>
         /// <returns>Always <c>false</c>.</returns>
+        /// <remarks>
+        ///     <para>This function (predicate) may be used by a <see cref="LineByLineTokeniser" /> for <em>checking</em> if a token is empty in cases in which no token should be considered empty (not even <c>null</c>s if <c>null</c>-tokens are possible).</para>
+        /// </remarks>
         protected static Boolean IsEmptyTokenAlwaysFalse(String? _) =>
             false;
+
+        private static readonly Func<String?, Boolean> _defaultIsEmptTokenPredicate;
+
+        /// <summary>Gets the default function (predicate) for checking if a token is empty.</summary>
+        /// <returns>The default function for checking if a token is empty.</returns>
+        /// <remarks>
+        ///     <para>This function is equivalent to the <see cref="String.IsNullOrEmpty(String)" /> method.</para>
+        /// </remarks>
+        public static Func<String?, Boolean> DefaultIsEmptyTokenPredicate => _defaultIsEmptTokenPredicate;
+
+        /// <summary>Initialises static fields.</summary>
+        static LineByLineTokeniser()
+        {
+            _defaultIsEmptTokenPredicate = String.IsNullOrEmpty;
+        }
 
         private readonly Func<String?, Boolean> _isEmptyToken;
         private readonly Func<String?, Boolean> _isNonEmptyToken;
@@ -46,7 +64,7 @@ namespace MagicText
         protected Func<String?, Boolean> IsNonEmptyToken => _isNonEmptyToken;
 
         /// <summary>Creates a tokeniser.</summary>
-        /// <param name="isEmptyToken">The function (predicate) to check if a token is empty.</param>
+        /// <param name="isEmptyToken">The function (predicate) for checking if a token is empty.</param>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="isEmptyToken" /></c> is <c>null</c>.</exception>
         protected LineByLineTokeniser(Func<String?, Boolean> isEmptyToken) : base()
         {
@@ -56,9 +74,9 @@ namespace MagicText
 
         /// <summary>Creates a default tokeniser.</summary>
         /// <remarks>
-        ///     <para>The method <see cref="String.IsNullOrEmpty(String)" /> is used as the function (predicate) to check if a token is empty.</para>
+        ///     <para>The function (predicate) <see cref="DefaultIsEmptyTokenPredicate" /> is used for checking if a token is empty.</para>
         /// </remarks>
-        public LineByLineTokeniser() : this(String.IsNullOrEmpty)
+        public LineByLineTokeniser() : this(DefaultIsEmptyTokenPredicate)
         {
         }
 
