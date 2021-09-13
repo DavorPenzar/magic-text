@@ -47,14 +47,14 @@ For example, if the context is acquired by slicing the string *aaaabaaac* at eac
     5.  *aaaab**a**aac*
     6.  *aaaaba**a**ac*
     7.  *aaaabaa**a**c*
-3.  occurrence 2 is chosen. Therefore the next token chosen is (also) the letter *a*. Note that the same would happen if any occurrence except occurrences 4 and 7 were chosen.
+3.  Occurrence 2 is chosen. Therefore the next token chosen is (also) the letter *a*. Note that the same would happen if any occurrence except occurrences 4 and 7 were chosen.
 4.  The string *aa* (still shorter than `n == 3` characters) must now be found. All occurrences of the string are the following:
     1.  ***aa**aabaaac*
     2.  *a**aa**abaaac*
     3.  *aa**aa**baaac*
     4.  *aaaab**aa**ac*
     5.  *aaaaba**aa**c*
-5.  occurrence 3 is chosen meaning the next token is the letter *b*. This makes the following steps uniquely determined.
+5.  Occurrence 3 is chosen meaning the next token is the letter *b*. This makes the following steps uniquely determined.
 6.  The string *aab* (exactly `n == 3` characters) must now be found. All occurrences of the string are the following:
     1.  *aa**aab**aaac*
 7.  The next token chosen is the letter *a*.
