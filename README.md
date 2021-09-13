@@ -109,11 +109,10 @@ using System.Linq;
 IEnumerable<String?> tokens;
 Pen pen;
 
-using (Stream fileStream = File.OpenRead("Firework.txt"))
-using (TextReader fileReader = new StreamReader(fileStream))
+using (Stream input = File.OpenRead("Firework.txt"))
 {
 	ITokeniser tokeniser = new RegexTokeniser();
-	tokens = tokeniser.ShatterToList(fileReader, new ShatteringOptions() { IgnoreEmptyTokens = true });
+	tokens = tokeniser.ShatterToList(input, new ShatteringOptions() { IgnoreEmptyTokens = true });
 }
 
 pen = new Pen(tokens);
@@ -245,13 +244,13 @@ foreach (String? token in tokens)
 
 entropy = probability.Select(e => e.Value * informationContent[e.Key]).Sum();
 
-foreach (KeyValuePair<String, Double> entry in probability.OrderBy(e => e.Value).ThenBy(e => e.Key))
+foreach (KeyValuePair<String, Double> entry in probability.OrderBy(e => e.Value).ThenBy(e => JsonSerializer.Deserialize<String>(e.Key)))
 {
 	Console.WriteLine("P ({0}) = {1:P2}", entry.Key, entry.Value);
 }
 Console.WriteLine();
 
-foreach (KeyValuePair<String, Double> entry in informationContent.OrderByDescending(e => e.Value).ThenBy(e => e.Key))
+foreach (KeyValuePair<String, Double> entry in informationContent.OrderByDescending(e => e.Value).ThenBy(e => JsonSerializer.Deserialize<String>(e.Key)))
 {
 	Console.WriteLine("I ({0}) = {1:N4}", entry.Key, entry.Value);
 }
