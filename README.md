@@ -298,12 +298,11 @@ using System.IO;
 IEnumerable<String?> tokens;
 Pen pen;
 
-using (Stream fileStream = File.OpenRead("Bible.txt"))
-using (TextReader fileReader = new StreamReader(fileStream))
+using (Stream input = File.OpenRead("Bible.txt"))
 {
 	ITokeniser tokeniser = new RegexTokeniser();
 	tokens = tokeniser.ShatterToList(
-		fileReader,
+		input,
 		new ShatteringOptions()
 		{
 			IgnoreEmptyTokens = true,
