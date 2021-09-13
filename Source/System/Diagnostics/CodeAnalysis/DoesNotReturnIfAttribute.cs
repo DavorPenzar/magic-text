@@ -15,6 +15,10 @@ namespace System.Diagnostics.CodeAnalysis
         {
             _parameterValue = parameterValue;
         }
+
+        private DoesNotReturnIfAttribute() : this(false)
+        {
+        }
     }
 }
 

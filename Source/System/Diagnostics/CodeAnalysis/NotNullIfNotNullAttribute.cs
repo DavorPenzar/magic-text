@@ -15,6 +15,10 @@ namespace System.Diagnostics.CodeAnalysis
         {
             _parameterName = parameterName;
         }
+
+        private NotNullIfNotNullAttribute() : this(null!)
+        {
+        }
     }
 }
 

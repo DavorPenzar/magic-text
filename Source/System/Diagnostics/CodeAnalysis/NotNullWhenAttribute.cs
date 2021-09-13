@@ -15,6 +15,10 @@ namespace System.Diagnostics.CodeAnalysis
         {
             _returnValue = returnValue;
         }
+
+        private NotNullWhenAttribute() : this(false)
+        {
+        }
     }
 }
 

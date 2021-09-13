@@ -17,10 +17,15 @@ namespace System.Diagnostics.CodeAnalysis
         {
             _returnValue = returnValue;
             _members = new String[members.Length];
+
             Array.Copy(members, _members, members.Length);
         }
 
         public MemberNotNullWhenAttribute(Boolean returnValue, String member) : this(returnValue, new String[] { member })
+        {
+        }
+
+        private MemberNotNullWhenAttribute() : this(false, Array.Empty<String>())
         {
         }
     }
