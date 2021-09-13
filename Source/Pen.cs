@@ -46,6 +46,7 @@ namespace MagicText
         protected const string PickOutOfRangeFormatErrorMessage = "Picking function returned a pick out of range. Must return a pick greater than {0:D} and less than the parameter given ({1:D}); however, if the parameter equals {2:D}, {3:D} must be returned.";
 
         private static readonly Object _locker;
+
         private static Int32 randomSeed;
 
         [ThreadStatic]
@@ -59,7 +60,7 @@ namespace MagicText
         /// <returns>The current seed.</returns>
         /// <value>The new seed. If the <c>value</c> is less than or equal to 0, the new seed is set to 1.</value>
         /// <remarks>
-        ///     <para>The current value does not necessarily indicate the seeding value or the random state of the internal number generator. The dissonance may appear if the number generator has already been instantiated and used or if the value of <see cref="RandomSeed" /> has changed.</para>
+        ///     <para>The current value does not necessarily indicate the seeding value or the random state of the internal number generator (<see cref="Random" />). The dissonance may appear if the number generator has already been instantiated and used or if the value of <see cref="RandomSeed" /> has changed.</para>
         /// </remarks>
         /// <seealso cref="Random" />
         private static Int32 RandomSeed
@@ -97,7 +98,7 @@ namespace MagicText
                     {
                         unchecked
                         {
-                            mutableThreadStaticRandom = new Random(RandomSeed++);
+                            mutableThreadStaticRandom = new System.Random(RandomSeed++);
                         }
                     }
 
