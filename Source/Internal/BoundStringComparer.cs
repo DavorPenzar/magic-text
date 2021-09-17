@@ -34,8 +34,18 @@ namespace MagicText.Internal
         /// <summary>Returns the hash code for the <see cref="String" />.</summary>
         /// <returns>The hash code for the <see cref="String" />.</returns>
         /// <seealso cref="String" />
-        public sealed override Int32 GetHashCode() =>
-            Comparer.GetHashCode(String);
+        public sealed override Int32 GetHashCode()
+        {
+            try
+            {
+                return Comparer.GetHashCode(String);
+            }
+            catch (ArgumentNullException) when (String is null)
+            {
+            }
+
+            return 0;
+        }
 
         /// <summary>Compares the <c><paramref name="str" /></c> to the <see cref="String" /> and returns a value indicating whether one is less than, equal to or greater than the other.</summary>
         /// <param name="str">The <see cref="System.String" /> to compare.</param>
