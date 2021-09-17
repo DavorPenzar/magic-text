@@ -649,7 +649,7 @@ namespace MagicText
                     String comparerType = info.GetString(nameof(StringComparer));
                     comparer = (StringComparer)info.GetValue(nameof(Comparer), Type.GetType(comparerType) ?? typeof(StringComparer));
                 }
-#endif
+#endif // NETSTANDARD2_0
                 _comparer = comparer;
             }
 
@@ -732,7 +732,7 @@ namespace MagicText
             HashSet<Int32> positions = new HashSet<Int32>();
 #else
             HashSet<Int32> positions = new HashSet<Int32>(n);
-#endif
+#endif // NETSTANDARD2_0
             for (Int32 i = p; i < P; ++i)
             {
                 positions.Add(i < Context.Count ? Index[i] : Context.Count);
@@ -1389,7 +1389,7 @@ namespace MagicText
                         info.AddValue(nameof(Comparer), Comparer, comparerType);
                     }
                 }
-#endif
+#endif // NETSTANDARD2_0
             }
 
             // Serialise the ending token.

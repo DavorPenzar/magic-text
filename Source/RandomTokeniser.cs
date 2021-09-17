@@ -1,6 +1,7 @@
 using MagicText.Internal;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,8 @@ namespace MagicText
     public class RandomTokeniser : LineByLineTokeniser
     {
         protected const string BreakTokenNullErrorMessage = "Token breaking predicate cannot be null.";
+        protected const string BiasOutOfRangeFormatErrorMessage = "Bias is out of range. Must be greater than {0:N0} and less than or equal to {1:N0}.";
+        protected const string RandomNullErrorMessage = "(Pseudo-)Random number generator cannot be null.";
 
         private readonly Func<Int32, Int32, Int32, Boolean> _breakToken;
 
@@ -103,7 +106,7 @@ namespace MagicText
         /// <seealso cref="RandomTokeniser()" />
         /// <seealso cref="RandomTokeniser(Random)" />
         /// <seealso cref="RandomTokeniser(Random, Double)" />
-        public RandomTokeniser(Double bias) : this(new RandomTokenBreaker(bias))
+        public RandomTokeniser(Double bias) : this((Double.IsNaN(bias) || Double.IsInfinity(bias) || bias <= 0.0D || bias > 1.0D) ? throw new ArgumentOutOfRangeException(nameof(bias), bias, String.Format(CultureInfo.CurrentCulture, BiasOutOfRangeFormatErrorMessage, 0.0D, 1.0D)) : new RandomTokenBreaker(bias))
         {
         }
 
@@ -119,7 +122,7 @@ namespace MagicText
         /// <seealso cref="RandomTokeniser()" />
         /// <seealso cref="RandomTokeniser(Double)" />
         /// <seealso cref="RandomTokeniser(Random, Double)" />
-        public RandomTokeniser(Random random) : this(new RandomTokenBreaker(random))
+        public RandomTokeniser(Random random) : this(random is null ? throw new ArgumentNullException(nameof(random), RandomNullErrorMessage) : new RandomTokenBreaker(random))
         {
         }
 
@@ -137,7 +140,7 @@ namespace MagicText
         /// <seealso cref="RandomTokeniser()" />
         /// <seealso cref="RandomTokeniser(Double)" />
         /// <seealso cref="RandomTokeniser(Random)" />
-        public RandomTokeniser(Random random, Double bias) : this(new RandomTokenBreaker(random, bias))
+        public RandomTokeniser(Random random, Double bias) : this(random is null ? throw new ArgumentNullException(nameof(random), RandomNullErrorMessage) : (Double.IsNaN(bias) || Double.IsInfinity(bias) || bias <= 0.0D || bias > 1.0D) ? throw new ArgumentOutOfRangeException(nameof(bias), bias, String.Format(CultureInfo.CurrentCulture, BiasOutOfRangeFormatErrorMessage, 0.0D, 1.0D)) : new RandomTokenBreaker(random, bias))
         {
         }
 

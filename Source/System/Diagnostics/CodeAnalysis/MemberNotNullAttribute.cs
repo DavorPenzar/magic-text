@@ -28,4 +28,4 @@ namespace System.Diagnostics.CodeAnalysis
     }
 }
 
-#endif
+#endif // NETSTANDARD2_0

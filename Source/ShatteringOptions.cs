@@ -1,4 +1,6 @@
+#if NETSTANDARD2_0
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+#endif // NETSTANDARD2_0
 
 using System;
 using System.Collections.Generic;
@@ -23,7 +25,7 @@ namespace MagicText
         protected const string StringComparerNullErrorMessage = "String comparer cannot be null.";
 #if !NETSTANDARD2_0
         protected const string StringComparisonNotSupportedErrorMessage = "The string comparison type passed in is currently not supported.";
-#endif
+#endif // NETSTANDARD2_0
 
         /// <summary>Indicates whether the <c><paramref name="left" /></c> <see cref="ShatteringOptions" /> are equal to the <c><paramref name="right" /></c> or not.</summary>
         /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>
@@ -73,7 +75,7 @@ namespace MagicText
                 throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(stringComparison), ex);
             }
         }
-#endif
+#endif // NETSTANDARD2_0
 
         /// <summary>Indicates whether the <c><paramref name="left" /></c> <see cref="ShatteringOptions" /> are equal to the <c><paramref name="right" /></c> or not.</summary>
         /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>
@@ -161,7 +163,8 @@ namespace MagicText
         ///     <para>The actual implementations of the <see cref="ITokeniser" /> interface may define what exactly an <em>empty</em> token means, but usually this would be a <c>null</c> or a <see cref="String" /> yielding <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> or <see cref="String.IsNullOrWhiteSpace(String)" /> method calls.</para>
         /// </remarks>
         [DisplayName("Ignore empty tokens")]
-        [Display(Name = "Ignore empty tokens", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "IgnoreEmptyTokens", Order = 0)]
+        [Display(Name = "Ignore empty tokens", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "Empty tokens", Order = 1)]
+        [Editable(true, AllowInitialValue = true)]
         [DefaultValue(false)]
         public Boolean IgnoreEmptyTokens
         {
@@ -183,7 +186,8 @@ namespace MagicText
         /// <seealso cref="LineEndToken" />
         /// <seealso cref="EmptyLineToken" />
         [DisplayName("Ignore line ends")]
-        [Display(Name = "Ignore line ends", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "IgnoreLineEnds", Order = 1)]
+        [Display(Name = "Ignore line ends", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "Line ends", Order = 2)]
+        [Editable(true, AllowInitialValue = true)]
         [DefaultValue(false)]
         public Boolean IgnoreLineEnds
         {
@@ -206,7 +210,8 @@ namespace MagicText
         /// <seealso cref="LineEndToken" />
         /// <seealso cref="EmptyLineToken" />
         [DisplayName("Ignore empty lines")]
-        [Display(Name = "Ignore empty lines", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "IgnoreEmptyLines", Order = 2)]
+        [Display(Name = "Ignore empty lines", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "Empty lines", Order = 3)]
+        [Editable(true, AllowInitialValue = true)]
         [DefaultValue(false)]
         public Boolean IgnoreEmptyLines
         {
@@ -227,9 +232,11 @@ namespace MagicText
         /// <seealso cref="IgnoreLineEnds" />
         /// <seealso cref="IgnoreEmptyLines" />
         /// <seealso cref="EmptyLineToken" />
+        [DataType(DataType.MultilineText)]
         [DisplayName("Line end token")]
-        [Display(Name = "Line end token", Description = "Token to represent a line end.", GroupName = "Tokens", ShortName = "LineEndToken", Order = 3)]
-        [DisplayFormat(ConvertEmptyStringToNull = false)]
+        [Display(Name = "Line end token", Description = "Token to represent a line end.", GroupName = "Tokens", ShortName = "Line end", Order = 4)]
+        [DisplayFormat(ConvertEmptyStringToNull = false, HtmlEncode = true)]
+        [Editable(true, AllowInitialValue = true)]
         [DefaultValue("\n")] // <-- this may be different from the `System.Environment.NewLine`
         public String? LineEndToken
         {
@@ -251,9 +258,11 @@ namespace MagicText
         /// <seealso cref="IgnoreLineEnds" />
         /// <seealso cref="IgnoreEmptyLines" />
         /// <seealso cref="LineEndToken" />
+        [DataType(DataType.MultilineText)]
         [DisplayName("Empty line token")]
-        [Display(Name = "Empty line token", Description = "Token to represent an empty line.", GroupName = "Tokens", ShortName = "EmptyLineToken", Order = 4)]
-        [DisplayFormat(ConvertEmptyStringToNull = false)]
+        [Display(Name = "Empty line token", Description = "Token to represent an empty line.", GroupName = "Tokens", ShortName = "Empty line", Order = 5)]
+        [DisplayFormat(ConvertEmptyStringToNull = false, HtmlEncode = true)]
+        [Editable(true, AllowInitialValue = true)]
         [DefaultValue("")]
         public String? EmptyLineToken
         {
@@ -355,7 +364,7 @@ namespace MagicText
                 throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(stringComparison), ex);
             }
         }
-#endif
+#endif // NETSTANDARD2_0
 
         /// <summary>Returns the hash code of the current options.</summary>
         /// <returns>The hash code of the current <see cref="ShatteringOptions" />.</returns>
@@ -419,7 +428,7 @@ namespace MagicText
                 throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(stringComparison), ex);
             }
         }
-#endif
+#endif // NETSTANDARD2_0
 
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="other" /></c> options or not.</summary>
         /// <param name="other">The other <see cref="ShatteringOptions" /> to compare with these options.</param>
@@ -492,7 +501,7 @@ namespace MagicText
                 throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(stringComparison), ex);
             }
         }
-#endif
+#endif // NETSTANDARD2_0
 
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="obj" /></c> or not.</summary>
         /// <param name="obj">The <see cref="Object" /> to compare with these <see cref="ShatteringOptions" />.</param>
@@ -518,4 +527,6 @@ namespace MagicText
     }
 }
 
+#if NETSTANDARD2_0
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
+#endif // NETSTANDARD2_0
