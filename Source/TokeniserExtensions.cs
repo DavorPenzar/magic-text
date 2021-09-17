@@ -32,7 +32,7 @@ namespace MagicText
         ///     <para>The method is intended for the internal use only and therefore does not make unnecessary checks of the parameters.</para>
         ///     <para>The <see cref="TokeniserExtensions" />' internal default settings are used for construction of the <see cref="StreamReader" />. These settings should coincide with the actual defaults of the <see cref="StreamReader" /> class.</para>
         ///     <para>Disposing of the <see cref="StreamReader" /> will neither dispose nor close the <c><paramref name="stream" /></c>.</para>
-        ///     <para>The exceptions thrown by the <see cref="StreamReader.StreamReader(Stream, Encoding, Boolean, Int32, Boolean)" /> constructor are not caught.</para>
+        ///     <para>The exceptions thrown by the <see cref="StreamReader(Stream, Encoding, Boolean, Int32, Boolean)" /> constructor are not caught.</para>
         /// </remarks>
         private static StreamReader CreateDefaultStreamReader(Stream stream) =>
             new StreamReader(stream: stream, encoding: DefaultEncoding, detectEncodingFromByteOrderMarks: DefaultDetectEncodingFromByteOrderMarks, bufferSize: DefaultBufferSize, leaveOpen: true);
