@@ -210,7 +210,7 @@ All tokenisers provided by the library tokenise text using [*deferred execution*
 
 ####    Simple [Information Theory](http://en.wikipedia.org/wiki/Information_theory) Analysis
 
-The [`Pen`](Source/Pen.cs) class may be used to perform some analysis of the context tokens in a probably more efficient way than simply iterating over its `Context` property and counting values, without creating an auxiliary index (such as the `Pen.Index` property). For instance, one could execute a code such as the following:
+The [`Pen`](Source/Pen.cs) class may be used to perform some analysis of the context tokens in a probably more efficient way than simply iterating over its `Context` property and counting values, without creating an auxiliary index (such as the `Index` property of the [`Pen`](Source/Pen.cs) class). For instance, one could execute a code as the following:
 
 ```csharp
 using MagicText; // <-- namespace of the library
