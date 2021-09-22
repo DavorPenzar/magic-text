@@ -3,16 +3,19 @@ using System;
 namespace MagicText.Internal
 {
     /// <summary>Provides methods for <see cref="System.String" /> comparison to a predefined reference <see cref="System.String" />.</summary>
-    internal class BoundStringComparer : Object, IComparable<String>, IEquatable<String>, IComparable
+    internal sealed class BoundStringComparer : Object, IComparable<String>, IEquatable<String>, IComparable
     {
         private const string ComparerNullErrorMessage = "String comparer cannot be null.";
+#if !NETSTANDARD2_0
+        private const string ComparisonNotSupportedErrorMessage = "The string comparison type passed in is currently not supported.";
+#endif // NETSTANDARD2_0
 
         private readonly StringComparer _comparer;
         private readonly System.String? _string;
 
-        /// <summary>Gets the <see cref="StringComparer" /> used by the comparer for comparing <see cref="System.String" />s.</summary>
+        /// <summary>Gets the bound <see cref="StringComparer" /> used by the comparer for comparing <see cref="System.String" />s.</summary>
         /// <returns>The internal <see cref="StringComparer" />.</returns>
-        protected StringComparer Comparer => _comparer;
+        private StringComparer Comparer => _comparer;
 
         /// <summary>Gets the predefined reference <see cref="System.String" /> used by the comparer.</summary>
         /// <returns>The internal predefined reference <see cref="System.String" />.</returns>
@@ -31,10 +34,40 @@ namespace MagicText.Internal
             _string = @string;
         }
 
+#if !NETSTANDARD2_0
+        /// <summary>Creates a comparer.</summary>
+        /// <param name="comparison">One of the enumeration values that specifies how <see cref="System.String" />s should be compared.</param>
+        /// <param name="string">The predefined reference <see cref="System.String" />. Other <see cref="System.String" />s are compared to this <c><paramref name="string" /></c> by the <see cref="StringComparer" /> specified by the <c><paramref name="comparison" /></c>.</param>
+        /// <exception cref="ArgumentException">The parameter <c><paramref name="comparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
+        public BoundStringComparer(StringComparison comparison, System.String? @string) : base()
+        {
+            try
+            {
+                _comparer = StringComparer.FromComparison(comparison);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(ComparisonNotSupportedErrorMessage, nameof(comparison), ex);
+            }
+            _string = @string;
+        }
+#endif // NETSTANDARD2_0
+
+        /// <summary>Creates a default comparer.</summary>
+        /// <remarks>The internal (bound) <see cref="StringComparer" /> is set to the <see cref="StringComparer.Ordinal" /> and the internal <see cref="System.String" /> (<see cref="String" />) is set to <c>null</c>.</remarks>
+        public BoundStringComparer() : this(GlobalDefaults.StringComparer, null)
+        {
+        }
+
+        /// <summary>Returns the <see cref="String" />.</summary>
+        /// <returns>If the <see cref="String" /> is not <c>null</c>, it is returned; otherwise the empty <see cref="System.String" /> (<see cref="System.String.Empty" />) is returned.</returns>
+        public override String ToString() =>
+            String ?? System.String.Empty;
+
         /// <summary>Returns the hash code for the <see cref="String" />.</summary>
         /// <returns>The hash code for the <see cref="String" />.</returns>
         /// <seealso cref="String" />
-        public sealed override Int32 GetHashCode()
+        public override Int32 GetHashCode()
         {
             try
             {

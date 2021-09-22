@@ -274,11 +274,16 @@ namespace MagicText
         }
 
         /// <summary>Creates options.</summary>
-        /// <param name="ignoreEmptyTokens">The indicator if empty tokens should be ignored.</param>
-        /// <param name="ignoreLineEnds">The indicator if line ends should be ignored.</param>
-        /// <param name="ignoreEmptyLines">The indicator if empty lines should be ignored.</param>
-        /// <param name="lineEndToken">The token to represent a line end.</param>
-        /// <param name="emptyLineToken">The token to represent an empty line.</param>
+        /// <param name="ignoreEmptyTokens">The indicator if empty tokens should be ignored. See <see cref="IgnoreEmptyTokens" /> for more information.</param>
+        /// <param name="ignoreLineEnds">The indicator if line ends should be ignored. See <see cref="IgnoreLineEnds" /> for more information.</param>
+        /// <param name="ignoreEmptyLines">The indicator if empty lines should be ignored. See <see cref="IgnoreEmptyLines" /> for more information.</param>
+        /// <param name="lineEndToken">The token to represent a line end. See <see cref="LineEndToken" /> for more information.</param>
+        /// <param name="emptyLineToken">The token to represent an empty line. See <see cref="EmptyLineToken" /> for more information.</param>
+        /// <seealso cref="IgnoreEmptyTokens" />
+        /// <seealso cref="IgnoreLineEnds" />
+        /// <seealso cref="IgnoreEmptyLines" />
+        /// <seealso cref="LineEndToken" />
+        /// <seealso cref="EmptyLineToken" />
         public ShatteringOptions(Boolean ignoreEmptyTokens, Boolean ignoreLineEnds, Boolean ignoreEmptyLines, String? lineEndToken, String? emptyLineToken) : base()
         {
             this.ignoreEmptyTokens = ignoreEmptyTokens;

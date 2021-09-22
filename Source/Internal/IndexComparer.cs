@@ -12,7 +12,29 @@ namespace MagicText.Internal
     {
         private const string ComparerNullErrorMessage = "String comparer cannot be null.";
         private const string TokensNullErrorMessage = "Token list cannot be null.";
+#if !NETSTANDARD2_0
+        private const string ComparisonNotSupportedErrorMessage = "The string comparison type passed in is currently not supported.";
+#endif // NETSTANDARD2_0
         private const string ObjectNotInt32ErrorMessage = "Object must be a 32-bit integer.";
+
+        private static readonly IReadOnlyList<String?> _emptyTokenList;
+
+        /// <summary>Gets an empty list of reference tokens.</summary>
+        /// <returns>The internal static empty list of reference tokens.</returns>
+        /// <remarks>
+        ///     <para>This property is intended for internal purposes only, to be used in <em>default</em> cases.</para>
+        ///     <para>Since the property is read-only and it represents a read-only collection of immutable elements (an <see cref="IReadOnlyList{T}" /> of <see cref="String" />s), it always returns the same reference (to the same <see cref="Object" />).</para>
+        /// </remarks>
+        protected static IReadOnlyList<String?> EmptyTokenList => _emptyTokenList;
+
+        /// <summary>Initialises static fields.</summary>
+        static IndexComparer()
+        {
+            List<String?> emptyTokenList = new List<String?>();
+            emptyTokenList.TrimExcess();
+
+            _emptyTokenList = emptyTokenList.AsReadOnly();
+        }
 
         private readonly StringComparer _comparer;
         private readonly IReadOnlyList<String?> _tokens;
@@ -37,6 +59,39 @@ namespace MagicText.Internal
         {
             _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer), ComparerNullErrorMessage);
             _tokens = tokens ?? throw new ArgumentNullException(nameof(tokens), TokensNullErrorMessage);
+        }
+
+#if !NETSTANDARD2_0
+        /// <summary>Creates a comparer.</summary>
+        /// <param name="comparison">One of the enumeration values that specifies how tokens should be compared. The <see cref="StringComparer" /> specified by the <c><paramref name="comparison" /></c> is used to compare tokens.</param>
+        /// <param name="tokens">The reference tokens. The indices shall be compared by comparing elements of the <c><paramref name="tokens" /></c>.</param>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="tokens" /></c> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">The parameter <c><paramref name="comparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
+        public IndexComparer(StringComparison comparison, IReadOnlyList<String?> tokens) : base()
+        {
+            if (tokens is null)
+            {
+                throw new ArgumentNullException(nameof(tokens), TokensNullErrorMessage);
+            }
+
+            try
+            {
+                _comparer = StringComparer.FromComparison(comparison);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(ComparisonNotSupportedErrorMessage, nameof(comparison), ex);
+            }
+            _tokens = tokens;
+        }
+#endif // NETSTANDARD2_0
+
+        /// <summary>Creates a default comparer.</summary>
+        /// <remarks>
+        ///     <para>The <see cref="StringComparer" /> (<see cref="Comparer" />) is set to the <see cref="StringComparer.Ordinal" /> and the reference tokens (<see cref="Tokens" />) are set to an empty list.</para>
+        /// </remarks>
+        public IndexComparer() : this(GlobalDefaults.StringComparer, EmptyTokenList)
+        {
         }
 
         /// <summary>Returns the hash code for the <c><paramref name="obj" /></c>.</summary>

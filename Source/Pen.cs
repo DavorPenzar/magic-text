@@ -41,6 +41,9 @@ namespace MagicText
         protected const string ContextNullErrorMessage = "Context token enumerable cannot be null.";
         protected const string PickerNullErrorMessage = "Picking function cannot be null.";
         private const string RandomNullErrorMessage = "(Pseudo-)Random number generator cannot be null.";
+#if !NETSTANDARD2_0
+        private const string ComparisonNotSupportedErrorMessage = "The string comparison type passed in is currently not supported.";
+#endif // NETSTANDARD2_0
         protected const string RelevantTokensOutOfRangeFormatErrorMessage = "Relevant tokens number is out of range. Must be greater than {0:D}.";
         protected const string FromPositionOutOfRangeFormatErrorMessage = "First token index is out of range. Must be greater than {0:D} and less than or equal to the size of the context ({1:D}).";
         protected const string PickOutOfRangeFormatErrorMessage = "Picking function returned a pick out of range. Must return a pick greater than {0:D} and less than the parameter given ({1:D}); however, if the parameter equals {2:D}, {3:D} must be returned.";
@@ -443,11 +446,10 @@ namespace MagicText
         /// <returns>If all tokens in the <see cref="Context" />, as well as the ending token (<see cref="SentinelToken" />), are interned, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <remarks>
         ///     <para>Tokens are interned using the <see cref="String.Intern(String)" /> method.</para>
-        ///     <para>If the <see cref="Context" /> is empty and the ending token (<see cref="SentinelToken" />) is <c>null</c>, the value of the <see cref="Interned" /> may still be both <c>true</c> and <c>false</c>. It actually depends on the value of the <c>intern</c> parameter in the <see cref="Pen(IEnumerable{String?}, String?, StringComparer?, Boolean)" /> or the <see cref="Pen(Pen, Boolean)" /> constructor.</para>
+        ///     <para>If the <see cref="Context" /> is empty and the ending token (<see cref="SentinelToken" />) is <c>null</c>, the value of the <see cref="Interned" /> may still be both <c>true</c> and <c>false</c>. It actually depends on the value of the <c>intern</c> parameter in the constructor.</para>
         /// </remarks>
         /// <seealso cref="Context" />
         /// <seealso cref="SentinelToken" />
-        /// <seealso cref="Pen(IEnumerable{String?}, String?, StringComparer?, Boolean)" />
         public Boolean Interned => _interned;
 
         /// <summary>Gets the <see cref="StringComparer" /> used by the pen for comparing tokens.</summary>
@@ -495,20 +497,24 @@ namespace MagicText
 
         /// <summary>Creates a pen.</summary>
         /// <param name="context">The input tokens. All random text shall be generated based on the <c><paramref name="context" /></c>: both by picking only from the <c><paramref name="context" /></c> and by using the order from it.</param>
+        /// <param name="comparer">The <see cref="StringComparer" /> used by the <see cref="Pen" />. Tokens shall be compared (e. g. for equality) by the <c><paramref name="comparer" /></c>.</param>
         /// <param name="sentinelToken">The ending token.</param>
-        /// <param name="comparer">The <see cref="StringComparer" /> used by the <see cref="Pen" />. Tokens shall be compared (e. g. for equality) by the <c><paramref name="comparer" /></c>. If <c>null</c>, the <see cref="StringComparer.Ordinal" /> is used.</param>
         /// <param name="intern">If <c>true</c>, non-<c>null</c> tokens from the <c><paramref name="context" /></c> shall be interned (via the <see cref="String.Intern(String)" /> method) when being copied into the internal <see cref="Pen" />'s container <see cref="Context" />.</param>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="context" /></c> is <c>null</c>.</exception>
-        public Pen(IEnumerable<String?> context, String? sentinelToken = null, StringComparer? comparer = null, Boolean intern = false) : base()
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="context" /></c> is <c>null</c>. The parameter <c><paramref name="comparer" /></c> is <c>null</c>.</exception>
+        public Pen(IEnumerable<String?> context, StringComparer comparer, String? sentinelToken = null, Boolean intern = false) : base()
         {
             if (context is null)
             {
                 throw new ArgumentNullException(nameof(context), ContextNullErrorMessage);
             }
+            if (comparer is null)
+            {
+                throw new ArgumentNullException(nameof(comparer), ComparerNullErrorMessage);
+            }
 
             // Copy the interning policy, the comparer and the ending token.
             _interned = intern;
-            _comparer = comparer ?? StringComparer.Ordinal;
+            _comparer = comparer;
             _sentinelToken = Interned ? StringExtensions.InternNullable(sentinelToken) : sentinelToken;
 
             // Copy the context.
@@ -530,12 +536,71 @@ namespace MagicText
             _allSentinels = Context.All((new BoundStringComparer(Comparer, SentinelToken)).Equals);
         }
 
+#if !NETSTANDARD2_0
+        /// <summary>Creates a pen.</summary>
+        /// <param name="context">The input tokens. All random text shall be generated based on the <c><paramref name="context" /></c>: both by picking only from the <c><paramref name="context" /></c> and by using the order from it.</param>
+        /// <param name="comparison">One of the enumeration values that specifies how <see cref="System.String" />s should be compared. Tokens shall be compared (e. g. for equality) by the <see cref="StringComparer" /> specified by the <c><paramref name="comparison" /></c>.</param>
+        /// <param name="sentinelToken">The ending token.</param>
+        /// <param name="intern">If <c>true</c>, non-<c>null</c> tokens from the <c><paramref name="context" /></c> shall be interned (via the <see cref="String.Intern(String)" /> method) when being copied into the internal <see cref="Pen" />'s container <see cref="Context" />.</param>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="context" /></c> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">The parameter <c><paramref name="comparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
+        public Pen(IEnumerable<String?> context, StringComparison comparison, String? sentinelToken = null, Boolean intern = false) : base()
+        {
+            if (context is null)
+            {
+                throw new ArgumentNullException(nameof(context), ContextNullErrorMessage);
+            }
+
+            // Copy the interning policy, the comparer and the ending token.
+            _interned = intern;
+            try
+            {
+                _comparer = StringComparer.FromComparison(comparison);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(ComparisonNotSupportedErrorMessage, nameof(comparison), ex);
+            }
+            _sentinelToken = Interned ? StringExtensions.InternNullable(sentinelToken) : sentinelToken;
+
+            // Copy the context.
+            {
+                List<String?> contextList = new List<String?>(Interned ? context.Select(StringExtensions.InternNullable) : context);
+                contextList.TrimExcess();
+                _context = contextList.AsReadOnly();
+            }
+
+            // Find the sorting positions of tokens in the context.
+            {
+                List<Int32> indexList = new List<Int32>(Enumerable.Range(0, Context.Count));
+                indexList.Sort(new IndexComparer(Comparer, Context));
+                indexList.TrimExcess();
+                _index = indexList.AsReadOnly();
+            }
+
+            // Check if all tokens are ending tokens.
+            _allSentinels = Context.All((new BoundStringComparer(Comparer, SentinelToken)).Equals);
+        }
+#endif // NETSTANDARD2_0
+
+        /// <summary>Creates a pen.</summary>
+        /// <param name="context">The input tokens. All random text shall be generated based on the <c><paramref name="context" /></c>: both by picking only from the <c><paramref name="context" /></c> and by using the order from it.</param>
+        /// <param name="sentinelToken">The ending token.</param>
+        /// <param name="intern">If <c>true</c>, non-<c>null</c> tokens from the <c><paramref name="context" /></c> shall be interned (via the <see cref="String.Intern(String)" /> method) when being copied into the internal <see cref="Pen" />'s container <see cref="Context" />.</param>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="context" /></c> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>The <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />) is set to the <see cref="StringComparer.Ordinal" />. Tokens shall be compared (e. g. for equality) by this <see cref="StringComparer" />.</para>
+        /// </remarks>
+        public Pen(IEnumerable<String?> context, String? sentinelToken = null, Boolean intern = false) : this(context, GlobalDefaults.StringComparer, sentinelToken, intern)
+        {
+        }
+
         /// <summary>Creates an empty pen.</summary>
         /// <remarks>
-        ///     <para>Other than setting the <see cref="Context" /> to an empty token list, this constructor uses the same default as the <see cref="Pen(IEnumerable{String?}, String?, StringComparer?, Boolean)" /> constructor.</para>
+        ///     <para>Other than setting the <see cref="Context" /> to an empty token list, this constructor uses the same default as the <see cref="Pen(IEnumerable{String?}, String?, Boolean)" /> constructor.</para>
         ///     <para><strong>Nota bene.</strong> This constructor was introduced to allow some operations that would be impossible if a parameterless constructor did not exist. It is strongly advised not to use this constructor because the resulting <see cref="Pen" /> is useless—objects of the <see cref="Pen" /> class are immutable and an empty <see cref="Context" /> cannot be used for any text generation or corpus analysis.</para>
         /// </remarks>
-        /// <seealso cref="Pen(IEnumerable{String?}, String?, StringComparer?, Boolean)" />
+        /// <seealso cref="Pen(IEnumerable{String?}, StringComparer, String?, Boolean)" />
         public Pen() : this(Enumerable.Empty<String?>())
         {
         }
