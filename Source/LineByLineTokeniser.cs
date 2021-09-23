@@ -37,19 +37,19 @@ namespace MagicText
         protected static Boolean IsEmptyTokenAlwaysFalse(String? _) =>
             false;
 
-        private static readonly Func<String?, Boolean> _defaultIsEmptTokenPredicate;
+        private static readonly Func<String?, Boolean> _defaultIsEmptyTokenPredicate;
 
         /// <summary>Gets the default function (predicate) for checking if a token is empty.</summary>
         /// <returns>The default function for checking if a token is empty.</returns>
         /// <remarks>
         ///     <para>This function is equivalent to the <see cref="String.IsNullOrEmpty(String)" /> method.</para>
         /// </remarks>
-        public static Func<String?, Boolean> DefaultIsEmptyTokenPredicate => _defaultIsEmptTokenPredicate;
+        public static Func<String?, Boolean> DefaultIsEmptyTokenPredicate => _defaultIsEmptyTokenPredicate;
 
         /// <summary>Initialises static fields.</summary>
         static LineByLineTokeniser()
         {
-            _defaultIsEmptTokenPredicate = String.IsNullOrEmpty;
+            _defaultIsEmptyTokenPredicate = String.IsNullOrEmpty;
         }
 
         private readonly Func<String?, Boolean> _isEmptyToken;
@@ -57,10 +57,12 @@ namespace MagicText
 
         /// <summary>Gets the function (predicate) to check if a token is empty: it returns <c>true</c> if and only if the token to check is empty.</summary>
         /// <returns>The token emptiness checking function (predicate).</returns>
+        /// <seealso cref="IsNonEmptyToken" />
         protected Func<String?, Boolean> IsEmptyToken => _isEmptyToken;
 
         /// <summary>Gets the function (predicate) to check if a token is non-empty: it returns <c>true</c> if and only if the token to check is non-empty.</summary>
         /// <returns>The token non-emptiness checking function (predicate).</returns>
+        /// <seealso cref="IsEmptyToken" />
         protected Func<String?, Boolean> IsNonEmptyToken => _isNonEmptyToken;
 
         /// <summary>Creates a tokeniser.</summary>

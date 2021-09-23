@@ -19,6 +19,14 @@ namespace MagicText.Internal
 
         private static readonly IReadOnlyList<String?> _emptyTokenList;
 
+        /// <summary>Gets the default <see cref="StringComparer" /> to use.</summary>
+        /// <returns>The default <see cref="StringComparer" /> to use in this library.</returns>
+        /// <remarks>
+        ///     <para>The default <see cref="StringComparer" /> is <see cref="StringComparer.Ordinal" />.</para>
+        ///     <para>Since the property is read-only and it represents an immutable <see cref="Object" />, it always returns the same reference (to the same <see cref="StringComparer" />).</para>
+        /// </remarks>
+        protected static StringComparer DefaultComparer => GlobalDefaults.StringComparer;
+
         /// <summary>Gets an empty list of reference tokens.</summary>
         /// <returns>The internal static empty list of reference tokens.</returns>
         /// <remarks>
@@ -90,7 +98,7 @@ namespace MagicText.Internal
         /// <remarks>
         ///     <para>The <see cref="StringComparer" /> (<see cref="Comparer" />) is set to the <see cref="StringComparer.Ordinal" /> and the reference tokens (<see cref="Tokens" />) are set to an empty list.</para>
         /// </remarks>
-        public IndexComparer() : this(GlobalDefaults.StringComparer, EmptyTokenList)
+        public IndexComparer() : this(DefaultComparer, EmptyTokenList)
         {
         }
 

@@ -10,6 +10,14 @@ namespace MagicText.Internal
         private const string ComparisonNotSupportedErrorMessage = "The string comparison type passed in is currently not supported.";
 #endif // NETSTANDARD2_0
 
+        /// <summary>Gets the default <see cref="StringComparer" /> to use.</summary>
+        /// <returns>The default <see cref="StringComparer" /> to use in this library.</returns>
+        /// <remarks>
+        ///     <para>The default <see cref="StringComparer" /> is <see cref="StringComparer.Ordinal" />.</para>
+        ///     <para>Since the property is read-only and it represents an immutable <see cref="Object" />, it always returns the same reference (to the same <see cref="StringComparer" />).</para>
+        /// </remarks>
+        private static StringComparer DefaultComparer => GlobalDefaults.StringComparer;
+
         private readonly StringComparer _comparer;
         private readonly System.String? _string;
 
@@ -55,7 +63,7 @@ namespace MagicText.Internal
 
         /// <summary>Creates a default comparer.</summary>
         /// <remarks>The internal (bound) <see cref="StringComparer" /> is set to the <see cref="StringComparer.Ordinal" /> and the internal <see cref="System.String" /> (<see cref="String" />) is set to <c>null</c>.</remarks>
-        public BoundStringComparer() : this(GlobalDefaults.StringComparer, null)
+        public BoundStringComparer() : this(DefaultComparer, null)
         {
         }
 

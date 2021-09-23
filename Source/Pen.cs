@@ -2,8 +2,6 @@ using MagicText.Extensions;
 using MagicText.Internal;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -54,6 +52,14 @@ namespace MagicText
 
         [ThreadStatic]
         private static System.Random? mutableThreadStaticRandom;
+
+        /// <summary>Gets the default <see cref="StringComparer" /> to use.</summary>
+        /// <returns>The default <see cref="StringComparer" /> to use in this library.</returns>
+        /// <remarks>
+        ///     <para>The default <see cref="StringComparer" /> is <see cref="StringComparer.Ordinal" />.</para>
+        ///     <para>Since the property is read-only and it represents an immutable <see cref="Object" />, it always returns the same reference (to the same <see cref="StringComparer" />).</para>
+        /// </remarks>
+        protected static StringComparer DefaultComparer => GlobalDefaults.StringComparer;
 
         /// <summary>Gets the internal locking object of the <see cref="Pen" /> class.</summary>
         /// <returns>The internal locking object.</returns>
@@ -144,24 +150,6 @@ namespace MagicText
         /// </remarks>
         protected static Int32 RandomNext(Int32 minValue, Int32 maxValue) =>
             Random.Next(minValue, maxValue);
-
-        /// <summary>Converts the <c><paramref name="enumerable" /></c> to an <see cref="IReadOnlyList{T}" />.</summary>
-        /// <typeparam name="T">The type of elements in the <c><paramref name="enumerable" /></c>.</typeparam>
-        /// <param name="enumerable">The <c><paramref name="enumerable" /></c> to convert.</param>
-        /// <returns>If <c><paramref name="enumerable" /></c> is non-<c>null</c>, an <see cref="IReadOnlyList{T}" /> equivalent to it is returned; otherwise a <c>null</c> is returned.</returns>
-        /// <remarks>
-        ///     <para>This method attempts to convert the <c><paramref name="enumerable" /></c> with as little work as possible (if possible, enumeration is avoided). Namely, if the <c><paramref name="enumerable" /></c> is already an <see cref="IReadOnlyList{T}" />, it is returned without conversion; if the <c><paramref name="enumerable" /></c> is an <see cref="IList{T}" />, the wrapper <see cref="ReadOnlyCollection{T}" /> around it is returned.</para>
-        ///     <para>The method does not throw an exception (such as the <see cref="ArgumentNullException" />) if the <c><paramref name="enumerable" /></c> is <c>null</c>. Instead, <c>null</c> is simply returned. Such cases should be handled in the code surrounding the method call.</para>
-        /// </remarks>
-        [return: MaybeNull, NotNullIfNotNull("enumerable")]
-        protected static IReadOnlyList<T> ConvertToReadOnlyList<T>([AllowNull] IEnumerable<T> enumerable) =>
-            enumerable switch
-            {
-                null => null!,
-                IReadOnlyList<T> readOnlyList => readOnlyList,
-                IList<T> list => new ReadOnlyCollection<T>(list),
-                _ => new List<T>(enumerable)
-            };
 
         /// <summary>Compares a subrange of <c><paramref name="tokens" /></c> with the sample of tokens <c><paramref name="sampleCycle" /></c>.</summary>
         /// <param name="comparer">The <see cref="StringComparer" /> used for comparing.</param>
@@ -368,7 +356,7 @@ namespace MagicText
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, IReadOnlyList{String?}, Int32, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         /// <seealso cref="FindPositionIndexAndCount(StringComparer, IReadOnlyList{String?}, IReadOnlyList{Int32}, String?, out Int32, Nullable{ValueTuple{Int32, Int32}})" />
         protected static Int32 FindPositionIndexAndCount(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<Int32> index, IEnumerable<String?> sample, out Int32 count, Nullable<ValueTuple<Int32, Int32>> bounds = default) =>
-            FindPositionIndexAndCount(comparer, tokens, index, ConvertToReadOnlyList(sample), 0, out count, bounds);
+            FindPositionIndexAndCount(comparer, tokens, index, sample?.ConvertToReadOnlyList()!, 0, out count, bounds);
 
         /// <summary>Finds the first index and the number of occurrences of the <c><paramref name="token" /></c> amongst the <c><paramref name="tokens" /></c>.</summary>
         /// <param name="comparer">The <see cref="StringComparer" /> used for comparing.</param>
@@ -591,7 +579,7 @@ namespace MagicText
         /// <remarks>
         ///     <para>The <see cref="StringComparer" /> used by the <see cref="Pen" /> (<see cref="Comparer" />) is set to the <see cref="StringComparer.Ordinal" />. Tokens shall be compared (e. g. for equality) by this <see cref="StringComparer" />.</para>
         /// </remarks>
-        public Pen(IEnumerable<String?> context, String? sentinelToken = null, Boolean intern = false) : this(context, GlobalDefaults.StringComparer, sentinelToken, intern)
+        public Pen(IEnumerable<String?> context, String? sentinelToken = null, Boolean intern = false) : this(context, DefaultComparer, sentinelToken, intern)
         {
         }
 

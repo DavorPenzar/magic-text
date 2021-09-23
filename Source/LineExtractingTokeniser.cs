@@ -28,6 +28,9 @@ namespace MagicText
         /// <remarks>
         ///     <para>This property merely returns the <see cref="LineByLineTokeniser.IsEmptyToken" /> property.</para>
         /// </remarks>
+        /// <seealso cref="IsNonEmptyLine" />
+        /// <seealso cref="LineByLineTokeniser.IsEmptyToken" />
+        /// <seealso cref="LineByLineTokeniser.IsNonEmptyToken" />
         protected Func<String, Boolean> IsEmptyLine => IsEmptyToken;
 
         /// <summary>Gets the function (predicate) to check if a line is non-empty: it returns <c>true</c> if and only if the line to check is non-empty.</summary>
@@ -35,6 +38,9 @@ namespace MagicText
         /// <remarks>
         ///     <para>This property merely returns the <see cref="LineByLineTokeniser.IsNonEmptyToken" /> property.</para>
         /// </remarks>
+        /// <seealso cref="IsEmptyLine" />
+        /// <seealso cref="LineByLineTokeniser.IsNonEmptyToken" />
+        /// <seealso cref="LineByLineTokeniser.IsEmptyToken" />
         protected Func<String, Boolean> IsNonEmptyLine => IsNonEmptyToken;
 
         /// <summary>Creates a tokeniser.</summary>

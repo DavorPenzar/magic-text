@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Xml.Serialization;
@@ -22,17 +23,59 @@ namespace MagicText
     {
         protected const string SerialisationInfoNullErrorMessage = "Serialisation info cannot be null.";
         private const string OtherNullErrorMessage = "Shattering options to copy cannot be null.";
-        protected const string StringComparerNullErrorMessage = "String comparer cannot be null.";
+        protected const string StringEqualityComparerNullErrorMessage = "String equality comparer cannot be null.";
 #if !NETSTANDARD2_0
         protected const string StringComparisonNotSupportedErrorMessage = "The string comparison type passed in is currently not supported.";
 #endif // NETSTANDARD2_0
+        protected const string FormatProviderNullErrorMessage = "Format provider cannot be null.";
+        protected const string StringBuilderNullErrorMessage = "String builder cannot be null.";
+
+        /// <summary>Defines <see cref="String" /> constants for building <see cref="String" /> representations of <see cref="ShatteringOptions" />.</summary>
+        protected static class StringRepresentation
+        {
+            /// <summary>A single space (<c>" "</c>).</summary>
+            public const string Space = " ";
+
+            /// <summary>A single comma (<c>","</c>).</summary>
+            public const string Comma = ",";
+
+            /// <summary>A single opening curly bracket (<c>"{"</c>).</summary>
+            public const string OpeningBracket = "{";
+
+            /// <summary>A single closing curly bracket (<c>"}"</c>).</summary>
+            public const string ClosingBracket = "}";
+
+            /// <summary>The <see cref="String" /> format for displaying named members.</summary>
+            /// <remarks>
+            ///     <para>The <see cref="NamedMemberFormat" /> is intended to be used as:</para>
+            ///     <code>
+            ///         <see cref="String" />.Format(<see cref="NamedMemberFormat" />, memberName, memberValue)
+            ///     </code>
+            ///     <para>In the example above, <c>memberName</c> is a <see cref="String" /> containing the name of the member (for instance, retrieved by the <c>nameof</c> operator), and <c>memberValue</c> is the current actual value of the member.</para>
+            ///     <para>The resulting string is of the format <c>{memberName} = {memberValue}</c>, i. e. <c>memberName</c> and <c>memberValue</c> delimited by an equality sign (<c>"="</c>) surrounded by spaces (<c>" "</c>).</para>
+            /// </remarks>
+            public const string NamedMemberFormat = "{0} = {1}";
+
+            /// <summary>The <see cref="String" /> delimiter for inserting between consecutive member displays.</summary>
+            /// <remarks>
+            ///     <para>The <see cref="MembersDelimiter" /> is a <see cref="Comma" /> followed by a <see cref="Space" />.</para>
+            /// </remarks>
+            public const string MembersDelimiter = Comma + Space;
+        }
+
+        /// <summary>Gets the default <see cref="IEqualityComparer{T}" /> of <see cref="String" />s to use.</summary>
+        /// <returns>The default <see cref="IEqualityComparer{T}" /> of <see cref="String" />s to use in this library.</returns>
+        /// <remarks>
+        ///     <para>The default <see cref="IEqualityComparer{T}" /> of <see cref="String" />s is the standard library's default <see cref="EqualityComparer{T}.Default" />.</para>
+        /// </remarks>
+        public static IEqualityComparer<String?> DefaultStringEqualityComparer => EqualityComparer<String?>.Default;
 
         /// <summary>Indicates whether the <c><paramref name="left" /></c> <see cref="ShatteringOptions" /> are equal to the <c><paramref name="right" /></c> or not.</summary>
         /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>
         /// <param name="right">The right <see cref="ShatteringOptions" /> to compare.</param>
-        /// <param name="stringComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
+        /// <param name="stringEqualityComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>If the <see cref="ShatteringOptions" /> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringComparer" /></c> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringEqualityComparer" /></c> is <c>null</c>.</exception>
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
@@ -43,9 +86,9 @@ namespace MagicText
         /// <seealso cref="Equals(Object?)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
-        public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right, IEqualityComparer<String?> stringComparer) =>
-            stringComparer is null ? throw new ArgumentNullException(nameof(stringComparer), StringComparerNullErrorMessage) :
-                left is null || right is null ? Object.ReferenceEquals(left, right) : left.Equals(right, stringComparer);
+        public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right, IEqualityComparer<String?> stringEqualityComparer) =>
+            stringEqualityComparer is null ? throw new ArgumentNullException(nameof(stringEqualityComparer), StringEqualityComparerNullErrorMessage) :
+                left is null || right is null ? Object.ReferenceEquals(left, right) : left.Equals(right, stringEqualityComparer);
 
 #if !NETSTANDARD2_0
         /// <summary>Indicates whether the <c><paramref name="left" /></c> <see cref="ShatteringOptions" /> are equal to the <c><paramref name="right" /></c> or not.</summary>
@@ -92,7 +135,7 @@ namespace MagicText
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right) =>
-            Equals(left, right, EqualityComparer<String?>.Default);
+            Equals(left, right, DefaultStringEqualityComparer);
 
         /// <summary>Indicates whether the <c><paramref name="left" /></c> <see cref="ShatteringOptions" /> are equal to the <c><paramref name="right" /></c> or not.</summary>
         /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>
@@ -328,16 +371,16 @@ namespace MagicText
         }
 
         /// <summary>Returns the hash code of the current options.</summary>
-        /// <param name="stringComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
-        /// <returns>The hash code of the current <see cref="ShatteringOptions" /> according to the <c><paramref name="stringComparer" /></c>.</returns>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringComparer" /></c> is <c>null</c>.</exception>
+        /// <param name="stringEqualityComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
+        /// <returns>The hash code of the current <see cref="ShatteringOptions" /> according to the <c><paramref name="stringEqualityComparer" /></c>.</returns>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringEqualityComparer" /></c> is <c>null</c>.</exception>
         /// <seealso cref="GetHashCode(StringComparison)" />
         /// <seealso cref="GetHashCode()" />
-        public virtual Int32 GetHashCode(IEqualityComparer<String?> stringComparer)
+        public virtual Int32 GetHashCode(IEqualityComparer<String?> stringEqualityComparer)
         {
-            if (stringComparer is null)
+            if (stringEqualityComparer is null)
             {
-                throw new ArgumentNullException(nameof(stringComparer), StringComparerNullErrorMessage);
+                throw new ArgumentNullException(nameof(stringEqualityComparer), StringEqualityComparerNullErrorMessage);
             }
 
             Int32 hashCode = 7;
@@ -347,7 +390,7 @@ namespace MagicText
             hashCode = 31 * hashCode + IgnoreEmptyLines.GetHashCode();
             try
             {
-                hashCode = 31 * hashCode + stringComparer.GetHashCode(LineEndToken);
+                hashCode = 31 * hashCode + stringEqualityComparer.GetHashCode(LineEndToken);
             }
             catch (ArgumentNullException) when (LineEndToken is null)
             {
@@ -355,7 +398,7 @@ namespace MagicText
             }
             try
             {
-                hashCode = 31 * hashCode + stringComparer.GetHashCode(EmptyLineToken);
+                hashCode = 31 * hashCode + stringEqualityComparer.GetHashCode(EmptyLineToken);
             }
             catch (ArgumentNullException) when (EmptyLineToken is null)
             {
@@ -368,7 +411,7 @@ namespace MagicText
 #if !NETSTANDARD2_0
         /// <summary>Returns the hash code of the current options.</summary>
         /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
-        /// <returns>The hash code of the current <see cref="ShatteringOptions" /> according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparison" /></c>.</returns>
+        /// <returns>The hash code of the current <see cref="ShatteringOptions" /> according to the <see cref="StringEqualityComparer" /> specified by the <c><paramref name="stringComparison" /></c>.</returns>
         /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
         /// <seealso cref="GetHashCode(IEqualityComparer{String?})" />
         /// <seealso cref="GetHashCode()" />
@@ -390,13 +433,13 @@ namespace MagicText
         /// <seealso cref="GetHashCode(IEqualityComparer{String?})" />
         /// <seealso cref="GetHashCode(StringComparison)" />
         public override Int32 GetHashCode() =>
-            GetHashCode(EqualityComparer<String?>.Default);
+            GetHashCode(DefaultStringEqualityComparer);
 
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="other" /></c> options or not.</summary>
         /// <param name="other">The other <see cref="ShatteringOptions" /> to compare with these options.</param>
-        /// <param name="stringComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
-        /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c> according to the <c><paramref name="stringComparer" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringComparer" /></c> is <c>null</c>.</exception>
+        /// <param name="stringEqualityComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
+        /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c> according to the <c><paramref name="stringEqualityComparer" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringEqualityComparer" /></c> is <c>null</c>.</exception>
         /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
         /// <seealso cref="Equals(ShatteringOptions?)" />
         /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
@@ -407,24 +450,24 @@ namespace MagicText
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
-        public virtual Boolean Equals(ShatteringOptions? other, IEqualityComparer<String?> stringComparer) =>
-            stringComparer is null ?
-                throw new ArgumentNullException(nameof(stringComparer), StringComparerNullErrorMessage) :
+        public virtual Boolean Equals(ShatteringOptions? other, IEqualityComparer<String?> stringEqualityComparer) =>
+            stringEqualityComparer is null ?
+                throw new ArgumentNullException(nameof(stringEqualityComparer), StringEqualityComparerNullErrorMessage) :
                 Object.ReferenceEquals(this, other) ||
                     (
                         !(other is null) &&
                         IgnoreEmptyTokens == other.IgnoreEmptyTokens &&
                         IgnoreLineEnds == other.IgnoreLineEnds &&
                         IgnoreEmptyLines == other.IgnoreEmptyLines &&
-                        stringComparer.Equals(LineEndToken, other.LineEndToken) &&
-                        stringComparer.Equals(EmptyLineToken, other.EmptyLineToken)
+                        stringEqualityComparer.Equals(LineEndToken, other.LineEndToken) &&
+                        stringEqualityComparer.Equals(EmptyLineToken, other.EmptyLineToken)
                     );
 
 #if !NETSTANDARD2_0
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="other" /></c> options or not.</summary>
         /// <param name="other">The other <see cref="ShatteringOptions" /> to compare with these options.</param>
         /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
-        /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c> according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparison" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
+        /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c> according to the <see cref="StringEqualityComparer" /> specified by the <c><paramref name="stringComparison" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
         /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
         /// <seealso cref="Equals(ShatteringOptions?)" />
@@ -463,13 +506,13 @@ namespace MagicText
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public virtual Boolean Equals(ShatteringOptions? other) =>
-            Equals(other, EqualityComparer<String?>.Default);
+            Equals(other, DefaultStringEqualityComparer);
 
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="obj" /></c> or not.</summary>
         /// <param name="obj">The <see cref="Object" /> to compare with these <see cref="ShatteringOptions" />.</param>
-        /// <param name="stringComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
-        /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it according to the <c><paramref name="stringComparer" /></c>, <c>true</c>; <c>false</c>otherwise.</returns>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringComparer" /></c> is <c>null</c>.</exception>
+        /// <param name="stringEqualityComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
+        /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it according to the <c><paramref name="stringEqualityComparer" /></c>, <c>true</c>; <c>false</c>otherwise.</returns>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringEqualityComparer" /></c> is <c>null</c>.</exception>
         /// <seealso cref="Equals(Object?, StringComparison)" />
         /// <seealso cref="Equals(Object?)" />
         /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
@@ -480,11 +523,11 @@ namespace MagicText
         /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
-        public virtual Boolean Equals(Object? obj, IEqualityComparer<String?> stringComparer)
+        public virtual Boolean Equals(Object? obj, IEqualityComparer<String?> stringEqualityComparer)
         {
             try
             {
-                return !(obj is null) && Equals((ShatteringOptions)obj, stringComparer);
+                return !(obj is null) && Equals((ShatteringOptions)obj, stringEqualityComparer);
             }
             catch (InvalidCastException)
             {
@@ -497,7 +540,7 @@ namespace MagicText
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="obj" /></c> or not.</summary>
         /// <param name="obj">The <see cref="Object" /> to compare with these <see cref="ShatteringOptions" />.</param>
         /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
-        /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparison" /></c>, <c>true</c>; <c>false</c>otherwise.</returns>
+        /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it according to the <see cref="StringEqualityComparer" /> specified by the <c><paramref name="stringComparison" /></c>, <c>true</c>; <c>false</c>otherwise.</returns>
         /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
         /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
         /// <seealso cref="Equals(Object?)" />
@@ -536,7 +579,117 @@ namespace MagicText
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public override Boolean Equals(Object? obj) =>
-            Equals(obj, EqualityComparer<String?>.Default);
+            Equals(obj, DefaultStringEqualityComparer);
+
+        /// <summary>Prints members to the <c><paramref name="stringBuilder" /></c>.</summary>
+        /// <param name="stringBuilder">The <see cref="StringBuilder" /> to which the members are printed.</param>
+        /// <returns>If any member is actually printed to the <c><paramref name="stringBuilder" /></c>, <c>true</c> is returned; otherwise (no member was printed, the <c><paramref name="stringBuilder" /></c> is unaffected) <c>false</c> is returned.</returns>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringBuilder" /></c> is <c>null</c>.</exception>
+        /// <remarks>
+        ///     <para>The members are represented by calling the <see cref="Object.ToString()" /> method or by their <see cref="Type" /> name.</para>
+        /// </remarks>
+        /// <seealso cref="PrintMembers(StringBuilder, IFormatProvider?)" />
+        /// <seealso cref="ToString()" />
+        /// <seealso cref="ToString(IFormatProvider?)" />
+        public virtual Boolean PrintMembers(StringBuilder stringBuilder)
+        {
+            if (stringBuilder is null)
+            {
+                throw new ArgumentNullException(nameof(stringBuilder), StringBuilderNullErrorMessage);
+            }
+
+            stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(IgnoreEmptyTokens), IgnoreEmptyTokens);
+            stringBuilder.Append(StringRepresentation.MembersDelimiter);
+            stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(IgnoreLineEnds), IgnoreLineEnds);
+            stringBuilder.Append(StringRepresentation.MembersDelimiter);
+            stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(IgnoreEmptyLines), IgnoreEmptyLines);
+            stringBuilder.Append(StringRepresentation.MembersDelimiter);
+            stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(LineEndToken), LineEndToken);
+            stringBuilder.Append(StringRepresentation.MembersDelimiter);
+            stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(EmptyLineToken), EmptyLineToken);
+
+            return true;
+        }
+
+        /// <summary>Prints members to the <c><paramref name="stringBuilder" /></c>.</summary>
+        /// <param name="stringBuilder">The <see cref="StringBuilder" /> to which the members are printed.</param>
+        /// <param name="provider">An <see cref="Object" /> that supplies culture-specific formatting information.</param>
+        /// <returns>If any member is actually printed to the <c><paramref name="stringBuilder" /></c>, <c>true</c> is returned; otherwise (no member was printed, the <c><paramref name="stringBuilder" /></c> is unaffected) <c>false</c> is returned.</returns>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringBuilder" /></c> is <c>null</c>. The parameter <c><paramref name="provider" /></c> is <c>null</c>, but that is not allowed by a member's <see cref="Object.ToString()" /> method overload.</exception>
+        /// <remarks>
+        ///     <para>For those members which provide a <see cref="Object.ToString()" /> method overload that accepts an argument of type <see cref="IFormatProvider" />, the <c><paramref name="provider" /></c> is passed to their adequate <see cref="Object.ToString()" /> method overload to represent them. Other members are represented by simply calling the <see cref="Object.ToString()" /> method or by their <see cref="Type" /> name.</para>
+        /// </remarks>
+        /// <seealso cref="PrintMembers(StringBuilder)" />
+        /// <seealso cref="ToString(IFormatProvider?)" />
+        /// <seealso cref="ToString()" />
+        public virtual Boolean PrintMembers(StringBuilder stringBuilder, IFormatProvider? provider)
+        {
+            if (stringBuilder is null)
+            {
+                throw new ArgumentNullException(nameof(stringBuilder), StringBuilderNullErrorMessage);
+            }
+
+            try
+            {
+                stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(IgnoreEmptyTokens), IgnoreEmptyTokens.ToString(provider));
+                stringBuilder.Append(StringRepresentation.MembersDelimiter);
+                stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(IgnoreLineEnds), IgnoreLineEnds.ToString(provider));
+                stringBuilder.Append(StringRepresentation.MembersDelimiter);
+                stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(IgnoreEmptyLines), IgnoreEmptyLines.ToString(provider));
+                stringBuilder.Append(StringRepresentation.MembersDelimiter);
+                stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(LineEndToken), LineEndToken?.ToString(provider));
+                stringBuilder.Append(StringRepresentation.MembersDelimiter);
+                stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(EmptyLineToken), EmptyLineToken?.ToString(provider));
+            }
+            catch (ArgumentNullException)
+            {
+                throw new ArgumentNullException(nameof(provider), FormatProviderNullErrorMessage);
+            }
+
+            return true;
+        }
+
+        /// <summary>Returns a <see cref="String" /> that represents the current options.</summary>
+        /// <returns>A <see cref="String" /> that represents the current <see cref="ShatteringOptions" />.</returns>
+        /// <seealso cref="ToString(IFormatProvider?)" />
+        public override String ToString()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.Append(GetType().Name ?? nameof(ShatteringOptions));
+            stringBuilder.Append(StringRepresentation.Space);
+            stringBuilder.Append(StringRepresentation.OpeningBracket);
+            stringBuilder.Append(StringRepresentation.Space);
+            if (PrintMembers(stringBuilder))
+            {
+                stringBuilder.Append(StringRepresentation.Space);
+            }
+            stringBuilder.Append(StringRepresentation.ClosingBracket);
+
+            return stringBuilder.ToString();
+        }
+
+        /// <summary>Returns a <see cref="String" /> that represents the current options.</summary>
+        /// <param name="provider">An <see cref="Object" /> that supplies culture-specific formatting information.</param>
+        /// <returns>A <see cref="String" /> that represents the current <see cref="ShatteringOptions" />.</returns>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="provider" /></c> is <c>null</c>, but that is not allowed by a member's <see cref="Object.ToString()" /> method overload.</exception>
+        /// <seealso cref="ToString()" />
+        public virtual String ToString(IFormatProvider? provider)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.Append(GetType().Name ?? nameof(ShatteringOptions));
+            stringBuilder.Append(StringRepresentation.Space);
+            stringBuilder.Append(StringRepresentation.OpeningBracket);
+            stringBuilder.Append(StringRepresentation.Space);
+            if (PrintMembers(stringBuilder, provider))
+            {
+                stringBuilder.Append(StringRepresentation.Space);
+            }
+            stringBuilder.Append(StringRepresentation.ClosingBracket);
+
+            return stringBuilder.ToString();
+        }
 
         /// <summary>Creates a new <see cref="Object" /> that is a copy of the current options.</summary>
         /// <returns>The new <see cref="ShatteringOptions" /> with the same values.</returns>
