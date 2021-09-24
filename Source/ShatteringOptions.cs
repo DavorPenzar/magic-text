@@ -21,7 +21,7 @@ namespace MagicText
     [CLSCompliant(true)]
     [DataContract]
     [Serializable]
-    public class ShatteringOptions : Object, IExtensibleDataObject, IEquatable<ShatteringOptions>, ICloneable
+    public class ShatteringOptions : Object, IEquatable<ShatteringOptions>, ICloneable, IExtensibleDataObject
     {
         protected const string SerialisationInfoNullErrorMessage = "Serialisation info cannot be null.";
         private const string OtherNullErrorMessage = "Shattering options to copy cannot be null.";
