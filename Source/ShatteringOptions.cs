@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -18,8 +19,9 @@ namespace MagicText
     /// <seealso cref="ITokeniser" />
     /// <seealso cref="TokeniserExtensions" />
     [CLSCompliant(true)]
+    [DataContract]
     [Serializable]
-    public class ShatteringOptions : Object, IEquatable<ShatteringOptions>, ICloneable
+    public class ShatteringOptions : Object, IExtensibleDataObject, IEquatable<ShatteringOptions>, ICloneable
     {
         protected const string SerialisationInfoNullErrorMessage = "Serialisation info cannot be null.";
         private const string OtherNullErrorMessage = "Shattering options to copy cannot be null.";
@@ -31,7 +33,7 @@ namespace MagicText
         protected const string StringBuilderNullErrorMessage = "String builder cannot be null.";
 
         /// <summary>Defines <see cref="String" /> constants for building <see cref="String" /> representations of <see cref="ShatteringOptions" />.</summary>
-        protected static class StringRepresentation
+        protected static class StringRepresentationConstants
         {
             /// <summary>A single space (<c>" "</c>).</summary>
             public const string Space = " ";
@@ -60,6 +62,8 @@ namespace MagicText
             /// <remarks>
             ///     <para>The <see cref="MembersDelimiter" /> is a <see cref="Comma" /> followed by a <see cref="Space" />.</para>
             /// </remarks>
+            /// <seealso cref="Comma" />
+            /// <seealso cref="Space" />
             public const string MembersDelimiter = Comma + Space;
         }
 
@@ -199,6 +203,11 @@ namespace MagicText
         [JsonIgnore]
         private String? emptyLineToken;
 
+        [XmlIgnore]
+        [JsonIgnore]
+        [NonSerialized]
+        private ExtensionDataObject extensionDataObjectValue;
+
         /// <summary>Gets or sets the policy of ignoring empty tokens: <c>true</c> if ignoring, <c>false</c> otherwise. The default is <c>false</c>.</summary>
         /// <returns>If empty tokens should be ignored, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <value>The new ignoring empty tokens policy value.</value>
@@ -209,6 +218,7 @@ namespace MagicText
         [Display(Name = "Ignore empty tokens", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "Empty tokens", Order = 1)]
         [Editable(true, AllowInitialValue = true)]
         [DefaultValue(false)]
+        [DataMember]
         public Boolean IgnoreEmptyTokens
         {
             get => ignoreEmptyTokens;
@@ -232,6 +242,7 @@ namespace MagicText
         [Display(Name = "Ignore line ends", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "Line ends", Order = 2)]
         [Editable(true, AllowInitialValue = true)]
         [DefaultValue(false)]
+        [DataMember]
         public Boolean IgnoreLineEnds
         {
             get => ignoreLineEnds;
@@ -256,6 +267,7 @@ namespace MagicText
         [Display(Name = "Ignore empty lines", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "Empty lines", Order = 3)]
         [Editable(true, AllowInitialValue = true)]
         [DefaultValue(false)]
+        [DataMember]
         public Boolean IgnoreEmptyLines
         {
             get => ignoreEmptyLines;
@@ -281,6 +293,7 @@ namespace MagicText
         [DisplayFormat(ConvertEmptyStringToNull = false, HtmlEncode = true)]
         [Editable(true, AllowInitialValue = true)]
         [DefaultValue("\n")] // <-- this may be different from the `System.Environment.NewLine`
+        [DataMember]
         public String? LineEndToken
         {
             get => lineEndToken;
@@ -307,12 +320,25 @@ namespace MagicText
         [DisplayFormat(ConvertEmptyStringToNull = false, HtmlEncode = true)]
         [Editable(true, AllowInitialValue = true)]
         [DefaultValue("")]
+        [DataMember]
         public String? EmptyLineToken
         {
             get => emptyLineToken;
             set
             {
                 emptyLineToken = value;
+            }
+        }
+
+        /// <summary>Gets or sets the structure that contains extra data.</summary>
+        /// <returns>An <see cref="ExtensionDataObject" /> which contains data that is not recognised as belonging to the data contract.</returns>
+        /// <value>New <see cref="ExtensionDataObject" /> that contains data not recognised as belonging to the data contract.</value>
+        ExtensionDataObject IExtensibleDataObject.ExtensionData
+        {
+            get => extensionDataObjectValue;
+            set
+            {
+                extensionDataObjectValue = value;
             }
         }
 
@@ -334,6 +360,8 @@ namespace MagicText
             this.ignoreEmptyLines = ignoreEmptyLines;
             this.lineEndToken = lineEndToken;
             this.emptyLineToken = emptyLineToken;
+
+            extensionDataObjectValue = default!;
         }
 
         /// <summary>Creates default options.</summary>
@@ -411,7 +439,7 @@ namespace MagicText
 #if !NETSTANDARD2_0
         /// <summary>Returns the hash code of the current options.</summary>
         /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
-        /// <returns>The hash code of the current <see cref="ShatteringOptions" /> according to the <see cref="StringEqualityComparer" /> specified by the <c><paramref name="stringComparison" /></c>.</returns>
+        /// <returns>The hash code of the current <see cref="ShatteringOptions" /> according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparison" /></c>.</returns>
         /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
         /// <seealso cref="GetHashCode(IEqualityComparer{String?})" />
         /// <seealso cref="GetHashCode()" />
@@ -467,7 +495,7 @@ namespace MagicText
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="other" /></c> options or not.</summary>
         /// <param name="other">The other <see cref="ShatteringOptions" /> to compare with these options.</param>
         /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
-        /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c> according to the <see cref="StringEqualityComparer" /> specified by the <c><paramref name="stringComparison" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
+        /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c> according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparison" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
         /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
         /// <seealso cref="Equals(ShatteringOptions?)" />
@@ -540,7 +568,7 @@ namespace MagicText
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="obj" /></c> or not.</summary>
         /// <param name="obj">The <see cref="Object" /> to compare with these <see cref="ShatteringOptions" />.</param>
         /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
-        /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it according to the <see cref="StringEqualityComparer" /> specified by the <c><paramref name="stringComparison" /></c>, <c>true</c>; <c>false</c>otherwise.</returns>
+        /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparison" /></c>, <c>true</c>; <c>false</c>otherwise.</returns>
         /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
         /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
         /// <seealso cref="Equals(Object?)" />
@@ -583,119 +611,142 @@ namespace MagicText
 
         /// <summary>Prints members to the <c><paramref name="stringBuilder" /></c>.</summary>
         /// <param name="stringBuilder">The <see cref="StringBuilder" /> to which the members are printed.</param>
+        /// <param name="provider">An <see cref="Object" /> that supplies culture-specific formatting information.</param>
         /// <returns>If any member is actually printed to the <c><paramref name="stringBuilder" /></c>, <c>true</c> is returned; otherwise (no member was printed, the <c><paramref name="stringBuilder" /></c> is unaffected) <c>false</c> is returned.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringBuilder" /></c> is <c>null</c>.</exception>
         /// <remarks>
-        ///     <para>The members are represented by calling the <see cref="Object.ToString()" /> method or by their <see cref="Type" /> name.</para>
+        ///     <para>Although the <see cref="ShatteringOptions" /> class is not a <em>C#</em> <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record"><c>record</c></a>, its <see cref="String" /> representation imitates default <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record"><c>record</c>s'</a> <see cref="Object.ToString()" /> method. Consequently, the <see cref="PrintMembers(StringBuilder, IFormatProvider?)" />, <see cref="PrintMembers(StringBuilder)" />, <see cref="ToString(IFormatProvider?)" /> and <see cref="ToString()" /> methods behave similarly to methods described <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record#built-in-formatting-for-display">here</a> and <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record#printmembers-formatting-in-derived-records">here</a>.</para>
+        ///     <para>For those members which are not represented by their <see cref="Type" /> name and provide a <see cref="Object.ToString()" /> method overload that accepts an argument of type <see cref="IFormatProvider" />, the <c><paramref name="provider" /></c> is passed to their adequate <see cref="Object.ToString()" /> method overload to represent them. However, if the <c><paramref name="provider" /></c> is <c>null</c> and the method throws an <see cref="ArgumentNullException" />, the default <see cref="Object.ToString()" /> method is used instead. Other members are represented by simply calling the <see cref="Object.ToString()" /> method or by their <see cref="Type" /> name.</para>
         /// </remarks>
-        /// <seealso cref="PrintMembers(StringBuilder, IFormatProvider?)" />
-        /// <seealso cref="ToString()" />
+        /// <seealso cref="PrintMembers(StringBuilder)" />
         /// <seealso cref="ToString(IFormatProvider?)" />
-        public virtual Boolean PrintMembers(StringBuilder stringBuilder)
+        /// <seealso cref="ToString()" />
+        protected virtual Boolean PrintMembers(StringBuilder stringBuilder, IFormatProvider? provider)
         {
             if (stringBuilder is null)
             {
                 throw new ArgumentNullException(nameof(stringBuilder), StringBuilderNullErrorMessage);
             }
 
-            stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(IgnoreEmptyTokens), IgnoreEmptyTokens);
-            stringBuilder.Append(StringRepresentation.MembersDelimiter);
-            stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(IgnoreLineEnds), IgnoreLineEnds);
-            stringBuilder.Append(StringRepresentation.MembersDelimiter);
-            stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(IgnoreEmptyLines), IgnoreEmptyLines);
-            stringBuilder.Append(StringRepresentation.MembersDelimiter);
-            stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(LineEndToken), LineEndToken);
-            stringBuilder.Append(StringRepresentation.MembersDelimiter);
-            stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(EmptyLineToken), EmptyLineToken);
+            {
+                IDictionary<String, String?> memberRepresentations = new Dictionary<String, String?>(5);
+                {
+                    try
+                    {
+                        memberRepresentations[nameof(IgnoreEmptyTokens)] = IgnoreEmptyTokens.ToString(provider);
+                    }
+                    catch (ArgumentNullException) when (provider is null)
+                    {
+                        memberRepresentations[nameof(IgnoreEmptyTokens)] = IgnoreEmptyTokens.ToString();
+                    }
+                    try
+                    {
+                        memberRepresentations[nameof(IgnoreLineEnds)] = IgnoreLineEnds.ToString(provider);
+                    }
+                    catch (ArgumentNullException) when (provider is null)
+                    {
+                        memberRepresentations[nameof(IgnoreLineEnds)] = IgnoreLineEnds.ToString();
+                    }
+                    try
+                    {
+                        memberRepresentations[nameof(IgnoreEmptyLines)] = IgnoreEmptyLines.ToString(provider);
+                    }
+                    catch (ArgumentNullException) when (provider is null)
+                    {
+                        memberRepresentations[nameof(IgnoreEmptyLines)] = IgnoreEmptyLines.ToString();
+                    }
+                    try
+                    {
+                        memberRepresentations[nameof(LineEndToken)] = LineEndToken?.ToString(provider);
+                    }
+                    catch (ArgumentNullException) when (provider is null)
+                    {
+                        memberRepresentations[nameof(LineEndToken)] = LineEndToken?.ToString();
+                    }
+                    try
+                    {
+                        memberRepresentations[nameof(EmptyLineToken)] = EmptyLineToken?.ToString(provider);
+                    }
+                    catch (ArgumentNullException) when (provider is null)
+                    {
+                        memberRepresentations[nameof(EmptyLineToken)] = EmptyLineToken?.ToString();
+                    }
+                }
+
+                stringBuilder.AppendFormat(StringRepresentationConstants.NamedMemberFormat, nameof(IgnoreEmptyTokens), memberRepresentations[nameof(IgnoreEmptyTokens)]);
+                stringBuilder.Append(StringRepresentationConstants.MembersDelimiter);
+                stringBuilder.AppendFormat(StringRepresentationConstants.NamedMemberFormat, nameof(IgnoreLineEnds), memberRepresentations[nameof(IgnoreLineEnds)]);
+                stringBuilder.Append(StringRepresentationConstants.MembersDelimiter);
+                stringBuilder.AppendFormat(StringRepresentationConstants.NamedMemberFormat, nameof(IgnoreEmptyLines), memberRepresentations[nameof(IgnoreEmptyLines)]);
+                stringBuilder.Append(StringRepresentationConstants.MembersDelimiter);
+                stringBuilder.AppendFormat(StringRepresentationConstants.NamedMemberFormat, nameof(LineEndToken), memberRepresentations[nameof(LineEndToken)]);
+                stringBuilder.Append(StringRepresentationConstants.MembersDelimiter);
+                stringBuilder.AppendFormat(StringRepresentationConstants.NamedMemberFormat, nameof(EmptyLineToken), memberRepresentations[nameof(EmptyLineToken)]);
+            }
 
             return true;
         }
 
         /// <summary>Prints members to the <c><paramref name="stringBuilder" /></c>.</summary>
         /// <param name="stringBuilder">The <see cref="StringBuilder" /> to which the members are printed.</param>
-        /// <param name="provider">An <see cref="Object" /> that supplies culture-specific formatting information.</param>
         /// <returns>If any member is actually printed to the <c><paramref name="stringBuilder" /></c>, <c>true</c> is returned; otherwise (no member was printed, the <c><paramref name="stringBuilder" /></c> is unaffected) <c>false</c> is returned.</returns>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringBuilder" /></c> is <c>null</c>. The parameter <c><paramref name="provider" /></c> is <c>null</c>, but that is not allowed by a member's <see cref="Object.ToString()" /> method overload.</exception>
+        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringBuilder" /></c> is <c>null</c>.</exception>
         /// <remarks>
-        ///     <para>For those members which provide a <see cref="Object.ToString()" /> method overload that accepts an argument of type <see cref="IFormatProvider" />, the <c><paramref name="provider" /></c> is passed to their adequate <see cref="Object.ToString()" /> method overload to represent them. Other members are represented by simply calling the <see cref="Object.ToString()" /> method or by their <see cref="Type" /> name.</para>
+        ///     <para>Although the <see cref="ShatteringOptions" /> class is not a <em>C#</em> <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record"><c>record</c></a>, its <see cref="String" /> representation imitates default <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record"><c>record</c>s'</a> <see cref="Object.ToString()" /> method. Consequently, the <see cref="PrintMembers(StringBuilder)" />, <see cref="PrintMembers(StringBuilder, IFormatProvider?)" />, <see cref="ToString()" /> and <see cref="ToString(IFormatProvider?)" /> methods behave similarly to methods described <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record#built-in-formatting-for-display">here</a> and <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record#printmembers-formatting-in-derived-records">here</a>.</para>
+        ///     <para>The members are represented by calling the <see cref="Object.ToString()" /> method or by their <see cref="Type" /> name.</para>
         /// </remarks>
-        /// <seealso cref="PrintMembers(StringBuilder)" />
-        /// <seealso cref="ToString(IFormatProvider?)" />
+        /// <seealso cref="PrintMembers(StringBuilder, IFormatProvider?)" />
         /// <seealso cref="ToString()" />
-        public virtual Boolean PrintMembers(StringBuilder stringBuilder, IFormatProvider? provider)
-        {
-            if (stringBuilder is null)
-            {
-                throw new ArgumentNullException(nameof(stringBuilder), StringBuilderNullErrorMessage);
-            }
-
-            try
-            {
-                stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(IgnoreEmptyTokens), IgnoreEmptyTokens.ToString(provider));
-                stringBuilder.Append(StringRepresentation.MembersDelimiter);
-                stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(IgnoreLineEnds), IgnoreLineEnds.ToString(provider));
-                stringBuilder.Append(StringRepresentation.MembersDelimiter);
-                stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(IgnoreEmptyLines), IgnoreEmptyLines.ToString(provider));
-                stringBuilder.Append(StringRepresentation.MembersDelimiter);
-                stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(LineEndToken), LineEndToken?.ToString(provider));
-                stringBuilder.Append(StringRepresentation.MembersDelimiter);
-                stringBuilder.AppendFormat(StringRepresentation.NamedMemberFormat, nameof(EmptyLineToken), EmptyLineToken?.ToString(provider));
-            }
-            catch (ArgumentNullException)
-            {
-                throw new ArgumentNullException(nameof(provider), FormatProviderNullErrorMessage);
-            }
-
-            return true;
-        }
-
-        /// <summary>Returns a <see cref="String" /> that represents the current options.</summary>
-        /// <returns>A <see cref="String" /> that represents the current <see cref="ShatteringOptions" />.</returns>
         /// <seealso cref="ToString(IFormatProvider?)" />
-        public override String ToString()
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-
-            stringBuilder.Append(GetType().Name ?? nameof(ShatteringOptions));
-            stringBuilder.Append(StringRepresentation.Space);
-            stringBuilder.Append(StringRepresentation.OpeningBracket);
-            stringBuilder.Append(StringRepresentation.Space);
-            if (PrintMembers(stringBuilder))
-            {
-                stringBuilder.Append(StringRepresentation.Space);
-            }
-            stringBuilder.Append(StringRepresentation.ClosingBracket);
-
-            return stringBuilder.ToString();
-        }
+        protected virtual Boolean PrintMembers(StringBuilder stringBuilder) =>
+            PrintMembers(stringBuilder, null);
 
         /// <summary>Returns a <see cref="String" /> that represents the current options.</summary>
         /// <param name="provider">An <see cref="Object" /> that supplies culture-specific formatting information.</param>
         /// <returns>A <see cref="String" /> that represents the current <see cref="ShatteringOptions" />.</returns>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="provider" /></c> is <c>null</c>, but that is not allowed by a member's <see cref="Object.ToString()" /> method overload.</exception>
+        /// <remarks>
+        ///     <para>Although the <see cref="ShatteringOptions" /> class is not a <em>C#</em> <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record"><c>record</c></a>, its <see cref="String" /> representation imitates default <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record"><c>record</c>s'</a> <see cref="Object.ToString()" /> method. Consequently, the <see cref="ToString(IFormatProvider?)" /> and <see cref="ToString()" /> methods behave similarly to methods described <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record#built-in-formatting-for-display">here</a> and <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record#printmembers-formatting-in-derived-records">here</a>.</para>
+        /// </remarks>
         /// <seealso cref="ToString()" />
         public virtual String ToString(IFormatProvider? provider)
         {
             StringBuilder stringBuilder = new StringBuilder();
 
             stringBuilder.Append(GetType().Name ?? nameof(ShatteringOptions));
-            stringBuilder.Append(StringRepresentation.Space);
-            stringBuilder.Append(StringRepresentation.OpeningBracket);
-            stringBuilder.Append(StringRepresentation.Space);
+            stringBuilder.Append(StringRepresentationConstants.Space);
+            stringBuilder.Append(StringRepresentationConstants.OpeningBracket);
+            stringBuilder.Append(StringRepresentationConstants.Space);
             if (PrintMembers(stringBuilder, provider))
             {
-                stringBuilder.Append(StringRepresentation.Space);
+                stringBuilder.Append(StringRepresentationConstants.Space);
             }
-            stringBuilder.Append(StringRepresentation.ClosingBracket);
+            stringBuilder.Append(StringRepresentationConstants.ClosingBracket);
 
             return stringBuilder.ToString();
         }
 
+        /// <summary>Returns a <see cref="String" /> that represents the current options.</summary>
+        /// <returns>A <see cref="String" /> that represents the current <see cref="ShatteringOptions" />.</returns>
+        /// <remarks>
+        ///     <para>Although the <see cref="ShatteringOptions" /> class is not a <em>C#</em> <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record"><c>record</c></a>, its <see cref="String" /> representation imitates default <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record"><c>record</c>s'</a> <see cref="Object.ToString()" /> method. Consequently, the <see cref="ToString()" /> and <see cref="ToString(IFormatProvider?)" /> methods behave similarly to methods described <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record#built-in-formatting-for-display">here</a> and <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/builtin-types/record#printmembers-formatting-in-derived-records">here</a>.</para>
+        /// </remarks>
+        /// <seealso cref="ToString(IFormatProvider?)" />
+        public override String ToString() =>
+            ToString(null);
+
         /// <summary>Creates a new <see cref="Object" /> that is a copy of the current options.</summary>
         /// <returns>The new <see cref="ShatteringOptions" /> with the same values.</returns>
+        /// <seealso cref="ICloneable.Clone()" />
         /// <seealso cref="ShatteringOptions(ShatteringOptions)" />
-        public virtual Object Clone() =>
+        public virtual ShatteringOptions Clone() =>
             new ShatteringOptions(this);
+
+        /// <summary>Creates a new <see cref="Object" /> that is a copy of the current options.</summary>
+        /// <returns>The new <see cref="ShatteringOptions" /> with the same values.</returns>
+        /// <seealso cref="Clone()" />
+        /// <seealso cref="ShatteringOptions(ShatteringOptions)" />
+        Object ICloneable.Clone() =>
+            Clone();
     }
 }
 
