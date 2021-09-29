@@ -80,14 +80,14 @@ namespace MagicText
         /// <param name="stringEqualityComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>If the <see cref="ShatteringOptions" /> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringEqualityComparer" /></c> is <c>null</c>.</exception>
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?)" />
-        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(Object?, StringComparison)" />
-        /// <seealso cref="Equals(Object?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right, IEqualityComparer<String?> stringEqualityComparer) =>
@@ -101,14 +101,14 @@ namespace MagicText
         /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
         /// <returns>If the <see cref="ShatteringOptions" /> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?)" />
-        /// <seealso cref="Equals(Object?, StringComparison)"/>
-        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(Object?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, StringComparison)"/>
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right, StringComparison stringComparison)
@@ -128,14 +128,14 @@ namespace MagicText
         /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>
         /// <param name="right">The right <see cref="ShatteringOptions" /> to compare.</param>
         /// <returns>If the <see cref="ShatteringOptions" /> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(Object?)" />
-        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(Object?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, StringComparison)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right) =>
@@ -146,15 +146,15 @@ namespace MagicText
         /// <param name="right">The right <see cref="ShatteringOptions" /> to compare.</param>
         /// <returns>If the <see cref="ShatteringOptions" /> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(Object?)" />
-        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(Object?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, StringComparison)" />
         public static Boolean operator ==(ShatteringOptions? left, ShatteringOptions? right) =>
             Equals(left, right);
 
@@ -163,15 +163,15 @@ namespace MagicText
         /// <param name="right">The right <see cref="ShatteringOptions" /> to compare.</param>
         /// <returns>If the <see cref="ShatteringOptions" /> are not equal, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(Object?)" />
-        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(Object?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, StringComparison)" />
         public static Boolean operator !=(ShatteringOptions? left, ShatteringOptions? right) =>
             !Equals(left, right);
 
@@ -402,8 +402,8 @@ namespace MagicText
         /// <param name="stringEqualityComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>The hash code of the current <see cref="ShatteringOptions" /> according to the <c><paramref name="stringEqualityComparer" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringEqualityComparer" /></c> is <c>null</c>.</exception>
-        /// <seealso cref="GetHashCode(StringComparison)" />
-        /// <seealso cref="GetHashCode()" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.GetHashCode(StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.GetHashCode()" />
         public virtual Int32 GetHashCode(IEqualityComparer<String?> stringEqualityComparer)
         {
             if (stringEqualityComparer is null)
@@ -441,8 +441,8 @@ namespace MagicText
         /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
         /// <returns>The hash code of the current <see cref="ShatteringOptions" /> according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparison" /></c>.</returns>
         /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
-        /// <seealso cref="GetHashCode(IEqualityComparer{String?})" />
-        /// <seealso cref="GetHashCode()" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.GetHashCode(IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.GetHashCode()" />
         public virtual Int32 GetHashCode(StringComparison stringComparison)
         {
             try
@@ -458,8 +458,8 @@ namespace MagicText
 
         /// <summary>Returns the hash code of the current options.</summary>
         /// <returns>The hash code of the current <see cref="ShatteringOptions" />.</returns>
-        /// <seealso cref="GetHashCode(IEqualityComparer{String?})" />
-        /// <seealso cref="GetHashCode(StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.GetHashCode(IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.GetHashCode(StringComparison)" />
         public override Int32 GetHashCode() =>
             GetHashCode(DefaultStringEqualityComparer);
 
@@ -468,14 +468,14 @@ namespace MagicText
         /// <param name="stringEqualityComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c> according to the <c><paramref name="stringEqualityComparer" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringEqualityComparer" /></c> is <c>null</c>.</exception>
-        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?)" />
-        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(Object?, StringComparison)" />
-        /// <seealso cref="Equals(Object?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public virtual Boolean Equals(ShatteringOptions? other, IEqualityComparer<String?> stringEqualityComparer) =>
@@ -497,14 +497,14 @@ namespace MagicText
         /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
         /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c> according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparison" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
-        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?)" />
-        /// <seealso cref="Equals(Object?, StringComparison)" />
-        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(Object?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public virtual Boolean Equals(ShatteringOptions? other, StringComparison stringComparison)
@@ -523,14 +523,14 @@ namespace MagicText
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="other" /></c> options or not.</summary>
         /// <param name="other">The other <see cref="ShatteringOptions" /> to compare with these options.</param>
         /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
-        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(Object?)" />
-        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(Object?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public virtual Boolean Equals(ShatteringOptions? other) =>
@@ -541,14 +541,14 @@ namespace MagicText
         /// <param name="stringEqualityComparer">The <see cref="IEqualityComparer{T}" /> of <see cref="String" />s used for comparing <see cref="String" />s for equality and for retrieving <see cref="String" />s' hash codes.</param>
         /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it according to the <c><paramref name="stringEqualityComparer" /></c>, <c>true</c>; <c>false</c>otherwise.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringEqualityComparer" /></c> is <c>null</c>.</exception>
-        /// <seealso cref="Equals(Object?, StringComparison)" />
-        /// <seealso cref="Equals(Object?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public virtual Boolean Equals(Object? obj, IEqualityComparer<String?> stringEqualityComparer)
@@ -570,14 +570,14 @@ namespace MagicText
         /// <param name="stringComparison">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
         /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparison" /></c>, <c>true</c>; <c>false</c>otherwise.</returns>
         /// <exception cref="ArgumentException">The parameter <c><paramref name="stringComparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
-        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(Object?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public virtual Boolean Equals(Object? obj, StringComparison stringComparison)
@@ -596,14 +596,14 @@ namespace MagicText
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="obj" /></c> or not.</summary>
         /// <param name="obj">The <see cref="Object" /> to compare with these <see cref="ShatteringOptions" />.</param>
         /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it, <c>true</c>; <c>false</c>otherwise.</returns>
-        /// <seealso cref="Equals(Object?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(Object?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, StringComparison)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?)" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
-        /// <seealso cref="Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(Object?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, StringComparison)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?)" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, IEqualityComparer{String?})" />
+        /// <seealso cref="M:MagicText.ShatteringOptions.Equals(ShatteringOptions?, ShatteringOptions?, StringComparison)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public override Boolean Equals(Object? obj) =>
