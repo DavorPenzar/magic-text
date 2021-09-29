@@ -123,12 +123,17 @@ namespace MagicText
                 throw new ArgumentException(InvalidStreamErrorMessage, nameof(input), ex);
             }
 
-            foreach (String? token in tokeniser.Shatter(inputReader, options))
+            try
             {
-                yield return token;
+                foreach (String? token in tokeniser.Shatter(inputReader, options))
+                {
+                    yield return token;
+                }
             }
-
-            inputReader.Dispose();
+            finally
+            {
+                inputReader.Dispose();
+            }
         }
 
         /// <summary>Shatters text read from the <c><paramref name="input" /></c> into a token list.</summary>
@@ -335,12 +340,17 @@ namespace MagicText
                 throw new ArgumentException(InvalidStreamErrorMessage, nameof(input), ex);
             }
 
-            await foreach (String? token in tokeniser.ShatterAsync(inputReader, options, cancellationToken, continueTasksOnCapturedContext).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
+            try
             {
-                yield return token;
+                await foreach (String? token in tokeniser.ShatterAsync(inputReader, options, cancellationToken, continueTasksOnCapturedContext).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
+                {
+                    yield return token;
+                }
             }
-
-            inputReader.Dispose();
+            finally
+            {
+                inputReader.Dispose();
+            }
         }
 
         /// <summary>Shatters text read from the <c><paramref name="input" /></c> into a token list asynchronously.</summary>
