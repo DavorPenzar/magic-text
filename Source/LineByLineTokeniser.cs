@@ -25,7 +25,6 @@ namespace MagicText
     {
         protected const string IsEmptyTokenNullErrorMessage = "Token emptiness checking function cannot be null.";
         private const string InputNullErrorMessage = "Input reader cannot be null.";
-        private const string LineTokensNullErrorMessage = "Line tokens cannot be null.";
         protected const string LineNullErrorMessage = "Line string cannot be null.";
 
         /// <summary>Always indicates the <c><paramref name="_" /></c> as non-empty.</summary>
@@ -97,7 +96,6 @@ namespace MagicText
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <returns>The enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="input" /></c> is <c>null</c>.</exception>
-        /// <exception cref="NullReferenceException">The method <see cref="ShatterLine(String)" /> call returns <c>null</c>.</exception>
         /// <remarks>
         ///     <para>The returned enumerable is merely a query for enumerating tokens (also known as <em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
         ///     <para>The exceptions thrown by the <see cref="TextReader.ReadLine()" /> method call are not caught.</para>
@@ -144,7 +142,7 @@ namespace MagicText
                     yield break;
                 }
 
-                IEnumerable<String?> lineTokens = ShatterLine(line) ?? throw new NullReferenceException(LineTokensNullErrorMessage);
+                IEnumerable<String?> lineTokens = ShatterLine(line);
                 if (options.IgnoreEmptyTokens)
                 {
                     lineTokens = lineTokens.Where(IsNonEmptyToken);
@@ -192,7 +190,6 @@ namespace MagicText
         /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method).</param>
         /// <returns>The asynchronous enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="input" /></c> is <c>null</c>.</exception>
-        /// <exception cref="NullReferenceException">The method <see cref="ShatterLine(String)" /> call returns <c>null</c>.</exception>
         /// <exception cref="OperationCanceledException">The operation is cancelled via the <c><paramref name="cancellationToken" /></c>.</exception>
         /// <remarks>
         ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, if the <c><paramref name="input" /></c> is a <see cref="StreamReader" />, data having already been read from the underlying <see cref="Stream" /> may be irrecoverable when cancelling the operation.</para>
@@ -246,7 +243,7 @@ namespace MagicText
                     yield break;
                 }
 
-                IEnumerable<String?> lineTokens = ShatterLine(line) ?? throw new NullReferenceException(LineTokensNullErrorMessage);
+                IEnumerable<String?> lineTokens = ShatterLine(line);
                 if (options.IgnoreEmptyTokens)
                 {
                     lineTokens = lineTokens.Where(IsNonEmptyToken);

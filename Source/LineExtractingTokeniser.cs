@@ -19,7 +19,7 @@ namespace MagicText
         /// <returns>If empty lines should be ignored, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <remarks>
         ///     <para>If empty lines should be ignored, shattering an empty line via the <see cref="ShatterLine(String)" /> returns an empty enumerable of tokens. Otherwise empty lines are shattered the same as non-empty lines.</para>
-        ///     <para>A <see cref="String" /> <c>line</c> is considered empty if it yields <c>true</c> when evaluated via the <see cref="IsEmptyLine" /> predicate.</para>
+        ///     <para>A <see cref="String" /> <c>line</c> is considered empty if it yields <c>true</c> when evaluated via the <see cref="IsEmptyLine" /> predicate (which should be the <see cref="LineByLineTokeniser.DefaultIsEmptyTokenPredicate" />).</para>
         /// </remarks>
         public Boolean IgnoreEmptyLines => _ignoreEmptyLines;
 
@@ -31,7 +31,7 @@ namespace MagicText
         /// <seealso cref="IsNonEmptyLine" />
         /// <seealso cref="LineByLineTokeniser.IsEmptyToken" />
         /// <seealso cref="LineByLineTokeniser.IsNonEmptyToken" />
-        protected Func<String, Boolean> IsEmptyLine => IsEmptyToken;
+        protected Func<String?, Boolean> IsEmptyLine => IsEmptyToken;
 
         /// <summary>Gets the function (predicate) to check if a line is non-empty: it returns <c>true</c> if and only if the line to check is non-empty.</summary>
         /// <returns>The line non-emptiness checking function (predicate).</returns>
@@ -41,7 +41,7 @@ namespace MagicText
         /// <seealso cref="IsEmptyLine" />
         /// <seealso cref="LineByLineTokeniser.IsNonEmptyToken" />
         /// <seealso cref="LineByLineTokeniser.IsEmptyToken" />
-        protected Func<String, Boolean> IsNonEmptyLine => IsNonEmptyToken;
+        protected Func<String?, Boolean> IsNonEmptyLine => IsNonEmptyToken;
 
         /// <summary>Creates a tokeniser.</summary>
         /// <param name="ignoreEmptyLines">The indicator if empty lines should be ignored. See <see cref="IgnoreEmptyLines" /> for more information.</param>
