@@ -54,8 +54,13 @@ namespace MagicText.Internal
         /// <seealso cref="Random" />
         public RandomTokenBreaker(System.Random random, Double bias) : base()
         {
+            if (random is null)
+            {
+                throw new ArgumentNullException(nameof(random), RandomNullErrorMessage);
+            }
+
             _bias = (Double.IsNaN(bias) || Double.IsInfinity(bias) || bias <= 0.0D || bias > 1.0D) ? throw new ArgumentOutOfRangeException(nameof(bias), bias, String.Format(CultureInfo.CurrentCulture, BiasOutOfRangeFormatErrorMessage, 0.0D, 1.0D)) : bias;
-            _random = random ?? throw new ArgumentNullException(nameof(random), RandomNullErrorMessage);
+            _random = random;
         }
 
         /// <summary>Creates a default token breaker.</summary>

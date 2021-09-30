@@ -63,12 +63,58 @@ namespace MagicText
             public const string MembersDelimiter = Comma + Space;
         }
 
+        /// <summary>The default policy of ignoring empty tokens (<see cref="IgnoreEmptyTokens" />).</summary>
+        /// <remarks>
+        ///     <para>The default is <c>false</c>.</para>
+        /// </remarks>
+        /// <seealso cref="IgnoreEmptyTokens" />
+        public const Boolean DefaultIgnoreEmptyTokens = false;
+
+        /// <summary>The default policy of ignoring line ends (<see cref="IgnoreLineEnds" />).</summary>
+        /// <remarks>
+        ///     <para>The default is <c>false</c>.</para>
+        /// </remarks>
+        /// <seealso cref="IgnoreLineEnds" />
+        public const Boolean DefaultIgnoreLineEnds = false;
+
+        /// <summary>The default policy of ignoring empty lines (<see cref="IgnoreEmptyLines" />).</summary>
+        /// <remarks>
+        ///     <para>The default is <c>false</c>.</para>
+        /// </remarks>
+        /// <seealso cref="IgnoreEmptyLines" />
+        public const Boolean DefaultIgnoreEmptyLines = false;
+
+        private static readonly String? _defaultLineEndToken;
+        private static readonly String? _defaultEmptyLineToken;
+
+        /// <summary>Gets the default token to represent a line end (<see cref="LineEndToken" />).</summary>
+        /// <returns>The default value of the <see cref="LineEndToken" />.</returns>
+        /// <remarks>
+        ///     <para>The default is <see cref="Environment.NewLine" />.</para>
+        /// </remarks>
+        /// <seealso cref="LineEndToken" />
+        public static String? DefaultLineEndToken => _defaultLineEndToken;
+
+        /// <summary>Gets the default token to represent an empty line (<see cref="EmptyLineToken" />).</summary>
+        /// <returns>The default value of the <see cref="EmptyLineToken" />.</returns>
+        /// <remarks>
+        ///     <para>The default is <see cref="String.Empty" />.</para>
+        /// </remarks>
+        /// <seealso cref="EmptyLineToken" />
+        public static String? DefaultEmptyLineToken => _defaultEmptyLineToken;
+
         /// <summary>Gets the default <see cref="IEqualityComparer{T}" /> of <see cref="String" />s to use.</summary>
         /// <returns>The default <see cref="IEqualityComparer{T}" /> of <see cref="String" />s to use in this library.</returns>
         /// <remarks>
         ///     <para>The default <see cref="IEqualityComparer{T}" /> of <see cref="String" />s is the standard library's default <see cref="EqualityComparer{T}.Default" />.</para>
         /// </remarks>
         public static IEqualityComparer<String?> DefaultStringEqualityComparer => EqualityComparer<String?>.Default;
+
+        static ShatteringOptions()
+        {
+            _defaultLineEndToken = Environment.NewLine;
+            _defaultEmptyLineToken = String.Empty;
+        }
 
         /// <summary>Indicates whether the <c><paramref name="left" /></c> <see cref="ShatteringOptions" /> are equal to the <c><paramref name="right" /></c> or not.</summary>
         /// <param name="left">The left <see cref="ShatteringOptions" /> to compare.</param>
@@ -109,14 +155,17 @@ namespace MagicText
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right, StringComparison stringComparison)
         {
+            IEqualityComparer<String?> stringEqualityComparer;
             try
             {
-                return Equals(left, right, StringComparer.FromComparison(stringComparison));
+                stringEqualityComparer = StringComparer.FromComparison(stringComparison);
             }
             catch (ArgumentException ex)
             {
                 throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(stringComparison), ex);
             }
+
+            return Equals(left, right, stringEqualityComparer);
         }
 #endif // NETSTANDARD2_0
 
@@ -202,9 +251,9 @@ namespace MagicText
         [XmlIgnore]
         [JsonIgnore]
         [NonSerialized]
-        private ExtensionDataObject extensionDataObjectValue;
+        private ExtensionDataObject extensionData;
 
-        /// <summary>Gets or sets the policy of ignoring empty tokens: <c>true</c> if ignoring, <c>false</c> otherwise. The default is <c>false</c>.</summary>
+        /// <summary>Gets or sets the policy of ignoring empty tokens: <c>true</c> if ignoring, <c>false</c> otherwise. The default is the <see cref="DefaultIgnoreEmptyTokens" /> (<c>false</c>).</summary>
         /// <returns>If empty tokens should be ignored, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <value>The new ignoring empty tokens policy value.</value>
         /// <remarks>
@@ -224,7 +273,7 @@ namespace MagicText
             }
         }
 
-        /// <summary>Gets or sets the policy of ignoring line ends: <c>true</c> if ignoring, <c>false</c> otherwise. The default is <c>false</c>.</summary>
+        /// <summary>Gets or sets the policy of ignoring line ends: <c>true</c> if ignoring, <c>false</c> otherwise. The default is the <see cref="DefaultIgnoreLineEnds" /> (<c>false</c>).</summary>
         /// <returns>If line ends should be ignored, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <value>The new ignoring line ends policy value.</value>
         /// <remarks>
@@ -248,7 +297,7 @@ namespace MagicText
             }
         }
 
-        /// <summary>Gets or sets the policy of ignoring empty lines: <c>true</c> if ignoring, <c>false</c> otherwise. The default is <c>false</c>.</summary>
+        /// <summary>Gets or sets the policy of ignoring empty lines: <c>true</c> if ignoring, <c>false</c> otherwise. The default is the <see cref="DefaultIgnoreEmptyLines" /> (<c>false</c>).</summary>
         /// <returns>If empty lines should be ignored, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <value>The new ignoring empty lines policy value.</value>
         /// <remarks>
@@ -273,7 +322,7 @@ namespace MagicText
             }
         }
 
-        /// <summary>Gets or sets the token to represent a line end. The default is the <see cref="Environment.NewLine" />.</summary>
+        /// <summary>Gets or sets the token to represent a line end. The default is the <see cref="DefaultLineEndToken" /> (<see cref="Environment.NewLine" />).</summary>
         /// <returns>The line end token.</returns>
         /// <value>The new line end token value.</value>
         /// <remarks>
@@ -299,7 +348,7 @@ namespace MagicText
             }
         }
 
-        /// <summary>Gets or sets the token to represent an empty line. The default is the <see cref="String.Empty" />.</summary>
+        /// <summary>Gets or sets the token to represent an empty line. The default is the <see cref="DefaultEmptyLineToken" /> (<see cref="String.Empty" />).</summary>
         /// <returns>The empty line token.</returns>
         /// <value>The new empty line token value.</value>
         /// <remarks>
@@ -331,10 +380,10 @@ namespace MagicText
         /// <value>New <see cref="ExtensionDataObject" /> that contains data not recognised as belonging to the data contract.</value>
         ExtensionDataObject IExtensibleDataObject.ExtensionData
         {
-            get => extensionDataObjectValue;
+            get => extensionData;
             set
             {
-                extensionDataObjectValue = value;
+                extensionData = value;
             }
         }
 
@@ -357,11 +406,11 @@ namespace MagicText
             this.lineEndToken = lineEndToken;
             this.emptyLineToken = emptyLineToken;
 
-            extensionDataObjectValue = default!;
+            extensionData = default!;
         }
 
         /// <summary>Creates default options.</summary>
-        public ShatteringOptions() : this(false, false, false, Environment.NewLine, String.Empty)
+        public ShatteringOptions() : this(DefaultIgnoreEmptyTokens, DefaultIgnoreLineEnds, DefaultIgnoreEmptyLines, DefaultLineEndToken, DefaultEmptyLineToken)
         {
         }
 
@@ -441,14 +490,17 @@ namespace MagicText
         /// <seealso cref="M:MagicText.ShatteringOptions.GetHashCode()" />
         public virtual Int32 GetHashCode(StringComparison stringComparison)
         {
+            IEqualityComparer<String?> stringEqualityComparer;
             try
             {
-                return GetHashCode(StringComparer.FromComparison(stringComparison));
+                stringEqualityComparer = StringComparer.FromComparison(stringComparison);
             }
             catch (ArgumentException ex)
             {
                 throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(stringComparison), ex);
             }
+
+            return GetHashCode(stringEqualityComparer);
         }
 #endif // NETSTANDARD2_0
 
@@ -505,14 +557,17 @@ namespace MagicText
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public virtual Boolean Equals(ShatteringOptions? other, StringComparison stringComparison)
         {
+            IEqualityComparer<String?> stringEqualityComparer;
             try
             {
-                return Equals(other, StringComparer.FromComparison(stringComparison));
+                stringEqualityComparer = StringComparer.FromComparison(stringComparison);
             }
             catch (ArgumentException ex)
             {
                 throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(stringComparison), ex);
             }
+
+            return Equals(stringEqualityComparer);
         }
 #endif // NETSTANDARD2_0
 
@@ -549,15 +604,17 @@ namespace MagicText
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public virtual Boolean Equals(Object? obj, IEqualityComparer<String?> stringEqualityComparer)
         {
+            ShatteringOptions? other;
             try
             {
-                return !(obj is null) && Equals((ShatteringOptions)obj, stringEqualityComparer);
+                other = (ShatteringOptions?)obj;
             }
             catch (InvalidCastException)
             {
+                return false;
             }
 
-            return false;
+            return Equals(other, stringEqualityComparer);
         }
 
 #if !NETSTANDARD2_0
@@ -578,14 +635,17 @@ namespace MagicText
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public virtual Boolean Equals(Object? obj, StringComparison stringComparison)
         {
+            IEqualityComparer<String?> stringEqualityComparer;
             try
             {
-                return Equals(obj, StringComparer.FromComparison(stringComparison));
+                stringEqualityComparer = StringComparer.FromComparison(stringComparison);
             }
             catch (ArgumentException ex)
             {
                 throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(stringComparison), ex);
             }
+
+            return Equals(obj, stringEqualityComparer);
         }
 #endif // NETSTANDARD2_0
 
@@ -635,6 +695,7 @@ namespace MagicText
                     {
                         memberRepresentations[nameof(IgnoreEmptyTokens)] = IgnoreEmptyTokens.ToString();
                     }
+
                     try
                     {
                         memberRepresentations[nameof(IgnoreLineEnds)] = IgnoreLineEnds.ToString(provider);
@@ -643,6 +704,7 @@ namespace MagicText
                     {
                         memberRepresentations[nameof(IgnoreLineEnds)] = IgnoreLineEnds.ToString();
                     }
+
                     try
                     {
                         memberRepresentations[nameof(IgnoreEmptyLines)] = IgnoreEmptyLines.ToString(provider);
@@ -651,6 +713,7 @@ namespace MagicText
                     {
                         memberRepresentations[nameof(IgnoreEmptyLines)] = IgnoreEmptyLines.ToString();
                     }
+
                     try
                     {
                         memberRepresentations[nameof(LineEndToken)] = LineEndToken?.ToString(provider);
@@ -659,6 +722,7 @@ namespace MagicText
                     {
                         memberRepresentations[nameof(LineEndToken)] = LineEndToken?.ToString();
                     }
+
                     try
                     {
                         memberRepresentations[nameof(EmptyLineToken)] = EmptyLineToken?.ToString(provider);

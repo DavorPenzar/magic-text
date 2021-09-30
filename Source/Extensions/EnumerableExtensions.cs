@@ -18,10 +18,10 @@ namespace MagicText.Extensions
         ///     <para>The method does not throw an exception (such as the <see cref="ArgumentNullException" />) if the <c><paramref name="source" /></c> is <c>null</c>. Instead, <c>null</c> is simply returned. Such cases should be handled in the code surrounding the method call.</para>
         /// </remarks>
         [return: MaybeNull, NotNullIfNotNull("source")]
-        public static IReadOnlyList<TSource> ConvertToReadOnlyList<TSource>([AllowNull] this IEnumerable<TSource> source) =>
+        public static IReadOnlyList<TSource>? ConvertToReadOnlyList<TSource>([AllowNull] this IEnumerable<TSource>? source) =>
             source switch
             {
-                null => null!,
+                null => null,
                 IReadOnlyList<TSource> sourceReadOnlyList => sourceReadOnlyList,
                 IList<TSource> sourceList => new ReadOnlyCollection<TSource>(sourceList),
                 _ => new List<TSource>(source)
@@ -36,10 +36,10 @@ namespace MagicText.Extensions
         ///     <para>The method does not throw an exception (such as the <see cref="ArgumentNullException" />) if the <c><paramref name="source" /></c> is <c>null</c>. Instead, <c>null</c> is simply returned. Such cases should be handled in the code surrounding the method call.</para>
         /// </remarks>
         [return: MaybeNull, NotNullIfNotNull("source")]
-        public static IList<TSource> ConvertToList<TSource>([AllowNull] this IEnumerable<TSource> source) =>
+        public static IList<TSource>? ConvertToList<TSource>([AllowNull] this IEnumerable<TSource>? source) =>
             source switch
             {
-                null => null!,
+                null => null,
                 IList<TSource> sourceList => sourceList,
                 _ => new List<TSource>(source)
             };

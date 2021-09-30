@@ -8,7 +8,7 @@ namespace MagicText.Internal
     /// <remarks>
     ///     <para>Only the reference to the list <c>tokens</c> passed to the constructor is stored by the comparer in the <see cref="Tokens" /> property. Changing the content of the enumerable externally, or even its order, results in inconsistent behaviour of comparison via the <see cref="IComparer{T}.Compare(T, T)" /> method.</para>
     /// </remarks>
-    internal class IndexComparer : Object, IComparer<Int32>, IEqualityComparer<Int32>, IComparer, IEqualityComparer
+    internal sealed class IndexComparer : Object, IComparer<Int32>, IEqualityComparer<Int32>, IComparer, IEqualityComparer
     {
         private const string ComparerNullErrorMessage = "String comparer cannot be null.";
         private const string TokensNullErrorMessage = "Token list cannot be null.";
