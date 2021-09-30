@@ -242,7 +242,7 @@ foreach (String? token in tokens)
 	informationContent.Add(tokenRep, info);
 }
 
-entropy = probability.Select(e => e.Value * informationContent[e.Key]).Sum();
+entropy = probability.Sum(e => e.Value * informationContent[e.Key]);
 
 foreach (KeyValuePair<String, Double> entry in probability.OrderBy(e => e.Value).ThenBy(e => JsonSerializer.Deserialize<String>(e.Key)))
 {
