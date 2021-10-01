@@ -29,6 +29,7 @@ namespace MagicText
         protected const string StringBuilderNullErrorMessage = "String builder cannot be null.";
 
         /// <summary>Defines <see cref="String" /> constants for building <see cref="String" /> representations of <see cref="ShatteringOptions" />.</summary>
+        /// <seealso cref="ShatteringOptions" />
         protected static class StringRepresentationConstants
         {
             /// <summary>A single space (<c>" "</c>).</summary>
@@ -110,6 +111,7 @@ namespace MagicText
         /// </remarks>
         public static IEqualityComparer<String?> DefaultStringEqualityComparer => EqualityComparer<String?>.Default;
 
+        /// <summary>Initialises static fields.</summary>
         static ShatteringOptions()
         {
             _defaultLineEndToken = Environment.NewLine;

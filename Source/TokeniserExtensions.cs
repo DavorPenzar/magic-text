@@ -21,9 +21,17 @@ namespace MagicText
         private const string InputNullErrorMessage = "Input stream cannot be null.";
         private const string InvalidStreamErrorMessage = "Cannot read from the input stream.";
 
+        private static readonly Encoding _defaultEncoding;
+
         /// <summary>Gets the default <see cref="Encoding" /> for reading and writing <see cref="Stream" />s as text resources, i. e. <see cref="Encoding.UTF8" />.</summary>
         /// <returns>The default <see cref="Encoding" />.</returns>
-        private static Encoding DefaultEncoding => Encoding.UTF8;
+        private static Encoding DefaultEncoding => _defaultEncoding;
+
+        /// <summary>Initialises static fields.</summary>
+        static TokeniserExtensions()
+        {
+            _defaultEncoding = Encoding.UTF8;
+        }
 
         /// <summary>Creates a <see cref="StreamReader" /> for reading <c><paramref name="stream" /></c>.</summary>
         /// <param name="stream">The <see cref="Stream" /> from which to read data.</param>
@@ -123,16 +131,12 @@ namespace MagicText
                 throw new ArgumentException(InvalidStreamErrorMessage, nameof(input), ex);
             }
 
-            try
+            using (inputReader)
             {
                 foreach (String? token in tokeniser.Shatter(inputReader, options))
                 {
                     yield return token;
                 }
-            }
-            finally
-            {
-                inputReader.Dispose();
             }
         }
 
@@ -249,7 +253,7 @@ namespace MagicText
         /// <param name="text">The input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
-        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method).</param>
+        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. the <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLineAsync()" /> and <see cref="IAsyncEnumerator{T}.MoveNextAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> method, the <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method etc.).</param>
         /// <returns>The asynchronous enumerable of tokens (in the order they were read) read from the <c><paramref name="text" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="tokeniser" /></c> is <c>null</c>. The parameter <c><paramref name="text" /></c> is <c>null</c>.</exception>
         /// <exception cref="OperationCanceledException">The operation is cancelled via the <c><paramref name="cancellationToken" /></c>.</exception>
@@ -294,7 +298,7 @@ namespace MagicText
         /// <param name="input">The <see cref="Stream" /> from which the input text is read.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
-        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method).</param>
+        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. the <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLineAsync()" /> and <see cref="IAsyncEnumerator{T}.MoveNextAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> method, the <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method etc.).</param>
         /// <returns>The asynchronous enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="tokeniser" /></c> is <c>null</c>. The parameter <c><paramref name="input" /></c> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">The <c><paramref name="input" /></c> is not readable.</exception>
@@ -340,16 +344,12 @@ namespace MagicText
                 throw new ArgumentException(InvalidStreamErrorMessage, nameof(input), ex);
             }
 
-            try
+            using (inputReader)
             {
                 await foreach (String? token in tokeniser.ShatterAsync(inputReader, options, cancellationToken, continueTasksOnCapturedContext).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
                 {
                     yield return token;
                 }
-            }
-            finally
-            {
-                inputReader.Dispose();
             }
         }
 
@@ -358,7 +358,7 @@ namespace MagicText
         /// <param name="input">The <see cref="TextReader" /> from which the input text is read.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
-        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method).</param>
+        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. the <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLineAsync()" /> and <see cref="IAsyncEnumerator{T}.MoveNextAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> method, the <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method etc.).</param>
         /// <returns>The task that represents the asynchronous shattering operation. Its value of the <see cref="Task{TResult}.Result" /> property is the list of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="tokeniser" /></c> is <c>null</c>. The parameter <c><paramref name="input" /></c> is <c>null.</c></exception>
         /// <exception cref="OperationCanceledException">The operation is cancelled via the <c><paramref name="cancellationToken" /></c>.</exception>
@@ -402,7 +402,7 @@ namespace MagicText
         /// <param name="text">The input text.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
-        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method).</param>
+        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. the <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLineAsync()" /> and <see cref="IAsyncEnumerator{T}.MoveNextAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> method, the <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method etc.).</param>
         /// <returns>The task that represents the asynchronous shattering operation. Its value of the <see cref="Task{TResult}.Result" /> property is the list of tokens (in the order they were read) read from the <c><paramref name="text" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="tokeniser" /></c> is <c>null</c>. The parameter <c><paramref name="text" /></c> is <c>null.</c></exception>
         /// <exception cref="OperationCanceledException">The operation is cancelled via the <c><paramref name="cancellationToken" /></c>.</exception>
@@ -446,7 +446,7 @@ namespace MagicText
         /// <param name="input">The <see cref="Stream" /> from which the input text is read.</param>
         /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
         /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
-        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" /> or <see cref="TextReader.ReadLineAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> extension method).</param>
+        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. the <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLineAsync()" /> and <see cref="IAsyncEnumerator{T}.MoveNextAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> method, the <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method etc.).</param>
         /// <returns>The asynchronous enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="tokeniser" /></c> is <c>null</c>. The parameter <c><paramref name="input" /></c> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">The <c><paramref name="input" /></c> is not readable.</exception>

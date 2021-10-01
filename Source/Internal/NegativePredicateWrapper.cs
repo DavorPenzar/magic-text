@@ -1,9 +1,13 @@
 using System;
+using System.Linq;
 
 namespace MagicText.Internal
 {
     /// <summary>Exposes the negation of a simple (one argument) predicate.</summary>
     /// <typeparam name="T">The type of the argument of the predicate.</typeparam>
+    /// <remarks>
+    ///     <para>Predicates are expressed through <see cref="Func{T, TResult}" /> <c>delegate</c>s that return a <see cref="Boolean" /> rather than through built-in <see cref="Predicate{T}" /> <c>delegate</c>s. This is because the intended use of the <see cref="NegativePredicateWrapper{T}" /> as a parameter to <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/programming-guide/concepts/linq/">LINQ</a> methods such as the <see cref="Enumerable.Any{TSource}(System.Collections.Generic.IEnumerable{TSource}, Func{TSource, Boolean})" /> and <see cref="Enumerable.Where{TSource}(System.Collections.Generic.IEnumerable{TSource}, Func{TSource, Boolean})" /> methods.</para>
+    /// </remarks>
     internal class NegativePredicateWrapper<T> : Object
     {
         private const string PositivePredicateNullErrorMessage = "Positive predicate cannot be null.";
@@ -34,10 +38,18 @@ namespace MagicText.Internal
             false;
 
         private readonly Func<T, Boolean> _positivePredicate;
+        private readonly Func<T, Boolean> _negativePredicate;
 
         /// <summary>Gets the predicate that is negated through the <see cref="EvaluateNegation(T)" /> method.</summary>
         /// <returns>The internal wrapped predicate.</returns>
         public Func<T, Boolean> PositivePredicate => _positivePredicate;
+
+        /// <summary>Gets the predicate that is a negation of the <see cref="PositivePredicate" />.</summary>
+        /// <returns>A negation of the internal wrapped predicate.</returns>
+        /// <remarks>
+        ///     <para>This is <c>delegate</c> merely encapsulates the <see cref="EvaluateNegation(T)" /> method.</para>
+        /// </remarks>
+        public Func<T, Boolean> NegativePredicate => _negativePredicate;
 
         /// <summary>Creates a negative wrapper of the <c><paramref name="positivePredicate" /></c>.</summary>
         /// <param name="positivePredicate">The predicate that is negated through the <see cref="EvaluateNegation(T)" /> method.</param>
@@ -45,6 +57,7 @@ namespace MagicText.Internal
         public NegativePredicateWrapper(Func<T, Boolean> positivePredicate) : base()
         {
             _positivePredicate = positivePredicate ?? throw new ArgumentNullException(nameof(positivePredicate), PositivePredicateNullErrorMessage);
+            _negativePredicate = EvaluateNegation;
         }
 
         /// <summary>Creates a default negative wrapper of a positive predicate.</summary>
