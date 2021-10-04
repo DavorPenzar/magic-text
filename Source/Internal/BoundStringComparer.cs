@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MagicText.Internal
 {
@@ -17,6 +18,25 @@ namespace MagicText.Internal
         ///     <para>Since the property is read-only and it represents an immutable <see cref="Object" />, it always returns the same reference (to the same <see cref="StringComparer" />).</para>
         /// </remarks>
         private static StringComparer DefaultComparer => GlobalDefaults.StringComparer;
+
+        /// <summary>Converts a <see cref="System.String" /> into a <see cref="BoundStringComparer" />.</summary>
+        /// <param name="string">The predefined reference <see cref="System.String" /> of the resulting <see cref="BoundStringComparer" />.</param>
+        /// <remarks>
+        ///     <para>The internal (bound) <see cref="StringComparer" /> is set to the <see cref="StringComparer.Ordinal" />.</para>
+        ///     <para>Even if the <c><paramref name="string" /></c> is <c>null</c>, the conversion <strong>does not</strong> result in a <c>null</c> reference. Rather, a <see cref="BoundStringComparer" /> bound to a <c>null</c> <see cref="System.String" /> is returned.</para>
+        /// </remarks>
+        [return: NotNull]
+        public static explicit operator BoundStringComparer(System.String @string) =>
+            new BoundStringComparer(@string);
+
+        /// <summary>Retrieves the <see cref="System.String" /> to which a <see cref="BoundStringComparer" /> is bound.</summary>
+        /// <param name="boundStringComparer">A <see cref="BoundStringComparer" /> bound to a <see cref="System.String" />.</param>
+        /// <remarks>
+        ///     <para>The conversion is essentially the same as simply using the <see cref="String" /> property of the <c><paramref name="boundStringComparer" /></c></para>
+        /// </remarks>
+        [return: MaybeNull]
+        public static explicit operator System.String(BoundStringComparer boundStringComparer) =>
+            boundStringComparer?.String!;
 
         private readonly StringComparer _comparer;
         private readonly System.String? _string;
@@ -61,9 +81,20 @@ namespace MagicText.Internal
         }
 #endif // NETSTANDARD2_0
 
+        /// <summary>Creates a comparer.</summary>
+        /// <param name="string">The predefined reference <see cref="System.String" />. Other <see cref="System.String" />s are compared to this <c><paramref name="string" /></c> by the internal (bound) <see cref="StringComparer" />.</param>
+        /// <remarks>
+        ///     <para>The internal (bound) <see cref="StringComparer" /> is set to the <see cref="StringComparer.Ordinal" />.</para>
+        /// </remarks>
+        public BoundStringComparer(System.String? @string) : this(DefaultComparer, @string)
+        {
+        }
+
         /// <summary>Creates a default comparer.</summary>
-        /// <remarks>The internal (bound) <see cref="StringComparer" /> is set to the <see cref="StringComparer.Ordinal" /> and the internal <see cref="System.String" /> (<see cref="String" />) is set to <c>null</c>.</remarks>
-        public BoundStringComparer() : this(DefaultComparer, null)
+        /// <remarks>
+        ///     <para>The internal (bound) <see cref="StringComparer" /> is set to the <see cref="StringComparer.Ordinal" /> and the internal <see cref="System.String" /> (<see cref="String" />) is set to <c>null</c>.</para>
+        /// </remarks>
+        public BoundStringComparer() : this(null)
         {
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace MagicText.Internal
@@ -11,7 +12,7 @@ namespace MagicText.Internal
     internal class NegativePredicateWrapper<T> : Object
     {
         private const string PositivePredicateNullErrorMessage = "Positive predicate cannot be null.";
-
+        
         private static readonly Func<T, Boolean> _defaultPositivePredicate;
 
         /// <summary>Gets the default positive predicate to wrap by a default <see cref="NegativePredicateWrapper{T}" />.</summary>
@@ -28,6 +29,26 @@ namespace MagicText.Internal
             _defaultPositivePredicate = PredicateAlwaysFalse;
         }
 
+        /// <summary>Wraps a <see cref="NegativePredicateWrapper{T}" /> around a predicate.</summary>
+        /// <param name="func">The predicate that is wrapped by the resulting <see cref="NegativePredicateWrapper{T}" />.</param>
+        /// <returns>A <see cref="NegativePredicateWrapper{T}" /> around the <c><paramref name="func" /></c>.</returns>
+        /// <remarks>
+        ///     <para>The conversion creates and returns a new <see cref="NegativePredicateWrapper{T}" /> around the <c><paramref name="func" /></c>.</para>
+        /// </remarks>
+        [return: MaybeNull, NotNullIfNotNull("func")]
+        public static explicit operator NegativePredicateWrapper<T>(Func<T, Boolean> func) =>
+            func is null ? null! : new NegativePredicateWrapper<T>(func);
+
+        /// <summary>Retrieves the negative of the predicate negated by a <see cref="NegativePredicateWrapper{T}" />.</summary>
+        /// <param name="negativePredicateWrapper">The <see cref="NegativePredicateWrapper{T}" /> around a positive predicate.</param>
+        /// <returns>The negation of the predicate wrapped by the <c><paramref name="negativePredicateWrapper" /></c>.</returns>
+        /// <remarks>
+        ///     <para>The conversion is essentially the same as simply using the <see cref="NegativePredicate" /> property of the <c><paramref name="negativePredicateWrapper" /></c>.</para>
+        /// </remarks>
+        [return: MaybeNull, NotNullIfNotNull("negativePredicateWrapper")]
+        public static implicit operator Func<T, Boolean>(NegativePredicateWrapper<T> negativePredicateWrapper) =>
+            negativePredicateWrapper is null ? null! : negativePredicateWrapper.NegativePredicate;
+
         /// <summary>Always evaluates the argument as <c>false</c>.</summary>
         /// <param name="_">The parameter to evaluate. This parameter is unused.</param>
         /// <returns>Always <c>false</c>.</returns>
@@ -40,29 +61,31 @@ namespace MagicText.Internal
         private readonly Func<T, Boolean> _positivePredicate;
         private readonly Func<T, Boolean> _negativePredicate;
 
-        /// <summary>Gets the predicate that is negated through the <see cref="EvaluateNegation(T)" /> method.</summary>
+        /// <summary>Gets the predicate that is negated through the <see cref="InvokeNegatively(T)" /> method.</summary>
         /// <returns>The internal wrapped predicate.</returns>
+        /// <seealso cref="NegativePredicate" />
         public Func<T, Boolean> PositivePredicate => _positivePredicate;
 
         /// <summary>Gets the predicate that is a negation of the <see cref="PositivePredicate" />.</summary>
         /// <returns>A negation of the internal wrapped predicate.</returns>
         /// <remarks>
-        ///     <para>This is <c>delegate</c> merely encapsulates the <see cref="EvaluateNegation(T)" /> method.</para>
+        ///     <para>This is <c>delegate</c> merely encapsulates the <see cref="InvokeNegatively(T)" /> method.</para>
         /// </remarks>
+        /// <seealso cref="PositivePredicate" />
         public Func<T, Boolean> NegativePredicate => _negativePredicate;
 
         /// <summary>Creates a negative wrapper of the <c><paramref name="positivePredicate" /></c>.</summary>
-        /// <param name="positivePredicate">The predicate that is negated through the <see cref="EvaluateNegation(T)" /> method.</param>
+        /// <param name="positivePredicate">The predicate that is negated through the <see cref="InvokeNegatively(T)" /> method.</param>
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="positivePredicate" /></c> is <c>null</c>.</exception>
         public NegativePredicateWrapper(Func<T, Boolean> positivePredicate) : base()
         {
             _positivePredicate = positivePredicate ?? throw new ArgumentNullException(nameof(positivePredicate), PositivePredicateNullErrorMessage);
-            _negativePredicate = EvaluateNegation;
+            _negativePredicate = InvokeNegatively;
         }
 
         /// <summary>Creates a default negative wrapper of a positive predicate.</summary>
         /// <remarks>
-        ///     <para>The resulting <see cref="NegativePredicateWrapper{T}" /> shall always return <c>true</c> when evaluating parameters via the <see cref="EvaluateNegation(T)" /> method. In other words, the underlying <see cref="PositivePredicate" /> always evaluates parameters as <c>false</c>.</para>
+        ///     <para>The resulting <see cref="NegativePredicateWrapper{T}" /> shall always return <c>true</c> when evaluating parameters via the <see cref="InvokeNegatively(T)" /> method. In other words, the underlying <see cref="PositivePredicate" /> always evaluates parameters as <c>false</c>.</para>
         /// </remarks>
         public NegativePredicateWrapper() : this(DefaultPositivePredicate)
         {
@@ -74,7 +97,7 @@ namespace MagicText.Internal
         /// <remarks>
         ///     <para>The exceptions thrown by the <see cref="PositivePredicate" /> delegate call are not caught.</para>
         /// </remarks>
-        public Boolean EvaluateNegation(T arg) =>
+        public Boolean InvokeNegatively(T arg) =>
             !PositivePredicate(arg);
     }
 }

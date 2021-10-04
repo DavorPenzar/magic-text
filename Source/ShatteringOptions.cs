@@ -85,6 +85,8 @@ namespace MagicText
         /// <seealso cref="IgnoreEmptyLines" />
         public const Boolean DefaultIgnoreEmptyLines = false;
 
+        private static readonly IEqualityComparer<String> _defaultStringEqualityComparer;
+
         private static readonly String? _defaultLineEndToken;
         private static readonly String? _defaultEmptyLineToken;
 
@@ -108,12 +110,15 @@ namespace MagicText
         /// <returns>The default <see cref="IEqualityComparer{T}" /> of <see cref="String" />s to use in this library.</returns>
         /// <remarks>
         ///     <para>The default <see cref="IEqualityComparer{T}" /> of <see cref="String" />s is the standard library's default <see cref="EqualityComparer{T}.Default" />.</para>
+        ///     <para>Since the property is read-only and it represents an immutable <see cref="Object" />, it always returns the same reference (to the same <see cref="StringComparer" />).</para>
         /// </remarks>
-        public static IEqualityComparer<String?> DefaultStringEqualityComparer => EqualityComparer<String?>.Default;
+        public static IEqualityComparer<String> DefaultStringEqualityComparer => _defaultStringEqualityComparer;
 
         /// <summary>Initialises static fields.</summary>
         static ShatteringOptions()
         {
+            _defaultStringEqualityComparer = EqualityComparer<String>.Default;
+
             _defaultLineEndToken = Environment.NewLine;
             _defaultEmptyLineToken = String.Empty;
         }
@@ -134,7 +139,7 @@ namespace MagicText
         /// <seealso cref="M:MagicText.ShatteringOptions.Equals(System.Object)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
-        public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right, IEqualityComparer<String?> stringEqualityComparer) =>
+        public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right, IEqualityComparer<String> stringEqualityComparer) =>
             stringEqualityComparer is null ? throw new ArgumentNullException(nameof(stringEqualityComparer), StringEqualityComparerNullErrorMessage) :
                 left is null || right is null ? Object.ReferenceEquals(left, right) : left.Equals(right, stringEqualityComparer);
 
@@ -157,7 +162,7 @@ namespace MagicText
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public static Boolean Equals(ShatteringOptions? left, ShatteringOptions? right, StringComparison stringComparison)
         {
-            IEqualityComparer<String?> stringEqualityComparer;
+            IEqualityComparer<String> stringEqualityComparer;
             try
             {
                 stringEqualityComparer = StringComparer.FromComparison(stringComparison);
@@ -265,7 +270,7 @@ namespace MagicText
         [Display(Name = "Ignore empty tokens", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "Empty tokens", Order = 1)]
         [Editable(true, AllowInitialValue = true)]
         [DefaultValue(false)]
-        [DataMember]
+        [DataMember(IsRequired = true, Order = 1)]
         public Boolean IgnoreEmptyTokens
         {
             get => ignoreEmptyTokens;
@@ -289,7 +294,7 @@ namespace MagicText
         [Display(Name = "Ignore line ends", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "Line ends", Order = 2)]
         [Editable(true, AllowInitialValue = true)]
         [DefaultValue(false)]
-        [DataMember]
+        [DataMember(IsRequired = true, Order = 2)]
         public Boolean IgnoreLineEnds
         {
             get => ignoreLineEnds;
@@ -314,7 +319,7 @@ namespace MagicText
         [Display(Name = "Ignore empty lines", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "Empty lines", Order = 3)]
         [Editable(true, AllowInitialValue = true)]
         [DefaultValue(false)]
-        [DataMember]
+        [DataMember(IsRequired = true, Order = 3)]
         public Boolean IgnoreEmptyLines
         {
             get => ignoreEmptyLines;
@@ -340,7 +345,7 @@ namespace MagicText
         [DisplayFormat(ConvertEmptyStringToNull = false, HtmlEncode = true)]
         [Editable(true, AllowInitialValue = true)]
         [DefaultValue("\n")] // <-- this may be different from the `System.Environment.NewLine`
-        [DataMember]
+        [DataMember(IsRequired = false, Order = 4)]
         public String? LineEndToken
         {
             get => lineEndToken;
@@ -367,7 +372,7 @@ namespace MagicText
         [DisplayFormat(ConvertEmptyStringToNull = false, HtmlEncode = true)]
         [Editable(true, AllowInitialValue = true)]
         [DefaultValue("")]
-        [DataMember]
+        [DataMember(IsRequired = false, Order = 5)]
         public String? EmptyLineToken
         {
             get => emptyLineToken;
@@ -451,7 +456,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">The parameter <c><paramref name="stringEqualityComparer" /></c> is <c>null</c>.</exception>
         /// <seealso cref="M:MagicText.ShatteringOptions.GetHashCode(System.StringComparison)" />
         /// <seealso cref="M:MagicText.ShatteringOptions.GetHashCode()" />
-        public virtual Int32 GetHashCode(IEqualityComparer<String?> stringEqualityComparer)
+        public virtual Int32 GetHashCode(IEqualityComparer<String> stringEqualityComparer)
         {
             if (stringEqualityComparer is null)
             {
@@ -465,7 +470,7 @@ namespace MagicText
             hashCode = 31 * hashCode + IgnoreEmptyLines.GetHashCode();
             try
             {
-                hashCode = 31 * hashCode + stringEqualityComparer.GetHashCode(LineEndToken);
+                hashCode = 31 * hashCode + stringEqualityComparer.GetHashCode(LineEndToken!);
             }
             catch (ArgumentNullException) when (LineEndToken is null)
             {
@@ -473,7 +478,7 @@ namespace MagicText
             }
             try
             {
-                hashCode = 31 * hashCode + stringEqualityComparer.GetHashCode(EmptyLineToken);
+                hashCode = 31 * hashCode + stringEqualityComparer.GetHashCode(EmptyLineToken!);
             }
             catch (ArgumentNullException) when (EmptyLineToken is null)
             {
@@ -492,7 +497,7 @@ namespace MagicText
         /// <seealso cref="M:MagicText.ShatteringOptions.GetHashCode()" />
         public virtual Int32 GetHashCode(StringComparison stringComparison)
         {
-            IEqualityComparer<String?> stringEqualityComparer;
+            IEqualityComparer<String> stringEqualityComparer;
             try
             {
                 stringEqualityComparer = StringComparer.FromComparison(stringComparison);
@@ -528,7 +533,7 @@ namespace MagicText
         /// <seealso cref="M:MagicText.ShatteringOptions.Equals(MagicText.ShatteringOptions,MagicText.ShatteringOptions)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
-        public virtual Boolean Equals(ShatteringOptions? other, IEqualityComparer<String?> stringEqualityComparer) =>
+        public virtual Boolean Equals(ShatteringOptions? other, IEqualityComparer<String> stringEqualityComparer) =>
             stringEqualityComparer is null ?
                 throw new ArgumentNullException(nameof(stringEqualityComparer), StringEqualityComparerNullErrorMessage) :
                 Object.ReferenceEquals(this, other) ||
@@ -537,8 +542,8 @@ namespace MagicText
                         IgnoreEmptyTokens == other.IgnoreEmptyTokens &&
                         IgnoreLineEnds == other.IgnoreLineEnds &&
                         IgnoreEmptyLines == other.IgnoreEmptyLines &&
-                        stringEqualityComparer.Equals(LineEndToken, other.LineEndToken) &&
-                        stringEqualityComparer.Equals(EmptyLineToken, other.EmptyLineToken)
+                        stringEqualityComparer.Equals(LineEndToken!, other.LineEndToken!) &&
+                        stringEqualityComparer.Equals(EmptyLineToken!, other.EmptyLineToken!)
                     );
 
 #if !NETSTANDARD2_0
@@ -559,7 +564,7 @@ namespace MagicText
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public virtual Boolean Equals(ShatteringOptions? other, StringComparison stringComparison)
         {
-            IEqualityComparer<String?> stringEqualityComparer;
+            IEqualityComparer<String> stringEqualityComparer;
             try
             {
                 stringEqualityComparer = StringComparer.FromComparison(stringComparison);
@@ -604,7 +609,7 @@ namespace MagicText
         /// <seealso cref="M:MagicText.ShatteringOptions.Equals(MagicText.ShatteringOptions,MagicText.ShatteringOptions)" />
         /// <seealso cref="operator ==(ShatteringOptions?, ShatteringOptions?)" />
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
-        public virtual Boolean Equals(Object? obj, IEqualityComparer<String?> stringEqualityComparer)
+        public virtual Boolean Equals(Object? obj, IEqualityComparer<String> stringEqualityComparer)
         {
             ShatteringOptions? other;
             try
@@ -637,7 +642,7 @@ namespace MagicText
         /// <seealso cref="operator !=(ShatteringOptions?, ShatteringOptions?)" />
         public virtual Boolean Equals(Object? obj, StringComparison stringComparison)
         {
-            IEqualityComparer<String?> stringEqualityComparer;
+            IEqualityComparer<String> stringEqualityComparer;
             try
             {
                 stringEqualityComparer = StringComparer.FromComparison(stringComparison);
@@ -796,7 +801,7 @@ namespace MagicText
         public override String ToString() =>
             ToString(null);
 
-        /// <summary>Creates a new <see cref="Object" /> that is a copy of the current options.</summary>
+        /// <summary>Creates new <see cref="ShatteringOptions" /> that are a copy of the current options.</summary>
         /// <returns>The new <see cref="ShatteringOptions" /> with the same values.</returns>
         /// <seealso cref="ICloneable.Clone()" />
         /// <seealso cref="ShatteringOptions(ShatteringOptions)" />

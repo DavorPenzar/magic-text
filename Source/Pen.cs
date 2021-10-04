@@ -59,7 +59,7 @@ namespace MagicText
         ///     <para>The default <see cref="StringComparer" /> is <see cref="StringComparer.Ordinal" />.</para>
         ///     <para>Since the property is read-only and it represents an immutable <see cref="Object" />, it always returns the same reference (to the same <see cref="StringComparer" />).</para>
         /// </remarks>
-        protected static StringComparer DefaultComparer => GlobalDefaults.StringComparer;
+        public static StringComparer DefaultComparer => GlobalDefaults.StringComparer;
 
         /// <summary>Gets the internal locking object of the <see cref="Pen" /> class.</summary>
         /// <returns>The internal locking object.</returns>
@@ -123,7 +123,7 @@ namespace MagicText
 
             unchecked
             {
-                randomSeed = Math.Max((Int32)((1073741827L * DateTime.UtcNow.Ticks + 1073741789L) & (Int64)Int32.MaxValue), 1);
+                randomSeed = Math.Max(~((Int32)((1073741827L * DateTime.UtcNow.Ticks + 1073741789L) & (Int64)Int32.MaxValue)), 1);
             }
         }
 
@@ -1472,10 +1472,18 @@ namespace MagicText
             info.AddValue(nameof(AllSentinels), AllSentinels);
         }
 
+        /// <summary>Creates a new <see cref="Pen" /> that is a copy of the current pen.</summary>
+        /// <returns>The new <see cref="Pen" /> with the same values.</returns>
+        /// <seealso cref="ICloneable.Clone()" />
+        /// <seealso cref="Pen(Pen)" />
+        public virtual Pen Clone() =>
+            new Pen(this);
+
         /// <summary>Creates a new <see cref="Object" /> that is a copy of the current pen.</summary>
         /// <returns>The new <see cref="Pen" /> with the same values.</returns>
+        /// <seealso cref="Clone()" />
         /// <seealso cref="Pen(Pen)" />
-        public virtual Object Clone() =>
-            new Pen(this);
+        Object ICloneable.Clone() =>
+            Clone();
     }
 }
