@@ -270,7 +270,7 @@ namespace MagicText
         [Display(Name = "Ignore empty tokens", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "Empty tokens", Order = 1)]
         [Editable(true, AllowInitialValue = true)]
         [DefaultValue(false)]
-        [DataMember(IsRequired = true, Order = 1)]
+        [DataMember(Order = 1)]
         public Boolean IgnoreEmptyTokens
         {
             get => ignoreEmptyTokens;
@@ -294,7 +294,7 @@ namespace MagicText
         [Display(Name = "Ignore line ends", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "Line ends", Order = 2)]
         [Editable(true, AllowInitialValue = true)]
         [DefaultValue(false)]
-        [DataMember(IsRequired = true, Order = 2)]
+        [DataMember(Order = 2)]
         public Boolean IgnoreLineEnds
         {
             get => ignoreLineEnds;
@@ -319,7 +319,7 @@ namespace MagicText
         [Display(Name = "Ignore empty lines", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "Empty lines", Order = 3)]
         [Editable(true, AllowInitialValue = true)]
         [DefaultValue(false)]
-        [DataMember(IsRequired = true, Order = 3)]
+        [DataMember(Order = 3)]
         public Boolean IgnoreEmptyLines
         {
             get => ignoreEmptyLines;

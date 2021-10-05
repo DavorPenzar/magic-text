@@ -36,7 +36,7 @@ namespace MagicText.Internal
         ///     <para>The conversion creates and returns a new <see cref="NegativePredicateWrapper{T}" /> around the <c><paramref name="func" /></c>.</para>
         /// </remarks>
         [return: MaybeNull, NotNullIfNotNull("func")]
-        public static explicit operator NegativePredicateWrapper<T>(Func<T, Boolean> func) =>
+        public static explicit operator NegativePredicateWrapper<T>([AllowNull] Func<T, Boolean> func) =>
             func is null ? null! : new NegativePredicateWrapper<T>(func);
 
         /// <summary>Retrieves the negative of the predicate negated by a <see cref="NegativePredicateWrapper{T}" />.</summary>
@@ -46,7 +46,7 @@ namespace MagicText.Internal
         ///     <para>The conversion is essentially the same as simply using the <see cref="NegativePredicate" /> property of the <c><paramref name="negativePredicateWrapper" /></c>.</para>
         /// </remarks>
         [return: MaybeNull, NotNullIfNotNull("negativePredicateWrapper")]
-        public static implicit operator Func<T, Boolean>(NegativePredicateWrapper<T> negativePredicateWrapper) =>
+        public static implicit operator Func<T, Boolean>([AllowNull] NegativePredicateWrapper<T> negativePredicateWrapper) =>
             negativePredicateWrapper is null ? null! : negativePredicateWrapper.NegativePredicate;
 
         /// <summary>Always evaluates the argument as <c>false</c>.</summary>

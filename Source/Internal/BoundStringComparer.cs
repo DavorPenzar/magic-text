@@ -26,7 +26,7 @@ namespace MagicText.Internal
         ///     <para>Even if the <c><paramref name="string" /></c> is <c>null</c>, the conversion <strong>does not</strong> result in a <c>null</c> reference. Rather, a <see cref="BoundStringComparer" /> bound to a <c>null</c> <see cref="System.String" /> is returned.</para>
         /// </remarks>
         [return: NotNull]
-        public static explicit operator BoundStringComparer(System.String @string) =>
+        public static explicit operator BoundStringComparer([AllowNull] System.String @string) =>
             new BoundStringComparer(@string);
 
         /// <summary>Retrieves the <see cref="System.String" /> to which a <see cref="BoundStringComparer" /> is bound.</summary>
@@ -35,7 +35,7 @@ namespace MagicText.Internal
         ///     <para>The conversion is essentially the same as simply using the <see cref="String" /> property of the <c><paramref name="boundStringComparer" /></c></para>
         /// </remarks>
         [return: MaybeNull]
-        public static explicit operator System.String(BoundStringComparer boundStringComparer) =>
+        public static explicit operator System.String([AllowNull] BoundStringComparer boundStringComparer) =>
             boundStringComparer?.String!;
 
         private readonly StringComparer _comparer;
