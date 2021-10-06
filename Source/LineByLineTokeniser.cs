@@ -109,9 +109,9 @@ namespace MagicText
         /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, String, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, Stream, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean)" />
+        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
+        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
+        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
         /// <seealso cref="ShatteringOptions" />
         /// <seealso cref="TokeniserExtensions" />
         public IEnumerable<String?> Shatter(TextReader input, ShatteringOptions? options = null)
@@ -196,7 +196,7 @@ namespace MagicText
         ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, if the <c><paramref name="input" /></c> is a <see cref="StreamReader" />, data having already been read from the underlying <see cref="Stream" /> may be irrecoverable when cancelling the operation.</para>
         ///     <para>The enumeration and, consequently, the shattering operation may be cancelled via the <see cref="TaskAsyncEnumerableExtensions.WithCancellation{T}(IAsyncEnumerable{T}, CancellationToken)" /> extension method as the parameter <c><paramref name="cancellationToken" /></c> is set with the <see cref="EnumeratorCancellationAttribute" /> attribute.</para>
         ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> is desirable as it may optimise the asynchronous shattering process. However, in some cases only the original context might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus <c><paramref name="continueTasksOnCapturedContext" /></c> should be set to <c>true</c> to avoid errors.</para>
-        ///     <para>The returned asynchronous enumerable is merely an asynchronous query for enumerating tokens (also known as <em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
+        ///     <para>The returned asynchronous enumerable is merely an asynchronous query for enumerating tokens (also known as <em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean, Boolean)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
         ///     <para>The exceptions thrown by the <see cref="TextReader.ReadLineAsync()" /> method call are not caught.</para>
         /// </remarks>
         /// <seealso cref="Shatter(TextReader, ShatteringOptions?)" />
@@ -204,9 +204,9 @@ namespace MagicText
         /// <seealso cref="TokeniserExtensions.ShatterAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean)" />
         /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, String, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, Stream, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean)" />
+        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
+        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
+        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
         /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, String, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, Stream, ShatteringOptions?)" />

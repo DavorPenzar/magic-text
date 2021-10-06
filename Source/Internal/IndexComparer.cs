@@ -25,7 +25,7 @@ namespace MagicText.Internal
         ///     <para>The default <see cref="StringComparer" /> is <see cref="StringComparer.Ordinal" />.</para>
         ///     <para>Since the property is read-only and it represents an immutable <see cref="Object" />, it always returns the same reference (to the same <see cref="StringComparer" />).</para>
         /// </remarks>
-        protected static StringComparer DefaultComparer => GlobalDefaults.StringComparer;
+        private static StringComparer DefaultComparer => GlobalDefaults.StringComparer;
 
         /// <summary>Gets an empty list of reference tokens.</summary>
         /// <returns>The internal static empty list of reference tokens.</returns>
@@ -33,7 +33,7 @@ namespace MagicText.Internal
         ///     <para>This property is intended for internal purposes only, to be used in <em>default</em> cases.</para>
         ///     <para>Since the property is read-only and it represents a read-only collection of immutable elements (an <see cref="IReadOnlyList{T}" /> of <see cref="String" />s), it always returns the same reference (to the same <see cref="Object" />).</para>
         /// </remarks>
-        protected static IReadOnlyList<String?> EmptyTokenList => _emptyTokenList;
+        private static IReadOnlyList<String?> EmptyTokenList => _emptyTokenList;
 
         /// <summary>Initialises static fields.</summary>
         static IndexComparer()
@@ -49,7 +49,7 @@ namespace MagicText.Internal
 
         /// <summary>Gets the <see cref="StringComparer" /> used by the comparer for comparing tokens.</summary>
         /// <returns>The internal <see cref="StringComparer" />.</returns>
-        protected StringComparer Comparer => _comparer;
+        private StringComparer Comparer => _comparer;
 
         /// <summary>Gets the reference tokens used by the comparer for comparing indices.</summary>
         /// <returns>The reference tokens.</returns>
