@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ namespace MagicText
     ///     <para>It is strongly advised to implement both <see cref="Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods to return non-executed queries for enumerating tokens (also known as <em>deferred execution</em>)—moreover, the extension methods from <see cref="TokeniserExtensions" /> <em>expect</em> this. Such queries would allow simultaneous reading and shattering operations from the input, which might be useful when reading the input text from an <em>infinite</em> source (e. g. from <see cref="Console.In" /> or a network channel). Contrarily, the extension methods such as <see cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" /> and <see cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean, Boolean)" /> are provided to extract tokens into a fully built container, which is useful when the tokens are read from a finite immutable source (e. g. a <see cref="String" /> or a read-only text file).</para>
     ///     <para>When both <see cref="Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods are implemented (none of them throws <see cref="NotImplementedException" />), they should ultimately return the same enumerable of tokens if called with the same parameters. For example, to implement the <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method from the <see cref="Shatter(TextReader, ShatteringOptions?)" /> method's code, substitute all <see cref="TextReader.Read(Char[], Int32, Int32)" />, <see cref="TextReader.ReadBlock(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLine()" />, <see cref="TextReader.ReadToEnd()" /> etc. method calls with <c>await</c> <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadBlockAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLineAsync()" />, <see cref="TextReader.ReadToEndAsync()" /> etc. method calls.</para>
     /// </remarks>
+    /// <seealso cref="TokeniserExtensions" />
     [CLSCompliant(true)]
     public interface ITokeniser
     {
@@ -26,14 +28,18 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
         /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, String, ShatteringOptions?)" />
+        /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, Stream, Encoding?, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, Stream, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.ShatterAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean)" />
+        /// <seealso cref="TokeniserExtensions.ShatterAsync(ITokeniser, Stream, Encoding?, ShatteringOptions?, CancellationToken, Boolean)" />
         /// <seealso cref="TokeniserExtensions.ShatterAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean)" />
         /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, String, ShatteringOptions?)" />
+        /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, Stream, Encoding?, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, Stream, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
         /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
+        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, Stream, Encoding?, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
         /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
         /// <seealso cref="ShatteringOptions" />
         /// <seealso cref="TokeniserExtensions" />
@@ -57,14 +63,18 @@ namespace MagicText
         /// </remarks>
         /// <seealso cref="Shatter(TextReader, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.ShatterAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean)" />
+        /// <seealso cref="TokeniserExtensions.ShatterAsync(ITokeniser, Stream, Encoding?, ShatteringOptions?, CancellationToken, Boolean)" />
         /// <seealso cref="TokeniserExtensions.ShatterAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean)" />
         /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, String, ShatteringOptions?)" />
+        /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, Stream, Encoding?, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, Stream, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
         /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
+        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, Stream, Encoding?, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
         /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
         /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, String, ShatteringOptions?)" />
+        /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, Stream, Encoding?, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, Stream, ShatteringOptions?)" />
         /// <seealso cref="TokeniserExtensions" />
         /// <seealso cref="ShatteringOptions" />
