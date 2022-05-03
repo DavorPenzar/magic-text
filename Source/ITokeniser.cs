@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,73 +10,38 @@ namespace MagicText
     /// <summary>Provides methods for tokenising (<em>shattering</em> into tokens) input texts.</summary>
     /// <remarks>
     ///     <h3>Notes to Implementers</h3>
-    ///     <para>It is strongly advised to implement both <see cref="Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods to return non-executed queries for enumerating tokens (also known as <em>deferred execution</em>)—moreover, the extension methods from <see cref="TokeniserExtensions" /> <em>expect</em> this. Such queries would allow simultaneous reading and shattering operations from the input, which might be useful when reading the input text from an <em>infinite</em> source (e. g. from <see cref="Console.In" /> or a network channel). Contrarily, the extension methods such as <see cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" /> and <see cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean, Boolean)" /> are provided to extract tokens into a fully built container, which is useful when the tokens are read from a finite immutable source (e. g. a <see cref="String" /> or a read-only text file).</para>
-    ///     <para>When both <see cref="Shatter(TextReader, ShatteringOptions?)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> methods are implemented (none of them throws <see cref="NotImplementedException" />), they should ultimately return the same enumerable of tokens if called with the same parameters. For example, to implement the <see cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" /> method from the <see cref="Shatter(TextReader, ShatteringOptions?)" /> method's code, substitute all <see cref="TextReader.Read(Char[], Int32, Int32)" />, <see cref="TextReader.ReadBlock(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLine()" />, <see cref="TextReader.ReadToEnd()" /> etc. method calls with <c>await</c> <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadBlockAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLineAsync()" />, <see cref="TextReader.ReadToEndAsync()" /> etc. method calls.</para>
+    ///     <para>It is strongly advised to implement both <see cref="Shatter(TextReader, ShatteringOptions)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> methods to return non-executed queries for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>)—moreover, the extension methods from <see cref="TokeniserExtensions" /> <em>expect</em> this. Such queries would allow simultaneous reading and shattering operations from the input, which might be useful when reading the input text from an <em>infinite</em> source (e. g. from <see cref="Console.In" /> or a network channel). Contrarily, the extension methods such as <see cref="TokeniserExtensions.ShatterToArray(ITokeniser, TextReader, ShatteringOptions)" /> and <see cref="TokeniserExtensions.ShatterToArrayAsync(ITokeniser, TextReader, ShatteringOptions, Boolean, Boolean, Action{OperationCanceledException}, CancellationToken)" /> are provided to extract tokens into a fully built container, which is useful when the tokens are read from a finite immutable source (e. g. a <see cref="String" /> or a read-only text file).</para>
+    ///     <para>When both <see cref="Shatter(TextReader, ShatteringOptions)" /> and <see cref="ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> methods are implemented (none of them throws <see cref="NotImplementedException" />), they should ultimately return the same enumerable of tokens if called with the same parameters. For example, to implement the <see cref="ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method from the <see cref="Shatter(TextReader, ShatteringOptions)" /> method's code, substitute all <see cref="TextReader.Read(Char[], Int32, Int32)" />, <see cref="TextReader.ReadBlock(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLine()" />, <see cref="TextReader.ReadToEnd()" /> etc. method calls with awaited <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadBlockAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLineAsync()" />, <see cref="TextReader.ReadToEndAsync()" /> etc. method calls.</para>
     /// </remarks>
-    /// <seealso cref="TokeniserExtensions" />
     [CLSCompliant(true)]
     public interface ITokeniser
     {
-        /// <summary>Shatters the text read from the <c><paramref name="input" /></c> into tokens.</summary>
+        /// <summary>Shatters text read from the <c><paramref name="input" /></c> into tokens.</summary>
         /// <param name="input">The <see cref="TextReader" /> from which the input text is read.</param>
-        /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) are used.</param>
-        /// <returns>The enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="input" /></c> is <c>null</c>.</exception>
+        /// <param name="options">The options to control the shattering behaviour. If <c>null</c>, the defaults are used (<see cref="ShatteringOptions.Default" />)</param>
+        /// <returns>An enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
+        /// <exception cref="ArgumentNullException">The <c><paramref name="input" /></c> parameter is <c>null</c>.</exception>
         /// <remarks>
-        ///     <para>The returned enumerable might merely be a query for enumerating tokens (also known as <em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
+        ///     <para>The returned enumerable might merely be a query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToArray(ITokeniser, TextReader, ShatteringOptions)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
         /// </remarks>
-        /// <seealso cref="ShatterAsync(TextReader, ShatteringOptions?, CancellationToken, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, String, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, Stream, Encoding?, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, Stream, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.ShatterAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterAsync(ITokeniser, Stream, Encoding?, ShatteringOptions?, CancellationToken, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, String, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, Stream, Encoding?, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, Stream, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, Stream, Encoding?, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
-        /// <seealso cref="ShatteringOptions" />
-        /// <seealso cref="TokeniserExtensions" />
         public IEnumerable<String?> Shatter(TextReader input, ShatteringOptions? options = null);
 
-        /// <summary>Shatters the text read from the <c><paramref name="input" /></c> into tokens asynchronously.</summary>
+        /// <summary>Shatters text read from the <c><paramref name="input" /></c> into tokens asynchronously.</summary>
         /// <param name="input">The <see cref="TextReader" /> from which the input text is read.</param>
-        /// <param name="options">Shattering options. If <c>null</c>, defaults (<see cref="ShatteringOptions.Default" />) should be used.</param>
-        /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
-        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s (e. g. the <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLineAsync()" /> and <see cref="IAsyncEnumerator{T}.MoveNextAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> method, the <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method etc.).</param>
-        /// <returns>The asynchronous enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="input" /></c> is <c>null</c>.</exception>
+        /// <param name="options">The options to control the shattering behaviour. If <c>null</c>, the defaults are used (<see cref="ShatteringOptions.Default" />)</param>
+        /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s and <see cref="ValueTask" />s (e. g. the <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLineAsync()" /> and <see cref="IAsyncEnumerator{T}.MoveNextAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> method, the <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method etc.).</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the shattering operation.</param>
+        /// <returns>An asynchronous enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
+        /// <exception cref="ArgumentNullException">The <c><paramref name="input" /></c> parameter is <c>null</c>.</exception>
         /// <exception cref="OperationCanceledException">The operation is cancelled via the <c><paramref name="cancellationToken" /></c>.</exception>
         /// <remarks>
-        ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, if the <c><paramref name="input" /></c> is a <see cref="StreamReader" />, data having already been read from the underlying <see cref="Stream" /> may be irrecoverable when cancelling the operation.</para>
-        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> is desirable as it may optimise the asynchronous shattering process. However, in some cases only the original context might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus <c><paramref name="continueTasksOnCapturedContext" /></c> should be set to <c>true</c> to avoid errors.</para>
-        ///     <para>The returned asynchronous enumerable might merely be an asynchronous query for enumerating tokens (also known as <em>deferred execution</em>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean, Boolean)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
+        ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, if the <c><paramref name="input" /></c> is a <see cref="StreamReader" />, the data having already been read from the underlying <see cref="Stream" /> may be irrecoverable after cancelling the operation.</para>
+        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <see cref="ITokeniser" /> instance's logic might be <see cref="SynchronizationContext" /> dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
+        ///     <para>The returned asynchronous enumerable might merely be an asynchronous query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToArrayAsync(ITokeniser, TextReader, ShatteringOptions, Boolean, Boolean, Action{OperationCanceledException}, CancellationToken)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
         ///
         ///     <h3>Notes to Implementers</h3>
-        ///     <para>If the method is implemented using iterators, the parameter <c><paramref name="cancellationToken" /></c> should be set with the <see cref="EnumeratorCancellationAttribute" /> attribute to support cancellation via the <see cref="TaskAsyncEnumerableExtensions.WithCancellation{T}(IAsyncEnumerable{T}, CancellationToken)" /> extension method. Similarly otherwise, of course, the parameter may be passed to the underlying <see cref="IAsyncEnumerable{T}" /> using the same extension method.</para>
+        ///     <para>When implementing the method using asynchronous iterators, the <c><paramref name="cancellationToken" /></c> parameter should be set with the <see cref="EnumeratorCancellationAttribute" /> attribute to support cancellation via the <see cref="TaskAsyncEnumerableExtensions.WithCancellation{T}(IAsyncEnumerable{T}, CancellationToken)" /> extension method.</para>
         /// </remarks>
-        /// <seealso cref="Shatter(TextReader, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.ShatterAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterAsync(ITokeniser, Stream, Encoding?, ShatteringOptions?, CancellationToken, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, String, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, Stream, Encoding?, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.Shatter(ITokeniser, Stream, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, TextReader, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, String, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, Stream, Encoding?, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToListAsync(ITokeniser, Stream, ShatteringOptions?, CancellationToken, Boolean, Boolean)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, TextReader, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, String, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, Stream, Encoding?, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions.ShatterToList(ITokeniser, Stream, ShatteringOptions?)" />
-        /// <seealso cref="TokeniserExtensions" />
-        /// <seealso cref="ShatteringOptions" />
-        public IAsyncEnumerable<String?> ShatterAsync(TextReader input, ShatteringOptions? options = null, CancellationToken cancellationToken = default, Boolean continueTasksOnCapturedContext = false);
+        public IAsyncEnumerable<String?> ShatterAsync(TextReader input, ShatteringOptions? options = null, Boolean continueTasksOnCapturedContext = false, CancellationToken cancellationToken = default);
     }
 }

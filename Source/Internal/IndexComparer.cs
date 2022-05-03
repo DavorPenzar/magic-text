@@ -1,3 +1,4 @@
+using MagicText.Internal.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,43 +7,14 @@ namespace MagicText.Internal
 {
     /// <summary>Provides methods for <see cref="Int32" /> comparison as comparing indices of the <see cref="Pen.Context" /> tokens.</summary>
     /// <remarks>
-    ///     <para>Only the reference to the list <c>tokens</c> passed to the constructor is stored by the comparer in the <see cref="Tokens" /> property. Changing the content of the enumerable externally, or even its order, results in inconsistent behaviour of comparison via the <see cref="IComparer{T}.Compare(T, T)" /> method.</para>
+    ///     <para>Only the reference to the list <c>tokens</c> passed to the constructor is stored by the comparer in the <see cref="Tokens" /> property. Changing the content of the enumerable externally, or even its order, results in inconsistent behaviour of comparison via the <see cref="Compare(Int32, Int32)" /> method.</para>
     /// </remarks>
     internal sealed class IndexComparer : Object, IComparer<Int32>, IEqualityComparer<Int32>, IComparer, IEqualityComparer
     {
         private const string ComparerNullErrorMessage = "String comparer cannot be null.";
         private const string TokensNullErrorMessage = "Token list cannot be null.";
-#if !NETSTANDARD2_0
         private const string ComparisonNotSupportedErrorMessage = "The string comparison type passed in is currently not supported.";
-#endif // NETSTANDARD2_0
         private const string ObjectNotInt32ErrorMessage = "Object must be a 32-bit integer.";
-
-        private static readonly IReadOnlyList<String?> _emptyTokenList;
-
-        /// <summary>Gets the default <see cref="StringComparer" /> to use.</summary>
-        /// <returns>The default <see cref="StringComparer" /> to use in this library.</returns>
-        /// <remarks>
-        ///     <para>The default <see cref="StringComparer" /> is <see cref="StringComparer.Ordinal" />.</para>
-        ///     <para>Since the property is read-only and it represents an immutable <see cref="Object" />, it always returns the same reference (to the same <see cref="StringComparer" />).</para>
-        /// </remarks>
-        private static StringComparer DefaultComparer => GlobalDefaults.StringComparer;
-
-        /// <summary>Gets an empty list of reference tokens.</summary>
-        /// <returns>The internal static empty list of reference tokens.</returns>
-        /// <remarks>
-        ///     <para>This property is intended for internal purposes only, to be used in <em>default</em> cases.</para>
-        ///     <para>Since the property is read-only and it represents a read-only collection of immutable elements (an <see cref="IReadOnlyList{T}" /> of <see cref="String" />s), it always returns the same reference (to the same <see cref="Object" />).</para>
-        /// </remarks>
-        private static IReadOnlyList<String?> EmptyTokenList => _emptyTokenList;
-
-        /// <summary>Initialises static fields.</summary>
-        static IndexComparer()
-        {
-            List<String?> emptyTokenList = new List<String?>();
-            emptyTokenList.TrimExcess();
-
-            _emptyTokenList = emptyTokenList.AsReadOnly();
-        }
 
         private readonly StringComparer _comparer;
         private readonly IReadOnlyList<String?> _tokens;
@@ -52,30 +24,34 @@ namespace MagicText.Internal
         private StringComparer Comparer => _comparer;
 
         /// <summary>Gets the reference tokens used by the comparer for comparing indices.</summary>
-        /// <returns>The reference tokens.</returns>
+        /// <returns>The internal reference tokens.</returns>
         /// <remarks>
-        ///     <para>If integers <c>x</c>, <c>y</c> are legal indices of the <see cref="Tokens" />, they are compared by comparing <c><see cref="Tokens" />[x]</c> and <c><see cref="Tokens" />[y]</c> using the <see cref="Comparer" /> in the <see cref="Compare(Int32, Int32)" /> method. Ties are resolved by comparing <c><see cref="Tokens" />[x + 1]</c> and <c><see cref="Tokens" />[y + 1]</c>, and so on; the first index to reach the end of <see cref="Tokens" /> is considered less if all prior tokens compared equal.</para>
+        ///     <para>If integers <c>x</c>, <c>y</c> are legal indices of the <see cref="Tokens" />, they are compared by comparing <c><see cref="Tokens" />[x]</c> and <c><see cref="Tokens" />[y]</c> using the <see cref="Comparer" /> in the <see cref="Compare(Int32, Int32)" /> method. Ties are resolved by comparing <c><see cref="Tokens" />[x + 1]</c> and <c><see cref="Tokens" />[y + 1]</c>, and so on; the first index to reach the end of <see cref="Tokens" /> is considered smaller if all prior tokens compared equal.</para>
         /// </remarks>
-        /// <seealso cref="Comparer" />
         public IReadOnlyList<String?> Tokens => _tokens;
 
         /// <summary>Creates a comparer.</summary>
-        /// <param name="comparer">The <see cref="StringComparer" /> used to compare tokens.</param>
+        /// <param name="comparer">The <see cref="StringComparer" /> used for comparing tokens.</param>
         /// <param name="tokens">The reference tokens. The indices shall be compared by comparing elements of the <c><paramref name="tokens" /></c>.</param>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="comparer" /></c> is <c>null</c>. The parameter <c><paramref name="tokens" /></c> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">
+        ///     <para>Either:</para>
+        ///     <list type="number">
+        ///         <item>the <c><paramref name="comparer" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokens" /></c> parameter is <c>null</c>.</item>
+        ///     </list>
+        /// </exception>
         public IndexComparer(StringComparer comparer, IReadOnlyList<String?> tokens) : base()
         {
             _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer), ComparerNullErrorMessage);
             _tokens = tokens ?? throw new ArgumentNullException(nameof(tokens), TokensNullErrorMessage);
         }
 
-#if !NETSTANDARD2_0
         /// <summary>Creates a comparer.</summary>
-        /// <param name="comparison">One of the enumeration values that specifies how tokens should be compared. The <see cref="StringComparer" /> specified by the <c><paramref name="comparison" /></c> is used to compare tokens.</param>
+        /// <param name="comparisonType">One of the enumeration values that specifies how tokens should be compared.</param>
         /// <param name="tokens">The reference tokens. The indices shall be compared by comparing elements of the <c><paramref name="tokens" /></c>.</param>
-        /// <exception cref="ArgumentNullException">The parameter <c><paramref name="tokens" /></c> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentException">The parameter <c><paramref name="comparison" /></c> is not a <see cref="StringComparison" /> value.</exception>
-        public IndexComparer(StringComparison comparison, IReadOnlyList<String?> tokens) : base()
+        /// <exception cref="ArgumentNullException">The <c><paramref name="tokens" /></c> parameter is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">The <c><paramref name="comparisonType" /></c> is not a supported <see cref="StringComparison" /> value.</exception>
+        public IndexComparer(StringComparison comparisonType, IReadOnlyList<String?> tokens) : base()
         {
             if (tokens is null)
             {
@@ -84,38 +60,29 @@ namespace MagicText.Internal
 
             try
             {
-                _comparer = StringComparer.FromComparison(comparison);
+#if NETSTANDARD2_0
+                _comparer = StringComparerExtensions.GetComparerFromComparison(comparisonType);
+#else
+                _comparer = StringComparer.FromComparison(comparisonType);
+#endif // NETSTANDARD2_0
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException exception)
             {
-                throw new ArgumentException(ComparisonNotSupportedErrorMessage, nameof(comparison), ex);
+                throw new ArgumentException(ComparisonNotSupportedErrorMessage, nameof(comparisonType), exception);
             }
             _tokens = tokens;
-        }
-#endif // NETSTANDARD2_0
-
-        /// <summary>Creates a default comparer.</summary>
-        /// <remarks>
-        ///     <para>The <see cref="StringComparer" /> (<see cref="Comparer" />) is set to the <see cref="StringComparer.Ordinal" /> and the reference tokens (<see cref="Tokens" />) are set to an empty list.</para>
-        /// </remarks>
-        public IndexComparer() : this(DefaultComparer, EmptyTokenList)
-        {
         }
 
         /// <summary>Returns the hash code for the <c><paramref name="obj" /></c>.</summary>
         /// <param name="obj">The index for which the hash code is to be returned.</param>
         /// <returns>The hash code for the <c><paramref name="obj" /></c>.</returns>
-        /// <seealso cref="Tokens" />
-        /// <seealso cref="GetHashCode(Object?)" />
         public Int32 GetHashCode(Int32 obj) =>
             obj.GetHashCode();
 
         /// <summary>Returns the hash code for the <c><paramref name="obj" /></c>.</summary>
         /// <param name="obj">The index for which the hash code is to be returned.</param>
         /// <returns>The hash code for the <c><paramref name="obj" /></c>.</returns>
-        /// <exception cref="ArgumentException">The parameter <c><paramref name="obj" /></c> is not an <see cref="Int32" />.</exception>
-        /// <seealso cref="Tokens" />
-        /// <seealso cref="GetHashCode(Int32)" />
+        /// <exception cref="ArgumentException">The <c><paramref name="obj" /></c> parameter is not an <see cref="Int32" />.</exception>
         public Int32 GetHashCode(Object? obj) =>
             obj is Int32 objInt ? GetHashCode(objInt) : throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(obj));
 
@@ -123,10 +90,6 @@ namespace MagicText.Internal
         /// <param name="x">The first index to compare.</param>
         /// <param name="y">The second index to compare.</param>
         /// <returns>If <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
-        /// <seealso cref="Tokens" />
-        /// <seealso cref="Equals(Object?, Object?)" />
-        /// <seealso cref="Compare(Int32, Int32)" />
-        /// <seealso cref="Compare(Object?, Object?)" />
         public Boolean Equals(Int32 x, Int32 y) =>
             (x == y);
 
@@ -134,11 +97,13 @@ namespace MagicText.Internal
         /// <param name="x">The first <see cref="Object" /> to compare.</param>
         /// <param name="y">The second <see cref="Object" /> to compare.</param>
         /// <returns>If <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal as indices, <c>true</c>; <c>false</c> otherwise.</returns>
-        /// <exception cref="ArgumentException">The parameter <c><paramref name="x" /></c> is not an <see cref="Int32" />. The parameter <c><paramref name="x" /></c> is not an <see cref="Int32" />.</exception>
-        /// <seealso cref="Tokens" />
-        /// <seealso cref="Equals(Int32, Int32)" />
-        /// <seealso cref="Compare(Object?, Object?)" />
-        /// <seealso cref="Compare(Int32, Int32)" />
+        /// <exception cref="ArgumentException">
+        ///     <para>Either:</para>
+        ///     <list type="number">
+        ///         <item>the <c><paramref name="x" /></c> parameter is not an <see cref="Int32" /> or</item>
+        ///         <item>the <c><paramref name="y" /></c> parameter is not an <see cref="Int32" />.</item>
+        ///     </list>
+        /// </exception>
         public new Boolean Equals(Object? x, Object? y)
         {
             if (!(x is Int32 xInt))
@@ -158,12 +123,8 @@ namespace MagicText.Internal
         /// <param name="y">The second index to compare.</param>
         /// <returns>If <c><paramref name="x" /></c> is less than <c><paramref name="y" /></c>, a value less than 0; if <c><paramref name="x" /></c> is greater than <c><paramref name="y" /></c>, a value greater than 0; if <c><paramref name="x" /></c> is equal to <c><paramref name="y" /></c>, 0.</returns>
         /// <remarks>
-        ///     <para>See the <see cref="Tokens" /> property's description to understand how (legal) indices are compared. If any of <c><paramref name="x" /></c> and <c><paramref name="y" /></c> is out of range as an index of the <see cref="Tokens" />, simply the <see cref="Int32.CompareTo(Int32)" /> method is used for comparison, although in the opposite order (i. e. the greater value shall be considered the less).</para>
+        ///     <para>See the <see cref="Tokens" /> property's description to understand how (legal) indices are compared. If any of <c><paramref name="x" /></c> and <c><paramref name="y" /></c> is out of range as an index of the <see cref="Tokens" />, simply the <see cref="Int32.CompareTo(Int32)" /> method is used for comparison, although in the opposite order (i. e. the greater value shall be considered smaller).</para>
         /// </remarks>
-        /// <seealso cref="Tokens" />
-        /// <seealso cref="Compare(Object?, Object?)" />
-        /// <seealso cref="Equals(Int32, Int32)" />
-        /// <seealso cref="Equals(Object?, Object?)" />
         public Int32 Compare(Int32 x, Int32 y)
         {
             // Compare the indices. If not equal, compare the tokens (if possible).
@@ -201,14 +162,16 @@ namespace MagicText.Internal
         /// <param name="x">The first <see cref="Object" /> to compare.</param>
         /// <param name="y">The second <see cref="Object" /> to compare.</param>
         /// <returns>If <c><paramref name="x" /></c> as an index is less than <c><paramref name="y" /></c> as an index, a value less than 0; if <c><paramref name="x" /></c> as an index is greater than <c><paramref name="y" /></c> as an index, a value greater than 0; if <c><paramref name="x" /></c> as an index is equal to <c><paramref name="y" /></c> as an index, 0.</returns>
-        /// <exception cref="ArgumentException">The parameter <c><paramref name="x" /></c> is not an <see cref="Int32" />. The parameter <c><paramref name="x" /></c> is not an <see cref="Int32" />.</exception>
+        /// <exception cref="ArgumentException">
+        ///     <para>Either:</para>
+        ///     <list type="number">
+        ///         <item>the <c><paramref name="x" /></c> parameter is not an <see cref="Int32" /> or</item>
+        ///         <item>the <c><paramref name="y" /></c> parameter is not an <see cref="Int32" />.</item>
+        ///     </list>
+        /// </exception>
         /// <remarks>
-        ///     <para>See the <see cref="Tokens" /> property's description to understand how (legal) indices are compared. If any of <c><paramref name="x" /></c> and <c><paramref name="y" /></c> is out of range as an index of the <see cref="Tokens" />, simply the <see cref="Int32.CompareTo(Int32)" /> method is used for comparison, although in the opposite order (i. e. the greater value shall be considered the less).</para>
+        ///     <para>See the <see cref="Tokens" /> property's description to understand how (legal) indices are compared. If any of <c><paramref name="x" /></c> and <c><paramref name="y" /></c> is out of range as an index of the <see cref="Tokens" />, simply the <see cref="Int32.CompareTo(Int32)" /> method is used for comparison, although in the opposite order (i. e. the greater value shall be considered the smaller).</para>
         /// </remarks>
-        /// <seealso cref="Tokens" />
-        /// <seealso cref="Compare(Int32, Int32)" />
-        /// <seealso cref="Equals(Object?, Object?)" />
-        /// <seealso cref="Equals(Int32, Int32)" />
         public Int32 Compare(Object? x, Object? y)
         {
             if (!(x is Int32 xInt))

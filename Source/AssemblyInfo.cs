@@ -1,9 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-[assembly: CLSCompliant(true)]
-
-[assembly: ComVisible(false)]
+[assembly: CLSCompliant(true), ComVisible(false)]
 
 namespace MagicText
 {
