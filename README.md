@@ -11,10 +11,10 @@ The library provides simple interfaces and classes for tokenising existing text 
 Tokens extracted from a text block are usually words + punctuation + white spaces, or single characters. It should not be considered a good practice to mix *apples and oranges*, i. e. to have some tokens in form of complete words, while others as single characters (except for words such as the pronoun *I* or the article *a*, for example, in English). Both tokenisation policies mentioned are implemented in the librabry, while additional policies may be obtained by:
 
 1.  passing desired [`ShatteringOptions`](Source/ShatteringOptions.cs) to tokenisation methods,
-2.  constructing a [`RegexTokeniser`](Source/RegexTokeniser.cs) with a custom [regular expression](http://en.wikipedia.org/wiki/Regular_expression) break pattern and potentially with a transformation function,
+2.  constructing a [`RegexMatchTokeniser`](Source/RegexMatchTokeniser.cs) or a [`RegexBreakTokeniser`](Source/RegexBreakTokeniser.cs) with a custom [regular expression](http://en.wikipedia.org/wiki/Regular_expression) match/break pattern and potentially with a token extraction / transformation function,
 3.  implementing a custom extension of the [`LineByLineTokeniser`](Source/LineByLineTokeniser.cs) abstract class or implementing the complete [`ITokeniser`](Source/ITokeniser.cs) interface.
 
-Additionally, the library provides a [`LineExtractingTokeniser`](Source/LineExtractingTokeniser.cs), which treats each line of text as a single token, and a [`RandomTokeniser`](Source/RandomTokeniser.cs), which chooses token breaking points at *random*. However, the latter is not very useful as it is, obviously, unpredictable ([*nondeterministic*](http://en.wikipedia.org/wiki/Nondeterministic_programming)). It is especially useless for the process of generating new text (v. [*Algorithm Explanation*](#Algorithm-Explanation) and [*Code Example*](#Code-Example)) because the resulting tokens would probably be mutually very different, even if they occur in otherwise *similar* parts of text. For instance, the string [`"lorem ipsum"`](http://en.wikipedia.org/wiki/Lorem_ipsum) may once be tokenised by a [`RandomTokeniser`](Source/RandomTokeniser.cs) into tokens `{ "lo", "r", "em ipsum", "", "" }`, and another time tokenised by the same [`RandomTokeniser`](Source/RandomTokeniser.cs) into tokens `{ "lor", "em ", "i", "psum" }`. On the other hand, a default [`RegexTokeniser`](Source/RegexTokeniser.cs) would always yield tokens `{ "lorem", " ", "ispum" }`, while a [`CharTokeniser`](Source/CharTokeniser.cs) would always yield tokens `{ "l", "o", ..., "m" }`.
+Additionally, the library provides a [`LineExtractingTokeniser`](Source/LineExtractingTokeniser.cs), which treats each line of text as a single token, and a [`RandomTokeniser`](Source/RandomTokeniser.cs), which chooses token breaking points at *random*. However, the latter is not very useful as it is, obviously, unpredictable ([*nondeterministic*](http://en.wikipedia.org/wiki/Nondeterministic_programming)). It is especially useless for the process of generating new text (v. [*Algorithm Explanation*](#Algorithm-Explanation) and [*Code Example*](#Code-Example)) because the resulting tokens would probably be mutually very different, even if they occur in otherwise *similar* parts of text. For instance, the string [`"lorem ipsum"`](http://en.wikipedia.org/wiki/Lorem_ipsum) may once be tokenised by a [`RandomTokeniser`](Source/RandomTokeniser.cs) into tokens `{ "lo", "r", "em ipsum", "", "" }`, and another time tokenised by the same [`RandomTokeniser`](Source/RandomTokeniser.cs) into tokens `{ "lor", "em ", "i", "psum" }`. On the other hand, a default [`RegexMatchTokeniser`](Source/RegexMatchTokeniser.cs) or [`RegexBreakTokeniser`](Source/RegexBreakTokeniser.cs) would always yield tokens `{ "lorem", " ", "ispum" }`, while a [`CharTokeniser`](Source/CharTokeniser.cs) would always yield tokens `{ "l", "o", ..., "m" }`.
 
 Once extracted, the collection of tokens (in the order as read from the input) is called ***context*** in the rest of this document (the tokenisation process is called ***shattering*** in the library). The terminology is inspired by actual context of words in usual forms of text.
 
@@ -111,8 +111,8 @@ Pen pen;
 
 using (Stream input = File.OpenRead("Firework.txt"))
 {
-	ITokeniser tokeniser = new RegexTokeniser();
-	tokens = tokeniser.ShatterToList(input, new ShatteringOptions() { IgnoreEmptyTokens = true });
+	ITokeniser tokeniser = new RegexBreakTokeniser();
+	tokens = tokeniser.ShatterToArray(input, new ShatteringOptions() { IgnoreEmptyTokens = true });
 }
 
 pen = new Pen(tokens);
@@ -125,7 +125,7 @@ Console.WriteLine();
 
 ```
 
-The code above uses the [`Pen`](Source/Pen.cs) class and the [`ITokeniser`](Source/ITokeniser.cs) interface (implemented through the [`RegexTokeniser`](Source/RegexTokeniser.cs) class) provided by the library and outputs:
+The code above uses the [`Pen`](Source/Pen.cs) class and the [`ITokeniser`](Source/ITokeniser.cs) interface (implemented through the [`RegexBreakTokeniser`](Source/RegexBreakTokeniser.cs) class) provided by the library and outputs:
 
 ```
  deep?
@@ -148,7 +148,7 @@ Do you know that there
 
 ```
 
-Alternatively, if a [`CharTokeniser`](Source/CharTokeniser.cs) is used instead of the [`RegexTokeniser`](Source/RegexTokeniser.cs), the code outputs:
+Alternatively, if a [`CharTokeniser`](Source/CharTokeniser.cs) is used instead of the [`RegexBreakTokeniser`](Source/RegexBreakTokeniser.cs), the code outputs:
 
 ```
  deep?
@@ -181,14 +181,14 @@ using System.Threading.Tasks;
 
 List<String?> tokens = new List<String?>();
 
-ITokeniser tokeniser = new RegexTokeniser(inclusiveBreaker: true);
+ITokeniser tokeniser = new RegexMatchTokeniser(matching: RegexMatchTokeniserDefaultMatchings.WordsOrPunctuationOrWhiteSpace);
 
 try
 {
 	CancellationTokenSource cancellation = new CancellationTokenSource();
 	await foreach (String? token in tokeniser.ShatterAsync(input: Console.In, continueTasksOnCapturedContext: false).WithCancellation(cancellation.Token).ConfigureAwait(false))
 	{
-		if (token?.Trim() == "###")
+		if (token == "###")
 		{
 			cancellation.Cancel();
 		}
@@ -204,9 +204,9 @@ catch (OperationCanceledException)
 
 Obviously, this is an *overkill*, as, instead of `cancellation.Cancel()`, one could simply `break` the asynchronous `foreach`-loop; not to mention that reading from the console may be done synchronously (and in the background it actually is, as explained [here](http://docs.microsoft.com/en-gb/dotnet/api/system.console.in#remarks)). However, the example above illustrates the power and possibilities provided by the library which might come useful in other real-life scenarios.
 
-Note that the [`LineByLineTokeniser`](Source/LineByLineTokeniser.cs)&mdash;the base class of the [`RegexTokeniser`](Source/RegexTokeniser.cs), [`CharTokeniser`](Source/CharTokeniser.cs), [`LineExtractingTokeniser`](Source/LineExtractingTokeniser.cs) and [`RandomTokeniser`](Source/RandomTokeniser.cs) classes&mdash;does not necessarily cancel the tokenising operation immediately, meaning that some additional iterations in the `foreach`-loop above may be run even after the breaking `"###"` token is found. However, no new lines will be read from the underlying input ([`System.Console.In`](http://docs.microsoft.com/en-gb/dotnet/api/system.console.in) in the example above) after cancelling the operation. Actually, no additional bytes shall be read appart from those having already been irrecoverably read.
+Note that the [`LineByLineTokeniser`](Source/LineByLineTokeniser.cs)&mdash;the base class of the [`RegexMatchTokeniser`](Source/RegexMatchTokeniser.cs), [`RegexMatchTokeniser`](Source/RegexBreakTokeniser.cs), [`CharTokeniser`](Source/CharTokeniser.cs), [`LineExtractingTokeniser`](Source/LineExtractingTokeniser.cs) and [`RandomTokeniser`](Source/RandomTokeniser.cs) classes&mdash;does not necessarily cancel the tokenising operation immediately, meaning that some additional iterations in the `foreach`-loop above may be run even after the breaking `"###"` token is found. However, no new lines will be read from the underlying input ([`System.Console.In`](http://docs.microsoft.com/en-gb/dotnet/api/system.console.in) in the example above) after cancelling the operation. Actually, no additional bytes shall be read appart from those having already been irrecoverably read.
 
-All tokenisers provided by the library tokenise text using [*deferred execution*](http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-example) (therefore similar examples could have been written using a [`CharTokeniser`](Source/CharTokeniser.cs), a [`LineExtractingTokeniser`](Source/LineExtractingTokeniser.cs) or a [`RandomTokeniser`](Source/RandomTokeniser.cs)). In fact, this is the recommended behaviour of all classes implementing the [`ITokeniser`](Source/ITokeniser.cs) interface. Such implementation enables simultaneous tokenising and reading operations, which may come useful when reading from sources such as the console or a network channel. On the other hand, the [`TokeniserExtensions`](Source/TokeniserExtensions.cs) class provides extension methods for tokenising into lists (fully built containers instead of the [*deferred execution*](http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-example)), which is useful when reading from strings and read-only text files. If the latter was the default, simultaneous reading and tokenising would be impossible because the input would have to be read and tokenised until the end before accessing any of the tokens.
+All tokenisers provided by the library tokenise text using [*deferred execution*](http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-example) (therefore similar examples could have been written using a [`CharTokeniser`](Source/CharTokeniser.cs), a [`LineExtractingTokeniser`](Source/LineExtractingTokeniser.cs) or a [`RandomTokeniser`](Source/RandomTokeniser.cs)). In fact, this is the recommended behaviour of all classes implementing the [`ITokeniser`](Source/ITokeniser.cs) interface. Such implementation enables simultaneous tokenising and reading operations, which may come useful when reading from sources such as the console or a network channel. On the other hand, the [`TokeniserExtensions`](Source/TokeniserExtensions.cs) class provides extension methods for tokenising into arrays (fully built containers instead of the [*deferred execution*](http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-example)), which is useful when reading from strings and read-only text files. If the latter was the default, simultaneous reading and tokenising would be impossible because the input would have to be read and tokenised until the end before accessing any of the tokens.
 
 ####    Simple [Information Theory](http://en.wikipedia.org/wiki/Information_theory) Analysis
 
@@ -300,8 +300,8 @@ Pen pen;
 
 using (Stream input = File.OpenRead("Bible.txt"))
 {
-	ITokeniser tokeniser = new RegexTokeniser();
-	tokens = tokeniser.ShatterToList(
+	ITokeniser tokeniser = new RegexBreakTokeniser();
+	tokens = tokeniser.ShatterToArray(
 		input,
 		new ShatteringOptions()
 		{
@@ -367,32 +367,29 @@ Character set encoding: UTF-8
 
 ```
 
-Also, note that the [information theory](http://en.wikipedia.org/wiki/Information_theory) analysis examples displayed above considered equally both words and word delimiters as tokens. However, when analysing words only, delimiters would have to be disregarded (e. g. when calculating the [empirical probability](http://en.wikipedia.org/wiki/Empirical_probability) of a word). The simplest solution would be to use a [`RegexTokeniser`](Source/RegexTokeniser.cs) which does not yield delimiters as tokens, but some word [bigrams](http://en.wikipedia.org/wiki/Bigram) and other [*n*-grams](http://en.wikipedia.org/wiki/N-gram) could then be misidentified. For instance, by shattering the sentence *Although I am hungry, people don't seem to care*, the words `"hungry"` and `"people"` would appear as neighbouring therefore generating the [bigram](http://en.wikipedia.org/wiki/Bigram) `{ "hungry", "people" }`, inspite of them clearly being parts of different clauses.
+Also, note that the [information theory](http://en.wikipedia.org/wiki/Information_theory) analysis examples displayed above considered equally both words and word delimiters as tokens. However, when analysing words only, delimiters would have to be disregarded (e. g. when calculating the [empirical probability](http://en.wikipedia.org/wiki/Empirical_probability) of a word). The simplest solution would be to use a [`RegexBreakTokeniser`](Source/RegexBreakTokeniser.cs) which does not yield delimiters as tokens, but some word [bigrams](http://en.wikipedia.org/wiki/Bigram) and other [*n*-grams](http://en.wikipedia.org/wiki/N-gram) could then be misidentified. For instance, by shattering the sentence *Although I am hungry, people don't seem to care*, the words `"hungry"` and `"people"` would appear as neighbouring therefore generating the [bigram](http://en.wikipedia.org/wiki/Bigram) `{ "hungry", "people" }`, inspite of them clearly being parts of different clauses.
 
 ##  Tips & Tricks
 
-To create an [`ITokeniser`](Source/ITokeniser.cs) which mimicks the [`System.String.Split`](http://docs.microsoft.com/en-gb/dotnet/api/system.string.split) method behaviour instead of the [`System.Text.RegularExpressions.Regex.Split`](http://docs.microsoft.com/en-gb/dotnet/api/system.text.regularexpressions.regex.split) method behaviour, pass the appropriate [regular expression](http://en.wikipedia.org/wiki/Regular_expression) break pattern to the [`RegexTokeniser`'s](Source/RegexTokeniser.cs) constructor. Although [the official documentation](http://docs.microsoft.com/en-gb/dotnet/api/system.text.regularexpressions.regex#regex_vs_string) advises to use [`System.String`'s](http://docs.microsoft.com/en-gb/dotnet/api/system.string) methods when specific characters or substrings are sought instead of patterns, these operations can be reproduced with [regular expressions](http://en.wikipedia.org/wiki/Regular_expression). For readability of the code, implement an auxiliary method or even a class such as the following:
+To create an [`ITokeniser`](Source/ITokeniser.cs) which mimicks the [`System.String.Split`](http://docs.microsoft.com/en-gb/dotnet/api/system.string.split) method behaviour instead of the [`System.Text.RegularExpressions.Regex.Split`](http://docs.microsoft.com/en-gb/dotnet/api/system.text.regularexpressions.regex.split) method behaviour, pass the appropriate [regular expression](http://en.wikipedia.org/wiki/Regular_expression) break pattern to the [`RegexBreakTokeniser`'s](Source/RegexBreakTokeniser.cs) constructor. Although [the official documentation](http://docs.microsoft.com/en-gb/dotnet/api/system.text.regularexpressions.regex#regex_vs_string) advises to use [`System.String`'s](http://docs.microsoft.com/en-gb/dotnet/api/system.string) methods when specific characters or substrings are sought instead of patterns, these operations can be reproduced with [regular expressions](http://en.wikipedia.org/wiki/Regular_expression). For readability of the code, implement an auxiliary method or even a class such as the following:
 
 ```csharp
 using MagicText; // <-- namespace of the library
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 // ...
 
-public static ITokeniser CreateSplittingTokeniser([AllowNull] params String[] separator) =>
-	new RegexTokeniser(String.Join('|', separator?.Select(Regex.Escape) ?? Enumerable.Empty<String>()));
+public static ITokeniser CreateSplittingTokeniser(params String[] separator) =>
+	new RegexBreakTokeniser(String.Join('|', separator.Select(Regex.Escape)));
 
-public static ITokeniser CreateSplittingTokeniser([AllowNull] params Char[] separator) =>
-	new RegexTokeniser(String.Join('|', separator?.Select(Char.ToString).Select(Regex.Escape) ?? Enumerable.Empty<String>()));
+public static ITokeniser CreateSplittingTokeniser(params Char[] separator) =>
+	new RegexBreakTokeniser(String.Join('|', separator.Select(Char.ToString).Select(Regex.Escape) Enumerable.Empty<String>()));
 
 ```
 
-Note that the [`AllowNullAttribute`](http://docs.microsoft.com/en-gb/dotnet/api/system.diagnostics.codeanalysis.allownullattribute) and the [`System.Diagnostic.CodeAnalysis`](http://docs.microsoft.com/en-gb/dotnet/api/system.diagnostics.codeanalysis) namespace may be omitted when using [*.NET Standard 2.0*](http://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.0.md) as the attribute is not available then.
-
-To use [`System.StringSplitOptions.RemoveEmptyEntries`](http://docs.microsoft.com/en-gb/dotnet/api/system.stringsplitoptions#System_StringSplitOptions_RemoveEmptyEntries), set the `IgnoreEmptyTokens` property of [`ShatteringOptions`](Source/ShatteringOptions.cs) to `true` when shattering input text. To use [`System.StringSplitOptions.TrimEntries`](http://docs.microsoft.com/en-gb/dotnet/api/system.stringsplitoptions#System_StringSplitOptions_TrimEntries), pass the [lambda expression](http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/operators/lambda-expressions) `t => t?.Trim()` as the `transform` parameter to the [`RegexTokeniser`'s](Source/RegexTokeniser.cs) constructor.
+To use [`System.StringSplitOptions.RemoveEmptyEntries`](http://docs.microsoft.com/en-gb/dotnet/api/system.stringsplitoptions#System_StringSplitOptions_RemoveEmptyEntries), set the `IgnoreEmptyTokens` property of [`ShatteringOptions`](Source/ShatteringOptions.cs) to `true` when shattering input text. To use [`System.StringSplitOptions.TrimEntries`](http://docs.microsoft.com/en-gb/dotnet/api/system.stringsplitoptions#System_StringSplitOptions_TrimEntries), pass the [lambda expression](http://docs.microsoft.com/en-gb/dotnet/csharp/language-reference/operators/lambda-expressions) `t => t?.Trim()` as the `transform` parameter to the [`RegexBreakTokeniser`'s](Source/RegexBreakTokeniser.cs) constructor.
 
 ##  Remarks
 
@@ -400,7 +397,13 @@ This library should not be used when working with large corpora of context. Obje
 
 Another limitation of the functionality provided by the library is the fact that objects of the [`Pen`](Source/Pen.cs) class are immutable. Consequently, once a [`Pen`](Source/Pen.cs) is initialised, its context cannot be updated. Each update applied to the corpus of the tokens (context) requires initialising a new [`Pen`](Source/Pen.cs), which in turn executes a relatively expensive process of sorting the context. The larger the context, the more expensive the process. The problem is somewhat justified by the fact that text corpora are relatively rarely updated compared to the frequency of other, read-only operations conducted on them. The complete functionality of the [`Pen`](Source/Pen.cs) class is in fact read-only in terms of the resources used, which is compatible with the intended use.
 
-On the other hand, the [`Pen`](Source/Pen.cs) class implements the [`System.Runtime.Serialization.ISerializable`](http://docs.microsoft.com/en-gb/dotnet/api/system.runtime.serialization.iserializable) interface and is implemented with the [`System.SerializableAttribute`](http://docs.microsoft.com/en-gb/dotnet/api/system.serializableattribute) attribute. In other words, it is serialisable and can be persisted through multiple instances of the application process. This may speed up the application startup as expensive [`Pen`](Source/Pen.cs) construction may be avoided. However, [*XML*](http://en.wikipedia.org/wiki/XML) and [*JSON*](http://en.wikipedia.org/wiki/JSON) serialisation using the standard serialisers ([`System.Xml.Serialization.XmlSerializer`](http://docs.microsoft.com/en-gb/dotnet/api/system.xml.serialization.xmlserializer) for [*XML*](http://en.wikipedia.org/wiki/XML); [`System.Text.Json.JsonSerializer`](http://docs.microsoft.com/en-gb/dotnet/api/system.text.json.jsonserializer), [`System.Text.Json.Serialization.JsonConverter`](http://docs.microsoft.com/en-gb/dotnet/api/system.text.json.serialization.jsonconverter) and [`System.Text.Json.Serialization.JsonConverter<T>`](http://docs.microsoft.com/en-gb/dotnet/api/system.text.json.serialization.jsonconverter-1) for [*JSON*](http://en.wikipedia.org/wiki/JSON)) is not (yet) supported.
+On the other hand, the [`Pen`](Source/Pen.cs) class implements the [`System.Runtime.Serialization.ISerializable`](http://docs.microsoft.com/en-gb/dotnet/api/system.runtime.serialization.iserializable) interface and is implemented with the [`System.SerializableAttribute`](http://docs.microsoft.com/en-gb/dotnet/api/system.serializableattribute) attribute. Also, a default [`JsonConverter<T>`](http://docs.microsoft.com/en-gb/dotnet/api/system.text.json.serialization.jsonconverter-1) to serialise and deserialise the [`Pen`](Source/Pen.cs) class to/from [*JSON*](http://en.wikipedia.org/wiki/JSON) is provided by the library *out of the box*. In other words, [`Pen`s](Source/Pen.cs) are serialisable and can be persisted through multiple instances of the application process. This may speed up the application startup as expensive [`Pen`](Source/Pen.cs) construction may be avoided. Both serialisation techniques even automatically handle serialisation of some standard and custom [`StringComparer`s](http://docs.microsoft.com/en-gb/dotnet/api/system.stringcomparer). However, [*XML*](http://en.wikipedia.org/wiki/XML) serialisation using the standard serialiser ([`System.Xml.Serialization.XmlSerializer`](http://docs.microsoft.com/en-gb/dotnet/api/system.xml.serialization.xmlserializer)), as well as [*JSON*](http://en.wikipedia.org/wiki/JSON) serialisation using [Json.NET](http://newtonsoft.com/) is not (yet) supported.
+
+### To Do
+
+Inline documentation of interfaces, classes and methods is not yet finished. This even affects some public parts of the code. Hopefully, if anyone uses this code, they will manage themselves through the code.
+
+On the other hand, the code is probably finished. There does not seem to be anything more worth implementing, and everything implemented seems to be perfected (regarding functionalities, code design, [optimisation](http://en.wikipedia.org/wiki/Program_optimization) etc.) as best as the author could.
 
 ##  References
 
