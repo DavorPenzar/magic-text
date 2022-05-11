@@ -1165,38 +1165,30 @@ namespace MagicText
             info.AddValue(nameof(Interned), Interned);
 
             // Serialise the `Comparer`.
+            if (Comparer == StringComparer.Ordinal)
             {
-                if (Comparer is ISerializable || Comparer.GetType().GetCustomAttributes(typeof(SerializableAttribute), true).Any())
-                {
-                    info.AddValue(nameof(StringComparer), Comparer.GetType().AssemblyQualifiedName);
-                    info.AddValue(nameof(Comparer), Comparer);
-                }
-                else
-                {
-                    StringComparison comparisonType;
-                    if (Comparer == StringComparer.Ordinal)
-                    {
-                        comparisonType = StringComparison.Ordinal;
-                    }
-                    else if (Comparer == StringComparer.OrdinalIgnoreCase)
-                    {
-                        comparisonType = StringComparison.OrdinalIgnoreCase;
-                    }
-                    else if (Comparer == StringComparer.InvariantCulture)
-                    {
-                        comparisonType = StringComparison.InvariantCulture;
-                    }
-                    else if (Comparer == StringComparer.InvariantCultureIgnoreCase)
-                    {
-                        comparisonType = StringComparison.InvariantCultureIgnoreCase;
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException(NonSerialisableComparerErrorMessage);
-                    }
-
-                    info.AddValue(nameof(Comparer), comparisonType);
-                }
+                info.AddValue(nameof(Comparer), StringComparison.Ordinal);
+            }
+            else if (Comparer == StringComparer.OrdinalIgnoreCase)
+            {
+                info.AddValue(nameof(Comparer), StringComparison.OrdinalIgnoreCase);
+            }
+            else if (Comparer == StringComparer.InvariantCulture)
+            {
+                info.AddValue(nameof(Comparer), StringComparison.InvariantCulture);
+            }
+            else if (Comparer == StringComparer.InvariantCultureIgnoreCase)
+            {
+                info.AddValue(nameof(Comparer), StringComparison.InvariantCultureIgnoreCase);
+            }
+            else if (Comparer is ISerializable || Comparer.GetType().GetCustomAttributes(typeof(SerializableAttribute), true).Any())
+            {
+                info.AddValue(nameof(StringComparer), Comparer.GetType().AssemblyQualifiedName);
+                info.AddValue(nameof(Comparer), Comparer);
+            }
+            else
+            {
+                throw new InvalidOperationException(NonSerialisableComparerErrorMessage);
             }
 
             // Serialise the `Index`.

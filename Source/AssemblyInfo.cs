@@ -7,5 +7,8 @@ namespace MagicText
 {
     internal static class AssemblyInfo
     {
+        static AssemblyInfo()
+        {
+        }
     }
 }
