@@ -385,7 +385,7 @@ public static ITokeniser CreateSplittingTokeniser(params String[] separator) =>
 	new RegexBreakTokeniser(String.Join('|', separator.Select(Regex.Escape)));
 
 public static ITokeniser CreateSplittingTokeniser(params Char[] separator) =>
-	new RegexBreakTokeniser(String.Join('|', separator.Select(Char.ToString).Select(Regex.Escape) Enumerable.Empty<String>()));
+	new RegexBreakTokeniser(String.Join('|', separator.Select(Char.ToString).Select(Regex.Escape)));
 
 ```
 
