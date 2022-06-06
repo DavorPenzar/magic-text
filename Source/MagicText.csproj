@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
@@ -11,12 +11,17 @@
 
   <PropertyGroup>
     <Authors>Davor Penzar</Authors>
+	<Description>Provides interfaces and classes for text tokenisation and random generation.</Description>
+	<RepositoryType>git</RepositoryType>
+	<RepositoryUrl>http://github.com/DavorPenzar/magic-text</RepositoryUrl>
     <NeutralLanguage>en-GB</NeutralLanguage>
   </PropertyGroup>
 
   <PropertyGroup>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn>
+	<SignAssembly>True</SignAssembly>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -42,12 +47,12 @@
     <!--<PackageReference Include="System.Security.Permissions" />-->
     <!--<PackageReference Include="System.Text.Encoding" />-->
     <!--<PackageReference Include="System.Text.Encoding.Extensions" />-->
-    <PackageReference Include="System.Text.Json" Version="6.0.3" />
+    <PackageReference Include="System.Text.Json" Version="5.0.2" /> <!-- NOTE. Do not update if using .NET Core 3.0 or older. -->
     <!--<PackageReference Include="System.Text.RegularExpressions" />-->
     <!--<PackageReference Include="System.Threading" />-->
     <!--<PackageReference Include="System.Threading.Tasks" />-->
     <!--<PackageReference Include="System.Threading.Tasks.Extensions" />-->
-    <!--<PackageReference Include="System.ValueTuple" />-->
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 
 </Project>

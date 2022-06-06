@@ -20,10 +20,17 @@ namespace MagicText
     ///     <para>Changing any of the properties—public or private—breaks the functionality of the <see cref="Pen" />. By doing so, the behaviour of the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods is unexpected and no longer guaranteed.</para>
     ///     <para>To learn about serialisation and deserialisation of <see cref="Pen" />s, see:</para>
     ///     <list type="bullet">
-    ///         <item>for binary serialisation, the <see cref="Pen(SerializationInfo, StreamingContext)" /> constructor and the <see cref="GetObjectData(SerializationInfo, StreamingContext)" /> method,</item>
-    ///         <item>for <a href="http://json.org/json-en.html"><em>JSON</em></a> serialisation, the <see cref="PenJsonConverter" /> class,</item>
+    ///         <item>for serialisation via <see cref="IFormatter" />s, the <see cref="Pen(SerializationInfo, StreamingContext)" /> constructor and the <see cref="GetObjectData(SerializationInfo, StreamingContext)" /> method,</item>
+    ///         <item>
+    ///             for <a href="http://json.org/json-en.html"><em>JSON</em></a> serialisation
+    ///             <list type="bullet">
+    ///                 <item>using <a href="http://docs.microsoft.com/en-gb/dotnet/api/system.text.json"><c>System.Text.Json</c> namespace</a> members, the <see cref="PenJsonConverter" /> class,</item>
+    ///                 <item>using <a href="http://newtonsoft.com/json">Json.NET</a>, the <see cref="Pen(SerializationInfo, StreamingContext)" /> constructor and the <see cref="GetObjectData(SerializationInfo, StreamingContext)" /> method,</item>
+    ///             </list>
+    ///         </item>
     ///         <item>for <a href="http://w3.org/XML/"><em>XML</em></a> serialisation, no implementation is provided.</item>
     ///     </list>
+    ///     <para><a href="http://json.org/json-en.html"><em>JSON</em></a> serialisation was primarily implemented only for <a href="http://docs.microsoft.com/en-gb/dotnet/api/system.text.json"><c>System.Text.Json</c> namespace</a> API. However, as described <a href="http://newtonsoft.com/json/help/html/serializationguide.htm#ISerializable">here</a>, <a href="http://newtonsoft.com/json">Json.NET</a> also enables <a href="http://json.org/json-en.html"><em>JSON</em></a> serialisation using the same <see cref="Pen" /> class' constructors and methods as <see cref="IFormatter" />s. On the other hand, <a href="http://docs.microsoft.com/en-gb/dotnet/api/system.text.json"><c>System.Text.Json</c> namespace</a> and <a href="http://newtonsoft.com/json">Json.NET</a> APIs might not always produce compatible serialised <a href="http://json.org/json-en.html"><em>JSON</em></a> data, i. e. serialising using one <a href="http://json.org/json-en.html"><em>JSON</em></a> serialisation provider and deserialising using the other may fail.</para>
     ///     <para>Note that any manipulation of the serialised data, or even deserialising any data not constructed by/with the documented and recomended serialisers, serialising methods and serialising protocols, may result in <see cref="Pen" />s with unexpected behaviour. Using such <see cref="Pen" />s may even cause uncaught exceptions not explicitly documented for the methods of the <see cref="Pen" /> class.</para>
     /// </remarks>
     [CLSCompliant(true), JsonConverter(typeof(PenJsonConverter)), Serializable]
@@ -49,7 +56,7 @@ namespace MagicText
         private static Int32 randomSeed;
 
         [ThreadStatic]
-        private static System.Random? mutableThreadStaticRandom;
+        private static System.Random? mutableThreadStaticRandom = null;
 
         /// <summary>Gets the internal locking object of the <see cref="Pen" /> class.</summary>
         /// <returns>The internal locking object.</returns>
@@ -1165,21 +1172,9 @@ namespace MagicText
             info.AddValue(nameof(Interned), Interned);
 
             // Serialise the `Comparer`.
-            if (Comparer == StringComparer.Ordinal)
+            if (Comparer.TryGetComparison(out StringComparison comparisonType))
             {
-                info.AddValue(nameof(Comparer), StringComparison.Ordinal);
-            }
-            else if (Comparer == StringComparer.OrdinalIgnoreCase)
-            {
-                info.AddValue(nameof(Comparer), StringComparison.OrdinalIgnoreCase);
-            }
-            else if (Comparer == StringComparer.InvariantCulture)
-            {
-                info.AddValue(nameof(Comparer), StringComparison.InvariantCulture);
-            }
-            else if (Comparer == StringComparer.InvariantCultureIgnoreCase)
-            {
-                info.AddValue(nameof(Comparer), StringComparison.InvariantCultureIgnoreCase);
+                info.AddValue(nameof(Comparer), comparisonType);
             }
             else if (Comparer is ISerializable || Comparer.GetType().GetCustomAttributes(typeof(SerializableAttribute), true).Any())
             {

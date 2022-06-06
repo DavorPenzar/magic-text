@@ -14,7 +14,7 @@ namespace MagicText.Internal.Extensions
         ///     <para>This method does not throw an <see cref="ArgumentNullException" /> if <c><paramref name="capture" /></c> is <c>null</c>; instead, <c>null</c> is simply returned.</para>
         /// </remarks>
         [return: MaybeNull, NotNullIfNotNull("capture")]
-        public static String? GetValueOrNull([AllowNull] this Capture capture) =>
+        public static String? GetValueOrNull([AllowNull] this Capture? capture) =>
             capture?.Value;
     }
 }

@@ -267,35 +267,17 @@ namespace MagicText.Internal.Json
                 return;
             }
 
-            // Detect the comparer's underlying comparison type.
-            StringComparison comparisonType;
-            if (value == StringComparer.Ordinal)
+            // Detect the comparer's underlying comparison type and proceed accordingly.
+            if (value.TryGetComparison(out StringComparison comparisonType))
             {
-                comparisonType = StringComparison.Ordinal;
-            }
-            else if (value == StringComparer.OrdinalIgnoreCase)
-            {
-                comparisonType = StringComparison.OrdinalIgnoreCase;
-            }
-            else if (value == StringComparer.InvariantCulture)
-            {
-                comparisonType = StringComparison.InvariantCulture;
-            }
-            else if (value == StringComparer.InvariantCultureIgnoreCase)
-            {
-                comparisonType = StringComparison.InvariantCultureIgnoreCase;
+                // Write the comparison type.
+                WriteStringComparisonValue(writer, comparisonType, options);
             }
             else
             {
-                // Write the custom string comparer using the special method and return.
-
+                // Write the custom string comparer using the special method.
                 WriteCustomStringComparer(writer, value, options);
-
-                return;
             }
-
-            // Write the comparison type.
-            WriteStringComparisonValue(writer, comparisonType, options);
         }
 
         public override Int32 GetHashCode() =>

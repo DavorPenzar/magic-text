@@ -105,7 +105,7 @@ namespace MagicText.Internal.Extensions
             {
                 foreach (T item in source)
                 {
-                    if (size == buffer.Length)
+                    if (size >= buffer.Length)
                     {
                         Expand(ref buffer);
                     }
