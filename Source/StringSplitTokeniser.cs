@@ -44,6 +44,9 @@ namespace MagicText
 
         /// <summary>Gets the <see cref="StringSplitOptions" /> used by the tokeniser.</summary>
         /// <returns>The internal <see cref="StringSplitOptions" /> used for shattering lines of text at the <see cref="Separators" /> into tokens.</returns>
+        /// <remarks>
+        ///     <para>Note that <see cref="StringSplitOptions.RemoveEmptyEntries" /> overrides the <see cref="ShatteringOptions.IgnoreEmptyTokens" />: if the former is <c>true</c>, empty tokens are ignored even if the latter is <c>false</c>. This is because the <see cref="Options" /> are applied in the <see cref="ShatterLine(String)" /> method, before evaluating the <see cref="ShatteringOptions" /> in the <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions)" /> metod or the <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method.</para>
+        /// </remarks>
         public StringSplitOptions Options => _options;
 
         /// <summary>Gets the <em>substring</em> separators used by the tokeniser.</summary>
