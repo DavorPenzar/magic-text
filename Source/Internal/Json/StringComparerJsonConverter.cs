@@ -49,6 +49,7 @@ namespace MagicText.Internal.Json
         /// <summary>Reads a <see cref="StringComparison" /> value.</summary>
         /// <param name="reader">The <see cref="Utf8JsonReader" /> to read.</param>
         /// <param name="options">The <see cref="JsonSerializerOptions" /> to use.</param>
+        /// <param name="read">If <c>true</c>, the method actually reads the token from the <c><paramref name="reader" /></c> and sets its position to the next token.</param>
         /// <returns>The <see cref="StringComparison" /> value read from the <c><paramref name="reader" /></c>.</returns>
         /// <remarks>
         ///     <para>The method reads the token from the <c><paramref name="reader" /></c> but does not move its position to the next token.</para>
