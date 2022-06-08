@@ -126,31 +126,24 @@ namespace MagicText.Internal.Extensions
             {
                 ICollection<TSource> sourceCollection => new TSource[sourceCollection.Count],
                 IReadOnlyCollection<TSource> sourceReadOnlyCollection => new TSource[sourceReadOnlyCollection.Count],
-                _ => new TSource[1]
+                _ => Array.Empty<TSource>()
             };
 
             foreach (TSource value in source)
             {
-                if (count == 0)
-                {
-                    ++count;
-                    distinctValues[0] = value;
-
-                    continue;
-                }
-
                 Int32 position = Array.BinarySearch(distinctValues, 0, count, value, comparer);
                 if (position >= 0)
                 {
                     continue;
                 }
 
+                position = ~position;
+
                 if (count++ >= distinctValues.Length)
                 {
                     Buffering.Expand(ref distinctValues);
                 }
 
-                position = ~position;
                 Array.Copy(distinctValues, position, distinctValues, position + 1, count - position);
                 distinctValues[position] = value;
             }
