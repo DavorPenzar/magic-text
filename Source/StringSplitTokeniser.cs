@@ -52,7 +52,7 @@ namespace MagicText
         /// <summary>Gets the <em>substring</em> separators used by the tokeniser.</summary>
         /// <returns>The internal <em>substring</em> separators.</returns>
         /// <remarks>
-        ///     <para>Shattering a line of text <c>line</c> (not ending in a line end (CR, LF or CRLF)) by the tokeniser, without filtering and replacement of empty lines, is done by calling the <c>line</c>'s <see cref="String.Split(String[], StringSplitOptions)" /> method with <see cref="Separators" /> as the first argument and <see cref="Options" /> as the second argument.</para>
+        ///     <para>Shattering a line of text <c>line</c> (not ending in a line end (<a href="http://en.wikipedia.org/wiki/Newline#Representation"> CR, LF or CRLF</a>)) by the tokeniser, without filtering and replacement of empty lines, is done by calling the <c>line</c>'s <see cref="String.Split(String[], StringSplitOptions)" /> method with <see cref="Separators" /> as the first argument and <see cref="Options" /> as the second argument.</para>
         ///     <para>By default, it is guaranteed that the <see cref="Separators" /> are all mutually distinct and sorted ascendingly as compared by the <see cref="StringComparer.Ordinal" />. Changing the values of the <see cref="Separators" /> shall cause inconsistent behaviour across multiple calls to the <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(System.IO.TextReader, ShatteringOptions)" /> and <see cref="LineByLineTokeniser.ShatterAsync(System.IO.TextReader, ShatteringOptions, Boolean, CancellationToken)" /> methods.</para>
         /// </remarks>
         private String[] Separators => _separators;
@@ -157,7 +157,7 @@ namespace MagicText
         /// <summary>Returns the <em>substring</em> separators used by the tokeniser.</summary>
         /// <returns>The internal <em>substring</em> separators.</returns>
         /// <remarks>
-        ///     <para>Shattering a line of text <c>line</c> (not ending in a line end (CR, LF or CRLF)) by the tokeniser, without filtering and replacement of empty lines, is done by calling the <c>line</c>'s <see cref="String.Split(String[], StringSplitOptions)" /> method with <see cref="Separators" /> as the first argument and <see cref="Options" /> as the second argument.</para>
+        ///     <para>Shattering a line of text <c>line</c> (not ending in a line end (<a href="http://en.wikipedia.org/wiki/Newline#Representation"> CR, LF or CRLF</a>)) by the tokeniser, without filtering and replacement of empty lines, is done by calling the <c>line</c>'s <see cref="String.Split(String[], StringSplitOptions)" /> method with <see cref="Separators" /> as the first argument and <see cref="Options" /> as the second argument.</para>
         ///     <para>It is guaranteed that the returned separators are all mutually distinct and sorted ascendingly as compared by the <see cref="StringComparer.Ordinal" />.</para>
         ///     <para>This method always creates a new <see cref="Array" /> of <see cref="String" />s and returns it. Changing the contents of the returned <see cref="Array" /> by any of the calls to this method shall affect neither the <see cref="StringSplitTokeniser" /> nor any subsequent calls to this method.</para>
         /// </remarks>

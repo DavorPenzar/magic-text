@@ -120,7 +120,7 @@ namespace MagicText
         /// <summary>Gets the regular expression match pattern used by the tokeniser.</summary>
         /// <returns>The internal regular expression match pattern.</returns>
         /// <remarks>
-        ///     <para>The tokens produced by the tokeniser are constructed from <see cref="Match" />es of the <see cref="MatchPattern" /> in the input text.</para>
+        ///     <para>Shattering a line of text <c>line</c> (not ending with a line end (<a href="http://en.wikipedia.org/wiki/Newline#Representation"> CR, LF or CRLF</a>)) by the tokeniser, without transformation, filtering and replacement of empty lines, is equivalent (performance aside) to calling the <see cref="Regex.Matches(String, String)" /> method with <c>line</c> as the first argument and <see cref="MatchPattern" /> as the second.</para>
         /// </remarks>
         [RegexPattern]
         protected String MatchPattern => Matcher.ToString();
@@ -128,7 +128,7 @@ namespace MagicText
         /// <summary>Gets the regular expression matcher used by the tokeniser.</summary>
         /// <returns>The internal regular expression matcher.</returns>
         /// <remarks>
-        ///     <para>The tokens produced by the tokeniser are constructed from <see cref="Match" />es retrieved by calling the <see cref="Matcher" />'s <see cref="Regex.Match(String)" /> method on the input text.</para>
+        ///     <para>Shattering a line of text <c>line</c> (not ending in a line end (<a href="http://en.wikipedia.org/wiki/Newline#Representation"> CR, LF or CRLF</a>)) by the tokeniser, without transformation, filtering and replacement of empty lines, is done by calling the <see cref="Matcher" />'s <see cref="Regex.Matches(String)" /> method with <c>line</c> as the argument.</para>
         /// </remarks>
         protected Regex Matcher => _matcher;
 

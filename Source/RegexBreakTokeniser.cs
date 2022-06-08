@@ -85,7 +85,7 @@ namespace MagicText
         /// <summary>Gets the regular expression break pattern used by the tokeniser.</summary>
         /// <returns>The internal regular expression break pattern.</returns>
         /// <remarks>
-        ///     <para>Shattering a line of text <c>line</c> (not ending with a line end (CR, LF or CRLF)) by the tokeniser, without transformation, filtering and replacement of empty lines, is equivalent (performance aside) to calling the <see cref="Regex.Split(String, String)" /> method with <c>line</c> as the first argument and <see cref="BreakPattern" /> as the second.</para>
+        ///     <para>Shattering a line of text <c>line</c> (not ending with a line end (<a href="http://en.wikipedia.org/wiki/Newline#Representation"> CR, LF or CRLF</a>)) by the tokeniser, without transformation, filtering and replacement of empty lines, is equivalent (performance aside) to calling the <see cref="Regex.Split(String, String)" /> method with <c>line</c> as the first argument and <see cref="BreakPattern" /> as the second.</para>
         /// </remarks>
         [RegexPattern]
         public String BreakPattern => Breaker.ToString();
@@ -93,7 +93,7 @@ namespace MagicText
         /// <summary>Gets the regular expression breaker used by the tokeniser.</summary>
         /// <returns>The internal regular expression breaker.</returns>
         /// <remarks>
-        ///     <para>Shattering a line of text <c>line</c> (not ending in a line end (CR, LF or CRLF)) by the tokeniser, without transformation, filtering and replacement of empty lines, is done by calling the <see cref="Breaker" />'s <see cref="Regex.Split(String)" /> method with <c>line</c> as the argument.</para>
+        ///     <para>Shattering a line of text <c>line</c> (not ending in a line end (<a href="http://en.wikipedia.org/wiki/Newline#Representation"> CR, LF or CRLF</a>)) by the tokeniser, without transformation, filtering and replacement of empty lines, is done by calling the <see cref="Breaker" />'s <see cref="Regex.Split(String)" /> method with <c>line</c> as the argument.</para>
         /// </remarks>
         protected Regex Breaker => _breaker;
 
