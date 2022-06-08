@@ -609,7 +609,7 @@ namespace MagicText
             {
                 await foreach (String? token in tokeniser.ShatterAsync(input, options, continueTasksOnCapturedContext, cancellationToken).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
                 {
-                    if (count == tokens.Length)
+                    if (count >= tokens.Length)
                     {
                         Buffering.Expand(ref tokens);
                     }
@@ -663,7 +663,7 @@ namespace MagicText
             {
                 await foreach (String? token in ShatterAsync(tokeniser, text, options, continueTasksOnCapturedContext, cancellationToken).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
                 {
-                    if (count == tokens.Length)
+                    if (count >= tokens.Length)
                     {
                         Buffering.Expand(ref tokens);
                     }
@@ -723,7 +723,7 @@ namespace MagicText
             {
                 await foreach (String? token in ShatterAsync(tokeniser, input, encoding, options, continueTasksOnCapturedContext, cancellationToken).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
                 {
-                    if (count == tokens.Length)
+                    if (count >= tokens.Length)
                     {
                         Buffering.Expand(ref tokens);
                     }
@@ -782,7 +782,7 @@ namespace MagicText
             {
                 await foreach (String? token in ShatterAsync(tokeniser, input, encoding, options, continueTasksOnCapturedContext, cancellationToken).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
                 {
-                    if (count == tokens.Length)
+                    if (count >= tokens.Length)
                     {
                         Buffering.Expand(ref tokens);
                     }

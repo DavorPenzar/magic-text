@@ -27,6 +27,7 @@
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
     <!--<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />-->
+	<!--<PackageReference Include="NETStandard.Library" />-->
     <!--<PackageReference Include="System.Collections" />-->
     <PackageReference Include="System.ComponentModel" Version="4.3.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />

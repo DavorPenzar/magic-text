@@ -12,7 +12,7 @@ namespace MagicText
     /// <summary>Implements a <see cref="LineByLineTokeniser" /> which shatters lines of text by capturing specific regular expression pattern matches.</summary>
     /// <remarks>
     ///     <para>Additional to shattering text into tokens, the <see cref="RegexMatchTokeniser" /> provides a possibility to customise the resulting tokens from raw <see cref="Match" />es (and not necessarily using the raw <see cref="Capture.Value" /> property) immediately after their capture and prior to checking for empty tokens. However, no built-in way of skipping tokens is provided through such customised token extraction. One possibility is to assign empty token values only to those tokens that ought to be skipped, and set the <see cref="ShatteringOptions.IgnoreEmptyTokens" /> option to <c>true</c>. Another possibility is to reserve a special <see cref="String" /> value for tokens to skip�e. g. a <c>null</c>�which would be assigned only to those tokens that should be skipped, and then manually filter out such tokens from the resulting token enumerable. The filtering part in the latter case may be implemented using the <see cref="Enumerable.Where{TSource}(IEnumerable{TSource}, Func{TSource, Boolean})" /> extension method.</para>
-    ///     <para>If a default regular expression match pattern (<see cref="DefaultWordsOrNonWordsPattern" />, <see cref="DefaultWordsOrPunctuationOrWhiteSpacePattern" />, <see cref="DefaultWordsOrPunctuationPattern" /> or <see cref="DefaultWordsPattern" />) should be used without special <see cref="RegexOptions" />, a better performance is achieved when using the default <see cref="RegexMatchTokeniser()" /> constructor or the <see cref="RegexMatchTokeniser(RegexMatchTokeniserDefaultMatchings, Func{Match, String})" /> constructor, in which case a pre-built <see cref="Regex" /> object is used constructed (with <see cref="Regex.Options" /> set to <see cref="DefaultMatchOptions" />), instead of the <see cref="RegexMatchTokeniser(String, Boolean, RegexOptions, Func{Match, String})" /> constructor.</para>
+    ///     <para>If a default regular expression match pattern (<see cref="DefaultWordsOrNonWordsPattern" />, <see cref="DefaultWordsOrPunctuationOrWhiteSpacePattern" />, <see cref="DefaultWordsOrPunctuationPattern" /> or <see cref="DefaultWordsPattern" />) should be used without special <see cref="RegexOptions" />, a better performance is achieved when using the default <see cref="RegexMatchTokeniser()" /> constructor or the <see cref="RegexMatchTokeniser(DefaultTokenRegexMatchings, Func{Match, String})" /> constructor, in which case a pre-built <see cref="Regex" /> object is used constructed (with <see cref="Regex.Options" /> set to <see cref="DefaultMatchOptions" />), instead of the <see cref="RegexMatchTokeniser(String, Boolean, RegexOptions, Func{Match, String})" /> constructor.</para>
     ///     <para>Empty tokens (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens that yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method. This behaviour cannot be overridden by a derived class.</para>
     ///     <para>No thread safety mechanism is implemented nor assumed by the class. If the token extraction function (<see cref="GetValue" />) should be thread-safe, lock the <see cref="RegexMatchTokeniser" /> instance during complete <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method calls to ensure consistent behaviour of the function over a single shattering operation.</para>
     /// </remarks>
@@ -77,7 +77,7 @@ namespace MagicText
         /// <returns>The default words and <em>non-words</em> regular expression matcher.</returns>
         /// <remarks>
         ///     <para>The regular expression matcher is constructed using the <see cref="DefaultWordsOrNonWordsPattern" /> with <see cref="Regex.Options" /> set to <see cref="DefaultMatchOptions" />.</para>
-        ///     <para>When constructing a <see cref="RegexMatchTokeniser" /> using the default <see cref="RegexMatchTokeniser()" /> constructor or the <see cref="RegexMatchTokeniser(RegexMatchTokeniserDefaultMatchings, Func{Match, String})" /> constructor with the <c>matching</c> parameter set to <see cref="RegexMatchTokeniserDefaultMatchings.WordsOrNonWords" />, the <see cref="Matcher" /> shall be set to <see cref="DefaultWordsOrNonWordsMatcher" />.</para>
+        ///     <para>When constructing a <see cref="RegexMatchTokeniser" /> using the default <see cref="RegexMatchTokeniser()" /> constructor or the <see cref="RegexMatchTokeniser(DefaultTokenRegexMatchings, Func{Match, String})" /> constructor with the <c>matching</c> parameter set to <see cref="DefaultTokenRegexMatchings.WordsOrNonWords" />, the <see cref="Matcher" /> shall be set to <see cref="DefaultWordsOrNonWordsMatcher" />.</para>
         /// </remarks>
         protected static Regex DefaultWordsOrNonWordsMatcher => _defaultWordsOrNonWordsMatcher;
 
@@ -85,7 +85,7 @@ namespace MagicText
         /// <returns>The default words, punctuation and white spaces regular expression matcher.</returns>
         /// <remarks>
         ///     <para>The regular expression matcher is constructed using the <see cref="DefaultWordsOrPunctuationOrWhiteSpacePattern" /> with <see cref="Regex.Options" /> set to <see cref="DefaultMatchOptions" />.</para>
-        ///     <para>When constructing a <see cref="RegexMatchTokeniser" /> using the <see cref="RegexMatchTokeniser(RegexMatchTokeniserDefaultMatchings, Func{Match, String})" /> constructor with the <c>matching</c> parameter set to <see cref="RegexMatchTokeniserDefaultMatchings.WordsOrPunctuationOrWhiteSpace" />, the <see cref="Matcher" /> shall be set to <see cref="DefaultWordsOrPunctuationOrWhiteSpaceMatcher" />.</para>
+        ///     <para>When constructing a <see cref="RegexMatchTokeniser" /> using the <see cref="RegexMatchTokeniser(DefaultTokenRegexMatchings, Func{Match, String})" /> constructor with the <c>matching</c> parameter set to <see cref="DefaultTokenRegexMatchings.WordsOrPunctuationOrWhiteSpace" />, the <see cref="Matcher" /> shall be set to <see cref="DefaultWordsOrPunctuationOrWhiteSpaceMatcher" />.</para>
         /// </remarks>
         protected static Regex DefaultWordsOrPunctuationOrWhiteSpaceMatcher => _defaultWordsOrPunctuationOrWhiteSpaceMatcher;
 
@@ -93,7 +93,7 @@ namespace MagicText
         /// <returns>The default words, punctuation and white spaces regular expression matcher.</returns>
         /// <remarks>
         ///     <para>The regular expression matcher is constructed using the <see cref="DefaultWordsOrPunctuationPattern" /> with <see cref="Regex.Options" /> set to <see cref="DefaultMatchOptions" />.</para>
-        ///     <para>When constructing a <see cref="RegexMatchTokeniser" /> using the <see cref="RegexMatchTokeniser(RegexMatchTokeniserDefaultMatchings, Func{Match, String})" /> constructor with the <c>matching</c> parameter set to <see cref="RegexMatchTokeniserDefaultMatchings.WordsOrPunctuation" />, the <see cref="Matcher" /> shall be set to <see cref="DefaultWordsOrPunctuationMatcher" />.</para>
+        ///     <para>When constructing a <see cref="RegexMatchTokeniser" /> using the <see cref="RegexMatchTokeniser(DefaultTokenRegexMatchings, Func{Match, String})" /> constructor with the <c>matching</c> parameter set to <see cref="DefaultTokenRegexMatchings.WordsOrPunctuation" />, the <see cref="Matcher" /> shall be set to <see cref="DefaultWordsOrPunctuationMatcher" />.</para>
         /// </remarks>
         protected static Regex DefaultWordsOrPunctuationMatcher => _defaultWordsOrPunctuationMatcher;
 
@@ -101,7 +101,7 @@ namespace MagicText
         /// <returns>The default words, punctuation and white spaces regular expression matcher.</returns>
         /// <remarks>
         ///     <para>The regular expression matcher is constructed using the <see cref="DefaultWordsPattern" /> with <see cref="Regex.Options" /> set to <see cref="DefaultMatchOptions" />.</para>
-        ///     <para>When constructing a <see cref="RegexMatchTokeniser" /> using the <see cref="RegexMatchTokeniser(RegexMatchTokeniserDefaultMatchings, Func{Match, String})" /> constructor with the <c>matching</c> parameter set to <see cref="RegexMatchTokeniserDefaultMatchings.Words" />, the <see cref="Matcher" /> shall be set to <see cref="DefaultWordsMatcher" />.</para>
+        ///     <para>When constructing a <see cref="RegexMatchTokeniser" /> using the <see cref="RegexMatchTokeniser(DefaultTokenRegexMatchings, Func{Match, String})" /> constructor with the <c>matching</c> parameter set to <see cref="DefaultTokenRegexMatchings.Words" />, the <see cref="Matcher" /> shall be set to <see cref="DefaultWordsMatcher" />.</para>
         /// </remarks>
         protected static Regex DefaultWordsMatcher => _defaultWordsMatcher;
 
@@ -181,14 +181,14 @@ namespace MagicText
         /// <remarks>
         ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultWordsOrNonWordsMatcher" />, <see cref="DefaultWordsOrPunctuationOrWhiteSpaceMatcher" />, <see cref="DefaultWordsOrPunctuationMatcher"/> or <see cref="DefaultWordsMatcher" />) with <see cref="Regex.Options" /> set to <see cref="DefaultMatchOptions" /> is used. Consider using this constructor or the default <see cref="RegexMatchTokeniser()" /> constructor if a default matching should be used to improve performance.</para>
         /// </remarks>
-        public RegexMatchTokeniser(RegexMatchTokeniserDefaultMatchings matching, Func<Match, String?>? getValue = null)
+        public RegexMatchTokeniser(DefaultTokenRegexMatchings matching, Func<Match, String?>? getValue = null)
         {
             _matcher = matching switch
             {
-                RegexMatchTokeniserDefaultMatchings.WordsOrNonWords => DefaultWordsOrNonWordsMatcher,
-                RegexMatchTokeniserDefaultMatchings.WordsOrPunctuationOrWhiteSpace => DefaultWordsOrPunctuationOrWhiteSpaceMatcher,
-                RegexMatchTokeniserDefaultMatchings.WordsOrPunctuation => DefaultWordsOrPunctuationMatcher,
-                RegexMatchTokeniserDefaultMatchings.Words => DefaultWordsMatcher,
+                DefaultTokenRegexMatchings.WordsOrNonWords => DefaultWordsOrNonWordsMatcher,
+                DefaultTokenRegexMatchings.WordsOrPunctuationOrWhiteSpace => DefaultWordsOrPunctuationOrWhiteSpaceMatcher,
+                DefaultTokenRegexMatchings.WordsOrPunctuation => DefaultWordsOrPunctuationMatcher,
+                DefaultTokenRegexMatchings.Words => DefaultWordsMatcher,
                 _ => throw new ArgumentException(MatchingNotSupportedErrorMessage, nameof(matching)),
             };
             _getValue = getValue ?? CaptureExtensions.GetValueOrNull;
@@ -197,9 +197,9 @@ namespace MagicText
         /// <summary>Creates a default tokeniser.</summary>
         /// <remarks>
         ///     <para>The <see cref="DefaultWordsOrNonWordsPattern" /> is used as the regular expression match pattern.</para>
-        ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultWordsOrNonWordsMatcher" />, <see cref="DefaultWordsOrPunctuationOrWhiteSpaceMatcher" />, <see cref="DefaultWordsOrPunctuationMatcher"/> or <see cref="DefaultWordsMatcher" />) with <see cref="Regex.Options" /> set to <see cref="DefaultMatchOptions" /> is used. Consider using this constructor or the <see cref="RegexMatchTokeniser(RegexMatchTokeniserDefaultMatchings, Func{Match, String})" /> if a default tokeniser should be used to improve performance.</para>
+        ///     <para>Actually, a pre-built <see cref="Regex" /> object (<see cref="DefaultWordsOrNonWordsMatcher" />, <see cref="DefaultWordsOrPunctuationOrWhiteSpaceMatcher" />, <see cref="DefaultWordsOrPunctuationMatcher"/> or <see cref="DefaultWordsMatcher" />) with <see cref="Regex.Options" /> set to <see cref="DefaultMatchOptions" /> is used. Consider using this constructor or the <see cref="RegexMatchTokeniser(DefaultTokenRegexMatchings, Func{Match, String})" /> if a default tokeniser should be used to improve performance.</para>
         /// </remarks>
-        public RegexMatchTokeniser() : this(RegexMatchTokeniserDefaultMatchings.WordsOrNonWords)
+        public RegexMatchTokeniser() : this(DefaultTokenRegexMatchings.WordsOrNonWords)
         {
         }
 

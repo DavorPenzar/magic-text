@@ -80,12 +80,84 @@ namespace MagicText.Internal.Extensions
         /// <remarks>
         ///     <para>In order to (try to) find an instance of type <c><typeparamref name="TMatch" /></c> in the <c><paramref name="source" /></c>, the <c><paramref name="source" /></c> must be enumerated. If a match is found (<c><paramref name="firstMatch" /></c>), the enumeration stops immediately.</para>
         /// </remarks>
-        public static Boolean ContainsType<TSource, TMatch>(this IEnumerable<TSource> source, [NotNullWhen(true)] out TMatch firstMatch) where TMatch : TSource
+        public static Boolean ContainsType<TSource, TMatch>(this IEnumerable<TSource> source, [NotNullWhen(true)] out TMatch firstMatch)
         {
-            Boolean matching = ContainsType(source, typeof(TMatch), out TSource firstMatchObject);
-            firstMatch = (TMatch)firstMatchObject!;
+            if (source is null)
+            {
+                throw new ArgumentNullException(nameof(source), SourceNullErrorMessage);
+            }
 
-            return matching;
+            foreach (TSource item in source)
+            {
+                if (item is TMatch itemMatch)
+                {
+                    firstMatch = itemMatch;
+
+                    return true;
+                }
+            }
+
+            firstMatch = default!;
+
+            return false;
+        }
+
+        /// <summary>Extracts a sorted <see cref="Array" /> of distinct values from the <c><paramref name="source" /></c>.</summary>
+        /// <typeparam name="TSource">The type of the elements of the <c><paramref name="source" /></c>.</typeparam>
+        /// <param name="source">The <c><paramref name="source" /></c> from which to extract distinct and sorted values.</param>
+        /// <param name="comparer">The <see cref="IComparer{T}" /> of <c><typeparamref name="TSource" /></c> to use for comparing items (to sort and check for duplicates). If <c>null</c>, <see cref="Comparer{T}.Default" /> is used.</param>
+        /// <returns>The sorted <see cref="Array" /> of distinct values from the <c><paramref name="source" /></c>.</returns>
+        /// <remarks>
+        ///     <para>The resulting <see cref="Array" /> is sorted ascendingly according to the <c><paramref name="comparer" /></c> and no two values in the <see cref="Array" /> compare equal by the <c><paramref name="comparer" /></c>.</para>
+        ///     <para>In order to extract distinct values from the <c><paramref name="source" /></c>, it must be enumerated until the end.</para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">The <c><paramref name="source" /></c> parameter is <c>null</c>.</exception>
+        public static TSource[] DistinctSorted<TSource>(this IEnumerable<TSource> source, IComparer<TSource>? comparer = null)
+        {
+            if (source is null)
+            {
+                throw new ArgumentNullException(nameof(source), SourceNullErrorMessage);
+            }
+
+            comparer ??= Comparer<TSource>.Default;
+
+            Int32 count = 0;
+            TSource[] distinctValues = source switch
+            {
+                ICollection<TSource> sourceCollection => new TSource[sourceCollection.Count],
+                IReadOnlyCollection<TSource> sourceReadOnlyCollection => new TSource[sourceReadOnlyCollection.Count],
+                _ => new TSource[1]
+            };
+
+            foreach (TSource value in source)
+            {
+                if (count == 0)
+                {
+                    ++count;
+                    distinctValues[0] = value;
+
+                    continue;
+                }
+
+                Int32 position = Array.BinarySearch(distinctValues, 0, count, value, comparer);
+                if (position >= 0)
+                {
+                    continue;
+                }
+
+                if (count++ >= distinctValues.Length)
+                {
+                    Buffering.Expand(ref distinctValues);
+                }
+
+                position = ~position;
+                Array.Copy(distinctValues, position, distinctValues, position + 1, count - position);
+                distinctValues[position] = value;
+            }
+
+            Buffering.TrimExcess(ref distinctValues, count);
+
+            return distinctValues;
         }
     }
 }
