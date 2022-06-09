@@ -9,13 +9,13 @@ using System.Threading;
 
 namespace MagicText
 {
-    /// <summary>Implements a <see cref="LineByLineTokeniser" /> which shatters lines of text at random positions.</summary>
+    /// <summary>Implements a <see cref="LineShatteringTokeniser" /> which shatters lines of text at random positions.</summary>
     /// <remarks>
     ///     <para>Empty tokens (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens that yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method. This behaviour cannot be overridden by a derived class.</para>
-    ///     <para>No thread safety mechanism is implemented nor assumed by the class. If the token breaking function (<see cref="BreakToken" />) should be thread-safe, lock the <see cref="RandomTokeniser" /> instance during complete <see cref="ShatterLine(String)" />, <see cref="LineByLineTokeniser.Shatter(TextReader, ShatteringOptions)" /> and <see cref="LineByLineTokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method calls to ensure consistent behaviour of the function over a single shattering operation.</para>
+    ///     <para>No thread safety mechanism is implemented nor assumed by the class. If the token breaking function (<see cref="BreakToken" />) should be thread-safe, lock the <see cref="RandomTokeniser" /> instance during complete <see cref="ShatterLine(String)" />, <see cref="LineShatteringTokeniser.Shatter(TextReader, ShatteringOptions)" /> and <see cref="LineShatteringTokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method calls to ensure consistent behaviour of the function over a single shattering operation.</para>
     /// </remarks>
     [CLSCompliant(true)]
-    public class RandomTokeniser : LineByLineTokeniser
+    public class RandomTokeniser : LineShatteringTokeniser
     {
         protected const string BreakTokenNullErrorMessage = "Token breaking predicate cannot be null.";
         protected const string BiasOutOfRangeFormatErrorMessage = "Bias is out of range. Must be greater than {0:N0} and less than or equal to {1:N0}.";

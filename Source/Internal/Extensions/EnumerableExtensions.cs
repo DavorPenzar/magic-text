@@ -82,37 +82,23 @@ namespace MagicText.Internal.Extensions
         /// </remarks>
         public static Boolean ContainsType<TSource, TMatch>(this IEnumerable<TSource> source, [NotNullWhen(true)] out TMatch firstMatch)
         {
-            if (source is null)
-            {
-                throw new ArgumentNullException(nameof(source), SourceNullErrorMessage);
-            }
+            Boolean matching = ContainsType(source, typeof(TMatch), out TSource firstMatchSource);
+            firstMatch = firstMatchSource is TMatch firstMatchMatch ? firstMatchMatch : default!;
 
-            foreach (TSource item in source)
-            {
-                if (item is TMatch itemMatch)
-                {
-                    firstMatch = itemMatch;
-
-                    return true;
-                }
-            }
-
-            firstMatch = default!;
-
-            return false;
+            return matching;
         }
 
-        /// <summary>Extracts a sorted <see cref="Array" /> of distinct values from the <c><paramref name="source" /></c>.</summary>
+        /// <summary>Extracts an ordered <see cref="Array" /> of distinct items from the <c><paramref name="source" /></c>.</summary>
         /// <typeparam name="TSource">The type of the elements of the <c><paramref name="source" /></c>.</typeparam>
         /// <param name="source">The <c><paramref name="source" /></c> from which to extract distinct and sorted values.</param>
-        /// <param name="comparer">The <see cref="IComparer{T}" /> of <c><typeparamref name="TSource" /></c> to use for comparing items (to sort and check for duplicates). If <c>null</c>, <see cref="Comparer{T}.Default" /> is used.</param>
-        /// <returns>The sorted <see cref="Array" /> of distinct values from the <c><paramref name="source" /></c>.</returns>
+        /// <param name="comparer">The <see cref="IComparer{T}" /> of <c><typeparamref name="TSource" /></c> to use for comparing items (to order and check for duplicates). If <c>null</c>, <see cref="Comparer{T}.Default" /> is used.</param>
+        /// <returns>The ordered <see cref="Array" /> of distinct items from the <c><paramref name="source" /></c>.</returns>
         /// <remarks>
-        ///     <para>The resulting <see cref="Array" /> is sorted ascendingly according to the <c><paramref name="comparer" /></c> and no two values in the <see cref="Array" /> compare equal by the <c><paramref name="comparer" /></c>.</para>
+        ///     <para>The resulting <see cref="Array" /> is ordered ascendingly according to the <c><paramref name="comparer" /></c> and no two items in the <see cref="Array" /> compare equal by the <c><paramref name="comparer" /></c>.</para>
         ///     <para>In order to extract distinct values from the <c><paramref name="source" /></c>, it must be enumerated until the end.</para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">The <c><paramref name="source" /></c> parameter is <c>null</c>.</exception>
-        public static TSource[] DistinctSorted<TSource>(this IEnumerable<TSource> source, IComparer<TSource>? comparer = null)
+        public static TSource[] OrderedDistinct<TSource>(this IEnumerable<TSource> source, IComparer<TSource>? comparer = null)
         {
             if (source is null)
             {
@@ -122,16 +108,16 @@ namespace MagicText.Internal.Extensions
             comparer ??= Comparer<TSource>.Default;
 
             Int32 count = 0;
-            TSource[] distinctValues = source switch
+            TSource[] distinctItems = source switch
             {
                 ICollection<TSource> sourceCollection => new TSource[sourceCollection.Count],
                 IReadOnlyCollection<TSource> sourceReadOnlyCollection => new TSource[sourceReadOnlyCollection.Count],
                 _ => Array.Empty<TSource>()
             };
 
-            foreach (TSource value in source)
+            foreach (TSource item in source)
             {
-                Int32 position = Array.BinarySearch(distinctValues, 0, count, value, comparer);
+                Int32 position = Array.BinarySearch(distinctItems, 0, count, item, comparer);
                 if (position >= 0)
                 {
                     continue;
@@ -139,18 +125,51 @@ namespace MagicText.Internal.Extensions
 
                 position = ~position;
 
-                if (count++ >= distinctValues.Length)
+                if (count++ >= distinctItems.Length)
                 {
-                    Buffering.Expand(ref distinctValues);
+                    Buffering.Expand(ref distinctItems);
                 }
 
-                Array.Copy(distinctValues, position, distinctValues, position + 1, count - position);
-                distinctValues[position] = value;
+                Array.Copy(distinctItems, position, distinctItems, position + 1, count - position);
+                distinctItems[position] = item;
             }
 
-            Buffering.TrimExcess(ref distinctValues, count);
+            Buffering.TrimExcess(ref distinctItems, count);
 
-            return distinctValues;
+            return distinctItems;
+        }
+
+        /// <summary>Extracts distinct items from the <c><paramref name="source" /></c> preserving their original order from the <c><paramref name="source" /></c>.</summary>
+        /// <typeparam name="TSource">The type of the elements of the <c><paramref name="source" /></c>.</typeparam>
+        /// <param name="source">The <c><paramref name="source" /></c> from which to extract distinct and sorted values.</param>
+        /// <param name="comparer">The <see cref="IEqualityComparer{T}" /> of <c><typeparamref name="TSource" /></c> to use for comparing items. If <c>null</c>, <see cref="EqualityComparer{T}.Default" /> is used.</param>
+        /// <returns>Distinct items from the <c><paramref name="source" /></c> as compared by the <c><paramref name="comparer" /></c>.</returns>
+        /// <remarks>
+        ///     <para>The distinct items are returned in the order of their first appearances.</para>
+        ///     <para>The returned enumerable is merely a query for enumerating items (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>).</para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">The <c><paramref name="source" /></c> parameter is <c>null</c>.</exception>
+        public static IEnumerable<TSource> DistinctPreserveOrder<TSource>(this IEnumerable<TSource> source, IEqualityComparer<TSource>? comparer = null)
+        {
+            if (source is null)
+            {
+                throw new ArgumentNullException(nameof(source), SourceNullErrorMessage);
+            }
+
+            comparer ??= EqualityComparer<TSource>.Default;
+
+            HashSet<TSource> distinctItems = new HashSet<TSource>(comparer);
+
+            foreach (TSource item in source)
+            {
+                if (distinctItems.Contains(item))
+                {
+                    continue;
+                }
+
+                yield return item;
+                distinctItems.Add(item);
+            }
         }
     }
 }
