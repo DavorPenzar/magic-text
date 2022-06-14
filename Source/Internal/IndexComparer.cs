@@ -36,7 +36,7 @@ namespace MagicText.Internal
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="comparer" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="comparer" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="tokens" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -100,7 +100,7 @@ namespace MagicText.Internal
         /// <exception cref="ArgumentException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="x" /></c> parameter is not an <see cref="Int32" /> or</item>
+        ///         <item>the <c><paramref name="x" /></c> parameter is not an <see cref="Int32" />, or</item>
         ///         <item>the <c><paramref name="y" /></c> parameter is not an <see cref="Int32" />.</item>
         ///     </list>
         /// </exception>
@@ -165,7 +165,7 @@ namespace MagicText.Internal
         /// <exception cref="ArgumentException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="x" /></c> parameter is not an <see cref="Int32" /> or</item>
+        ///         <item>the <c><paramref name="x" /></c> parameter is not an <see cref="Int32" />, or</item>
         ///         <item>the <c><paramref name="y" /></c> parameter is not an <see cref="Int32" />.</item>
         ///     </list>
         /// </exception>

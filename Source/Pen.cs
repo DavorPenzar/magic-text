@@ -198,7 +198,7 @@ namespace MagicText
         ///     <para>Either:</para>
         ///     <list type="number">
         ///         <item>the <c><paramref name="comparer" /></c> parameter is <c>null</c>,</item>
-        ///         <item>the <c><paramref name="tokens" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokens" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="sampleCycle" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -325,7 +325,7 @@ namespace MagicText
         ///     <para>Either:</para>
         ///     <list type="number">
         ///         <item>the <c><paramref name="comparer" /></c> parameter is <c>null</c>,</item>
-        ///         <item>the <c><paramref name="tokens" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokens" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="sample" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -367,7 +367,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="comparer" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="comparer" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="tokens" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -413,9 +413,6 @@ namespace MagicText
         [XmlIgnore, JsonIgnore, NonSerialized]
         private readonly String? _sentinelToken;
 
-        [XmlIgnore, JsonIgnore, NonSerialized]
-        private readonly Boolean _allSentinels;
-
         /// <summary>Gets the policy of interning all non-<c>null</c> tokens from the <see cref="Context" />, as well as the ending token (<see cref="SentinelToken" />): <c>true</c> if interning, <c>false</c> otherwise.</summary>
         /// <returns>If all tokens in the <see cref="Context" />, as well as the ending token (<see cref="SentinelToken" />), are interned, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <remarks>
@@ -451,13 +448,6 @@ namespace MagicText
         /// </remarks>
         public String? SentinelToken => _sentinelToken;
 
-        /// <summary>Gets the indicator of all tokens in the <see cref="Context" /> being equal to the ending token (<see cref="SentinelToken" />) in respect of the <see cref="Comparer" />: <c>true</c> if equal, <c>false</c> otherwise.</summary>
-        /// <returns>If all tokens in the <see cref="Context" /> are ending tokens (<see cref="SentinelToken" />) as compared by the <see cref="Comparer" />, <c>true</c>; <c>false</c> otherwise.</returns>
-        /// <remarks>
-        ///     <para>If the <see cref="Context" /> is empty, <see cref="AllSentinels" /> is <c>true</c>. This coincides with mathematical logic of empty sets.</para>
-        /// </remarks>
-        public Boolean AllSentinels => _allSentinels;
-
         /// <summary>Creates a pen.</summary>
         /// <param name="context">The input tokens. All random text shall be generated based on the <c><paramref name="context" /></c>: both by picking only tokens from the <c><paramref name="context" /></c> and by using the order of tokens from it.</param>
         /// <param name="comparer">The <see cref="StringComparer" /> used by the <see cref="Pen" />. Tokens shall be compared (e. g. for equality) by the <c><paramref name="comparer" /></c>. If <c>null</c>, <see cref="StringComparer.Ordinal" /> is used.</param>
@@ -492,9 +482,6 @@ namespace MagicText
                 indexList.TrimExcess();
                 _index = indexList.AsReadOnly();
             }
-
-            // Check if all tokens are ending tokens.
-            _allSentinels = Context.All((new BoundStringComparer(Comparer, SentinelToken)).Equals);
         }
 
         /// <summary>Creates a pen.</summary>
@@ -541,9 +528,6 @@ namespace MagicText
                 indexList.TrimExcess();
                 _index = indexList.AsReadOnly();
             }
-
-            // Check if all tokens are ending tokens.
-            _allSentinels = Context.All((new BoundStringComparer(Comparer, SentinelToken)).Equals);
         }
 
         /// <summary>Creates an empty pen.</summary>
@@ -592,9 +576,6 @@ namespace MagicText
 
             // Copy the `Index`.
             _index = other.Index;
-
-            // Copy whether or not all tokens are ending tokens.
-            _allSentinels = other.AllSentinels;
         }
 
         /// <summary>Copies the <c><paramref name="other" /></c> pen.</summary>
@@ -688,9 +669,6 @@ namespace MagicText
                 String? sentinelToken = info.GetString(nameof(SentinelToken));
                 _sentinelToken = Interned ? StringExtensions.InternNullable(sentinelToken) : sentinelToken;
             }
-
-            // Deserialise whether or not all tokens are ending tokens.
-            _allSentinels = info.GetBoolean(nameof(AllSentinels));
         }
 
         /// <summary>Creates a pen from externally initialised values.</summary>
@@ -699,18 +677,16 @@ namespace MagicText
         /// <param name="index">The sorting index of the <c><paramref name="context" /></c> in respect of the <c><paramref name="comparer" /></c>.</param>
         /// <param name="context">The token context.</param>
         /// <param name="sentinelToken">The ending token.</param>
-        /// <param name="allSentinels">The indicator of all tokens in the <c><paramref name="context" /></c> being the ending token (<c><paramref name="sentinelToken" /></c>).</param>
         /// <remarks>
         ///     <para><strong>Nota bene.</strong> This constructor is intended for <strong>internal use only</strong> (hence the access modifier <em><c>internal</c></em>). It is supposed to be used for <em>XML</em> and <em>JSON</em> serialisation and deserialisation of instances of class <see cref="Pen" />.</para>
         /// </remarks>
-        internal Pen(Boolean interned, StringComparer comparer, IReadOnlyList<Int32> index, IReadOnlyList<String?> context, String? sentinelToken, Boolean allSentinels) : base()
+        internal Pen(Boolean interned, StringComparer comparer, IReadOnlyList<Int32> index, IReadOnlyList<String?> context, String? sentinelToken) : base()
         {
             _interned = interned;
             _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer), ComparerNullErrorMessage);
             _context = context ?? throw new ArgumentNullException(nameof(context), ContextNullErrorMessage);
             _index = index ?? throw new ArgumentNullException(nameof(index), IndexNullErrorMessage);
             _sentinelToken = sentinelToken;
-            _allSentinels = allSentinels;
         }
 
         /// <summary>Finds the positions of the <c><paramref name="sample" /></c> in the <see cref="Context" />.</summary>
@@ -970,7 +946,7 @@ namespace MagicText
         ///     <para>Either:</para>
         ///     <list type="number">
         ///         <item><c><paramref name="relevantTokens" /></c> is less than 0,</item>
-        ///         <item><c><paramref name="fromPosition" /></c> is less than 0 or greater than the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property) or</item>
+        ///         <item><c><paramref name="fromPosition" /></c> is less than 0 or greater than the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property), or</item>
         ///         <item>the <c><paramref name="picker" /></c> function returns a value outside the legal range.</item>
         ///     </list>
         /// </exception>
@@ -982,7 +958,7 @@ namespace MagicText
         ///     <para>The enumeration of tokens shall immediately stop, without rendering any tokens, if:</para>
         ///     <list type="number">
         ///         <item>the <see cref="Context" /> is empty,</item>
-        ///         <item>all tokens in the <see cref="Context" /> are ending tokens (mathematically speaking, this is a <em>supercase</em> of the first case), which is indicated by the <see cref="AllSentinels" /> property, or</item>
+        ///         <item>all tokens in the <see cref="Context" /> are ending tokens (mathematically speaking, this is a <em>supercase</em> of the first case), or</item>
         ///         <item>a <em>successor</em> of the last token or an ending token is picked first, which may be manually triggered (regardless of the <c><paramref name="picker" /></c> function) by passing the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property) as the value of the parameter <c><paramref name="fromPosition" /></c>.</item>
         ///     </list>
         /// </remarks>
@@ -1102,7 +1078,7 @@ namespace MagicText
         /// <exception cref="ArgumentOutOfRangeException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item><c><paramref name="relevantTokens" /></c> is less than 0 or</item>
+        ///         <item><c><paramref name="relevantTokens" /></c> is less than 0, or</item>
         ///         <item><c><paramref name="fromPosition" /></c> is less than 0 or greater than the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</item>
         ///     </list>
         /// </exception>
@@ -1115,7 +1091,7 @@ namespace MagicText
         ///     <para>The enumeration of tokens shall immediately stop, without rendering any tokens, if:</para>
         ///     <list type="number">
         ///         <item>the <see cref="Context" /> is empty,</item>
-        ///         <item>all tokens in the <see cref="Context" /> are ending tokens (mathematically speaking, this is a <em>supercase</em> of the first case), which is indicated by the <see cref="AllSentinels" /> property, or</item>
+        ///         <item>all tokens in the <see cref="Context" /> are ending tokens (mathematically speaking, this is a <em>supercase</em> of the first case), or</item>
         ///         <item>a <em>successor</em> of the last token or an ending token is picked first, which may be manually triggered (regardless of the <c><paramref name="random" /></c>) by passing the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property) as the value of the parameter <c><paramref name="fromPosition" /></c>.</item>
         ///     </list>
         /// </remarks>
@@ -1129,7 +1105,7 @@ namespace MagicText
         /// <exception cref="ArgumentOutOfRangeException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item><c><paramref name="relevantTokens" /></c> is less than 0 or</item>
+        ///         <item><c><paramref name="relevantTokens" /></c> is less than 0, or</item>
         ///         <item><c><paramref name="fromPosition" /></c> is less than 0 or greater than the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property).</item>
         ///     </list>
         /// </exception>
@@ -1142,7 +1118,7 @@ namespace MagicText
         ///     <para>The enumeration of tokens shall immediately stop, without rendering any tokens, if:</para>
         ///     <list type="number">
         ///         <item>the <see cref="Context" /> is empty,</item>
-        ///         <item>all tokens in the <see cref="Context" /> are ending tokens (mathematically speaking, this is a <em>supercase</em> of the first case), which is indicated by the <see cref="AllSentinels" /> property, or</item>
+        ///         <item>all tokens in the <see cref="Context" /> are ending tokens (mathematically speaking, this is a <em>supercase</em> of the first case), or</item>
         ///         <item>a <em>successor</em> of the last token or an ending token is picked first, which may be manually triggered by passing the total number of tokens in the <see cref="Context" /> (its <see cref="IReadOnlyCollection{T}.Count" /> property) as the value of the parameter <c><paramref name="fromPosition" /></c>.</item>
         ///     </list>
         /// </remarks>
@@ -1208,9 +1184,6 @@ namespace MagicText
 
             // Serialise the ending token.
             info.AddValue(nameof(SentinelToken), SentinelToken, typeof(String));
-
-            // Serialise whether or not all tokens are ending tokens.
-            info.AddValue(nameof(AllSentinels), AllSentinels);
         }
 
         /// <summary>Creates a new <see cref="Pen" /> that is a copy of the current pen.</summary>

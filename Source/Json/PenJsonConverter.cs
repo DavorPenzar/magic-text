@@ -146,10 +146,6 @@ namespace MagicText.Json
             {
                 properties[nameof(Pen.SentinelToken)] = JsonConversionHelper.ReadString(ref reader, options);
             }
-            else if (propertyNameComparer.Equals(propertyName, propertyNames[nameof(Pen.AllSentinels)]))
-            {
-                properties[nameof(Pen.AllSentinels)] = JsonConversionHelper.ReadBoolean(ref reader, options);
-            }
             else
             {
                 throw new JsonException(String.Format(CultureInfo.CurrentCulture, JsonConversionHelper.InvalidPropertyErrorMessage, propertyName));
@@ -170,7 +166,6 @@ namespace MagicText.Json
             JsonConversionHelper.WriteStringArray(writer, convertName(nameof(Pen.Context)), value.Context?.AsBuffer()!, options);
             JsonConversionHelper.WriteInt32Array(writer, convertName(nameof(Pen.Index)), value.Index?.AsBuffer(), options);
             JsonConversionHelper.WriteString(writer, convertName(nameof(Pen.SentinelToken)), value.SentinelToken, options);
-            JsonConversionHelper.WriteBoolean(writer, convertName(nameof(Pen.AllSentinels)), value.AllSentinels, options);
         }
 
         /// <summary>Deconstructs a <see cref="Pen" />'s property <see cref="IReadOnlyDictionary{TKey, TValue}" />.</summary>
@@ -180,8 +175,7 @@ namespace MagicText.Json
         /// <param name="index">The index of entries in the <see cref="Pen.Context" /> sorted ascendingly.</param>
         /// <param name="context">The reference token context.</param>
         /// <param name="sentinelToken">The ending token.</param>
-        /// <param name="allSentinels">The indicator of all tokens in the <see cref="Pen.Context" /> being equal to the ending token (<see cref="Pen.SentinelToken" />).</param>
-        private static void DeconstructProperties(IReadOnlyDictionary<String, Object?> properties, out Boolean interned, out StringComparer? comparer, out IReadOnlyList<Int32>? index, out IReadOnlyList<String?>? context, out String? sentinelToken, out Boolean allSentinels)
+        private static void DeconstructProperties(IReadOnlyDictionary<String, Object?> properties, out Boolean interned, out StringComparer? comparer, out IReadOnlyList<Int32>? index, out IReadOnlyList<String?>? context, out String? sentinelToken)
         {
             interned = properties.TryGetValue(nameof(Pen.Interned), out Object? internedObject) && (Boolean)internedObject!;
             comparer = properties.TryGetValue(nameof(Pen.Comparer), out Object? comparerObject) ? (StringComparer)comparerObject! : null;
@@ -212,7 +206,6 @@ namespace MagicText.Json
                 context = null;
             }
             sentinelToken = properties.TryGetValue(nameof(Pen.SentinelToken), out Object? sentinelTokenObject) ? (String)sentinelTokenObject! : null;
-            allSentinels = properties.TryGetValue(nameof(Pen.AllSentinels), out Object? allSentinelsObject) ? (Boolean)allSentinelsObject! : (context is null || context.Count == 0);
         }
 
         private readonly JsonConverter<StringComparer> _comparerJsonConverter;
@@ -251,7 +244,6 @@ namespace MagicText.Json
             IReadOnlyList<Int32>? index;
             IReadOnlyList<String?>? context;
             String? sentinelToken;
-            Boolean allSentinels;
 
             // Return `null` in case of a `null`.
             if (reader.TokenType == JsonTokenType.Null)
@@ -273,18 +265,17 @@ namespace MagicText.Json
                 Func<String, String> convertName = JsonConversionHelper.GetPropertyNameConversionPolicy(options);
 
                 // Initialise a dictionary mapping raw property names to the converted.
-                Dictionary<String, String> propertyNames = new Dictionary<String, String>(6)
+                Dictionary<String, String> propertyNames = new Dictionary<String, String>(5)
                 {
                     {  nameof(Pen.Interned), convertName(nameof(Pen.Interned)) },
                     {  nameof(Pen.Comparer), convertName(nameof(Pen.Comparer)) },
                     {  nameof(Pen.Index), convertName(nameof(Pen.Index)) },
                     {  nameof(Pen.Context), convertName(nameof(Pen.Context)) },
-                    {  nameof(Pen.SentinelToken), convertName(nameof(Pen.SentinelToken)) },
-                    {  nameof(Pen.AllSentinels), convertName(nameof(Pen.AllSentinels)) }
+                    {  nameof(Pen.SentinelToken), convertName(nameof(Pen.SentinelToken)) }
                 };
 
                 // Initialise an empty dictionary of property values.
-                Dictionary<String, Object?> properties = new Dictionary<String, Object?>(6, propertyNameComparer);
+                Dictionary<String, Object?> properties = new Dictionary<String, Object?>(5, propertyNameComparer);
 
                 // Read properties.
                 while (true)
@@ -303,11 +294,11 @@ namespace MagicText.Json
                 }
 
                 // Deconstruct properties from the dictionary.
-                DeconstructProperties(properties, out interned, out comparer, out index, out context, out sentinelToken, out allSentinels);
+                DeconstructProperties(properties, out interned, out comparer, out index, out context, out sentinelToken);
             }
 
             // Create and return the read `Pen`.
-            return new Pen(interned, comparer!, index!, context!, sentinelToken, allSentinels);
+            return new Pen(interned, comparer!, index!, context!, sentinelToken);
         }
 
         /// <summary>Writes the specified <see cref="Pen" /> <c><paramref name="value" /></c> as <a href="http://json.org/json-en.html"><em>JSON</em></a>.</summary>

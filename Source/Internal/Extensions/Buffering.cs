@@ -8,7 +8,7 @@ namespace MagicText.Internal.Extensions
     internal static class Buffering
     {
         private const string BufferNullErrorMessage = "Buffer cannot be null.";
-        private const string SizeOutOfRangeFormatErrorMessage = "Size is out of range. Must be greater than or equal to {0:D} and less than or equal to buffer capacity ({1:D}).";
+        private const string SizeOutOfRangeFormatErrorMessage = "Size is out of range. Must be greater than or equal to {0:D}, and less than or equal to buffer capacity ({1:D}).";
         private const string BufferToLargeFormatErrorMessage = "Cannot expand buffer beyond maximal size ({0:D).";
         private const string SourceNullErrorMessage = "Source cannot be null.";
 
@@ -32,9 +32,7 @@ namespace MagicText.Internal.Extensions
                 _ when buffer.Length < Int32.MaxValue => new T[Int32.MaxValue],
                 _ => throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, BufferToLargeFormatErrorMessage, Int32.MaxValue))
             };
-
-            Array.Copy(buffer, newBuffer, buffer.Length);
-
+            buffer.CopyTo(newBuffer, 0);
             buffer = newBuffer;
         }
 
@@ -62,9 +60,7 @@ namespace MagicText.Internal.Extensions
             }
 
             T[] newBuffer = new T[size];
-
-            Array.Copy(buffer, newBuffer, size);
-
+            Array.Copy(buffer, 0, newBuffer, 0, size);
             buffer = newBuffer;
         }
 

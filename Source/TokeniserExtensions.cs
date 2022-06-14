@@ -119,7 +119,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="text" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -157,7 +157,7 @@ namespace MagicText
         ///     <para>Either:</para>
         ///     <list type="number">
         ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>,</item>
-        ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="encoding" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -206,7 +206,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -250,7 +250,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -272,7 +272,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="inputReader" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -301,7 +301,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="text" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -327,7 +327,7 @@ namespace MagicText
         ///     <para>Either:</para>
         ///     <list type="number">
         ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>,</item>
-        ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="encoding" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -353,7 +353,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -378,7 +378,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -403,7 +403,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="text" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -446,7 +446,7 @@ namespace MagicText
         ///     <para>Either:</para>
         ///     <list type="number">
         ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>,</item>
-        ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="encoding" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -499,7 +499,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -547,7 +547,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -580,7 +580,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="inputReader" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -639,7 +639,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="text" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -697,7 +697,7 @@ namespace MagicText
         ///     <para>Either:</para>
         ///     <list type="number">
         ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>,</item>
-        ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="encoding" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -756,7 +756,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -814,7 +814,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c> or</item>
+        ///         <item>the <c><paramref name="tokeniser" /></c> parameter is <c>null</c>, or</item>
         ///         <item>the <c><paramref name="input" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>

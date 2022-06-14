@@ -87,7 +87,7 @@ namespace MagicText.Internal
 
         /// <summary>Creates a default comparer.</summary>
         /// <remarks>
-        ///     <para>The internal (bound) <see cref="StringComparer" /> is set to <see cref="StringComparer.Ordinal" /> and the internal reference <see cref="System.String" /> (<see cref="String" />) is set to <c>null</c>.</para>
+        ///     <para>The internal (bound) <see cref="StringComparer" /> is set to <see cref="StringComparer.Ordinal" />, and the internal reference <see cref="System.String" /> (<see cref="String" />) is set to <c>null</c>.</para>
         /// </remarks>
         public BoundStringComparer() : this(null)
         {

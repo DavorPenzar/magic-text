@@ -84,7 +84,7 @@ namespace MagicText.Internal.Json
         /// <exception cref="InvalidOperationException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>a <see cref="JsonConverter{T}" /> of the <see cref="StringComparer" />'s <see cref="Type" /> was not provided or</item>
+        ///         <item>a <see cref="JsonConverter{T}" /> of the <see cref="StringComparer" />'s <see cref="Type" /> was not provided, or</item>
         ///         <item>failed to utilise the provided <see cref="JsonConverter" />.</item>
         ///     </list>
         /// </exception>
@@ -205,7 +205,7 @@ namespace MagicText.Internal.Json
         /// <exception cref="InvalidOperationException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>a <see cref="JsonConverter{T}" /> of the <see cref="StringComparer" />'s <see cref="Type" /> was not provided or</item>
+        ///         <item>a <see cref="JsonConverter{T}" /> of the <see cref="StringComparer" />'s <see cref="Type" /> was not provided, or</item>
         ///         <item>failed to utilise the provided <see cref="JsonConverter" />.</item>
         ///     </list>
         /// </exception>

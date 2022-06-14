@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace MagicText.Internal.Extensions
 {
@@ -37,7 +38,7 @@ namespace MagicText.Internal.Extensions
         /// <exception cref="ArgumentNullException">
         ///     <para>Either:</para>
         ///     <list type="number">
-        ///         <item>The <c><paramref name="source" /></c> parameter is <c>null</c> or</item>
+        ///         <item>The <c><paramref name="source" /></c> parameter is <c>null</c>, or</item>
         ///         <item>The <c><paramref name="type" /></c> parameter is <c>null</c>.</item>
         ///     </list>
         /// </exception>
@@ -143,10 +144,10 @@ namespace MagicText.Internal.Extensions
         /// <summary>Extracts distinct items from the <c><paramref name="source" /></c> preserving their original order from the <c><paramref name="source" /></c>.</summary>
         /// <typeparam name="TSource">The type of the elements of the <c><paramref name="source" /></c>.</typeparam>
         /// <param name="source">The <c><paramref name="source" /></c> from which to extract distinct and sorted values.</param>
-        /// <param name="comparer">The <see cref="IEqualityComparer{T}" /> of <c><typeparamref name="TSource" /></c> to use for comparing items. If <c>null</c>, <see cref="EqualityComparer{T}.Default" /> is used.</param>
+        /// <param name="comparer">The <see cref="IEqualityComparer{T}" /> of <c><typeparamref name="TSource" /></c> to use for comparing items. If <c>null</c>, <see cref="EqualityComparer{T}.Default" /> of <c><typeparamref name="TSource" /></c> is used.</param>
         /// <returns>Distinct items from the <c><paramref name="source" /></c> as compared by the <c><paramref name="comparer" /></c>.</returns>
         /// <remarks>
-        ///     <para>The distinct items are returned in the order of their first appearances.</para>
+        ///     <para>Unlike the <see cref="Enumerable.Distinct{TSource}(IEnumerable{TSource}, IEqualityComparer{TSource})" /> method, it is guaranteed that the distinct items are returned in the order of their first appearances in the <c><paramref name="source" /></c>.</para>
         ///     <para>The returned enumerable is merely a query for enumerating items (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>).</para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">The <c><paramref name="source" /></c> parameter is <c>null</c>.</exception>
@@ -159,7 +160,16 @@ namespace MagicText.Internal.Extensions
 
             comparer ??= EqualityComparer<TSource>.Default;
 
+#if NETSTANDARD2_0
             HashSet<TSource> distinctItems = new HashSet<TSource>(comparer);
+#else
+            HashSet<TSource> distinctItems = source switch
+            {
+                ICollection<TSource> sourceCollection => new HashSet<TSource>(sourceCollection.Count),
+                IReadOnlyCollection<TSource> sourceReadOnlyCollection => new HashSet<TSource>(sourceReadOnlyCollection.Count),
+                _ => new HashSet<TSource>()
+            };
+#endif // NETSTANDARD2_0
 
             foreach (TSource item in source)
             {

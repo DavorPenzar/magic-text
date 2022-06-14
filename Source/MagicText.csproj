@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -26,6 +26,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="docfx" Version="2.59.2" />
+    <PackageReference Include="docfx.console" Version="2.59.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
 	<!--<PackageReference Include="NETStandard.Library" />-->
@@ -49,7 +54,7 @@
     <!--<PackageReference Include="System.Security.Permissions" />-->
     <!--<PackageReference Include="System.Text.Encoding" />-->
     <!--<PackageReference Include="System.Text.Encoding.Extensions" />-->
-    <PackageReference Include="System.Text.Json" Version="5.0.2" /> <!-- NOTE. Do not update if using .NET Core 3.0 or older. -->
+    <PackageReference Include="System.Text.Json" Version="5.0.2" /> <!-- NOTE. Do not update if using .NET Core 3.0 or less. -->
     <!--<PackageReference Include="System.Text.RegularExpressions" />-->
     <!--<PackageReference Include="System.Threading" />-->
     <!--<PackageReference Include="System.Threading.Tasks" />-->
