@@ -78,7 +78,7 @@ namespace MagicText
         /// <remarks>
         ///     <para>Calling this constructor is essentially the same (performance aside) as calling the <see cref="RegexSplitTokeniser(String, Boolean, RegexOptions, Func{String, String})" /> constructor as:</para>
         ///     <code>
-        ///         <see cref="RegexSplitTokeniser" />(pattern: <paramref name="regex" />.ToString(), options: <paramref name="alterOptions" /> ?? <paramref name="regex" />.Options, transform: <paramref name="transformToken" />)
+        ///         <see cref="RegexSplitTokeniser" />(pattern: <paramref name="regex" />.ToString(), options: <paramref name="alterOptions" /> ?? <paramref name="regex" />.Options, transformToken: <paramref name="transformToken" />)
         ///     </code>
         /// </remarks>
         public RegexSplitTokeniser(System.Text.RegularExpressions.Regex regex, Nullable<RegexOptions> alterOptions = default, Func<String, String?>? transformToken = null) : base(regex, alterOptions)

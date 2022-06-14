@@ -112,29 +112,29 @@ namespace MagicText
         /// <summary>Creates a tokeniser.</summary>
         /// <param name="regex">The regular expression matcher to use.</param>
         /// <param name="alterOptions">If not set (if <c>null</c>), the <c><paramref name="regex" /></c>'s <see cref="System.Text.RegularExpressions.Regex.Options" /> are used (actually, no new <see cref="System.Text.RegularExpressions.Regex" /> is constructed but the original <c><paramref name="regex" /></c> is used); otherwise the options passed to the <see cref="System.Text.RegularExpressions.Regex(String, RegexOptions)" /> constructor.</param>
-        /// <param name="getValue">The optional token extraction function. If <c>null</c>, tokens are constructed from <see cref="Match" />es' raw <see cref="Capture.Value" /> properties.</param>
+        /// <param name="getToken">The optional token extraction function. If <c>null</c>, tokens are constructed from <see cref="Match" />es' raw <see cref="Capture.Value" /> properties.</param>
         /// <exception cref="ArgumentNullException">The <c><paramref name="regex" /></c> parameter is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">The <c><paramref name="alterOptions" /></c> are an invalid <see cref="RegexOptions" /> value.</exception>
         /// <remarks>
         ///     <para>Calling this constructor is essentially the same (performance aside) as calling the <see cref="RegexMatchesTokeniser(String, Boolean, RegexOptions, Func{Match, String})" /> constructor as:</para>
         ///     <code>
-        ///         <see cref="RegexMatchesTokeniser" />(pattern: <paramref name="regex" />.ToString(), options: <paramref name="alterOptions" /> ?? <paramref name="regex" />.Options, getValue: <paramref name="getValue" />)
+        ///         <see cref="RegexMatchesTokeniser" />(pattern: <paramref name="regex" />.ToString(), options: <paramref name="alterOptions" /> ?? <paramref name="regex" />.Options, getToken: <paramref name="getToken" />)
         ///     </code>
         /// </remarks>
-        public RegexMatchesTokeniser(System.Text.RegularExpressions.Regex regex, Nullable<RegexOptions> alterOptions = default, Func<Match, String?>? getValue = null) : base(regex, alterOptions)
+        public RegexMatchesTokeniser(System.Text.RegularExpressions.Regex regex, Nullable<RegexOptions> alterOptions = default, Func<Match, String?>? getToken = null) : base(regex, alterOptions)
         {
-            _getToken = getValue ?? CaptureExtensions.GetValueOrNull;
+            _getToken = getToken ?? CaptureExtensions.GetValueOrNull;
         }
 
         /// <summary>Creates a tokeniser with a default matching.</summary>
         /// <param name="matching">Specifies which default regular expression match pattern to use (<see cref="DefaultWordsOrNonWordsPattern" />, <see cref="DefaultWordsOrPunctuationOrWhiteSpacePattern" />, <see cref="DefaultWordsOrPunctuationPattern" /> or <see cref="DefaultWordsPattern" />).</param>
-        /// <param name="getValue">The optional token extraction function. If <c>null</c>, tokens are constructed from <see cref="Match" />es' raw <see cref="Capture.Value" /> properties.</param>
+        /// <param name="getToken">The optional token extraction function. If <c>null</c>, tokens are constructed from <see cref="Match" />es' raw <see cref="Capture.Value" /> properties.</param>
         /// <remarks>
         ///     <para>Actually, a pre-built <see cref="System.Text.RegularExpressions.Regex" /> object (<see cref="DefaultWordsOrNonWordsRegex" />, <see cref="DefaultWordsOrPunctuationOrWhiteSpaceRegex" />, <see cref="DefaultWordsOrPunctuationRegex"/> or <see cref="DefaultWordsRegex" />) with <see cref="System.Text.RegularExpressions.Regex.Options" /> set to <see cref="RegexTokeniser.DefaultOptions" /> is used. Consider using this constructor or the default <see cref="RegexMatchesTokeniser()" /> constructor if a default matching should be used to improve performance.</para>
         /// </remarks>
-        public RegexMatchesTokeniser(DefaultTokenRegexMatchings matching, Func<Match, String?>? getValue = null) : base(matching switch { DefaultTokenRegexMatchings.WordsOrNonWords => DefaultWordsOrNonWordsRegex, DefaultTokenRegexMatchings.WordsOrPunctuationOrWhiteSpace => DefaultWordsOrPunctuationOrWhiteSpaceRegex, DefaultTokenRegexMatchings.WordsOrPunctuation => DefaultWordsOrPunctuationRegex, DefaultTokenRegexMatchings.Words => DefaultWordsRegex, _ => throw new ArgumentException(MatchingNotSupportedErrorMessage, nameof(matching)) })
+        public RegexMatchesTokeniser(DefaultTokenRegexMatchings matching, Func<Match, String?>? getToken = null) : base(matching switch { DefaultTokenRegexMatchings.WordsOrNonWords => DefaultWordsOrNonWordsRegex, DefaultTokenRegexMatchings.WordsOrPunctuationOrWhiteSpace => DefaultWordsOrPunctuationOrWhiteSpaceRegex, DefaultTokenRegexMatchings.WordsOrPunctuation => DefaultWordsOrPunctuationRegex, DefaultTokenRegexMatchings.Words => DefaultWordsRegex, _ => throw new ArgumentException(MatchingNotSupportedErrorMessage, nameof(matching)) })
         {
-            _getToken = getValue ?? CaptureExtensions.GetValueOrNull;
+            _getToken = getToken ?? CaptureExtensions.GetValueOrNull;
         }
 
         /// <summary>Creates a default tokeniser.</summary>
@@ -150,13 +150,13 @@ namespace MagicText
         /// <param name="pattern">The regular expression match pattern to use.</param>
         /// <param name="escape">If <c>true</c>, the <c><paramref name="pattern" /></c> is escaped using the <see cref="System.Text.RegularExpressions.Regex.Escape(String)" /> method to construct the actual regular expression match pattern.</param>
         /// <param name="options">The options passed to the <see cref="System.Text.RegularExpressions.Regex(String, RegexOptions)" /> constructor.</param>
-        /// <param name="getValue">The optional token extraction function. If <c>null</c>, tokens are constructed from <see cref="Match" />es' raw <see cref="Capture.Value" /> properties.</param>
+        /// <param name="getToken">The optional token extraction function. If <c>null</c>, tokens are constructed from <see cref="Match" />es' raw <see cref="Capture.Value" /> properties.</param>
         /// <exception cref="ArgumentNullException">The <c><paramref name="pattern" /></c> parameter is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">The <c><paramref name="options" /></c> are an invalid <see cref="RegexOptions" /> value.</exception>
         /// <exception cref="ArgumentException">The <c><paramref name="pattern" /></c> is not a valid regular expression pattern.</exception>
-        public RegexMatchesTokeniser([RegexPattern] String pattern, Boolean escape = false, RegexOptions options = RegexOptions.None, Func<Match, String?>? getValue = null) : base(pattern, escape, options)
+        public RegexMatchesTokeniser([RegexPattern] String pattern, Boolean escape = false, RegexOptions options = RegexOptions.None, Func<Match, String?>? getToken = null) : base(pattern, escape, options)
         {
-            _getToken = getValue ?? CaptureExtensions.GetValueOrNull;
+            _getToken = getToken ?? CaptureExtensions.GetValueOrNull;
         }
 
 #if NETSTANDARD2_0
@@ -184,7 +184,7 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">The <c><paramref name="line" /></c> parameter is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>Performance aside, the initial capturing is equivalent to calling the <see cref="System.Text.RegularExpressions.Regex.Matches(String, String, RegexOptions)" /> method with the <c><paramref name="line" /></c> as the first argument, the <see cref="RegexTokeniser.Pattern" /> as the second and <see cref="RegexTokeniser.Options" /> as the third.</para>
-        ///     <para>After capturing <see cref="Match" />es from the <c><paramref name="line" /></c>, the token extraction from the <see cref="Match" />es is done using the <see cref="GetValue" /> function.</para>
+        ///     <para>After capturing <see cref="Match" />es from the <c><paramref name="line" /></c>, the token extraction from the <see cref="Match" />es is done using the <see cref="GetToken" /> function.</para>
         ///     <para>The returned enumerable is merely be a query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>). If multiple enumeration processes over the enumerable should be performed, it is advisable to convert it to a fully built container beforehand, such as a <see cref="List{T}" /> via the <see cref="List{T}.List(IEnumerable{T})" /> constructor or the <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.</para>
         ///
         ///     <h3>Notes to Implementers</h3>
