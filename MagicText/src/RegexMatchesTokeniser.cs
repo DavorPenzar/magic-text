@@ -191,7 +191,7 @@ namespace MagicText
         ///     <para>This method cannot be overridden.</para>
         /// </remarks>
         protected sealed override IEnumerable<String?> ShatterLine(String line) =>
-            line is null ? throw new ArgumentNullException(nameof(line), LineNullErrorMessage) : Regex.Matches(line).Select(GetValue);
+            line is null ? throw new ArgumentNullException(nameof(line), LineNullErrorMessage) : Regex.Matches(line).Select(GetToken);
 
 #endif // NETSTANDARD2_0
     }
