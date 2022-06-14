@@ -35,11 +35,11 @@ namespace MagicText.Internal.Json
         /// <param name="options">The <see cref="JsonSerializerOptions" /> to use.</param>
         /// <returns>The converted <see cref="StringComparer" /> value.</returns>
         /// <exception cref="JsonException">An unexpected <a href="http://json.org/json-en.html"><em>JSON</em></a> token is encountered (by type or value).</exception>
-        public override Type? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override Type Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType == JsonTokenType.Null)
             {
-                return null;
+                return null!;
             }
 
             return Type.GetType(JsonConversionHelper.ReadString(ref reader, options, read: false));

@@ -26,40 +26,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="docfx" Version="2.59.2" />
-    <PackageReference Include="docfx.console" Version="2.59.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
-	<!--<PackageReference Include="NETStandard.Library" />-->
-    <!--<PackageReference Include="System.Collections" />-->
-    <PackageReference Include="System.ComponentModel" Version="4.3.0" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-    <!--<PackageReference Include="System.ComponentModel.Primitives" />-->
-    <!--<PackageReference Include="System.Diagnostics.Tools" />-->
-    <!--<PackageReference Include="System.Globalization" />-->
-    <!--<PackageReference Include="System.IO" />-->
-    <!--<PackageReference Include="System.Linq" />-->
-    <!--<PackageReference Include="System.Linq.Async" />-->
-    <!--<PackageReference Include="System.ObjectModel" />-->
-    <!--<PackageReference Include="System.Runtime" />-->
-    <!--<PackageReference Include="System.Runtime.CompilerServices.Unsafe" />-->
-    <!--<PackageReference Include="System.Runtime.Extensions" />-->
-    <!--<PackageReference Include="System.Runtime.InteropServices" />-->
-    <!--<PackageReference Include="System.Runtime.Serialization.Json" />-->
-    <!--<PackageReference Include="System.Runtime.Serialization.Primitives" />-->
-    <!--<PackageReference Include="System.Runtime.Serialization.Xml" />-->
-    <!--<PackageReference Include="System.Security.Permissions" />-->
-    <!--<PackageReference Include="System.Text.Encoding" />-->
-    <!--<PackageReference Include="System.Text.Encoding.Extensions" />-->
-    <PackageReference Include="System.Text.Json" Version="5.0.2" /> <!-- NOTE. Do not update if using .NET Core 3.0 or less. -->
-    <!--<PackageReference Include="System.Text.RegularExpressions" />-->
-    <!--<PackageReference Include="System.Threading" />-->
-    <!--<PackageReference Include="System.Threading.Tasks" />-->
-    <!--<PackageReference Include="System.Threading.Tasks.Extensions" />-->
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
+    <PackageReference Include="System.ComponentModel" Version="4.0.1" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.1.0" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
+    <PackageReference Include="System.Runtime.Serialization.Xml" Version="4.1.1" />
+    <PackageReference Include="System.Text.Json" Version="5.0.0" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.1.0" />
+    <PackageReference Include="System.Threading" Version="4.0.11" />
+    <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+    <PackageReference Include="System.ValueTuple" Version="4.3.0" />
+	<PackageReference Include="System.Xml.XmlSerializer" Version="4.0.11" />
   </ItemGroup>
 
 </Project>

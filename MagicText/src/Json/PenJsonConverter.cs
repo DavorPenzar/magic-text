@@ -236,7 +236,7 @@ namespace MagicText.Json
         /// <param name="options">The <see cref="JsonSerializerOptions" /> to use.</param>
         /// <returns>The converted <see cref="Pen" /> value.</returns>
         /// <exception cref="JsonException">An unexpected <a href="http://json.org/json-en.html"><em>JSON</em></a> token is encountered (by type or value).</exception>
-        public override Pen? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override Pen Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             // Declare `Pen`'s properties.
             Boolean interned;
@@ -248,7 +248,7 @@ namespace MagicText.Json
             // Return `null` in case of a `null`.
             if (reader.TokenType == JsonTokenType.Null)
             {
-                return null;
+                return null!;
             }
 
             // Read `Pen`'s properties.

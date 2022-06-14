@@ -254,18 +254,18 @@ namespace MagicText.Internal.Json
         /// <param name="options">The <see cref="JsonSerializerOptions" /> to use.</param>
         /// <returns>The converted <see cref="StringComparer" /> value.</returns>
         /// <exception cref="JsonException">An unexpected <a href="http://json.org/json-en.html"><em>JSON</em></a> token is encountered (by type or value).</exception>
-        public override StringComparer? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override StringComparer Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             // Return `null` if a `null` JSON token is found.
             if (reader.TokenType == JsonTokenType.Null)
             {
-                return null;
+                return null!;
             }
 
             // If a JSON object is found, read it as a custom string comparer.
             if (reader.TokenType == JsonTokenType.StartObject)
             {
-                return ReadCustomStringComparer(ref reader, options, read: false);
+                return ReadCustomStringComparer(ref reader, options, read: false)!;
             }
 
             // Read the comparison type.
