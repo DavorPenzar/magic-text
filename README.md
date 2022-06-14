@@ -228,8 +228,8 @@ Pen pen;
 
 ICollection<String?> tokens = new HashSet<String?>(pen.Context);
 
-IDictionary<String, Double> probability = new Dictionary<String, Double>();
-IDictionary<String, Double> informationContent = new Dictionary<String, Double>();
+IDictionary<String, Double> probabilities = new Dictionary<String, Double>();
+IDictionary<String, Double> informationContents = new Dictionary<String, Double>();
 Double entropy;
 
 foreach (String? token in tokens)
@@ -239,19 +239,19 @@ foreach (String? token in tokens)
 	Double prob = Convert.ToDouble(pen.Count(token)) / pen.Context.Count;
 	Double info = -Math.Log2(prob);
 
-	probability.Add(tokenRep, prob);
-	informationContent.Add(tokenRep, info);
+	probabilities.Add(tokenRep, prob);
+	informationContents.Add(tokenRep, info);
 }
 
-entropy = probability.Sum(e => e.Value * informationContent[e.Key]);
+entropy = probabilities.Sum(e => e.Value * informationContent[e.Key]);
 
-foreach (KeyValuePair<String, Double> entry in probability.OrderBy(e => e.Value).ThenBy(e => JsonSerializer.Deserialize<String>(e.Key)))
+foreach (KeyValuePair<String, Double> entry in probabilities.OrderBy(e => e.Value).ThenBy(e => JsonSerializer.Deserialize<String>(e.Key)))
 {
 	Console.WriteLine("P ({0}) = {1:P2}", entry.Key, entry.Value);
 }
 Console.WriteLine();
 
-foreach (KeyValuePair<String, Double> entry in informationContent.OrderByDescending(e => e.Value).ThenBy(e => JsonSerializer.Deserialize<String>(e.Key)))
+foreach (KeyValuePair<String, Double> entry in informationContents.OrderByDescending(e => e.Value).ThenBy(e => JsonSerializer.Deserialize<String>(e.Key)))
 {
 	Console.WriteLine("I ({0}) = {1:N4}", entry.Key, entry.Value);
 }
