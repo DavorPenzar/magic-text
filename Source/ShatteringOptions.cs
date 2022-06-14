@@ -176,7 +176,7 @@ namespace MagicText
         /// <value>The new ignoring line ends policy value.</value>
         /// <remarks>
         ///     <para>If the value is <c>false</c>, line ends should be copied or represented by <see cref="LineEndToken" />s.</para>
-        ///     <para>The actual implementations of the <see cref="ITokeniser" /> interface may define what exactly a <em>line end</em> means, but usually this would be the new line characters and sequences of characters (CR, LF and CRLF) and/or the end of the input.</para>
+        ///     <para>The actual implementations of the <see cref="ITokeniser" /> interface may define what exactly a <em>line end</em> means, but usually this would be the new line characters and sequences of characters (<a href="http://en.wikipedia.org/wiki/Newline#Representation">CR, LF and CRLF</a>) and/or the end of the input.</para>
         /// </remarks>
         [DisplayName("Ignore line ends"), Display(Name = "Ignore line ends", Description = "True if ignoring, false otherwise.", GroupName = "Ignore", ShortName = "Line ends", Order = 2), Editable(true, AllowInitialValue = true), DefaultValue(false), DataMember(Order = 2)]
         public Boolean IgnoreLineEnds
@@ -210,7 +210,7 @@ namespace MagicText
         /// <returns>The line end token.</returns>
         /// <value>The new line end token value.</value>
         /// <remarks>
-        ///     <para>The actual implementations of the <see cref="ITokeniser" /> interface may define what exactly a <em>line end</em> means, but usually this would be the new line characters and sequences of characters (CR, LF and CRLF) and/or the end of the input. Furthermore, an actual implementation of the <see cref="ITokeniser" /> interface at hand may as well choose to merely copy the line end and not replace it with a <see cref="LineEndToken" />. The property is given only to allow the standardisation of line ends when shattering text, but not to force it.</para>
+        ///     <para>The actual implementations of the <see cref="ITokeniser" /> interface may define what exactly a <em>line end</em> means, but usually this would be the new line characters and sequences of characters (<a href="http://en.wikipedia.org/wiki/Newline#Representation">CR, LF and CRLF</a>) and/or the end of the input. Furthermore, an actual implementation of the <see cref="ITokeniser" /> interface at hand may as well choose to merely copy the line end and not replace it with a <see cref="LineEndToken" />. The property is given only to allow the standardisation of line ends when shattering text, but not to force it.</para>
         ///     <para>If a line is discarded as empty (when <see cref="IgnoreEmptyLines" /> is <c>true</c>), it might not produce <see cref="LineEndToken" />—it depends on the <see cref="ITokeniser" /> interface implementation used.</para>
         /// </remarks>
         [DataType(DataType.MultilineText), DisplayName("Line end token"), Display(Name = "Line end token", Description = "Token to represent a line end.", GroupName = "Tokens", ShortName = "Line end", Order = 4), DisplayFormat(ConvertEmptyStringToNull = false, HtmlEncode = true), Editable(true, AllowInitialValue = true)]

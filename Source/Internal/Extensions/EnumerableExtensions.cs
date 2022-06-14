@@ -125,13 +125,14 @@ namespace MagicText.Internal.Extensions
 
                 position = ~position;
 
-                if (count++ >= distinctItems.Length)
+                if (count >= distinctItems.Length - 1)
                 {
                     Buffering.Expand(ref distinctItems);
                 }
 
                 Array.Copy(distinctItems, position, distinctItems, position + 1, count - position);
                 distinctItems[position] = item;
+                ++count;
             }
 
             Buffering.TrimExcess(ref distinctItems, count);

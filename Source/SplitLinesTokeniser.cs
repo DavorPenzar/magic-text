@@ -6,7 +6,7 @@ namespace MagicText
 {
     /// <summary>Implements a <see cref="LineShatteringTokeniser" /> which shatters text into lines of text.</summary>
     /// <remarks>
-    ///     <para>This <see cref="LineShatteringTokeniser" /> extension class is inspired by <a href="http://docs.python.org/"><em>Python</em>'s</a> built-in <a href="http://docs.python.org/library/stdtypes.html#str.splitlines"><c>str.splitlines(bool)</c></a> and <a href="http://docs.python.org/library/io.html#io.IOBase.readlines"><c>io.IOBase.readlines(int)</c></a> methods (but does not mimick them entirely), unlike the <see cref="StringSplitTokeniser" />, which simulates the <see cref="String.Split(String[], StringSplitOptions)" /> method, on each line of text.</para>
+    ///     <para>This <see cref="LineShatteringTokeniser" /> extension class is inspired by <a href="http://docs.python.org/"><em>Python</em>'s</a> built-in <a href="http://docs.python.org/library/stdtypes.html#str.splitlines"><c>str.splitlines</c></a> and <a href="http://docs.python.org/library/io.html#io.IOBase.readlines"><c>io.IOBase.readlines</c></a> methods (but does not mimick them entirely), unlike the <see cref="StringSplitTokeniser" />, which simulates the <see cref="String.Split(String[], StringSplitOptions)" /> method, on each line of text.</para>
     ///     <para>Empty lines and tokens (which are ignored if <see cref="IgnoreEmptyLines" /> and <see cref="ShatteringOptions.IgnoreEmptyLines" /> or <see cref="ShatteringOptions.IgnoreEmptyTokens" /> are <c>true</c>) are considered those lines that yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method. This behaviour cannot be overridden by a derived class.</para>
     /// </remarks>
     [CLSCompliant(true)]

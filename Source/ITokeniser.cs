@@ -16,32 +16,32 @@ namespace MagicText
     [CLSCompliant(true)]
     public interface ITokeniser
     {
-        /// <summary>Shatters text read from the <c><paramref name="input" /></c> into tokens.</summary>
-        /// <param name="input">The <see cref="TextReader" /> from which the input text is read.</param>
+        /// <summary>Shatters text read from the <c><paramref name="inputReader" /></c> into tokens.</summary>
+        /// <param name="inputReader">The <see cref="TextReader" /> from which the input text is read.</param>
         /// <param name="options">The options to control the shattering behaviour. If <c>null</c>, the defaults are used (<see cref="ShatteringOptions.Default" />)</param>
-        /// <returns>An enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
-        /// <exception cref="ArgumentNullException">The <c><paramref name="input" /></c> parameter is <c>null</c>.</exception>
+        /// <returns>An enumerable of tokens (in the order they were read) read from the <c><paramref name="inputReader" /></c>.</returns>
+        /// <exception cref="ArgumentNullException">The <c><paramref name="inputReader" /></c> parameter is <c>null</c>.</exception>
         /// <remarks>
-        ///     <para>The returned enumerable might merely be a query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToArray(ITokeniser, TextReader, ShatteringOptions)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
+        ///     <para>The returned enumerable might merely be a query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="inputReader" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToArray(ITokeniser, TextReader, ShatteringOptions)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="inputReader" /></c>.</para>
         /// </remarks>
-        public IEnumerable<String?> Shatter(TextReader input, ShatteringOptions? options = null);
+        public IEnumerable<String?> Shatter(TextReader inputReader, ShatteringOptions? options = null);
 
-        /// <summary>Shatters text read from the <c><paramref name="input" /></c> into tokens asynchronously.</summary>
-        /// <param name="input">The <see cref="TextReader" /> from which the input text is read.</param>
+        /// <summary>Shatters text read from the <c><paramref name="inputReader" /></c> into tokens asynchronously.</summary>
+        /// <param name="inputReader">The <see cref="TextReader" /> from which the input text is read.</param>
         /// <param name="options">The options to control the shattering behaviour. If <c>null</c>, the defaults are used (<see cref="ShatteringOptions.Default" />)</param>
         /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s and <see cref="ValueTask" />s (e. g. the <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLineAsync()" /> and <see cref="IAsyncEnumerator{T}.MoveNextAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> method, the <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method etc.).</param>
         /// <param name="cancellationToken">The cancellation token to cancel the shattering operation.</param>
-        /// <returns>An asynchronous enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
-        /// <exception cref="ArgumentNullException">The <c><paramref name="input" /></c> parameter is <c>null</c>.</exception>
+        /// <returns>An asynchronous enumerable of tokens (in the order they were read) read from the <c><paramref name="inputReader" /></c>.</returns>
+        /// <exception cref="ArgumentNullException">The <c><paramref name="inputReader" /></c> parameter is <c>null</c>.</exception>
         /// <exception cref="OperationCanceledException">The operation is cancelled via the <c><paramref name="cancellationToken" /></c>.</exception>
         /// <remarks>
-        ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, if the <c><paramref name="input" /></c> is a <see cref="StreamReader" />, the data having already been read from the underlying <see cref="Stream" /> may be irrecoverable after cancelling the operation.</para>
-        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <see cref="ITokeniser" /> instance's logic might be <see cref="SynchronizationContext" /> dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
-        ///     <para>The returned asynchronous enumerable might merely be an asynchronous query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToArrayAsync(ITokeniser, TextReader, ShatteringOptions, Boolean, Boolean, Action{OperationCanceledException}, CancellationToken)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
+        ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, if the <c><paramref name="inputReader" /></c> is a <see cref="StreamReader" />, the data having already been read from the underlying <see cref="Stream" /> may be irrecoverable after cancelling the operation.</para>
+        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <see cref="ITokeniser" /> instance's logic might be <see cref="SynchronizationContext" /> dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the resource provided by the <c><paramref name="inputReader" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
+        ///     <para>The returned asynchronous enumerable might merely be an asynchronous query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="inputReader" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToArrayAsync(ITokeniser, TextReader, ShatteringOptions, Boolean, Boolean, Action{OperationCanceledException}, CancellationToken)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="inputReader" /></c>.</para>
         ///
         ///     <h3>Notes to Implementers</h3>
         ///     <para>When implementing the method using asynchronous iterators, the <c><paramref name="cancellationToken" /></c> parameter should be set with the <see cref="EnumeratorCancellationAttribute" /> attribute to support cancellation via the <see cref="TaskAsyncEnumerableExtensions.WithCancellation{T}(IAsyncEnumerable{T}, CancellationToken)" /> extension method.</para>
         /// </remarks>
-        public IAsyncEnumerable<String?> ShatterAsync(TextReader input, ShatteringOptions? options = null, Boolean continueTasksOnCapturedContext = false, CancellationToken cancellationToken = default);
+        public IAsyncEnumerable<String?> ShatterAsync(TextReader inputReader, ShatteringOptions? options = null, Boolean continueTasksOnCapturedContext = false, CancellationToken cancellationToken = default);
     }
 }

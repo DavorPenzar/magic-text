@@ -12,7 +12,7 @@ namespace MagicText
     /// <summary>Implements an <see cref="ITokeniser" /> which shatters lines of text one by one.</summary>
     /// <remarks>
     ///     <para>By default, empty tokens (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens that yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method. Derived classes may override this behaviour.</para>
-    ///     <para>Assuming the default behaviour of the <see cref="TextReader" /> used concerning its <see cref="TextReader.ReadLine()" /> and <see cref="TextReader.ReadLineAsync()" /> methods (such as <see cref="StringReader" />'s and <see cref="StreamReader" />'s behaviour), shattering methods read and process text <em>line-by-line</em> with all <a href="http://en.wikipedia.org/wiki/Newline#Representation"> CR, LF and CRLF line breaks</a> treated the same. These line breaks and the end of the input are considered line ends when shattering text, and are therefore substituted by a <see cref="ShatteringOptions.LineEndToken" /> if <see cref="ShatteringOptions.IgnoreLineEnds" /> is <c>false</c>. This behaviour may not be overridden by a derived class.</para>
+    ///     <para>Assuming the default behaviour of the <see cref="TextReader" /> used concerning its <see cref="TextReader.ReadLine()" /> and <see cref="TextReader.ReadLineAsync()" /> methods (such as <see cref="StringReader" />'s and <see cref="StreamReader" />'s behaviour), shattering methods read and process text <em>line-by-line</em> with all <a href="http://en.wikipedia.org/wiki/Newline#Representation">CR, LF and CRLF line breaks</a> treated the same. These line breaks and the end of the input are considered line ends when shattering text, and are therefore substituted by a <see cref="ShatteringOptions.LineEndToken" /> if <see cref="ShatteringOptions.IgnoreLineEnds" /> is <c>false</c>. This behaviour may not be overridden by a derived class.</para>
     ///     <para>The empty lines are substituted by a <see cref="ShatteringOptions.EmptyLineToken" /> if <see cref="ShatteringOptions.IgnoreEmptyLines" /> is <c>false</c>. This behaviour may also not be overridden by a derived class.</para>
     ///
     ///     <h3>Notes to Implementers</h3>
@@ -62,29 +62,29 @@ namespace MagicText
         /// <remarks>
         ///     <h3>Notes to Implementers</h3>
         ///     <para>The method <strong>should not</strong> produce an <see cref="ShatteringOptions.EmptyLineToken" /> to represent an empty <c><paramref name="line" /></c> or a <see cref="ShatteringOptions.LineEndToken" /> at the <c><paramref name="line" /></c>'s end. Also, the method <strong>should not</strong> manually filter out empty tokens. Hence no <see cref="ShatteringOptions" /> are available to the method. The result of an empty line should be an empty <see cref="IEnumerable{T}" /> of <see cref="String" />s (e. g. <see cref="Enumerable.Empty{TResult}()" />). Empty tokens, empty lines and line ends are treated within the scope of the <see cref="LineShatteringTokeniser" /> parent class and its methods.</para>
-        ///     <para>It is guaranteed that, when called from the <see cref="LineShatteringTokeniser" />'s non-overridable methods, the <c><paramref name="line" /></c> shall be a non-<c>null</c> <see cref="String" /> that does not contain a line end (<a href="http://en.wikipedia.org/wiki/Newline#Representation"> CR, LF or CRLF</a>). Nonetheless, when calling from a derived class, its programmer may call the method however they wish.</para>
+        ///     <para>It is guaranteed that, when called from the <see cref="LineShatteringTokeniser" />'s non-overridable methods, the <c><paramref name="line" /></c> shall be a non-<c>null</c> <see cref="String" /> that does not contain a line end (<a href="http://en.wikipedia.org/wiki/Newline#Representation">CR, LF or CRLF</a>). Nonetheless, when calling from a derived class, its programmer may call the method however they wish.</para>
         /// </remarks>
         protected abstract IEnumerable<String?> ShatterLine(String line);
 
-        /// <summary>Shatters text read from the <c><paramref name="input" /></c> into tokens.</summary>
-        /// <param name="input">The <see cref="TextReader" /> from which the input text is read.</param>
+        /// <summary>Shatters text read from the <c><paramref name="inputReader" /></c> into tokens.</summary>
+        /// <param name="inputReader">The <see cref="TextReader" /> from which the input text is read.</param>
         /// <param name="options">The options to control the shattering behaviour. If <c>null</c>, the defaults are used (<see cref="ShatteringOptions.Default" />)</param>
-        /// <returns>An enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
-        /// <exception cref="ArgumentNullException">The <c><paramref name="input" /></c> parameter is <c>null</c>.</exception>
+        /// <returns>An enumerable of tokens (in the order they were read) read from the <c><paramref name="inputReader" /></c>.</returns>
+        /// <exception cref="ArgumentNullException">The <c><paramref name="inputReader" /></c> parameter is <c>null</c>.</exception>
         /// <remarks>
-        ///     <para>The returned enumerable is merely a query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToArray(ITokeniser, TextReader, ShatteringOptions)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
+        ///     <para>The returned enumerable is merely a query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="inputReader" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToArray(ITokeniser, TextReader, ShatteringOptions)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="inputReader" /></c>.</para>
         ///     <para>The exceptions thrown by the <see cref="TextReader.ReadLine()" /> method call are not caught.</para>
         /// </remarks>
-        public IEnumerable<String?> Shatter(TextReader input, ShatteringOptions? options = null)
+        public IEnumerable<String?> Shatter(TextReader inputReader, ShatteringOptions? options = null)
         {
-            if (input is null)
+            if (inputReader is null)
             {
-                throw new ArgumentNullException(nameof(input), InputNullErrorMessage);
+                throw new ArgumentNullException(nameof(inputReader), InputNullErrorMessage);
             }
 
             options ??= ShatteringOptions.Default;
 
-            // Declare:
+            // Declare and initialise:
             Boolean addLineEnd = false; // the indicator that a line end should be added
 
             // Shatter text from the `input` line-by-line.
@@ -98,7 +98,7 @@ namespace MagicText
 
                 // Read and shatter the next line.
 
-                String? line = input.ReadLine();
+                String? line = inputReader.ReadLine();
                 if (line is null)
                 {
                     yield break;
@@ -145,30 +145,30 @@ namespace MagicText
             }
         }
 
-        /// <summary>Shatters text read from the <c><paramref name="input" /></c> into tokens asynchronously.</summary>
-        /// <param name="input">The <see cref="TextReader" /> from which the input text is read.</param>
+        /// <summary>Shatters text read from the <c><paramref name="inputReader" /></c> into tokens asynchronously.</summary>
+        /// <param name="inputReader">The <see cref="TextReader" /> from which the input text is read.</param>
         /// <param name="options">The options to control the shattering behaviour. If <c>null</c>, the defaults are used (<see cref="ShatteringOptions.Default" />)</param>
         /// <param name="continueTasksOnCapturedContext">If <c>true</c>, the continuation of all internal <see cref="Task" />s and <see cref="ValueTask" />s (e. g. the <see cref="TextReader.ReadAsync(Char[], Int32, Int32)" />, <see cref="TextReader.ReadLineAsync()" /> and <see cref="IAsyncEnumerator{T}.MoveNextAsync()" /> method calls) should be marshalled back to the original context (via the <see cref="Task{TResult}.ConfigureAwait(Boolean)" /> method, the <see cref="TaskAsyncEnumerableExtensions.ConfigureAwait(IAsyncDisposable, Boolean)" /> extension method etc.).</param>
         /// <param name="cancellationToken">The cancellation token to cancel the shattering operation.</param>
-        /// <returns>An asynchronous enumerable of tokens (in the order they were read) read from the <c><paramref name="input" /></c>.</returns>
-        /// <exception cref="ArgumentNullException">The <c><paramref name="input" /></c> parameter is <c>null</c>.</exception>
+        /// <returns>An asynchronous enumerable of tokens (in the order they were read) read from the <c><paramref name="inputReader" /></c>.</returns>
+        /// <exception cref="ArgumentNullException">The <c><paramref name="inputReader" /></c> parameter is <c>null</c>.</exception>
         /// <exception cref="OperationCanceledException">The operation is cancelled via the <c><paramref name="cancellationToken" /></c>.</exception>
         /// <remarks>
-        ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, if the <c><paramref name="input" /></c> is a <see cref="StreamReader" />, the data having already been read from the underlying <see cref="Stream" /> may be irrecoverable after cancelling the operation.</para>
-        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <see cref="LineShatteringTokeniser" /> instance's logic might be <see cref="SynchronizationContext" /> dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
-        ///     <para>The returned asynchronous enumerable is merely an asynchronous query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="input" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToArrayAsync(ITokeniser, TextReader, ShatteringOptions, Boolean, Boolean, Action{OperationCanceledException}, CancellationToken)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="input" /></c>.</para>
+        ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, if the <c><paramref name="inputReader" /></c> is a <see cref="StreamReader" />, the data having already been read from the underlying <see cref="Stream" /> may be irrecoverable after cancelling the operation.</para>
+        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <see cref="LineShatteringTokeniser" /> instance's logic might be <see cref="SynchronizationContext" /> dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the resource provided by the <c><paramref name="inputReader" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
+        ///     <para>The returned asynchronous enumerable is merely an asynchronous query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>) to allow simultaneously reading and enumerating tokens from the <c><paramref name="inputReader" /></c>. If a fully built container is needed, consider using the <see cref="TokeniserExtensions.ShatterToArrayAsync(ITokeniser, TextReader, ShatteringOptions, Boolean, Boolean, Action{OperationCanceledException}, CancellationToken)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after disposing the <c><paramref name="inputReader" /></c>.</para>
         ///     <para>The exceptions thrown by the <see cref="TextReader.ReadLineAsync()" /> method call are not caught.</para>
         /// </remarks>
-        public async IAsyncEnumerable<String?> ShatterAsync(TextReader input, ShatteringOptions? options = null, Boolean continueTasksOnCapturedContext = false, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<String?> ShatterAsync(TextReader inputReader, ShatteringOptions? options = null, Boolean continueTasksOnCapturedContext = false, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            if (input is null)
+            if (inputReader is null)
             {
-                throw new ArgumentNullException(nameof(input), InputNullErrorMessage);
+                throw new ArgumentNullException(nameof(inputReader), InputNullErrorMessage);
             }
 
             options ??= ShatteringOptions.Default;
 
-            // Declare:
+            // Declare and initialise:
             Boolean addLineEnd = false; // the indicator that a line end should be added
 
             // Shatter text from the `input` line-by-line.
@@ -185,7 +185,7 @@ namespace MagicText
 
                 // Read and shatter the next line.
 
-                String? line = await input.ReadLineAsync().ConfigureAwait(continueTasksOnCapturedContext);
+                String? line = await inputReader.ReadLineAsync().ConfigureAwait(continueTasksOnCapturedContext);
                 if (line is null)
                 {
                     yield break;
