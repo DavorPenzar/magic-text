@@ -16,8 +16,8 @@
 		<NeutralLanguage>en-GB</NeutralLanguage>
 	</PropertyGroup>
 	<PropertyGroup>
-		<SignAssembly>True</SignAssembly>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<SignAssembly>true</SignAssembly>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
 	</PropertyGroup>
