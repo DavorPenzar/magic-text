@@ -1,44 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <LangVersion>8.0</LangVersion>
-	<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-	<ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <RootNamespace>MagicText</RootNamespace>
-    <ProjectGuid>7D19EA1D-C7D8-C6BC-8118-EE62DDD96F98</ProjectGuid>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <Authors>Davor Penzar</Authors>
-	<Description>Provides interfaces and classes for text tokenisation and random generation.</Description>
-	<RepositoryType>git</RepositoryType>
-	<RepositoryUrl>http://github.com/DavorPenzar/magic-text</RepositoryUrl>
-    <NeutralLanguage>en-GB</NeutralLanguage>
-  </PropertyGroup>
-
-  <PropertyGroup>
-	<SignAssembly>True</SignAssembly>
-	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	<NoWarn>$(NoWarn);1591</NoWarn>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
-    <PackageReference Include="System.ComponentModel" Version="4.0.1" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.1.0" />
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
-    <PackageReference Include="System.Runtime.Serialization.Xml" Version="4.1.1" />
-    <PackageReference Include="System.Text.Json" Version="5.0.0" />
-    <PackageReference Include="System.Text.RegularExpressions" Version="4.1.0" />
-    <PackageReference Include="System.Threading" Version="4.0.11" />
-    <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
-    <PackageReference Include="System.ValueTuple" Version="4.3.0" />
-	<PackageReference Include="System.Xml.XmlSerializer" Version="4.0.11" />
-  </ItemGroup>
-
+	<PropertyGroup>
+		<LangVersion>8.0</LangVersion>
+		<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>MagicText</RootNamespace>
+		<ProjectGuid>7D19EA1D-C7D8-C6BC-8118-EE62DDD96F98</ProjectGuid>
+	</PropertyGroup>
+	<PropertyGroup>
+		<Authors>Davor Penzar</Authors>
+		<Description>Provides interfaces and classes for text tokenisation and random generation.</Description>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>http://github.com/DavorPenzar/magic-text</RepositoryUrl>
+		<NeutralLanguage>en-GB</NeutralLanguage>
+	</PropertyGroup>
+	<PropertyGroup>
+		<SignAssembly>True</SignAssembly>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
+		<PackageReference Include="System.ComponentModel" Version="4.0.1" />
+		<PackageReference Include="System.ComponentModel.Annotations" Version="4.1.0" />
+		<PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
+		<PackageReference Include="System.Runtime.Serialization.Xml" Version="4.1.1" />
+		<PackageReference Include="System.Text.Json" Version="5.0.0" />
+		<PackageReference Include="System.Text.RegularExpressions" Version="4.1.0" />
+		<PackageReference Include="System.Threading" Version="4.0.11" />
+		<PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
+		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+		<PackageReference Include="System.ValueTuple" Version="4.3.0" />
+		<PackageReference Include="System.Xml.XmlSerializer" Version="4.0.11" />
+	</ItemGroup>
 </Project>
