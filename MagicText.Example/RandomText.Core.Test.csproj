@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<LangVersion>10.0</LangVersion>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>MagicText.Example</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<Directory Include="Resources\" />
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\Bible.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\MagicText\MagicText.csproj" />
+	</ItemGroup>
+</Project>
