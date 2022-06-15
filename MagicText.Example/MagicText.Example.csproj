@@ -9,10 +9,6 @@
 		<RootNamespace>MagicText.Example</RootNamespace>
 	</PropertyGroup>
 	<ItemGroup>
-		<Directory Include="Logging\" />
-		<Directory Include="Resources\" />
-	</ItemGroup>
-	<ItemGroup>
 		<EmbeddedResource Include="appsettings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</EmbeddedResource>
