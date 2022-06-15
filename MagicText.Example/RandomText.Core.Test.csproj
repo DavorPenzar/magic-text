@@ -2,19 +2,48 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<LangVersion>10.0</LangVersion>
+		<LangVersion>8.0</LangVersion>
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RootNamespace>MagicText.Example</RootNamespace>
 	</PropertyGroup>
 	<ItemGroup>
+		<Directory Include="Logging\" />
 		<Directory Include="Resources\" />
 	</ItemGroup>
 	<ItemGroup>
-		<EmbeddedResource Include="Resources\Bible.txt">
+		<EmbeddedResource Include="appsettings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</EmbeddedResource>
+		<EmbeddedResource Include="appsettings.Development.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+		<PackageReference Include="Serilog" Version="2.10.0" />
+		<PackageReference Include="Serilog.Expressions" Version="3.2.1" />
+		<PackageReference Include="Serilog.Extensions.Hosting" Version="4.2.0" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
+		<PackageReference Include="Serilog.Formatting.Compact" Version="1.1.0" />
+		<PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+		<PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+		<PackageReference Include="System.Net.Http" Version="4.3.4" />
+		<PackageReference Include="System.Net.Primitives" Version="4.3.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\MagicText\MagicText.csproj" />
