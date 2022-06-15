@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -91,9 +90,9 @@ namespace MagicText.Example
                     else
                     {
                         tokens = await Tokeniser.ShatterToArrayAsync(
-                            await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false),
-                            encoding ?? Encoding.UTF8,
-                            ShatteringOptions,
+                            input: await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false),
+                            encoding: encoding ?? Encoding.UTF8,
+                            options: ShatteringOptions,
                             cancellationToken: cancellationToken
                         ).ConfigureAwait(false);
                     }
