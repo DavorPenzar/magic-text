@@ -1,12 +1,13 @@
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MagicText.Example
+namespace MagicText.Example.BLL
 {
     internal class TextDownloader : IDisposable
     {
@@ -51,19 +52,28 @@ namespace MagicText.Example
         }
 
         public async Task<String?[]> DownloadTextAsync(
-            String? url = null,
+            String? uri = null,
             Encoding? encoding = null,
             CancellationToken cancellationToken = default
         )
         {
             String?[] tokens;
 
+            Stopwatch stopwatch = new Stopwatch();
+
+            if (!Uri.TryCreate(Client.BaseAddress, uri, out Uri? fullUri))
+            {
+                fullUri = uri is null ? Client.BaseAddress : new Uri(uri, UriKind.RelativeOrAbsolute);
+            }
+
             Logger.LogDebug(
-                "Fetching tokens from the web source at {url}.",
-                    url
+                "Fetching tokens from the web source at {uri}.",
+                    fullUri
             );
 
-            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url ?? String.Empty))
+            stopwatch.Start();
+
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri))
             using (
                 HttpResponseMessage response = await Client.SendAsync(
                     request,
@@ -72,6 +82,8 @@ namespace MagicText.Example
                 ).ConfigureAwait(false)
             )
             {
+                stopwatch.Stop();
+
                 HttpStatusCode statusCode = response.StatusCode;
 
                 if (response.IsSuccessStatusCode)
@@ -79,8 +91,8 @@ namespace MagicText.Example
                     if (statusCode == HttpStatusCode.NoContent)
                     {
                         Logger.LogWarning(
-                            "The web source at {url} returned no content ({statusCode:D} {status}).",
-                                url,
+                            "The web source at {uri} returned no content ({statusCode:D} {status}).",
+                                fullUri,
                                 Convert.ToInt32(HttpStatusCode.NoContent),
                                 HttpStatusCode.NoContent.ToString()
                         );
@@ -99,6 +111,15 @@ namespace MagicText.Example
                 }
                 else
                 {
+                    Logger.LogWarning(
+                        "Failed to receive content from the web source at {uri} ({statusCode:D} {status}). Time elapsed: {duration:D} ms",
+                            fullUri,
+                            Convert.ToInt32(statusCode),
+                            statusCode.ToString(),
+                            stopwatch.ElapsedMilliseconds
+
+                    );
+
                     throw new HttpRequestException(
                         await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false),
                         null,
@@ -107,15 +128,16 @@ namespace MagicText.Example
                 }
 
                 Logger.LogInformation(
-                    "Tokens successfully fetched from the web source at {url} ({statusCode:D} {status}). Token count: {count:D}",
-                        url,
+                    "Tokens successfully fetched from the web source at {uri} ({statusCode:D} {status}). Time elapsed: {duration:d} ms, token count: {count:D}",
+                        fullUri,
                         Convert.ToInt32(statusCode),
                         statusCode.ToString(),
+                        stopwatch.ElapsedMilliseconds,
                         tokens.Length
                 );
-
-                return tokens;
             }
+
+            return tokens;
         }
 
         protected virtual void Dispose(Boolean disposing)
