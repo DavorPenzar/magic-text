@@ -154,10 +154,9 @@ namespace MagicText.Example
 
                     pen = new Pen(
                         context: tokens,
-                        comparisonType: (StringComparison)Enum.Parse(
-                            typeof(StringComparison),
-                            Configuration.GetValue<String>("Pen:ComparisonType", nameof(StringComparison.Ordinal)),
-                            true
+                        comparisonType: Configuration.GetValue<StringComparison>(
+                            "Pen:ComparisonType",
+                            StringComparison.Ordinal
                         ),
                         sentinelToken: Configuration.GetValue<String?>("Pen:SentinelToken"),
                         intern: Configuration.GetValue<Boolean>("Pen:Intern")
@@ -187,7 +186,7 @@ namespace MagicText.Example
                             JsonSerializer.Serialize(text)
                 );
 
-                //Console.WriteLine(text);
+                Console.WriteLine(text);
             }
             catch (Exception exception)
             {
