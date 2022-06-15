@@ -79,81 +79,85 @@ namespace MagicText.Example
 
             Microsoft.Extensions.Logging.ILogger logger = loggerFactory.CreateLogger(typeof(Program).FullName!);
 
-            using HttpClientHandler clientHandler = new HttpClientHandler();
-            using HttpClient client = new HttpClient(clientHandler, true)
+            try
             {
-                BaseAddress = new Uri(Configuration["Text:WebSource:Authority"])
-            };
 
-            ITokeniser tokeniser = new RegexSplitTokeniser(
-                Configuration["Tokeniser:Pattern"],
-                false,
-                Configuration.GetValue<RegexOptions>("Tokeniser:Options", RegexTokeniser.DefaultOptions)
-            );
+                using HttpClientHandler clientHandler = new HttpClientHandler();
+                using HttpClient client = new HttpClient(clientHandler, true)
+                {
+                    BaseAddress = new Uri(Configuration["Text:WebSource:Authority"])
+                };
 
-            Pen pen;
+                ITokeniser tokeniser = new RegexSplitTokeniser(
+                    Configuration["Tokeniser:Pattern"],
+                    false,
+                    Configuration.GetValue<RegexOptions>("Tokeniser:Options", RegexTokeniser.DefaultOptions)
+                );
 
-            using (
-                TextDownloader textDownloader = new TextDownloader(
-                    loggerFactory.CreateLogger<TextDownloader>(),
-                    client,
-                    tokeniser,
-                    Configuration.GetValue<ShatteringOptions>("ShatteringOptions"),
-                    false
+                Pen pen;
+
+                using (
+                    TextDownloader textDownloader = new TextDownloader(
+                        loggerFactory.CreateLogger<TextDownloader>(),
+                        client,
+                        tokeniser,
+                        Configuration.GetValue<ShatteringOptions>("ShatteringOptions"),
+                        false
+                    )
                 )
-            )
-            {
-                try
                 {
-                    pen = new Pen(
-                        context: await textDownloader.DownloadTextAsync(
-                            Configuration["Text:WebSource:Query"],
-                            Encoding.GetEncoding(
-                                Configuration.GetSection("Text:WebSource:Encoding").Exists() ?
-                                    Configuration["Text:WebSource:Encoding"] :
-                                    "UTF-8"
-                            )
-                        ),
-                        comparisonType: (StringComparison)Enum.Parse(
-                            typeof(StringComparison),
-                            Configuration.GetSection("Pen:ComparisonType").Exists() ?
-                                Configuration["Pen:ComparisonType"] :
-                                nameof(StringComparison.Ordinal),
-                            true
-                        ),
-                        intern: Configuration.GetValue<Boolean>("Pen:Intern")
-                    );
-                }
-                catch (HttpRequestException exception)
-                {
-                    logger.LogError(
-                        exception,
-                        "Failed to download text ({statusCode} {status}).",
-                            exception.StatusCode.HasValue ?
-                                Convert.ToInt32(exception.StatusCode.Value) :
-                                Convert.ToInt32(HttpStatusCode.BadRequest),
-                            exception.StatusCode.HasValue ?
-                                exception.StatusCode.Value.ToString() :
-                                HttpStatusCode.BadRequest.ToString()
-                    );
+                    try
+                    {
+                        pen = new Pen(
+                            context: await textDownloader.DownloadTextAsync(
+                                Configuration["Text:WebSource:Query"],
+                                Encoding.GetEncoding(Configuration.GetValue<String>("Text:WebSource:Encoding", "UTF-8"))
+                            ),
+                            comparisonType: (StringComparison)Enum.Parse(
+                                typeof(StringComparison),
+                                Configuration.GetValue<String>("Pen:ComparisonType", nameof(StringComparison.Ordinal)),
+                                true
+                            ),
+                            intern: Configuration.GetValue<Boolean>("Pen:Intern")
+                        );
+                    }
+                    catch (HttpRequestException exception)
+                    {
+                        logger.LogError(
+                            exception,
+                            "Failed to download text ({statusCode:D} {status}).",
+                                exception.StatusCode.HasValue ?
+                                    Convert.ToInt32(exception.StatusCode.Value) :
+                                    Convert.ToInt32(HttpStatusCode.BadRequest),
+                                exception.StatusCode.HasValue ?
+                                    exception.StatusCode.Value.ToString() :
+                                    HttpStatusCode.BadRequest.ToString()
+                        );
 
-                    FinaliseEnvironment();
+                        FinaliseEnvironment();
 
-                    return ExitFailure;
+                        return ExitFailure;
+                    }
                 }
+
+                String text = String.Join(
+                    String.Empty,
+                    pen.Render(
+                        Configuration.GetValue<Int32>("Text:RandomGenerator:RelevantTokens"),
+                        new Random(Configuration.GetValue<Int32>("Text:RandomGenerator:Seed")),
+                        Configuration.GetValue<Nullable<Int32>>("Text:RandomGenerator:FromPosition")
+                    ).Take(Configuration.GetValue<Int32>("Text:RandomGenerator:MaxTokens"))
+                );
+                logger.LogInformation($"Generated text:{Environment.NewLine}{{text}}", text);
             }
-
-            String text = String.Join(
-                String.Empty,
-                pen.Render(
-                    Configuration.GetValue<Int32>("Text:RandomGenerator:RelevantTokens"),
-                    new Random(Configuration.GetValue<Int32>("Text:RandomGenerator:Seed")),
-                    Configuration.GetValue<Nullable<Int32>>("Text:RandomGenerator:FromPosition")
-                ).Take(Configuration.GetValue<Int32>("Text:RandomGenerator:MaxTokens"))
-            );
-            logger.LogInformation($"Generated text:{Environment.NewLine}{{text}}", text);
-
-            FinaliseEnvironment();
+            catch (Exception exception)
+            {
+                logger.LogCritical(exception, "An error occured while running the program.");
+            }
+            finally
+            {
+                FinaliseEnvironment();
+            }
 
             return ExitSuccess;
         }

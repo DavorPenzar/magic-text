@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MagicText.Example
 {
-    public class TextDownloader : IDisposable
+    internal class TextDownloader : IDisposable
     {
         private readonly Boolean _disposeMembers;
         private readonly ILogger<TextDownloader> _logger;
@@ -59,7 +59,7 @@ namespace MagicText.Example
             String?[] tokens;
 
             Logger.LogDebug(
-                "Fetching tokens from web source at {url}.",
+                "Fetching tokens from the web source at {url}.",
                     url
             );
 
@@ -79,7 +79,7 @@ namespace MagicText.Example
                     if (statusCode == HttpStatusCode.NoContent)
                     {
                         Logger.LogWarning(
-                            "Web source at {url} returned no content ({statusCode} {status}).",
+                            "The web source at {url} returned no content ({statusCode:D} {status}).",
                                 url,
                                 Convert.ToInt32(HttpStatusCode.NoContent),
                                 HttpStatusCode.NoContent.ToString()
@@ -107,7 +107,7 @@ namespace MagicText.Example
                 }
 
                 Logger.LogInformation(
-                    "Tokens successfully fetched from web source at {url} ({statusCode} {status}). Token count: {count}",
+                    "Tokens successfully fetched from the web source at {url} ({statusCode:D} {status}). Token count: {count:D}",
                         url,
                         Convert.ToInt32(statusCode),
                         statusCode.ToString(),
