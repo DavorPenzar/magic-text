@@ -172,7 +172,7 @@ namespace MagicText.Example
                             JsonSerializer.Serialize(text)
                 );
 
-                //Console.WriteLine(text);
+                Console.WriteLine(text);
             }
             catch (Exception exception)
             {
