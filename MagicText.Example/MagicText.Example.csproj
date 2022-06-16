@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<LangVersion>8.0</LangVersion>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>netcoreapp2.0</TargetFramework>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RootNamespace>MagicText.Example</RootNamespace>

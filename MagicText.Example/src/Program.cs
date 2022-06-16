@@ -7,8 +7,9 @@ using Serilog.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
+using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -81,7 +82,12 @@ namespace MagicText.Example
 
             try
             {
-                logger.LogDebug("The application has started. Time: {time:HH:mm:ss}", DateTime.Now);
+                logger.LogDebug(
+                    "The application has started. CLR version: {clr}, .NET framework: {dotnet}, time: {time:HH:mm:ss}",
+                        Environment.Version,
+                        Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName,
+                        DateTime.Now
+                );
 
                 using HttpClientHandler clientHandler = new HttpClientHandler();
                 using HttpClient client = new HttpClient(clientHandler, true)
@@ -114,35 +120,15 @@ namespace MagicText.Example
                         )
                     )
                     {
-                        try
-                        {
-                            tokens = await textDownloader.DownloadTextAsync(
-                                Configuration["Text:WebSource:Query"],
-                                Encoding.GetEncoding(
-                                    Configuration.GetValue<String>(
-                                        "Text:WebSource:Encoding",
-                                        "UTF-8"
-                                    )
+                        tokens = await textDownloader.DownloadTextAsync(
+                            Configuration["Text:WebSource:Query"],
+                            Encoding.GetEncoding(
+                                Configuration.GetValue<String>(
+                                    "Text:WebSource:Encoding",
+                                    "UTF-8"
                                 )
-                            );
-                        }
-                        catch (HttpRequestException exception)
-                        {
-                            logger.LogError(
-                                exception,
-                                "Failed to download text ({statusCode:D} {status}).",
-                                    exception.StatusCode.HasValue ?
-                                        Convert.ToInt32(exception.StatusCode.Value) :
-                                        Convert.ToInt32(HttpStatusCode.BadRequest),
-                                    exception.StatusCode.HasValue ?
-                                        exception.StatusCode.Value.ToString() :
-                                        HttpStatusCode.BadRequest.ToString()
-                            );
-
-                            FinaliseEnvironment();
-
-                            return ExitFailure;
-                        }
+                            )
+                        );
                     }
 
                     logger.LogDebug(
@@ -190,11 +176,17 @@ namespace MagicText.Example
             }
             catch (Exception exception)
             {
-                logger.LogCritical(exception, "An error occured while running the program.");
+                logger.LogCritical(
+                    exception,
+                    "An error has occured while running the program."
+                );
             }
             finally
             {
-                logger.LogDebug("The application is closing. Time: {time:HH:mm:ss}", DateTime.Now);
+                logger.LogDebug(
+                    "The application is closing. Time: {time:HH:mm:ss}",
+                        DateTime.Now
+                );
 
                 FinaliseEnvironment();
             }

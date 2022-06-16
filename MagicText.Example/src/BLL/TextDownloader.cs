@@ -101,12 +101,21 @@ namespace MagicText.Example.BLL
                     }
                     else
                     {
+#if NET5_0_OR_GREATER
                         tokens = await Tokeniser.ShatterToArrayAsync(
                             input: await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false),
                             encoding: encoding ?? Encoding.UTF8,
                             options: ShatteringOptions,
                             cancellationToken: cancellationToken
                         ).ConfigureAwait(false);
+#else
+                        tokens = await Tokeniser.ShatterToArrayAsync(
+                            input: await response.Content.ReadAsStreamAsync().ConfigureAwait(false),
+                            encoding: encoding ?? Encoding.UTF8,
+                            options: ShatteringOptions,
+                            cancellationToken: cancellationToken
+                        ).ConfigureAwait(false);
+#endif // NET5_0_OR_GREATER
                     }
                 }
                 else
@@ -120,11 +129,17 @@ namespace MagicText.Example.BLL
 
                     );
 
+#if NET5_0_OR_GREATER
                     throw new HttpRequestException(
-                        await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false),
-                        null,
-                        statusCode
+                        message: await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false),
+                        inner: null,
+                        statusCode: statusCode
                     );
+#else
+                    throw new HttpRequestException(
+                        message: await response.Content.ReadAsStringAsync().ConfigureAwait(false)
+                    );
+#endif // NET5_0_OR_GREATER
                 }
 
                 Logger.LogInformation(
