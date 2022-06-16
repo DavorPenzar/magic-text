@@ -122,7 +122,7 @@ namespace MagicText.Example.BLL
                 {
                     stopwatch.Stop();
 
-                    Logger.LogWarning(
+                    Logger.LogError(
                         "Failed to receive content from the web source at {uri} ({statusCode:D} {status}). Time elapsed: {duration:D} ms",
                             fullUri,
                             Convert.ToInt32(statusCode),
