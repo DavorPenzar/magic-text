@@ -1,6 +1,6 @@
 #   MagicText
 
-`MagicText` is a [*.NET Standard*](http://docs.microsoft.com/en-gb/dotnet/standard/net-standard) library written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) for generating random text. The library's interface is [CLS-compliant](http://docs.microsoft.com/en-gb/dotnet/standard/language-independence#cls-compliance-rules); however, inline documentation is written from a [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) perspective and some code excerpts (e. g. regarding operator overloading) may not be compatible with other [CLI](http://ecma-international.org/publications-and-standards/standards/ecma-335/) languages.
+[`MagicText`](MagicText/) is a [*.NET Standard*](http://docs.microsoft.com/en-gb/dotnet/standard/net-standard) library written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) for generating random text. The library's interface is [CLS-compliant](http://docs.microsoft.com/en-gb/dotnet/standard/language-independence#cls-compliance-rules); however, inline documentation is written from a [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) perspective and some code excerpts (e. g. regarding operator overloading) may not be compatible with other [CLI](http://ecma-international.org/publications-and-standards/standards/ecma-335/) languages.
 
 **Author**: Davor Penzar (June 2022)
 
@@ -369,6 +369,10 @@ Character set encoding: UTF-8
 ```
 
 Also, note that the [information theory](http://en.wikipedia.org/wiki/Information_theory) analysis examples displayed above considered equally both words and word delimiters as tokens. However, when analysing words only, delimiters would have to be disregarded (e. g. when calculating the [empirical probability](http://en.wikipedia.org/wiki/Empirical_probability) of a word). The simplest solution would be to use a [`RegexMatchesTokeniser`](MagicText/src/RegexMatchesTokeniser.cs) which only yields words as tokens, or a [`StringSplitTokeniser`](MagicText/src/StringSplitTokeniser.cs) or [`RegexSplitTokeniser`](MagicText/src/RegexSplitTokeniser.cs) which do not yield delimiters as tokens, but some word [bigrams](http://en.wikipedia.org/wiki/Bigram) and other [*n*-grams](http://en.wikipedia.org/wiki/N-gram) could then be misidentified. For instance, by shattering the sentence *Although I am hungry, people don't seem to care*, the words `"hungry"` and `"people"` would appear as neighbouring therefore generating the [bigram](http://en.wikipedia.org/wiki/Bigram) `{ "hungry", "people" }`, inspite of them clearly being parts of different clauses.
+
+### Even Further Examples
+
+The [`MagicText.Example`](MagicText.Example/) project targeted for [*.NET 5*](http://github.com/dotnet/core/blob/main/5.0/README.md) is a fully-working project written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) that demonstrates how to use online sources to download an original text and use it for the generation of a new, random text.
 
 ##  Remarks
 
