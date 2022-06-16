@@ -9,7 +9,11 @@
 		<RootNamespace>MagicText.Example</RootNamespace>
 	</PropertyGroup>
 	<PropertyGroup>
+		<Authors>Davor Penzar</Authors>
 		<Description>Demonstrates text tokenisation and random generation from a web source.</Description>
+		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>http://github.com/DavorPenzar/magic-text</RepositoryUrl>
 		<NeutralLanguage>en-GB</NeutralLanguage>
 	</PropertyGroup>
 	<PropertyGroup>
