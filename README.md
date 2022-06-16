@@ -372,7 +372,7 @@ Also, note that the [information theory](http://en.wikipedia.org/wiki/Informatio
 
 ### Even Further Examples
 
-The [`MagicText.Example`](MagicText.Example/) project targeted for [*.NET 5*](http://github.com/dotnet/core/blob/main/5.0/README.md) is a fully-working project written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) that demonstrates how to use online sources to download an original text and use it for the generation of a new, random text.
+The [`MagicText.Example`](MagicText.Example/) project targeted for [*.NET 6*](http://github.com/dotnet/core/blob/main/6.0/README.md) (but compatible with as low as [*.NET Core 2.0*](http://github.com/dotnet/core/blob/main/2.0/README.md)) is a fully-working project written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) that demonstrates how to use online sources to download an original text and use it for the generation of a new, random text.
 
 ##  Remarks
 
