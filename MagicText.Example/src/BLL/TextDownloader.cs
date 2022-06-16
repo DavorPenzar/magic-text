@@ -82,8 +82,6 @@ namespace MagicText.Example.BLL
                 ).ConfigureAwait(false)
             )
             {
-                stopwatch.Stop();
-
                 HttpStatusCode statusCode = response.StatusCode;
 
                 if (response.IsSuccessStatusCode)
@@ -117,9 +115,13 @@ namespace MagicText.Example.BLL
                         ).ConfigureAwait(false);
 #endif // NET5_0_OR_GREATER
                     }
+
+                    stopwatch.Stop();
                 }
                 else
                 {
+                    stopwatch.Stop();
+
                     Logger.LogWarning(
                         "Failed to receive content from the web source at {uri} ({statusCode:D} {status}). Time elapsed: {duration:D} ms",
                             fullUri,
