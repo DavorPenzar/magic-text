@@ -3,10 +3,20 @@
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<LangVersion>8.0</LangVersion>
-		<TargetFramework>netcoreapp2.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RootNamespace>MagicText.Example</RootNamespace>
+	</PropertyGroup>
+	<PropertyGroup>
+		<Description>Demonstrates text tokenisation and random generation from a web source.</Description>
+		<NeutralLanguage>en-GB</NeutralLanguage>
+	</PropertyGroup>
+	<PropertyGroup>
+		<SignAssembly>true</SignAssembly>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
 		<EmbeddedResource Include="appsettings.json">
@@ -33,7 +43,7 @@
 		<PackageReference Include="Serilog.Settings.Configuration" Version="3.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="3.0.0" />
 		<PackageReference Include="Serilog.Sinks.Debug" Version="1.0.0" />
-		<PackageReference Include="Serilog.Sinks.File" Version="2.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="4.0.0" />
 		<PackageReference Include="System.Net.Http" Version="4.3.0" />
 		<PackageReference Include="System.Net.Primitives" Version="4.3.0" />
 	</ItemGroup>
