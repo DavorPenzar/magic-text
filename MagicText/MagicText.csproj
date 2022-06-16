@@ -12,7 +12,6 @@
 		<Authors>Davor Penzar</Authors>
 		<Description>Provides interfaces and classes for text tokenisation and random generation.</Description>
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
-		<PackageLicenseUrl>http://licenses.nuget.org/GPL-3.0-only</PackageLicenseUrl>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>http://github.com/DavorPenzar/magic-text</RepositoryUrl>
 		<NeutralLanguage>en-GB</NeutralLanguage>
