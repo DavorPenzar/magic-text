@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="119pt"
+   height="119pt"
+   viewBox="0 0 41.980552 41.980556"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   sodipodi:docname="ICON.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="79.333333"
+     inkscape:cy="79.333333"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     units="pt"
+     inkscape:window-width="1920"
+     inkscape:window-height="1011"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(6.9792323e-8,-255.01944)">
+    <g
+       id="g4530"
+       transform="translate(1.0495133)">
+      <circle
+         r="18.891251"
+         cy="276.0097"
+         cx="20.990278"
+         id="path4524"
+         style="fill:#87ceeb;fill-opacity:0.70196078;stroke-width:0.46845037" />
+      <path
+         transform="matrix(1.0212363,0,0,1.0230191,-3.2051431,165.99188)"
+         style="fill:#ffd700;fill-opacity:1;stroke-width:0.26458332"
+         inkscape:transform-center-y="-7.9901934e-06"
+         d="m 28.996501,114.02816 c -0.640944,0.69675 -2.439592,13.89878 -3.359319,14.03116 -0.919727,0.13237 -5.462257,-13.39158 -6.317545,-13.78533 -0.855287,-0.39376 -12.7591439,8.17573 -13.3979297,7.572 -0.6387857,-0.60373 10.0876347,-11.91301 9.8333957,-12.75976 -0.25424,-0.84675 -12.8764001,-5.88981 -12.6125299,-6.7347 0.2638701,-0.8449 14.3968789,-0.88112 15.0773139,-1.41502 0.680435,-0.53389 -1.608552,-13.616255 -0.72798,-13.907543 0.880572,-0.291288 5.695179,13.256333 6.464997,13.661723 0.769819,0.40539 14.511701,-6.505999 15.024115,-5.756963 0.512415,0.749035 -6.79728,10.592443 -6.65451,11.470933 0.14277,0.87848 8.043058,5.43425 7.803468,6.30437 -0.239589,0.87012 -10.492531,0.62238 -11.133476,1.31913 z"
+         inkscape:randomized="0.1"
+         inkscape:rounded="0.07"
+         inkscape:flatsided="false"
+         sodipodi:arg2="1.3836877"
+         sodipodi:arg1="0.86008889"
+         sodipodi:r2="19.699232"
+         sodipodi:r1="8.6676617"
+         sodipodi:cy="107.06696"
+         sodipodi:cx="22.678572"
+         sodipodi:sides="6"
+         id="path3717"
+         sodipodi:type="star" />
+      <text
+         id="text3715"
+         y="284.40582"
+         x="23.445246"
+         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16.93333244px;line-height:1.25;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif Italic';text-align:center;letter-spacing:0.05291667px;word-spacing:0px;text-anchor:middle;fill:#b22222;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16.93333244px;font-family:'Noto Serif';-inkscape-font-specification:'Noto Serif Italic';text-align:center;letter-spacing:1.05833328px;text-anchor:middle;fill:#b22222;fill-opacity:1;stroke-width:0.26458332"
+           y="284.40582"
+           x="23.974413"
+           id="tspan3713"
+           sodipodi:role="line">MT</tspan></text>
+    </g>
+  </g>
+</svg>
