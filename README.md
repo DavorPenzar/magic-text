@@ -164,7 +164,7 @@ Do you know that there's a spark in
 
 ```
 
-**Nota bene.** The results above were obtained by running the code in a 64-bit version ([*x64*](http://en.wikipedia.org/wiki/X86-64)) of the [*.NET 6.0* framework](http://github.com/dotnet/core/blob/master/release-notes/6.0/README.md) on [*Microsoft Windows 10*](http://microsoft.com/en-gb/windows/get-windows-10). Running the code in a different environment may yield different results&mdash;this has not been tested.
+**Nota bene.** The results above were obtained by running the code in a 64-bit version ([*x64*](http://en.wikipedia.org/wiki/X86-64)) of the [*.NET 6* framework](http://github.com/dotnet/core/blob/main/6.0/README.md) on [*Microsoft Windows 10*](http://microsoft.com/en-gb/windows/get-windows-10). Running the code in a different environment may yield different results&mdash;this has not been tested.
 
 ### Further Examples
 
@@ -381,6 +381,11 @@ This library should not be used when working with large corpora of context. Obje
 Another limitation of the functionality provided by the library is the fact that objects of the [`Pen`](MagicText/src/Pen.cs) class are immutable. Consequently, once a [`Pen`](MagicText/src/Pen.cs) is initialised, its context cannot be updated. Each update applied to the corpus of the tokens (context) requires initialising a new [`Pen`](MagicText/src/Pen.cs), which in turn executes a relatively expensive process of sorting the context. The larger the context, the more expensive the process. The problem is somewhat justified by the fact that text corpora are relatively rarely updated compared to the frequency of other, read-only operations conducted on them. The complete functionality of the [`Pen`](MagicText/src/Pen.cs) class is in fact read-only in terms of the resources used, which is compatible with the intended use.
 
 On the other hand, the [`Pen`](MagicText/src/Pen.cs) class implements the [`System.Runtime.Serialization.ISerializable`](http://docs.microsoft.com/en-gb/dotnet/api/system.runtime.serialization.iserializable) interface and is implemented with the [`System.SerializableAttribute`](http://docs.microsoft.com/en-gb/dotnet/api/system.serializableattribute) attribute. Also, a default [`System.Text.Json.Serialization.JsonConverter<T>`](http://docs.microsoft.com/en-gb/dotnet/api/system.text.json.serialization.jsonconverter-1) to serialise and deserialise [`Pen`](MagicText/src/Pen.cs) instances to/from [*JSON*](http://en.wikipedia.org/wiki/JSON) is provided by the library *out of the box*. In other words, [`Pen`s](MagicText/src/Pen.cs) are serialisable and can be persisted through multiple instances of the application process. This may speed up the application startup as expensive [`Pen`](MagicText/src/Pen.cs) construction may be avoided. Both serialisation techniques even automatically handle serialisation of some standard and custom [`System.StringComparer`](http://docs.microsoft.com/en-gb/dotnet/api/system.stringcomparer) subclasses. However, [*XML*](http://en.wikipedia.org/wiki/XML) serialisation using the standard serialiser ([`System.Xml.Serialization.XmlSerializer`](http://docs.microsoft.com/en-gb/dotnet/api/system.xml.serialization.xmlserializer)) is not supported.
+
+##  Known Issues
+
+1.  Although the [`Microsoft.Bcl.AsyncInterfaces` package](http://nuget.org/packages/Microsoft.Bcl.AsyncInterfaces/5.0.0) is listed as the library's dependency, when referncing the library from a [*.NET Framework*](http://docs.microsoft.com/en-gb/dotnet/framework/) project, the package might have to be explicitly referenced again from the project. Without doing so the code may fail to compile or the application may crash when an asynchronous method provided by the library is encountered.
+    *   **Soultion.** Reference the [`Microsoft.Bcl.AsyncInterfaces` package](http://nuget.org/packages/Microsoft.Bcl.AsyncInterfaces/5.0.0) explicitly from your project. If the error still arises, consider updating to a more recent (modern) [*.NET*](http://dotnet.microsoft.com/) version.
 
 ##  License
 
