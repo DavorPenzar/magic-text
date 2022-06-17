@@ -7,14 +7,17 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RootNamespace>MagicText.Example</RootNamespace>
+		<NeutralLanguage>en-GB</NeutralLanguage>
+		<ProjectGuid>66AF68D8-BE1C-156E-0669-C09447109C4C</ProjectGuid>
 	</PropertyGroup>
 	<PropertyGroup>
 		<Authors>Davor Penzar</Authors>
 		<Description>Demonstrates text tokenisation and random generation from a web source.</Description>
-		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+		<Copyright>Copyright (c) Davor Penzar 2022</Copyright>
+		<PackageProjectUrl>http://DavorPenzar.github.io/magic-text/</PackageProjectUrl>
 		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>http://github.com/DavorPenzar/magic-text</RepositoryUrl>
-		<NeutralLanguage>en-GB</NeutralLanguage>
+		<RepositoryUrl>http://github.com/DavorPenzar/magic-text/</RepositoryUrl>
+		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
 	</PropertyGroup>
 	<PropertyGroup>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>

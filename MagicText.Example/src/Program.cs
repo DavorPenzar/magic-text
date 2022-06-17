@@ -38,38 +38,46 @@ namespace MagicText.Example
             configuration = null!;
         }
 
-        private static void InitialiseEnvironment(String[]? args = null)
+        private static void InitialiseConfiguration(String[]? args = null)
         {
+            IConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.SetBasePath(AppContext.BaseDirectory);
+            configurationBuilder.AddEnvironmentVariables();
+            configurationBuilder.AddJsonFile("appsettings.json");
+            configurationBuilder.AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNETCORE_ENVIRONMENT") ?? "Production"}.json", true);
+            if (!(args is null))
             {
-                IConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
-                configurationBuilder.SetBasePath(AppContext.BaseDirectory);
-                configurationBuilder.AddEnvironmentVariables();
-                configurationBuilder.AddJsonFile("appsettings.json");
-                configurationBuilder.AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNETCORE_ENVIRONMENT") ?? "Production"}.json", true);
-                if (!(args is null))
-                {
-                    configurationBuilder.AddCommandLine(args);
-                }
-
-                Configuration = configurationBuilder.Build();
+                configurationBuilder.AddCommandLine(args);
             }
 
-            {
-                SelfLog.Enable(Console.Error);
-
-                LoggerConfiguration loggerConfiguration = new LoggerConfiguration();
-                loggerConfiguration.ReadFrom.Configuration(Configuration);
-
-                Log.Logger = loggerConfiguration.CreateLogger();
-
-                SelfLog.Disable();
-            }
+            Configuration = configurationBuilder.Build();
         }
 
-        private static void FinaliseEnvironment()
+        private static void InitialiseLogging()
         {
+            SelfLog.Enable(Console.Error);
+
+            LoggerConfiguration loggerConfiguration = new LoggerConfiguration();
+            loggerConfiguration.ReadFrom.Configuration(Configuration);
+
+            Log.Logger = loggerConfiguration.CreateLogger();
+        }
+
+        private static void FinaliseLogging()
+        {
+            SelfLog.Disable();
+
             Log.CloseAndFlush();
         }
+
+        private static void InitialiseEnvironment(String[]? args = null)
+        {
+            InitialiseConfiguration(args);
+            InitialiseLogging();
+        }
+
+        private static void FinaliseEnvironment() =>
+            FinaliseLogging();
 
         public static async Task<Int32> Main(String[] args)
         {
