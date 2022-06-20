@@ -183,11 +183,11 @@ namespace MagicText.Example
                 String text = String.Join(
                     String.Empty,
                     pen.Render(
-                        Configuration.GetValue<Int32>("Text:RandomGenerator:RelevantTokens"),
-                        Configuration.GetSection("Text:RandomGenerator:Seed").Exists() ?
+                        relevantTokens: Configuration.GetValue<Int32>("Text:RandomGenerator:RelevantTokens"),
+                        random: Configuration.GetSection("Text:RandomGenerator:Seed").Exists() ?
                             new Random(Configuration.GetValue<Int32>("Text:RandomGenerator:Seed")) :
                             new Random(),
-                        Configuration.GetValue<Nullable<Int32>>("Text:RandomGenerator:FromPosition")
+                        fromPosition: Configuration.GetValue<Nullable<Int32>>("Text:RandomGenerator:FromPosition")
                     ).Take(
                         Configuration.GetValue<Int32>(
                             "Text:RandomGenerator:MaxTokens",
