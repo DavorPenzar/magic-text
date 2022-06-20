@@ -389,7 +389,7 @@ On the other hand, the [`Pen`](MagicText/src/Pen.cs) class implements the [`Syst
 
 ##  License
 
-This project is licensed under the terms of the [*GNU General Public License v3*](http://gnu.org/licenses/gpl-3.0.en.html).
+This project is licensed under the terms of the [*GNU General Public License v3*](http://gnu.org/licenses/gpl-3.0.en.html). However, external dependencies might use different licenses.
 
 ##  References
 

@@ -68,7 +68,9 @@ The following keys are app-specific and are used to configure internal app's ser
     *   `SentinelToken` (string) &ndash; ending token,
     *   `Intern` (boolean) &ndash; whether or not to intern tokens using the [`System.String.Intern(System.String)` method](http://docs.microsoft.com/en-gb/dotnet/api/system.string.intern).
 
-Most, if not all, fields may be omitted. Omitted values are usually substituted by the corresponding type's default value (e. g. 0 for number types), with a few notable exceptions:
+Although explicitly set, by default (as appearing in the original code of the example project) all settings follow the default values of the corresponding arguments/fields/properties in the library, except for `Text:WebSource:Encoding` (explicitly set to [*UTF-8*](http://en.wikipedia.org/wiki/UTF-8)), `ShatteringOptions` (custom values) and `Pen:Intern` (explicitly set to `true`). **The original text resource is initially set to the [*Bible* at *Project Gutenberg*](http://gutenberg.org/ebooks/10) ([direct link](http://gutenberg.org/ebooks/10.txt.utf-8))**: the base address is set to [`http://gutenberg.org/`](http://gutenberg.org/) ([*Project Gutenberg* host](http://gutenberg.org/)), and the request [URI](http://en.wikipedia.org/wiki/Uniform_Resource_Identifier) is set to [ebooks/10.txt.utf-8](http://gutenberg.org/ebooks/10.txt.utf-8) (the [*Bible*'s](http://en.wikipedia.org/wiki/Bible) location at [*Project Gutenberg*](http://gutenberg.org/)).
+
+Most fields, if not all, may be omitted. Omitted values are usually substituted by the corresponding type's default value (e. g. 0 for number types), with a few notable exceptions:
 
 *   `Text:WebSource:Encoding`: if omitted or `null`, [*UTF-8*](http://en.wikipedia.org/wiki/UTF-8) is used,
 *   `Text:RandomGenerator:FromPosition`: `null` is the default,
@@ -76,5 +78,7 @@ Most, if not all, fields may be omitted. Omitted values are usually substituted 
 *   `Tokeniser:Pattern`: `RegexSplitTokeniser.DefaultInclusivePattern` field of the [`RegexSplitTokeniser` class](http://github.com/DavorPenzar/magic-text/blob/main/MagicText/src/RegexSplitTokeniser.cs) is the default,
 *   `Tokeniser:Options`: `RegexTokeniser.DefaultOptions` field of the [`RegexTokeniser` class](http://github.com/DavorPenzar/magic-text/blob/main/MagicText/src/RegexTokeniser.cs) is the default,
 *   `Pen:ComparisonType` &ndash; [`System.StringComparison.Ordinal`](http://docs.microsoft.com/en-gb/dotnet/api/system.stringcomparison#system-stringcomparison-ordinal) is the default.
+
+Note that the defaults (either the types' default values or the defaults listed above) might not always correspond to default arguments'/fields'/properties' values in the library (e. g. `Tokeniser:Options`, for which the library uses [`System.RegularExpressions.Regex.None`](http://docs.microsoft.com/en-gb/dotnet/api/system.text.regularexpressions.regexoptions#system-text-regularexpressions-regexoptions-none) as the default).
 
 **Nota bene.** To avoid problems (including exceptions) caused by [Issue #36510: *Null Configuration Elements Deserialized as Empty Strings*](http://github.com/dotnet/runtime/issues/36510), all `null` and empty [`System.String`s](http://docs.microsoft.com/en-gb/dotnet/api/system.string) read from the [`Microsoft.Extensions.Configuration.IConfiguration`](http://docs.microsoft.com/en-gb/dotnet/api/microsoft.extensions.configuration.iconfiguration) are treated as `null`s. As a result, `Tokeniser:Pattern` and `Pen:SentinelToken` cannot be set to a empty [`System.String`s](http://docs.microsoft.com/en-gb/dotnet/api/system.string) (`""` or [`System.String.Empty`](http://docs.microsoft.com/en-gb/dotnet/api/system.string.empty)).
