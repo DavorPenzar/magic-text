@@ -82,13 +82,13 @@ namespace MagicText
             {
                 lock (Locker)
                 {
-                    randomSeed = Math.Max(value, 1);
+                    randomSeed = GetRandomSeed(value);
                 }
             }
         }
 
         /// <summary>Gets the <see cref="Pen" />'s static (pseudo-)random number generator.</summary>
-        /// <returns>The internal (pseudo-)random number generator at the current thread.</returns>
+        /// <returns>The internal (pseudo-)random number generator for the current thread.</returns>
         /// <remarks>
         ///     <para>The number generator is thread safe (actually, each thread uses its own instance) and instances across multiple threads are seeded differently. However, instances across multiple processes initiated at approximately the same time could be seeded with the same value. Therefore the main purpose of the number generator is to provide a virtually unpredictable (to an unconcerned human user) implementation of the <see cref="Render(Int32, Nullable{Int32})" /> method for a single process without having to provide a custom number generator (a <see cref="Func{T, TResult}" /> function or a <see cref="System.Random" /> instance); no other properties are guaranteed.</para>
         ///     <para>If the code is expected to spread over multiple threads (either explicitly by starting <see cref="Thread" />s or implicitly by programming asynchronously), the reference returned by the <see cref="Random" /> property should not be stored in an outside variable and used later. Reference the property <see cref="Random" /> directly (or indirectly via the <see cref="RandomNext()" /> method or one of its overloads) in such scenarios.</para>
@@ -117,9 +117,20 @@ namespace MagicText
         {
             _locker = new Object();
 
+            randomSeed = GetRandomSeed((Int32)((1073741827L * AssemblyInfo.InitialisationTimePoint.Ticks + 1073741789L) & (Int64)Int32.MaxValue));
+        }
+
+        /// <summary>Gets a strictly positive random seed value constructed from a raw <see cref="Int32" /> <c><paramref name="value" /></c>.</summary>
+        /// <param name="value">The original <see cref="Int32" /> value.</param>
+        /// <returns>The strictly positive random seed value defined by the raw <c><paramref name="value" /></c>.</returns>
+        /// <remarks>
+        ///     <para>The strictly positive random seed value is obtained by taking the maximum of <c><paramref name="value" /></c>, its bitwise complement and 1.</para>
+        /// </remarks>
+        private static Int32 GetRandomSeed(Int32 value)
+        {
             unchecked
             {
-                randomSeed = Math.Max((Int32)((1073741827L * DateTime.UtcNow.Ticks + 1073741789L) & (Int64)Int32.MaxValue), 1);
+                return Math.Max(Math.Max(value, ~value), 1);
             }
         }
 

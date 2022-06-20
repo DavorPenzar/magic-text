@@ -16,9 +16,9 @@ namespace MagicText.Internal.Json
     {
         public const string UnexpectedTokenFormatErrorMessage = "Expected to read token {0}, got {1} instead.";
         public const string PropertyNameReadingFailErrorMessage = "Failed to read property name as a string.";
-        public const string UnexpectedPropertyNameErrorMessage = "Expected to read property `{0}�, got `{1}� instead.";
-        public const string DuplicatePropertyDefinitionErrorMessage = "Property `{0}� is defined multiple times.";
-        public const string InvalidPropertyErrorMessage = "Property `{0}� is not valid (unrecognised).";
+        public const string UnexpectedPropertyNameErrorMessage = "Expected to read property `{0}´, got `{1}´ instead.";
+        public const string DuplicatePropertyDefinitionErrorMessage = "Property `{0}´ is defined multiple times.";
+        public const string InvalidPropertyErrorMessage = "Property `{0}´ is not valid (unrecognised).";
 
         /// <summary>Represents the <see cref="JsonConverter{T}.Read(ref Utf8JsonReader, Type, JsonSerializerOptions)" /> method.</summary>
         /// <param name="reader">The <see cref="Utf8JsonReader" /> to read.</param>
