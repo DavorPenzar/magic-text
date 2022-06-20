@@ -13,9 +13,15 @@ namespace System.Diagnostics.CodeAnalysis
 
         public MemberNotNullAttribute(params String[] members) : base()
         {
-            _members = new String[members.Length];
-
-            Array.Copy(members, _members, members.Length);
+            if (members is null)
+            {
+                _members = Array.Empty<String>();
+            }
+            else
+            {
+                _members = new String[members.Length];
+                members.CopyTo(_members, members.Length);
+            }
         }
 
         public MemberNotNullAttribute(String member) : this(new String[] { member })

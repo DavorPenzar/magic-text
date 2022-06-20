@@ -67,6 +67,9 @@ namespace MagicText
 
         /// <summary>Creates a tokeniser.</summary>
         /// <param name="randomTokenBreaker">The <see cref="RandomTokenBreaker" /> whose <see cref="RandomTokenBreaker.BreakToken(Int32, Int32, Int32)" /> method is used as the token breaking function. See the <see cref="BreakToken" /> property and the <see cref="ShatterLine(String)" /> method for more details.</param>
+        /// <remarks>
+        ///     <para><strong>Nota bene.</strong> The constructor is intended for <strong>internal use only</strong>, and therefore does not make unnecessary checks of the parameters.</para>
+        /// </remarks>
         private RandomTokeniser(RandomTokenBreaker randomTokenBreaker) : this(randomTokenBreaker.BreakToken)
         {
         }

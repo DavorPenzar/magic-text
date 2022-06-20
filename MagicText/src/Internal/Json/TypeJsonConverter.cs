@@ -8,7 +8,7 @@ namespace MagicText.Internal.Json
     /// <remarks>
     ///     <para>This is a singleton class. <see cref="TypeJsonConverter" />s cannot be initialised, use the singleton <see cref="Instance" /> static property instead.</para>
     ///     <para>Obviously, the <see cref="Type" /> is framework/language-specific even though there are other <a href="http://en.wikipedia.org/wiki/Object-oriented_programming">object-oriented programming languages</a>. Consequently, interpreting the resulting <a href="http://json.org/json-en.html"><em>JSON</em></a> in a different programming language/framework is meaningless.</para>
-    ///     <para><strong>Nota bene.</strong> All private methods (static or instance members) are intended for <strong>internal use only</strong> and therefore do not make unnecessary checks of the parameters.</para>
+    ///     <para><strong>Nota bene.</strong> All private methods (static or instance members) are intended for <strong>internal use only</strong>, and therefore do not make unnecessary checks of the parameters.</para>
     /// </remarks>
     internal sealed class TypeJsonConverter : JsonConverter<Type>
     {

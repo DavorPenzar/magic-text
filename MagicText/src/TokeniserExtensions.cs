@@ -71,11 +71,11 @@ namespace MagicText
         /// <param name="encoding">The <see cref="Encoding" /> to use to read <see cref="Char" />s from the <c><paramref name="stream" /></c>.</param>
         /// <returns>A <see cref="StreamReader" /> for reading from the <c><paramref name="stream" /></c> with <see cref="TokeniserExtensions" />' internal default default settings.</returns>
         /// <remarks>
-        ///     <para>The method is intended for the internal use only and therefore does not make unnecessary checks of the parameters.</para>
         ///     <para>The <see cref="TokeniserExtensions" />' internal default settings are used for construction of the <see cref="StreamReader" />. These settings should coincide with the actual defaults of the <see cref="StreamReader" /> class regarding buffer size; however, different policies for detecting byte order marks (BOM) and leaving the <c><paramref name="stream" /></c> open are used.</para>
         ///     <para>Byte order marks are not looked for at the beginning of the <c><paramref name="stream" /></c>.</para>
         ///     <para>Disposing of the <see cref="StreamReader" /> will neither dispose nor close the <c><paramref name="stream" /></c>.</para>
         ///     <para>The exceptions thrown by the <see cref="StreamReader(Stream, Encoding, Boolean, Int32, Boolean)" /> constructor are not caught.</para>
+        ///     <para><strong>Nota bene.</strong> The method is intended for the internal use only, and therefore does not make unnecessary checks of the parameters.</para>
         /// </remarks>
         private static StreamReader CreateDefaultStreamReader(Stream stream, Encoding encoding) =>
             new StreamReader(stream: stream, encoding: encoding, detectEncodingFromByteOrderMarks: false, bufferSize: DefaultBufferSize, leaveOpen: true);
@@ -87,11 +87,11 @@ namespace MagicText
         /// <param name="encoding">The <see cref="Encoding" /> to use to read <see cref="Char" />s from the <c><paramref name="stream" /></c>.</param>
         /// <returns>A <see cref="StreamReader" /> for reading from the <c><paramref name="stream" /></c> with <see cref="TokeniserExtensions" />' internal default default settings.</returns>
         /// <remarks>
-        ///     <para>The method is intended for the internal use only and therefore does not make unnecessary checks of the parameters.</para>
         ///     <para>The <see cref="TokeniserExtensions" />' internal default settings are used for construction of the <see cref="StreamReader" />. These settings should coincide with the actual defaults of the <see cref="StreamReader" /> class regarding buffer size; however, different policies for detecting byte order marks (BOM) and leaving the <c><paramref name="stream" /></c> open are used.</para>
         ///     <para>Byte order marks are not looked for at the beginning of the <c><paramref name="stream" /></c>.</para>
         ///     <para>Disposing of the <see cref="StreamReader" /> will neither dispose nor close the <c><paramref name="stream" /></c>.</para>
         ///     <para>The exceptions thrown by the <see cref="StreamReader(Stream, Encoding, Boolean, Int32, Boolean)" /> constructor are not caught.</para>
+        ///     <para><strong>Nota bene.</strong> The method is intended for the internal use only, and therefore does not make unnecessary checks of the parameters.</para>
         /// </remarks>
         private static StreamReader CreateDefaultStreamReader(Stream stream, Encoding? encoding) =>
             new StreamReader(stream: stream, encoding: encoding, detectEncodingFromByteOrderMarks: false, bufferSize: DefaultBufferSize, leaveOpen: true);

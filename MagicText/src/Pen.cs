@@ -120,6 +120,42 @@ namespace MagicText
             randomSeed = GetRandomSeed((Int32)((1073741827L * AssemblyInfo.InitialisationTimePoint.Ticks + 1073741789L) & (Int64)Int32.MaxValue));
         }
 
+        /// <summary>Initialises variables representing a <se cref="Pen" /> instance's fields..</summary>
+        /// <param name="context">The input tokens.</param>
+        /// <param name="comparer">The <see cref="StringComparer" /> used by the <see cref="Pen" />.</param>
+        /// <param name="sentinelToken">The ending token.</param>
+        /// <param name="intern">Whether or not to intern non-<c>null</c> tokens from the <c><paramref name="context" /></c> (via the <see cref="String.Intern(String)" /> method) when being copied into the <c><paramref name="contextField" /></c>.</param>
+        /// <param name="internedField">Destination for the <see cref="Interned" />'s underlying field.</param>
+        /// <param name="comparerField">Destination for the <see cref="Comparer" />'s underlying field.</param>
+        /// <param name="indexField">Destination for the <see cref="Index" />'s underlying field.</param>
+        /// <param name="contextField">Destination for the <see cref="Context" />'s underlying field.</param>
+        /// <param name="sentinelTokenField">Destination for the <see cref="SentinelToken" />'s underlying field.</param>
+        /// <remarks>
+        ///     <para><strong>Nota bene.</strong> The method is intended for <strong>internal use only</strong> to be used in the <see cref="Pen(IEnumerable{String}, StringComparer, String, Boolean)" /> and <see cref="Pen(IEnumerable{String}, StringComparison, String, Boolean)" /> constructors, and therefore does not make unnecessary checks of the parameters.</para>
+        /// </remarks>
+        private static void InitialiseFields(IEnumerable<String?> context, StringComparer comparer, String? sentinelToken, Boolean intern, out Boolean internedField, out StringComparer comparerField, out IReadOnlyList<Int32> indexField, out IReadOnlyList<String?> contextField, out String? sentinelTokenField)
+        {
+            // Copy the interning policy, the comparer and the ending token.
+            internedField = intern;
+            comparerField = comparer;
+            sentinelTokenField = internedField ? StringExtensions.InternNullable(sentinelToken) : sentinelToken;
+
+            // Copy the context.
+            {
+                List<String?> contextList = new List<String?>(internedField ? context.Select(StringExtensions.InternNullable) : context);
+                contextList.TrimExcess();
+                contextField = contextList.AsReadOnly();
+            }
+
+            // Find the sorting positions of tokens in the context.
+            {
+                List<Int32> indexList = new List<Int32>(Enumerable.Range(0, contextField.Count));
+                indexList.Sort(new IndexComparer(comparerField, contextField));
+                indexList.TrimExcess();
+                indexField = indexList.AsReadOnly();
+            }
+        }
+
         /// <summary>Gets a strictly positive random seed value constructed from a raw <see cref="Int32" /> <c><paramref name="value" /></c>.</summary>
         /// <param name="value">The original <see cref="Int32" /> value.</param>
         /// <returns>The strictly positive random seed value defined by the raw <c><paramref name="value" /></c>.</returns>
@@ -167,7 +203,7 @@ namespace MagicText
         /// <returns>A signed integer that indicates the comparison of the values of the subrange from the <c><paramref name="tokens" /></c> starting from <c><paramref name="i" /></c> and the <c><paramref name="sampleCycle" /></c>. A negative value indicates the <em>less than</em> relation, a positive value indicates the <em>greater than</em> relation, and 0 indicates the <em>equal to</em> relation between the <c><paramref name="cycleStart" /></c> and the subrange from <c><paramref name="tokens" />.</c></returns>
         /// <remarks>
         ///     <para>The values from the subrange of <c><paramref name="tokens" /></c> and the <c><paramref name="sampleCycle" /></c> are compared in order by calling the <see cref="StringComparer.Compare(String, String)" /> method of the <c><paramref name="comparer" /></c>. If a comparison yields a non-zero value, it is returned. If the subrange of <c><paramref name="tokens" /></c> is shorter (in the number of tokens) than the <c><paramref name="sampleCycle" /></c> but all of its tokens compare equal to corresponding tokens from the beginning of the <c><paramref name="sampleCycle" /></c>, a negative number is returned. If all tokens compare equal and the subrange of <c><paramref name="tokens" /></c> is the same length (in the number of tokens) as the <c><paramref name="sampleCycle" /></c>, 0 is returned.</para>
-        ///     <para><strong>Nota bene.</strong> The method is intended for <strong>internal use only</strong> and therefore does not make unnecessary checks of the parameters.</para>
+        ///     <para><strong>Nota bene.</strong> The method is intended for <strong>internal use only</strong>, and therefore does not make unnecessary checks of the parameters.</para>
         /// </remarks>
         private static Int32 CompareRange(StringComparer comparer, IReadOnlyList<String?> tokens, IReadOnlyList<String?> sampleCycle, Int32 i, Int32 cycleStart)
         {
@@ -472,27 +508,7 @@ namespace MagicText
                 throw new ArgumentNullException(nameof(context), ContextNullErrorMessage);
             }
 
-            comparer ??= StringComparer.Ordinal;
-
-            // Copy the interning policy, the comparer and the ending token.
-            _interned = intern;
-            _comparer = comparer;
-            _sentinelToken = Interned ? StringExtensions.InternNullable(sentinelToken) : sentinelToken;
-
-            // Copy the context.
-            {
-                List<String?> contextList = new List<String?>(Interned ? context.Select(StringExtensions.InternNullable) : context);
-                contextList.TrimExcess();
-                _context = contextList.AsReadOnly();
-            }
-
-            // Find the sorting positions of tokens in the context.
-            {
-                List<Int32> indexList = new List<Int32>(Enumerable.Range(0, Context.Count));
-                indexList.Sort(new IndexComparer(Comparer, Context));
-                indexList.TrimExcess();
-                _index = indexList.AsReadOnly();
-            }
+            InitialiseFields(context, comparer ?? StringComparer.Ordinal, sentinelToken, intern, out _interned, out _comparer, out _index, out _context, out _sentinelToken);
         }
 
         /// <summary>Creates a pen.</summary>
@@ -509,36 +525,21 @@ namespace MagicText
                 throw new ArgumentNullException(nameof(context), ContextNullErrorMessage);
             }
 
-            // Copy the interning policy, the comparer and the ending token.
-            _interned = intern;
+            StringComparer comparer;
             try
             {
 #if NETSTANDARD2_0
-                _comparer = StringComparerExtensions.GetComparerFromComparison(comparisonType);
+                comparer = StringComparerExtensions.GetComparerFromComparison(comparisonType);
 #else
-                _comparer = StringComparer.FromComparison(comparisonType);
+                comparer = StringComparer.FromComparison(comparisonType);
 #endif // NETSTANDARD2_0
             }
             catch (ArgumentException exception)
             {
                 throw new ArgumentException(ComparisonTypeNotSupportedErrorMessage, nameof(comparisonType), exception);
             }
-            _sentinelToken = Interned ? StringExtensions.InternNullable(sentinelToken) : sentinelToken;
 
-            // Copy the context.
-            {
-                List<String?> contextList = new List<String?>(Interned ? context.Select(StringExtensions.InternNullable) : context);
-                contextList.TrimExcess();
-                _context = contextList.AsReadOnly();
-            }
-
-            // Find the sorting positions of tokens in the context.
-            {
-                List<Int32> indexList = new List<Int32>(Enumerable.Range(0, Context.Count));
-                indexList.Sort(new IndexComparer(Comparer, Context));
-                indexList.TrimExcess();
-                _index = indexList.AsReadOnly();
-            }
+            InitialiseFields(context, comparer, sentinelToken, intern, out _interned, out _comparer, out _index, out _context, out _sentinelToken);
         }
 
         /// <summary>Creates an empty pen.</summary>

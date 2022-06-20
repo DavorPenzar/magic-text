@@ -16,9 +16,15 @@ namespace System.Diagnostics.CodeAnalysis
         public MemberNotNullWhenAttribute(Boolean returnValue, params String[] members) : base()
         {
             _returnValue = returnValue;
-            _members = new String[members.Length];
-
-            Array.Copy(members, _members, members.Length);
+            if (members is null)
+            {
+                _members = Array.Empty<String>();
+            }
+            else
+            {
+                _members = new String[members.Length];
+                members.CopyTo(_members, members.Length);
+            }
         }
 
         public MemberNotNullWhenAttribute(Boolean returnValue, String member) : this(returnValue, new String[] { member })

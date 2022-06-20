@@ -10,7 +10,7 @@ namespace MagicText.Internal.Json
 {
     /// <summary>Provides auxiliary delegates and methods for reading/writing <a href="http://json.org/json-en.html"><em>JSON</em></a> objects.</summary>
     /// <remarks>
-    ///     <para><strong>Nota bene.</strong> All methods (private or public) are intended for <strong>internal use only</strong> and therefore do not make unnecessary checks of the parameters.</para>
+    ///     <para><strong>Nota bene.</strong> All methods (private or public) are intended for <strong>internal use only</strong>, and therefore do not make unnecessary checks of the parameters.</para>
     /// </remarks>
     internal static class JsonConversionHelper
     {
