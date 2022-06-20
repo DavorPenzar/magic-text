@@ -100,13 +100,21 @@ namespace MagicText.Example
                 using HttpClientHandler clientHandler = new HttpClientHandler();
                 using HttpClient client = new HttpClient(clientHandler, true)
                 {
-                    BaseAddress = new Uri(Configuration["Text:WebSource:Authority"])
+                    BaseAddress =
+                        Configuration["Text:WebSource:Authority"] is String webSourceAuthority &&
+                            !String.IsNullOrEmpty(webSourceAuthority) ?
+                                new Uri(webSourceAuthority) :
+                                null
                 };
 
                 ITokeniser tokeniser = new RegexSplitTokeniser(
-                    Configuration["Tokeniser:Pattern"],
-                    false,
-                    Configuration.GetValue<RegexOptions>(
+                    pattern:
+                        Configuration["Tokeniser:Pattern"] is String tokeniserPattern &&
+                            !String.IsNullOrEmpty(tokeniserPattern) ?
+                                tokeniserPattern :
+                                RegexSplitTokeniser.DefaultInclusivePattern,
+                    escape: false,
+                    options: Configuration.GetValue<RegexOptions>(
                         "Tokeniser:Options",
                         RegexTokeniser.DefaultOptions
                     )
@@ -123,19 +131,22 @@ namespace MagicText.Example
                             logger: loggerFactory.CreateLogger<TextDownloader>(),
                             client: client,
                             tokeniser: tokeniser,
-                            shatteringOptions: Configuration.GetValue<ShatteringOptions>("ShatteringOptions"),
+                            shatteringOptions: Configuration.GetValue<ShatteringOptions?>("ShatteringOptions"),
                             disposeMembers: false
                         )
                     )
                     {
                         tokens = await textDownloader.DownloadTextAsync(
-                            Configuration["Text:WebSource:Query"],
-                            Encoding.GetEncoding(
-                                Configuration.GetValue<String>(
-                                    "Text:WebSource:Encoding",
-                                    "UTF-8"
-                                )
-                            )
+                            uri:
+                                Configuration["Text:WebSource:Query"] is String webSourceQuery &&
+                                    !String.IsNullOrEmpty(webSourceQuery) ?
+                                        webSourceQuery :
+                                        null,
+                            encoding:
+                                Configuration["Text:WebSource:Encoding"] is String encodingName &&
+                                    !String.IsNullOrEmpty(encodingName) ?
+                                        Encoding.GetEncoding(encodingName) :
+                                        null
                         );
                     }
 
@@ -152,7 +163,11 @@ namespace MagicText.Example
                             "Pen:ComparisonType",
                             StringComparison.Ordinal
                         ),
-                        sentinelToken: Configuration.GetValue<String?>("Pen:SentinelToken"),
+                        sentinelToken:
+                            Configuration["Pen:SentinelToke"] is String sentinelToken &&
+                                !String.IsNullOrEmpty(sentinelToken) ?
+                                    sentinelToken :
+                                    null,
                         intern: Configuration.GetValue<Boolean>("Pen:Intern")
                     );
 
@@ -169,9 +184,16 @@ namespace MagicText.Example
                     String.Empty,
                     pen.Render(
                         Configuration.GetValue<Int32>("Text:RandomGenerator:RelevantTokens"),
-                        new Random(Configuration.GetValue<Int32>("Text:RandomGenerator:Seed")),
+                        Configuration.GetSection("Text:RandomGenerator:Seed").Exists() ?
+                            new Random(Configuration.GetValue<Int32>("Text:RandomGenerator:Seed")) :
+                            new Random(),
                         Configuration.GetValue<Nullable<Int32>>("Text:RandomGenerator:FromPosition")
-                    ).Take(Configuration.GetValue<Int32>("Text:RandomGenerator:MaxTokens"))
+                    ).Take(
+                        Configuration.GetValue<Int32>(
+                            "Text:RandomGenerator:MaxTokens",
+                            Int32.MaxValue
+                        )
+                    )
                 );
                 logger.LogInformation(
                     "Generated text: {text}",
