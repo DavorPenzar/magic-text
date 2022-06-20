@@ -4,7 +4,7 @@
 
 ##  Setup
 
-After downloading the project, it is ready to run. Originally, it targets the [*.NET 6* framework](http://github.com/dotnet/core/blob/main/6.0/README.md), but this can be easily changed to as low as [*.NET Core 2.0*](http://github.com/dotnet/core/blob/main/2.0/README.md)) without changing the source code (other than the `TargetFramework` property in the [`MagicText.Example.csproj` project file](MagicText.Example.csproj)).
+After downloading the project, it is ready to run. Originally, it targets the [*.NET 6* framework](http://github.com/dotnet/core/blob/main/6.0/README.md), but this can be easily changed to as low as [*.NET Core 2.0*](http://github.com/dotnet/core/blob/main/2.0/README.md)) without changing the source code (other than the [`TargetFramework`](http://docs.microsoft.com/en-gb/dotnet/core/project-sdk/msbuild-props#targetframework) property in the [`MagicText.Example.csproj` project file](MagicText.Example.csproj)).
 
 ### Application Settings
 
@@ -41,7 +41,7 @@ The app settings shall only be described for the [`appsettings.json`](appsetting
 
 The following keys are not app-specific and are used to configure third-party services used by the app:
 
-*   `$schema` &ndash; the [*JSNO*](http://json.org/) schema of the file (ignore in other [`Microsoft.Extensions.Configuration.IConfigurationProvider`s](http://docs.microsoft.com/en-gb/dotnet/api/microsoft.extensions.configuration.iconfigurationprovider)),
+*   `$schema` &ndash; the [*JSON*](http://json.org/) schema of the file (ignore in other [`Microsoft.Extensions.Configuration.IConfigurationProvider`s](http://docs.microsoft.com/en-gb/dotnet/api/microsoft.extensions.configuration.iconfigurationprovider)),
 *   `ConnectionStrings` &ndash; connection strings for database connections (unused),
 *   `Serilog` &ndash; configuration of [Serilog](http://serilog.net/) logging.
 
