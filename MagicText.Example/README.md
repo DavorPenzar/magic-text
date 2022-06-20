@@ -51,8 +51,8 @@ The following keys are app-specific and are used to configure internal app's ser
 
 *   `Text` (object) &ndash; settings for the original text source and the random text generator:
     *   `WebSource` (object) &ndash; settings for the original text cource:
-        *   `Authority` (string) &ndash; base address (see [`System.Uri.Authority`](http://docs.microsoft.com/en-gb/dotnet/api/system.uri.authority)),
-        *   `Query` (string) &ndash; query (see [`System.Uri.Query`](https://docs.microsoft.com/en-gb/dotnet/api/system.uri.query)),
+        *   `BaseAddress` (string) &ndash; base address (see [`System.Net.Http.HttpClient.BaseAddress`](http://docs.microsoft.com/en-gb/dotnet/api/system.net.http.httpclient.baseaddress)),
+        *   `RequestUri` (string) &ndash; request [URI](http://en.wikipedia.org/wiki/Uniform_Resource_Identifier) (see [`System.Net.Http.HttpRequestMessage.RequestUri`](http://docs.microsoft.com/en-gb/dotnet/api/system.net.http.httprequestmessage.requesturi)),
         *   `Encoding` (string) &ndash; encoding name (see [*List of Encodings*](http://docs.microsoft.com/en-gb/dotnet/api/system.text.encoding#list-of-encodings)),
     *   `RandomGenerator` (object) &ndash; settings for the random text generator:
         *   `Seed` (number) &ndash; random seed (see [`System.Random.Random(System.Int32)`](http://docs.microsoft.com/en-gb/dotnet/api/system.random.-ctor))
@@ -78,6 +78,3 @@ Most, if not all, fields may be omitted. Omitted values are usually substituted 
 *   `Pen:ComparisonType` &ndash; [`System.StringComparison.Ordinal`](http://docs.microsoft.com/en-gb/dotnet/api/system.stringcomparison#system-stringcomparison-ordinal) is the default.
 
 **Nota bene.** To avoid problems (including exceptions) caused by [Issue #36510: *Null Configuration Elements Deserialized as Empty Strings*](http://github.com/dotnet/runtime/issues/36510), all `null` and empty [`System.String`s](http://docs.microsoft.com/en-gb/dotnet/api/system.string) read from the [`Microsoft.Extensions.Configuration.IConfiguration`](http://docs.microsoft.com/en-gb/dotnet/api/microsoft.extensions.configuration.iconfiguration) are treated as `null`s. As a result, `Tokeniser:Pattern` and `Pen.SentinelToken` cannot be set to a empty [`System.String`s](http://docs.microsoft.com/en-gb/dotnet/api/system.string) (`""` or [`System.String.Empty`](http://docs.microsoft.com/en-gb/dotnet/api/system.string.empty)).
-
-**Good to Know.** Fields `Text:WebSource:Authority` and `Text:WebSource:Query` do not necessarily have to represent the final request [`System.Uri`'s](http://docs.microsoft.com/en-gb/dotnet/api/system.uri) [`Authority`](http://docs.microsoft.com/en-gb/dotnet/api/system.uri.authority) and [`Query`](https://docs.microsoft.com/en-gb/dotnet/api/system.uri.query) properties. In fact, if `Text:WebSource:Query` is an absolute [`System.Uri`
-](http://docs.microsoft.com/en-gb/dotnet/api/system.uri), `Text:WebSource:Authority` is ignored. Similarly, if `Text:WebSource:Query` is `null` or empty, it is disregarded. In all other cases, the final request [`System.Uri`](http://docs.microsoft.com/en-gb/dotnet/api/system.uri)) is obtained by joining the two addresses with `Text:WebSource:Authority` being the left part and `Text:WebSource:Query` being the right&mdash;even if `Text:WebSource:Authority` contains more than only the [`Authority`](http://docs.microsoft.com/en-gb/dotnet/api/system.uri.authority) information.

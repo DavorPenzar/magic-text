@@ -101,9 +101,9 @@ namespace MagicText.Example
                 using HttpClient client = new HttpClient(clientHandler, true)
                 {
                     BaseAddress =
-                        Configuration["Text:WebSource:Authority"] is String webSourceAuthority &&
-                            !String.IsNullOrEmpty(webSourceAuthority) ?
-                                new Uri(webSourceAuthority) :
+                        Configuration["Text:WebSource:BaseAddress"] is String webSourceBaseAddress &&
+                            !String.IsNullOrEmpty(webSourceBaseAddress) ?
+                                new Uri(webSourceBaseAddress) :
                                 null
                 };
 
@@ -138,9 +138,9 @@ namespace MagicText.Example
                     {
                         tokens = await textDownloader.DownloadTextAsync(
                             uri:
-                                Configuration["Text:WebSource:Query"] is String webSourceQuery &&
-                                    !String.IsNullOrEmpty(webSourceQuery) ?
-                                        webSourceQuery :
+                                Configuration["Text:WebSource:RequestUri"] is String webSourceRequestUri &&
+                                    !String.IsNullOrEmpty(webSourceRequestUri) ?
+                                        webSourceRequestUri :
                                         null,
                             encoding:
                                 Configuration["Text:WebSource:Encoding"] is String encodingName &&
