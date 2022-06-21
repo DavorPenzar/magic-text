@@ -21,32 +21,32 @@ namespace MagicText.Internal.Extensions
 
             Boolean recognised;
 
-            if (comparer == StringComparer.CurrentCulture)
+            if (StringComparer.CurrentCulture.Equals(comparer))
             {
                 comparisonType = StringComparison.CurrentCulture;
                 recognised = true;
             }
-            else if (comparer == StringComparer.CurrentCultureIgnoreCase)
+            else if (StringComparer.CurrentCultureIgnoreCase.Equals(comparer))
             {
                 comparisonType = StringComparison.CurrentCultureIgnoreCase;
                 recognised = true;
             }
-            else if (comparer == StringComparer.InvariantCulture)
+            else if (StringComparer.InvariantCulture.Equals(comparer))
             {
                 comparisonType = StringComparison.InvariantCulture;
                 recognised = true;
             }
-            else if (comparer == StringComparer.InvariantCultureIgnoreCase)
+            else if (StringComparer.InvariantCultureIgnoreCase.Equals(comparer))
             {
                 comparisonType = StringComparison.InvariantCultureIgnoreCase;
                 recognised = true;
             }
-            else if (comparer == StringComparer.Ordinal)
+            else if (StringComparer.Ordinal.Equals(comparer))
             {
                 comparisonType = StringComparison.Ordinal;
                 recognised = true;
             }
-            else if (comparer == StringComparer.OrdinalIgnoreCase)
+            else if (StringComparer.OrdinalIgnoreCase.Equals(comparer))
             {
                 comparisonType = StringComparison.OrdinalIgnoreCase;
                 recognised = true;

@@ -6,9 +6,9 @@
 
 After downloading the project, it is ready to run. Originally, it targets the [*.NET 6* framework](http://github.com/dotnet/core/blob/main/6.0/README.md), but this can be easily changed to as low as [*.NET Core 2.0*](http://github.com/dotnet/core/blob/main/2.0/README.md)) without changing the source code (other than the [`TargetFramework`](http://docs.microsoft.com/en-gb/dotnet/core/project-sdk/msbuild-props#targetframework) property in the [`MagicText.Example.csproj` project file](MagicText.Example.csproj)).
 
-### Application Settings
+### Runtime Settings
 
-Additionally, some application settings may be changed via the [`appsettings.json` settings file](appsettings.json) without changing the source code, but first learn about the intended use of the application before altering its settings. Read [*Usage* section](#Usage) first, then [*`appsettings.json` Schema* section](#appsettings.json-schema) next.
+Additionally, some of the app's runtime settings may be changed via the [`appsettings.json` settings file](appsettings.json) without changing the source code, but first learn about the intended use of the application before altering its settings. Read [*Usage* section](#usage) first, then [*`appsettings.json` Schema* section](#appsettings%2Ejson-schema) next.
 
 ##  Usage
 
@@ -24,18 +24,18 @@ More detailed:
 2.  After the web resource is read until the end and all tokens are extracted, the communication with the source is closed. **Only then (all tokens fully constructed and in memory) is a [`Pen`](http://github.com/DavorPenzar/magic-text/blob/main/MagicText/src/Pen.cs) constructed**&mdash;once a response is received from the resource, any potential subsequent changes made on the web source are not reflected in the app.
 3.  Finally, when the [`Pen`](http://github.com/DavorPenzar/magic-text/blob/main/MagicText/src/Pen.cs) is constructed, a **limited number of random text tokens are generated**. The tokens are first concatenated into a single [`System.String`](http://docs.microsoft.com/en-gb/dotnet/api/system.string), and then the [`System.String`](http://docs.microsoft.com/en-gb/dotnet/api/system.string) is printed to the console. **If the number of tokens is too large for the resulting [`System.String`](http://docs.microsoft.com/en-gb/dotnet/api/system.string) to fit in the memory, the app may crash**.
 
-Without changing the source code, the behaviour explained above cannot be changed. However, settings such as the web resource address, the [`RegexSplitTokeniser`](http://github.com/DavorPenzar/magic-text/blob/main/MagicText/src/RegexSplitTokeniser.cs) pattern, or the maximal number of tokens to generate, may easily be set/altered. See [*`appsettings.json` Schema* section](#appsettings.json-schema) to learn how.
+Without changing the source code, the behaviour explained above cannot be changed. However, settings such as the web resource address, the [`RegexSplitTokeniser`](http://github.com/DavorPenzar/magic-text/blob/main/MagicText/src/RegexSplitTokeniser.cs) pattern, or the maximal number of tokens to generate, may easily be set/altered. See [*`appsettings.json` Schema* section](#appsettings%2Ejson-schema) to learn how.
 
 ##  [`appsettings.json`](appsettings.json) Schema
 
-The app uses [`Microsoft.Extensions.Configuration.IConfiguration`](http://docs.microsoft.com/en-gb/dotnet/api/microsoft.extensions.configuration.iconfiguration) to read settings at startup. It actually reads in the following order (subsequent definition overrides a previous one):
+The app uses [`Microsoft.Extensions.Configuration.IConfiguration`](http://docs.microsoft.com/en-gb/dotnet/api/microsoft.extensions.configuration.iconfiguration) to read runtime settings at startup. It actually reads in the following order (subsequent definition overrides a previous one):
 
 1.  environment variables,
 2.  [`appsettings.json` file](appsettings.json),
-3.  `appsettings.{DOTNETCORE_ENVIRONMENT}.json` file (e. g. [`appsettings.Development.json` file](appsettings.json)) if the `DOTNETCORE_ENVIRONMENT` environment variable is set and the file exists,
+3.  `appsettings.{DOTNETCORE_ENVIRONMENT}.json` file (e. g. [`appsettings.Development.json` file](appsettings.Development.json)) if the `DOTNETCORE_ENVIRONMENT` environment variable is set (otherwise `Production` is assumed) and the file exists,
 4.  command line arguments.
 
-The app settings shall only be described for the [`appsettings.json`](appsettings.json) and `appsettings.{DOTNETCORE_ENVIRONMENT}.json` files&mdash;to set the settings using another [`Microsoft.Extensions.Configuration.IConfigurationProvider`](http://docs.microsoft.com/en-gb/dotnet/api/microsoft.extensions.configuration.iconfigurationprovider), use the same keys and data types following the [`Microsoft.Extensions.Configuration.IConfigurationProvider`'s](http://docs.microsoft.com/en-gb/dotnet/api/microsoft.extensions.configuration.iconfigurationprovider) syntax.
+The app settings shall only be described for the [`appsettings.json`](appsettings.json) and `appsettings.{DOTNETCORE_ENVIRONMENT}.json` files&mdash;to set the settings using another [`Microsoft.Extensions.Configuration.IConfigurationProvider`](http://docs.microsoft.com/en-gb/dotnet/api/microsoft.extensions.configuration.iconfigurationprovider), use the same keys and data types but following the [`Microsoft.Extensions.Configuration.IConfigurationProvider`'s](http://docs.microsoft.com/en-gb/dotnet/api/microsoft.extensions.configuration.iconfigurationprovider) syntax.
 
 ### Non-App Settings
 

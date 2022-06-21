@@ -344,7 +344,7 @@ namespace MagicText
         /// <param name="stringComparisonType">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
         /// <returns>The hash code of the current <see cref="ShatteringOptions" /> according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparisonType" /></c>.</returns>
         /// <exception cref="ArgumentException">The <c><paramref name="stringComparisonType" /></c> is not a supported <see cref="StringComparison" /> value.</exception>
-        public virtual Int32 GetHashCode(StringComparison stringComparisonType)
+        public Int32 GetHashCode(StringComparison stringComparisonType)
         {
             IEqualityComparer<String> stringEqualityComparer;
             try
@@ -393,7 +393,7 @@ namespace MagicText
         /// <param name="stringComparisonType">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
         /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c> according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparisonType" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
         /// <exception cref="ArgumentException">The <c><paramref name="stringComparisonType" /></c> is not a supported <see cref="StringComparison" /> value.</exception>
-        public virtual Boolean Equals(ShatteringOptions? other, StringComparison stringComparisonType)
+        public Boolean Equals(ShatteringOptions? other, StringComparison stringComparisonType)
         {
             IEqualityComparer<String> stringEqualityComparer;
             try
@@ -409,13 +409,13 @@ namespace MagicText
                 throw new ArgumentException(StringComparisonTypeNotSupportedErrorMessage, nameof(stringComparisonType), exception);
             }
 
-            return Equals(stringEqualityComparer);
+            return Equals(other, stringEqualityComparer);
         }
 
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="other" /></c> options or not.</summary>
         /// <param name="other">The other <see cref="ShatteringOptions" /> to compare with these options.</param>
         /// <returns>If the current <see cref="ShatteringOptions" /> are equal to the <c><paramref name="other" /></c>, <c>true</c>; <c>false</c> otherwise.</returns>
-        public virtual Boolean Equals(ShatteringOptions? other) =>
+        public Boolean Equals(ShatteringOptions? other) =>
             this.Equals(other, null);
 
         /// <summary>Indicates whether the current options are equal to the <c><paramref name="obj" /></c> or not.</summary>
@@ -442,7 +442,7 @@ namespace MagicText
         /// <param name="stringComparisonType">One of the enumeration values that specifies how <see cref="String" />s should be compared.</param>
         /// <returns>If the <c><paramref name="obj" /></c> is also <see cref="ShatteringOptions" /> or it may be cast to <see cref="ShatteringOptions" /> and the current shattering options are equal to it according to the <see cref="StringComparer" /> specified by the <c><paramref name="stringComparisonType" /></c>, <c>true</c>; <c>false</c>otherwise.</returns>
         /// <exception cref="ArgumentException">The <c><paramref name="stringComparisonType" /></c> is not a supported <see cref="StringComparison" /> value.</exception>
-        public virtual Boolean Equals(Object? obj, StringComparison stringComparisonType)
+        public Boolean Equals(Object? obj, StringComparison stringComparisonType)
         {
             IEqualityComparer<String> stringEqualityComparer;
             try
