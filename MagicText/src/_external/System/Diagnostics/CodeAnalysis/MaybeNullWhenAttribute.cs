@@ -1,4 +1,4 @@
-#if NETSTANDARD2_0
+#if !NETSTANDARD2_1_OR_GREATER
 
 using System;
 
@@ -22,4 +22,4 @@ namespace System.Diagnostics.CodeAnalysis
     }
 }
 
-#endif // NETSTANDARD2_0
+#endif // NETSTANDARD2_1_OR_GREATER

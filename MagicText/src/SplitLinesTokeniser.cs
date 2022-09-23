@@ -6,11 +6,11 @@ namespace MagicText
 {
     /// <summary>Implements a <see cref="LineShatteringTokeniser" /> which shatters text into lines of text.</summary>
     /// <remarks>
-    ///     <para>This <see cref="LineShatteringTokeniser" /> extension class is inspired by <a href="http://docs.python.org/"><em>Python</em>'s</a> built-in <a href="http://docs.python.org/library/stdtypes.html#str.splitlines"><c>str.splitlines</c></a> and <a href="http://docs.python.org/library/io.html#io.IOBase.readlines"><c>io.IOBase.readlines</c></a> methods (but does not mimick them entirely), unlike the <see cref="StringSplitTokeniser" />, which simulates the <see cref="String.Split(String[], StringSplitOptions)" /> method, on each line of text.</para>
-    ///     <para>Empty lines and tokens (which are ignored if <see cref="IgnoreEmptyLines" /> and <see cref="ShatteringOptions.IgnoreEmptyLines" /> or <see cref="ShatteringOptions.IgnoreEmptyTokens" /> are <c>true</c>) are considered those lines that yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method. This behaviour cannot be overridden by a derived class.</para>
+    ///     <para>This <see cref="LineShatteringTokeniser" /> extension class is inspired by <a href="http://docs.python.org/"><em>Python</em>'s</a> built-in <a href="http://docs.python.org/library/stdtypes.html#str.splitlines"><c>str.splitlines</c></a> and <a href="http://docs.python.org/library/io.html#io.IOBase.readlines"><c>io.IOBase.readlines</c></a> methods (but does not mimick them entirely), unlike the <see cref="StringSplitTokeniser" />, which simulates the <see cref="String.Split(String[], StringSplitOptions)" /> method on each line of text.</para>
+    ///     <para>Empty lines and tokens (which are ignored if <see cref="IgnoreEmptyLines" /> and <see cref="ShatteringOptions.IgnoreEmptyLines" /> or <see cref="ShatteringOptions.IgnoreEmptyTokens" /> are <c>true</c>) are considered those lines that yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method.</para>
     /// </remarks>
     [CLSCompliant(true)]
-    public class SplitLinesTokeniser : LineShatteringTokeniser
+    public sealed class SplitLinesTokeniser : LineShatteringTokeniser
     {
         private readonly Boolean _ignoreEmptyLines;
 
@@ -27,14 +27,14 @@ namespace MagicText
         /// <remarks>
         ///     <para>This property merely returns the <see cref="LineShatteringTokeniser.IsEmptyToken" /> property.</para>
         /// </remarks>
-        protected Func<String?, Boolean> IsEmptyLine => IsEmptyToken;
+        private Func<String?, Boolean> IsEmptyLine => IsEmptyToken;
 
         /// <summary>Gets the function (predicate) to check if a line is non-empty: it returns <c>true</c> if and only if the line to check is non-empty.</summary>
         /// <returns>The line non-emptiness checking function (predicate).</returns>
         /// <remarks>
         ///     <para>This property merely returns the <see cref="LineShatteringTokeniser.IsNonEmptyToken" /> property.</para>
         /// </remarks>
-        protected Func<String?, Boolean> IsNonEmptyLine => IsNonEmptyToken;
+        private Func<String?, Boolean> IsNonEmptyLine => IsNonEmptyToken;
 
         /// <summary>Creates a tokeniser.</summary>
         /// <param name="ignoreEmptyLines">The indicator if empty lines should be ignored. See <see cref="IgnoreEmptyLines" /> for more information.</param>
@@ -61,7 +61,7 @@ namespace MagicText
         ///     <h3>Notes to Implementers</h3>
         ///     <para>This method cannot be overridden.</para>
         /// </remarks>
-        protected sealed override IEnumerable<String?> ShatterLine(String line)
+        protected override IEnumerable<String?> ShatterLine(String line)
         {
             if (line is null)
             {

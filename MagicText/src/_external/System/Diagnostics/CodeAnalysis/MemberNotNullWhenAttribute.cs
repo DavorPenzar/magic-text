@@ -1,4 +1,4 @@
-#if NETSTANDARD2_0
+#if !NETSTANDARD2_1_OR_GREATER
 
 using System;
 
@@ -23,7 +23,7 @@ namespace System.Diagnostics.CodeAnalysis
             else
             {
                 _members = new String[members.Length];
-                members.CopyTo(_members, members.Length);
+                members.CopyTo(_members, 0);
             }
         }
 
@@ -37,4 +37,4 @@ namespace System.Diagnostics.CodeAnalysis
     }
 }
 
-#endif // NETSTANDARD2_0
+#endif // NETSTANDARD2_1_OR_GREATER

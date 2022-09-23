@@ -60,23 +60,8 @@ namespace MagicText.Internal.Extensions
             return recognised;
         }
 
-#if NETSTANDARD2_0
-        /// <summary>Converts the specified <see cref="StringComparison" /> type to a <see cref="StringComparer" />.</summary>
-        /// <param name="comparisonType">The <see cref="StringComparison" /> type to convert.</param>
-        /// <returns>A <see cref="StringComparer" /> representing the equivalent <see cref="String" /> comparison of the specified <c><paramref name="comparisonType" /></c>.</returns>
-        /// <exception cref="ArgumentException">The <c><paramref name="comparisonType" /></c> is not a supported <see cref="StringComparison" /> value.</exception>
-        public static StringComparer GetComparerFromComparison(StringComparison comparisonType) =>
-            comparisonType switch
-            {
-                StringComparison.CurrentCulture => StringComparer.CurrentCulture,
-                StringComparison.CurrentCultureIgnoreCase => StringComparer.CurrentCultureIgnoreCase,
-                StringComparison.InvariantCulture => StringComparer.InvariantCulture,
-                StringComparison.InvariantCultureIgnoreCase => StringComparer.InvariantCultureIgnoreCase,
-                StringComparison.Ordinal => StringComparer.Ordinal,
-                StringComparison.OrdinalIgnoreCase => StringComparer.OrdinalIgnoreCase,
-                _ => throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(comparisonType))
-            };
-#else
+#if NETSTANDARD2_1_OR_GREATER
+
         /// <summary>Converts the specified <see cref="StringComparison" /> type to a <see cref="StringComparer" />.</summary>
         /// <param name="comparisonType">The <see cref="StringComparison" /> type to convert.</param>
         /// <returns>A <see cref="StringComparer" /> representing the equivalent <see cref="String" /> comparison of the specified <c><paramref name="comparisonType" /></c>.</returns>
@@ -92,6 +77,25 @@ namespace MagicText.Internal.Extensions
                 throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(comparisonType), exception);
             }
         }
-#endif // NETSTANDARD2_0
+
+#else
+
+        /// <summary>Converts the specified <see cref="StringComparison" /> type to a <see cref="StringComparer" />.</summary>
+        /// <param name="comparisonType">The <see cref="StringComparison" /> type to convert.</param>
+        /// <returns>A <see cref="StringComparer" /> representing the equivalent <see cref="String" /> comparison of the specified <c><paramref name="comparisonType" /></c>.</returns>
+        /// <exception cref="ArgumentException">The <c><paramref name="comparisonType" /></c> is not a supported <see cref="StringComparison" /> value.</exception>
+        public static StringComparer GetComparerFromComparison(StringComparison comparisonType) =>
+            comparisonType switch
+            {
+                StringComparison.CurrentCulture => StringComparer.CurrentCulture,
+                StringComparison.CurrentCultureIgnoreCase => StringComparer.CurrentCultureIgnoreCase,
+                StringComparison.InvariantCulture => StringComparer.InvariantCulture,
+                StringComparison.InvariantCultureIgnoreCase => StringComparer.InvariantCultureIgnoreCase,
+                StringComparison.Ordinal => StringComparer.Ordinal,
+                StringComparison.OrdinalIgnoreCase => StringComparer.OrdinalIgnoreCase,
+                _ => throw new ArgumentException(StringComparisonNotSupportedErrorMessage, nameof(comparisonType))
+            };
+
+#endif // NETSTANDARD2_1_OR_GREATER
     }
 }

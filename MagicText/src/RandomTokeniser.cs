@@ -1,6 +1,7 @@
 using MagicText.Internal;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,15 +12,17 @@ namespace MagicText
 {
     /// <summary>Implements a <see cref="LineShatteringTokeniser" /> which shatters lines of text at random positions.</summary>
     /// <remarks>
-    ///     <para>Empty tokens (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens that yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method. This behaviour cannot be overridden by a derived class.</para>
+    ///     <para>Empty tokens (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens that yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method.</para>
     ///     <para>No thread safety mechanism is implemented nor assumed by the class. If the token breaking function (<see cref="BreakToken" />) should be thread-safe, lock the <see cref="RandomTokeniser" /> instance during complete <see cref="ShatterLine(String)" />, <see cref="LineShatteringTokeniser.Shatter(TextReader, ShatteringOptions)" /> and <see cref="LineShatteringTokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method calls to ensure consistent behaviour of the function over a single shattering operation.</para>
     /// </remarks>
     [CLSCompliant(true)]
-    public class RandomTokeniser : LineShatteringTokeniser
+    public sealed class RandomTokeniser : LineShatteringTokeniser
     {
-        protected const string BreakTokenNullErrorMessage = "Token breaking predicate cannot be null.";
-        protected const string BiasOutOfRangeFormatErrorMessage = "Bias is out of range. Must be greater than {0:N0} and less than or equal to {1:N0}.";
-        protected const string RandomNullErrorMessage = "(Pseudo-)Random number generator cannot be null.";
+        private const string BreakTokenNullErrorMessage = "Token breaking predicate cannot be null.";
+        private const string RandomNullErrorMessage = "(Pseudo-)Random number generator cannot be null.";
+
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+        private const string BiasOutOfRangeFormatErrorMessage = "Bias is out of range. Must be greater than {0:N0} and less than or equal to {1:N0}.";
 
         private readonly Func<Int32, Int32, Int32, Boolean> _breakToken;
 
@@ -53,9 +56,9 @@ namespace MagicText
         ///     <para>Returning <c>true</c> from <c><see cref="BreakToken" />(n, 0, j)</c> results in an empty token at the very beginning of the <c>line</c>.</para>
         ///     <para>If the <c>line</c> is empty (<c>n == 0</c>), no token breaking point is created by default. The only way possible to retrieve tokens from an empty <c>line</c> is to return <c>true</c> from <c><see cref="BreakToken" />(0, 0, j)</c> (note, however, that returning <c>false</c> from the first call <c><see cref="BreakToken" />(0, 0, 0)</c> shall result in no tokens because the shattering is terminated). Otherwise (the <c>line</c> is non-empty (<c>n != 0</c>)) a final breaking point is put at the position <c>i == n</c>, without calling the <see cref="BreakToken" /> function. Subsequently, returning <c>true</c> from <c><see cref="BreakToken" />(n, n, j)</c> shall result in empty tokens at the end of the (non-empty) <c>line</c>.</para>
         ///     <para>Having defined the token breaking points, the <c>line</c> is shattered into tokens. The first token starts at the beginning of the <c>line</c> and ends at the first token breaking point. The second token starts here and ends at the second token starting point, and so on. The breaking points are resolved in the ascending order of the value <c>j</c>, with the default final breaking point indeed being the last one, therefore any non-empty token ending at position <c>i</c> (there can only one such token at the most) occurs before all empty tokens starting and ending at position <c>i</c>.</para>
-        ///     <para><strong>Nota bene.</strong> The preceding description assumes <see cref="BreakToken" /> is called from the <see cref="ShatterLine(String)" /> method, even where it is not explicitly mentioned. In that case all three parameters should be greater than or equal to 0, with an unlikely exception of the third parameter possibly being negative due to an overflow. If the tokeniser is used on a single thread, each call <c><see cref="BreakToken" />(n, 0, 0)</c> from the <see cref="ShatterLine(String)" /> method indicates the beginning of a <c>line</c> shattering process. However, when calling from a derived class, its programmer may call the function however they wish, with whatever the meaning and values of the parameters.</para>
+        ///     <para><strong>Nota bene.</strong> The preceding description assumes <see cref="BreakToken" /> is called from the <see cref="ShatterLine(String)" /> method, even where it is not explicitly mentioned. In that case all three parameters should be greater than or equal to 0, with an unlikely exception of the third parameter possibly being negative due to an overflow. If the tokeniser is used on a single thread, each call <c><see cref="BreakToken" />(n, 0, 0)</c> from the <see cref="ShatterLine(String)" /> method indicates the beginning of a <c>line</c> shattering process.</para>
         /// </remarks>
-        protected Func<Int32, Int32, Int32, Boolean> BreakToken => _breakToken;
+        private Func<Int32, Int32, Int32, Boolean> BreakToken => _breakToken;
 
         /// <summary>Creates a tokeniser.</summary>
         /// <param name="breakToken">The token breaking function. See the <see cref="BreakToken" /> property and the <see cref="ShatterLine(String)" /> method for more details.</param>
@@ -131,7 +134,7 @@ namespace MagicText
         ///     <h3>Notes to Implementers</h3>
         ///     <para>This method cannot be overridden.</para>
         /// </remarks>
-        protected sealed override IEnumerable<String> ShatterLine(String line)
+        protected override IEnumerable<String> ShatterLine(String line)
         {
             if (line is null)
             {

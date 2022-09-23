@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace MagicText.Internal.Extensions
@@ -8,9 +9,13 @@ namespace MagicText.Internal.Extensions
     internal static class Buffering
     {
         private const string BufferNullErrorMessage = "Buffer cannot be null.";
-        private const string SizeOutOfRangeFormatErrorMessage = "Size is out of range. Must be greater than or equal to {0:D}, and less than or equal to buffer capacity ({1:D}).";
-        private const string BufferToLargeFormatErrorMessage = "Cannot expand buffer beyond maximal size ({0:D).";
         private const string SourceNullErrorMessage = "Source cannot be null.";
+
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+        private const string SizeOutOfRangeFormatErrorMessage = "Size is out of range. Must be greater than or equal to {0:D}, and less than or equal to buffer capacity ({1:D}).";
+
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+        private const string BufferToLargeFormatErrorMessage = "Cannot expand buffer beyond maximal size ({0:D).";
 
         /// <summary>Expands <c><paramref name="buffer" /></c>'s capacity.</summary>
         /// <typeparam name="T">The type of the items in the <c><paramref name="buffer" /></c>.</typeparam>

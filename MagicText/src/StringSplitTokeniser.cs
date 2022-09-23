@@ -9,14 +9,13 @@ using System.Threading;
 
 namespace MagicText
 {
-    /// <summary>Implements a <see cref="LineShatteringTokeniser" /> which shatters lines of text by breaking it at specific <em>substring</em> separators.</summary>
+    /// <summary>Implements a <see cref="LineShatteringTokeniser" /> which shatters lines of text by splitting at specific <em>substring</em> separators.</summary>
     /// <remarks>
     ///     <para>This <see cref="LineShatteringTokeniser" /> extension class simulates the <see cref="String.Split(String[], StringSplitOptions)" /> method, unlike the <see cref="RegexSplitTokeniser" />, which simulates the <see cref="Regex.Split(String)" /> method, on each line of text.</para>
-    ///     <para>Empty tokens (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens that yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method. This behaviour cannot be overridden by a derived class.</para>
-    ///     <para>Changing any of the properties—public or private—breaks the consistency or even the functionality of the <see cref="StringSplitTokeniser" />. By doing so, the behaviour of the <see cref="ShatterLine(String)" />, <see cref="LineShatteringTokeniser.Shatter(TextReader, ShatteringOptions)" /> and <see cref="LineShatteringTokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> methods, as well as the <see cref="GetSeparator" /> method, is unexpected and no longer guaranteed.</para>
+    ///     <para>Empty tokens (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those tokens that yield <c>true</c> when checked via the <see cref="String.IsNullOrEmpty(String)" /> method.</para>
     /// </remarks>
     [CLSCompliant(true)]
-    public class StringSplitTokeniser : LineShatteringTokeniser
+    public sealed class StringSplitTokeniser : LineShatteringTokeniser
     {
         private const string InvalidOptionsErrorMessage = "An option value flag is invalid.";
 
@@ -24,7 +23,7 @@ namespace MagicText
 
         /// <summary>Gets the combination of all possible <see cref="StringSplitOptions" /> values.</summary>
         /// <returns>The bitwise combination of all values in the <see cref="StringSplitOptions" /> enumeration type.</returns>
-        protected static StringSplitOptions ValidOptions => _validOptions;
+        private static StringSplitOptions ValidOptions => _validOptions;
 
         /// <summary>Initialises static fields.</summary>
         static StringSplitTokeniser()
@@ -62,7 +61,7 @@ namespace MagicText
         /// <exception cref="ArgumentException">The <c><paramref name="options" /></c> are an invalid <see cref="StringSplitOptions" /> value.</exception>
         public StringSplitTokeniser(IEnumerable<String?>? separator, StringSplitOptions options = StringSplitOptions.None) : base()
         {
-            if ((options & ~ValidOptions) != 0)
+            if ((Int32)(options & ~ValidOptions) != 0)
             {
                 throw new ArgumentException(InvalidOptionsErrorMessage, nameof(options));
             }
@@ -144,7 +143,7 @@ namespace MagicText
         /// <remarks>
         ///     <para>The splitting is equivalent to calling the <c><paramref name="line" /></c>'s <see cref="String.Split(String[], StringSplitOptions)" /> method with the <see cref="Separator" /> (<see cref="GetSeparator()" />) as the first argument and the <see cref="Options" /> as the second.</para>
         /// </remarks>
-        protected sealed override IEnumerable<String?> ShatterLine(String line) =>
+        protected override IEnumerable<String?> ShatterLine(String line) =>
             line is null ? throw new ArgumentNullException(nameof(line), LineNullErrorMessage) : line.Split(Separator, Options);
     }
 }

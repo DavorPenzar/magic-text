@@ -1,5 +1,6 @@
 using MagicText.Internal.Extensions;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
@@ -21,7 +22,11 @@ namespace MagicText.Internal.Json
     internal sealed class StringComparerJsonConverter : JsonConverter<StringComparer>
     {
         private const string ComparerJsonConverterNullErrorMessage = "String somparer JSON converter cannot be null.";
+
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
         private const string MissingComparerJsonConverterFormatErrorMessage = "No JSON converter is registered for string comparers of type {0}.";
+
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
         private const string InvalidComparerJsonConverterTypeFormatErrorMessage = "Cannot derive a standard JSON converter of type {1} from JSON converter type {0}.";
 
         /// <summary>Provides property names for custom <a href="http://json.org/json-en.html"><em>JSON</em></a> serialisation of <see cref="StringComparer" />s.</summary>
@@ -151,7 +156,7 @@ namespace MagicText.Internal.Json
             Type converterType = typeof(JsonConverter<>).MakeGenericType(valueType);
             if (!converterType.IsAssignableFrom(jsonConverter.GetType()))
             {
-                throw new InvalidOperationException(String.Format(InvalidComparerJsonConverterTypeFormatErrorMessage, jsonConverter.GetType().FullName, converterType.FullName));
+                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, InvalidComparerJsonConverterTypeFormatErrorMessage, jsonConverter.GetType().FullName, converterType.FullName));
             }
 
             // Get the JSON conversion method `Read` from the `jsonConverter`.
@@ -222,7 +227,7 @@ namespace MagicText.Internal.Json
             Type converterType = typeof(JsonConverter<>).MakeGenericType(valueType);
             if (!converterType.IsAssignableFrom(jsonConverter.GetType()))
             {
-                throw new InvalidOperationException(String.Format(InvalidComparerJsonConverterTypeFormatErrorMessage, jsonConverter.GetType().FullName, converterType.FullName));
+                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, InvalidComparerJsonConverterTypeFormatErrorMessage, jsonConverter.GetType().FullName, converterType.FullName));
             }
 
             // Get the JSON conversion method `Write` from the `jsonConverter`.
@@ -272,11 +277,11 @@ namespace MagicText.Internal.Json
             StringComparison comparisonType = ReadStringComparison(ref reader, options, read: false);
 
             // Return a string comparer corresponding to the comparison type.
-#if NETSTANDARD2_0
-            return StringComparerExtensions.GetComparerFromComparison(comparisonType);
-#else
+#if NETSTANDARD2_1_OR_GREATER
             return StringComparer.FromComparison(comparisonType);
-#endif // NETSTANDARD2_0
+#else
+            return StringComparerExtensions.GetComparerFromComparison(comparisonType);
+#endif // NETSTANDARD2_1_OR_GREATER
         }
 
         /// <summary>Writes the specified <see cref="StringComparer" /> <c><paramref name="value" /></c> as <a href="http://json.org/json-en.html"><em>JSON</em></a>.</summary>

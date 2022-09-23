@@ -1,13 +1,16 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace MagicText.Internal
 {
     /// <summary>Provides a method for the <see cref="RandomTokeniser" /> to choose token breaking points using a <see cref="System.Random" /> instance.</summary>
-    internal class RandomTokenBreaker : Object
+    internal sealed class RandomTokenBreaker : Object
     {
-        protected const string BiasOutOfRangeFormatErrorMessage = "Bias is out of range. Must be greater than {0:N0} and less than or equal to {1:N0}.";
-        protected const string RandomNullErrorMessage = "(Pseudo-)Random number generator cannot be null.";
+        private const string RandomNullErrorMessage = "(Pseudo-)Random number generator cannot be null.";
+
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+        private const string BiasOutOfRangeFormatErrorMessage = "Bias is out of range. Must be greater than {0:N0} and less than or equal to {1:N0}.";
 
         private readonly Double _bias;
         private readonly System.Random _random;
@@ -25,7 +28,7 @@ namespace MagicText.Internal
         /// <remarks>
         ///     <para>The <see cref="Random" /> is used in the <see cref="BreakToken(Int32, Int32, Int32)" /> method for nondeterministic and biased deciding.</para>
         /// </remarks>
-        protected System.Random Random => _random;
+        private System.Random Random => _random;
 
         /// <summary>Creates a biased token breaker.</summary>
         /// <param name="random">The (pseudo-)random number generator to use.</param>

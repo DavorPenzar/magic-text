@@ -36,7 +36,6 @@
 		<None Include="README.md" Pack="true" PackagePath="" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
 		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
 		<PackageReference Include="System.ComponentModel" Version="4.0.1" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="4.1.0" />

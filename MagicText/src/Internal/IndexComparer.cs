@@ -60,11 +60,11 @@ namespace MagicText.Internal
 
             try
             {
-#if NETSTANDARD2_0
-                _comparer = StringComparerExtensions.GetComparerFromComparison(comparisonType);
-#else
+#if NETSTANDARD2_1_OR_GREATER
                 _comparer = StringComparer.FromComparison(comparisonType);
-#endif // NETSTANDARD2_0
+#else
+                _comparer = StringComparerExtensions.GetComparerFromComparison(comparisonType);
+#endif // NETSTANDARD2_1_OR_GREATER
             }
             catch (ArgumentException exception)
             {

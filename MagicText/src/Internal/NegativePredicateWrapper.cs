@@ -9,7 +9,7 @@ namespace MagicText.Internal
     /// <remarks>
     ///     <para>Predicates are expressed through <see cref="Func{T, TResult}" /> <c>delegate</c>s that return a <see cref="Boolean" /> rather than through built-in <see cref="Predicate{T}" /> <c>delegate</c>s. This is because of the intended use of the <see cref="NegativePredicateWrapper{T}" /> as a parameter to <a href="http://docs.microsoft.com/en-gb/dotnet/csharp/programming-guide/concepts/linq/">LINQ</a> methods such as the <see cref="Enumerable.Any{TSource}(System.Collections.Generic.IEnumerable{TSource}, Func{TSource, Boolean})" /> and <see cref="Enumerable.Where{TSource}(System.Collections.Generic.IEnumerable{TSource}, Func{TSource, Boolean})" /> methods.</para>
     /// </remarks>
-    internal class NegativePredicateWrapper<T> : Object
+    internal sealed class NegativePredicateWrapper<T> : Object
     {
         private const string PositivePredicateNullErrorMessage = "Positive predicate cannot be null.";
         

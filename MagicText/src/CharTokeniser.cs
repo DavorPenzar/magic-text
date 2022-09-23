@@ -6,10 +6,10 @@ namespace MagicText
 {
     /// <summary>Implements a <see cref="LineShatteringTokeniser" /> which shatters lines of text at each character.</summary>
     /// <remarks>
-    ///     <para>Empty characters (tokens) (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those characters that yield <c>true</c> when converted to <see cref="String" />s via the <see cref="Char.ToString(Char)" /> method and checked via the <see cref="String.IsNullOrEmpty(String)" /> method. This behaviour cannot be overridden by a derived class.</para>
+    ///     <para>Empty characters (tokens) (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those characters that yield <c>true</c> when converted to <see cref="String" />s via the <see cref="Char.ToString(Char)" /> method and checked via the <see cref="String.IsNullOrEmpty(String)" /> method.</para>
     /// </remarks>
     [CLSCompliant(true)]
-    public class CharTokeniser : LineShatteringTokeniser
+    public sealed class CharTokeniser : LineShatteringTokeniser
     {
         /// <summary>Creates a default tokeniser.</summary>
         public CharTokeniser() : base()
@@ -26,7 +26,7 @@ namespace MagicText
         ///     <h3>Notes to Implementers</h3>
         ///     <para>This method cannot be overridden.</para>
         /// </remarks>
-        protected sealed override IEnumerable<String?> ShatterLine(String line) =>
+        protected override IEnumerable<String?> ShatterLine(String line) =>
             line is null ? throw new ArgumentNullException(nameof(line), LineNullErrorMessage) : line.Select(Char.ToString);
     }
 }

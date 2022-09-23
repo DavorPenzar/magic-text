@@ -17,13 +17,23 @@ using System.Threading.Tasks;
 
 namespace MagicText.Example
 {
+    /// <summary>Represents a console application for demonstrating the <a href="http://github.com/DavorPenzar/magic-text"><em>MagicText</em></a> library.</summary>
     public static class Program
     {
+        /// <summary>Represents a successful program exit code.</summary>
         public const int ExitSuccess = 0;
+
+        /// <summary>Represents an unsuccessful program exit code.</summary>
         public const int ExitFailure = -1;
 
         private static IConfiguration configuration;
 
+        /// <summary>Key/value application configuration properties.</summary>
+        /// <value>The new configuration properties for the application.</value>
+        /// <returns>The configuration properties for the application.</returns>
+        /// <remarks>
+        ///     <para>To configure the application, edit the <em>appsettings.json</em> file.</para>
+        /// </remarks>
         public static IConfiguration Configuration
         {
             get => configuration;
@@ -33,18 +43,27 @@ namespace MagicText.Example
             }
         }
 
+        /// <summary>Initialises static fields.</summary>
         static Program()
         {
             configuration = null!;
         }
 
+        /// <summary>Initialises the application configuration properties.</summary>
+        /// <param name="args">Command line arguments (excluding the program's command). If <c>null</c>, it is ignored.</param>
+        /// <remarks>
+        ///    <para>This method (re)sets the <see cref="Configuration" /> property.</para>
+        /// </remarks>
         private static void InitialiseConfiguration(String[]? args = null)
         {
             IConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.SetBasePath(AppContext.BaseDirectory);
             configurationBuilder.AddEnvironmentVariables();
             configurationBuilder.AddJsonFile("appsettings.json");
-            configurationBuilder.AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNETCORE_ENVIRONMENT") ?? "Production"}.json", true);
+            configurationBuilder.AddJsonFile(
+                $"appsettings.{Environment.GetEnvironmentVariable("DOTNETCORE_ENVIRONMENT") ?? "Production"}.json",
+                optional: true
+            );
             if (!(args is null))
             {
                 configurationBuilder.AddCommandLine(args);
@@ -53,33 +72,60 @@ namespace MagicText.Example
             Configuration = configurationBuilder.Build();
         }
 
+        /// <summary>Initialises the globally shared logger.</summary>
+        /// <remarks>
+        ///    <para>This method (re)sets the <see cref="Log.Logger" /> property.</para>
+        /// </remarks>
         private static void InitialiseLogging()
         {
             SelfLog.Enable(Console.Error);
 
             LoggerConfiguration loggerConfiguration = new LoggerConfiguration();
-            loggerConfiguration.ReadFrom.Configuration(Configuration);
+            if (!(Configuration is null))
+            {
+                loggerConfiguration.ReadFrom.Configuration(Configuration);
+            }
 
             Log.Logger = loggerConfiguration.CreateLogger();
         }
 
+        /// <summary>Finalises the globally shared logger.</summary>
+        /// <remarks>
+        ///    <para>This method resets the <see cref="Log.Logger" /> propery by calling the <see cref="Log.CloseAndFlush()" /> method.</para>
+        /// </remarks>
         private static void FinaliseLogging()
         {
-            SelfLog.Disable();
-
             Log.CloseAndFlush();
+
+            SelfLog.Disable();
         }
 
+        /// <summary>Initialises the application configuration properties and the globally shared logger.</summary>
+        /// <param name="args">Command line arguments (excluding the program's command). If <c>null</c>, it is ignored.</param>
+        /// <remarks>
+        ///    <para>This method simply calls the <see cref="InitialiseConfiguration(String[])" /> and <see cref="InitialiseLogging()" /> methods respectively.</para>
+        /// </remarks>
         private static void InitialiseEnvironment(String[]? args = null)
         {
             InitialiseConfiguration(args);
             InitialiseLogging();
         }
 
+        /// <summary>Finalises the globally shared logger.</summary>
+        /// <remarks>
+        ///    <para>This method simply calls the <see cref="FinaliseLogging()" /> method.</para>
+        /// </remarks>
         private static void FinaliseEnvironment() =>
             FinaliseLogging();
 
-        public static async Task<Int32> Main(String[] args)
+        /// <summary>Represents the program's main procedure.</summary>
+        /// <param name="args">Command line arguments (excluding the program's command).</param>
+        /// <returns>A task that represents running the program. Its <see cref="Task{TResult}.Result" /> property is the resulting status code returned by the program (0 on success).</returns>
+        /// <remarks>
+        ///    <para>For more details about the program and what it does, read the rest of the documentation.</para>
+        ///    <para>On success, the program returns <see cref="ExitSuccess" />; on failure, <see cref="ExitFailure" /> is returned.</para>
+        /// </remarks>
+        public static async Task<Int32> Main(String[]? args = null)
         {
             InitialiseEnvironment(args);
 
@@ -113,7 +159,6 @@ namespace MagicText.Example
                             !String.IsNullOrEmpty(tokeniserPattern) ?
                                 tokeniserPattern :
                                 RegexSplitTokeniser.DefaultInclusivePattern,
-                    escape: false,
                     options: Configuration.GetValue<RegexOptions>(
                         "Tokeniser:Options",
                         RegexTokeniser.DefaultOptions
@@ -198,7 +243,7 @@ namespace MagicText.Example
                 logger.LogInformation(
                     "Generated text: {text}",
                         text.Length > 100 ?
-                            JsonSerializer.Serialize(text.Substring(0, 100)) + "…" :
+                            JsonSerializer.Serialize(text.Substring(0, 99)) + "…" :
                             JsonSerializer.Serialize(text)
                 );
 

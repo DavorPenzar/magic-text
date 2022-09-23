@@ -160,16 +160,16 @@ namespace MagicText.Internal.Extensions
 
             comparer ??= EqualityComparer<TSource>.Default;
 
-#if NETSTANDARD2_0
-            HashSet<TSource> distinctItems = new HashSet<TSource>(comparer);
-#else
+#if NETSTANDARD2_1_OR_GREATER
             HashSet<TSource> distinctItems = source switch
             {
-                ICollection<TSource> sourceCollection => new HashSet<TSource>(sourceCollection.Count),
-                IReadOnlyCollection<TSource> sourceReadOnlyCollection => new HashSet<TSource>(sourceReadOnlyCollection.Count),
-                _ => new HashSet<TSource>()
+                ICollection<TSource> sourceCollection => new HashSet<TSource>(sourceCollection.Count, comparer),
+                IReadOnlyCollection<TSource> sourceReadOnlyCollection => new HashSet<TSource>(sourceReadOnlyCollection.Count, comparer),
+                _ => new HashSet<TSource>(comparer)
             };
-#endif // NETSTANDARD2_0
+#else
+            HashSet<TSource> distinctItems = new HashSet<TSource>(comparer);
+#endif // NETSTANDARD2_1_OR_GREATER
 
             foreach (TSource item in source)
             {

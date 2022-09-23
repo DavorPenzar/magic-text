@@ -3,6 +3,7 @@ using MagicText.Internal.Extensions;
 using MagicText.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -15,7 +16,7 @@ namespace MagicText
 {
     /// <summary>Provides methods for (pseudo-)random text generation.</summary>
     /// <remarks>
-    ///     <para>If the <see cref="Pen" /> should choose from tokens from multiple sources, the tokens should be concatenated into a single enumerable <c>context</c> passed to the constructor. To prevent overflowing from one source to another (e. g. if the last token from the first source is not a contextual predecessor of the first token from the second source), an ending token (<see cref="SentinelToken" />) should be put between the sources' tokens in the final enumerable <c>tokens</c>. Choosing an ending token in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, Random, Nullable{Int32})" /> or <see cref="Render(Int32, Nullable{Int32})" /> method calls shall cause the rendering to stop—the same as when a <em>successor</em> of the last entry in tokens is chosen.</para>
+    ///     <para>If the <see cref="Pen" /> should choose from tokens from multiple sources, the tokens should be concatenated into a single enumerable <c>context</c> passed to the constructor. To prevent overflowing from one source to another (e. g. if the last token from the first source is not a contextual predecessor of the first token from the second source), an ending token (<see cref="SentinelToken" />) should be put between the sources' tokens in the final enumerable <c>tokens</c>. Picking an ending token in the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, Random, Nullable{Int32})" /> or <see cref="Render(Int32, Nullable{Int32})" /> method calls shall cause the rendering to stop—the same as when a <em>successor</em> of the last entry in tokens is chosen.</para>
     ///     <para>A complete deep copy of the enumerable <c>context</c> (passed to the constructor) is created and stored by the pen. Memory errors may occur if the number of tokens in the enumerable is too large. To reduce memory usage and even time consumption, <c>true</c> may be passed as the parameter <c>intern</c> to the constructor; however, other side effects of <see cref="String" /> interning via the <see cref="String.Intern(String)" /> method should be considered as well.</para>
     ///     <para>Changing any of the properties—public or private—breaks the functionality of the <see cref="Pen" />. By doing so, the behaviour of the <see cref="Render(Int32, Func{Int32, Int32}, Nullable{Int32})" />, <see cref="Render(Int32, Random, Nullable{Int32})" /> and <see cref="Render(Int32, Nullable{Int32})" /> methods is unexpected and no longer guaranteed.</para>
     ///     <para>To learn about serialisation and deserialisation of <see cref="Pen" />s, see:</para>
@@ -46,11 +47,17 @@ namespace MagicText
         private const string PickerNullErrorMessage = "Picking function cannot be null.";
         private const string RandomNullErrorMessage = "(Pseudo-)Random number generator cannot be null.";
         private const string ComparisonTypeNotSupportedErrorMessage = "The string comparison type passed in is currently not supported.";
-        private const string RelevantTokensOutOfRangeFormatErrorMessage = "Relevant tokens number is out of range. Must be greater than or equal to {0:D}.";
-        private const string FromPositionOutOfRangeFormatErrorMessage = "First token index is out of range. Must be greater than or equal to {0:D} and less than or equal to the size of the context ({1:D}).";
-        private const string PickOutOfRangeFormatErrorMessage = "Picking function returned a pick out of range. Must return a pick greater than or equal to {0:D} and less than the parameter given ({1:D}); however, if the parameter equals {2:D}, {3:D} must be returned.";
         private const string NonSerialisableComparerErrorMessage = "Cannot serialise the pen because the comparer is not serialisable.";
 
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+        private const string RelevantTokensOutOfRangeFormatErrorMessage = "Relevant tokens number is out of range. Must be greater than or equal to {0:D}.";
+
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+        private const string FromPositionOutOfRangeFormatErrorMessage = "First token index is out of range. Must be greater than or equal to {0:D} and less than or equal to the size of the context ({1:D}).";
+
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+        private const string PickOutOfRangeFormatErrorMessage = "Picking function returned a pick out of range. Must return a pick greater than or equal to {0:D} and less than the parameter given ({1:D}); however, if the parameter equals {2:D}, {3:D} must be returned.";
+        
         private static readonly Object _locker;
 
         private static Int32 randomSeed;
@@ -120,7 +127,21 @@ namespace MagicText
             randomSeed = GetRandomSeed((Int32)((1073741827L * AssemblyInfo.InitialisationTimePoint.Ticks + 1073741789L) & (Int64)Int32.MaxValue));
         }
 
-        /// <summary>Initialises variables representing a <se cref="Pen" /> instance's fields..</summary>
+        /// <summary>Gets a strictly positive random seed value constructed from a raw <see cref="Int32" /> <c><paramref name="value" /></c>.</summary>
+        /// <param name="value">The original <see cref="Int32" /> value.</param>
+        /// <returns>The strictly positive random seed value defined by the raw <c><paramref name="value" /></c>.</returns>
+        /// <remarks>
+        ///     <para>The strictly positive random seed value is obtained by taking the maximum of <c><paramref name="value" /></c>, its bitwise complement and 1.</para>
+        /// </remarks>
+        private static Int32 GetRandomSeed(Int32 value)
+        {
+            unchecked
+            {
+                return Math.Max(Math.Max(value, ~value), 1);
+            }
+        }
+
+        /// <summary>Initialises variables representing a <se cref="Pen" /> instance's fields.</summary>
         /// <param name="context">The input tokens.</param>
         /// <param name="comparer">The <see cref="StringComparer" /> used by the <see cref="Pen" />.</param>
         /// <param name="sentinelToken">The ending token.</param>
@@ -153,20 +174,6 @@ namespace MagicText
                 indexList.Sort(new IndexComparer(comparerField, contextField));
                 indexList.TrimExcess();
                 indexField = indexList.AsReadOnly();
-            }
-        }
-
-        /// <summary>Gets a strictly positive random seed value constructed from a raw <see cref="Int32" /> <c><paramref name="value" /></c>.</summary>
-        /// <param name="value">The original <see cref="Int32" /> value.</param>
-        /// <returns>The strictly positive random seed value defined by the raw <c><paramref name="value" /></c>.</returns>
-        /// <remarks>
-        ///     <para>The strictly positive random seed value is obtained by taking the maximum of <c><paramref name="value" /></c>, its bitwise complement and 1.</para>
-        /// </remarks>
-        private static Int32 GetRandomSeed(Int32 value)
-        {
-            unchecked
-            {
-                return Math.Max(Math.Max(value, ~value), 1);
             }
         }
 
@@ -528,11 +535,11 @@ namespace MagicText
             StringComparer comparer;
             try
             {
-#if NETSTANDARD2_0
-                comparer = StringComparerExtensions.GetComparerFromComparison(comparisonType);
-#else
+#if NETSTANDARD2_1_OR_GREATER
                 comparer = StringComparer.FromComparison(comparisonType);
-#endif // NETSTANDARD2_0
+#else
+                comparer = StringComparerExtensions.GetComparerFromComparison(comparisonType);
+#endif // NETSTANDARD2_1_OR_GREATER
             }
             catch (ArgumentException exception)
             {
@@ -636,11 +643,11 @@ namespace MagicText
                 catch (Exception exception) when (exception is SerializationException || exception is ArgumentNullException || exception is ArgumentException || exception is InvalidCastException)
                 {
                     StringComparison comparisonType = (StringComparison)info.GetValue(nameof(Comparer), typeof(StringComparison));
-#if NETSTANDARD2_0
-                    comparer = StringComparerExtensions.GetComparerFromComparison(comparisonType);
-#else
+#if NETSTANDARD2_1_OR_GREATER
                     comparer = StringComparer.FromComparison(comparisonType);
-#endif // NETSTANDARD2_0
+#else
+                    comparer = StringComparerExtensions.GetComparerFromComparison(comparisonType);
+#endif // NETSTANDARD2_1_OR_GREATER
                 }
                 if (comparer is null)
                 {
@@ -720,12 +727,11 @@ namespace MagicText
             Int32 p = FindPositionIndexAndCount(Comparer, Context, Index, sample, out Int32 n);
             Int32 P = p + n;
 
-            // HashSet<Int32> positions = new HashSet<Int32>(Index.Skip(p).Take(n));
-#if NETSTANDARD2_0
-            HashSet<Int32> positions = new HashSet<Int32>();
-#else
+#if NETSTANDARD2_1_OR_GREATER
             HashSet<Int32> positions = new HashSet<Int32>(n);
-#endif // NETSTANDARD2_0
+#else
+            HashSet<Int32> positions = new HashSet<Int32>();
+#endif // NETSTANDARD2_1_OR_GREATER
             for (Int32 i = p; i < P; ++i)
             {
                 positions.Add(i < Context.Count ? Index[i] : Context.Count);
@@ -982,7 +988,7 @@ namespace MagicText
             }
             if (relevantTokens < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(relevantTokens), relevantTokens, RelevantTokensOutOfRangeFormatErrorMessage);
+                throw new ArgumentOutOfRangeException(nameof(relevantTokens), relevantTokens, String.Format(CultureInfo.CurrentCulture, RelevantTokensOutOfRangeFormatErrorMessage, 0));
             }
 
             // Initialise the list of the `relevantTokens` most recent tokens and its first position (the list will be cyclical after rendering `relevantTokens` tokens).
