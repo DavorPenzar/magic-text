@@ -20,10 +20,21 @@ namespace MagicText
         private const string InvalidOptionsErrorMessage = "An option value flag is invalid.";
 
         private static readonly StringSplitOptions _validOptions;
+        private static readonly StringSplitOptions _validOptionsBitwiseComplement;
 
         /// <summary>Gets the combination of all possible <see cref="StringSplitOptions" /> values.</summary>
         /// <returns>The bitwise combination of all values in the <see cref="StringSplitOptions" /> enumeration type.</returns>
+        /// <remarks>
+        ///     <para>This property represents the bitwise complement of the <see cref="ValidOptionsBitwiseComplement" /> property.</para>
+        /// </remarks>
         private static StringSplitOptions ValidOptions => _validOptions;
+
+        /// <summary>Gets the complement of the combination of all possible <see cref="StringSplitOptions" /> values.</summary>
+        /// <returns>The bitwise complement of the bitwise combination of all values in the <see cref="StringSplitOptions" /> enumeration type.</returns>
+        /// <remarks>
+        ///     <para>This property represents the bitwise complement of the <see cref="ValidOptions" /> property.</para>
+        /// </remarks>
+        private static StringSplitOptions ValidOptionsBitwiseComplement => _validOptionsBitwiseComplement;
 
         /// <summary>Initialises static fields.</summary>
         static StringSplitTokeniser()
@@ -35,6 +46,7 @@ namespace MagicText
             }
 
             _validOptions = validOptions;
+            _validOptionsBitwiseComplement = ~validOptions;
         }
 
         private readonly StringSplitOptions _options;
@@ -61,7 +73,7 @@ namespace MagicText
         /// <exception cref="ArgumentException">The <c><paramref name="options" /></c> are an invalid <see cref="StringSplitOptions" /> value.</exception>
         public StringSplitTokeniser(IEnumerable<String?>? separator, StringSplitOptions options = StringSplitOptions.None) : base()
         {
-            if ((Int32)(options & ~ValidOptions) != 0)
+            if ((Int32)(options & ValidOptionsBitwiseComplement) != 0)
             {
                 throw new ArgumentException(InvalidOptionsErrorMessage, nameof(options));
             }
