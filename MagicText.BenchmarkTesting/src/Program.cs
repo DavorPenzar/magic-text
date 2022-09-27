@@ -1,6 +1,6 @@
 using System;
 
-namespace MagicText.Example
+namespace MagicText.BenchmarkTesting
 {
     public static class Program
     {
