@@ -2,9 +2,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MagicText", "MagicText\MagicText.csproj", "{7D19EA1D-C7D8-C6BC-8118-EE62DDD96F98}"
+Project("{7D19EA1D-C7D8-C6BC-8118-EE62DDD96F98}") = "MagicText", "MagicText\MagicText.csproj", "{7D19EA1D-C7D8-C6BC-8118-EE62DDD96F98}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MagicText.Example", "MagicText.Example\MagicText.Example.csproj", "{66AF68D8-BE1C-156E-0669-C09447109C4C}"
+Project("{66AF68D8-BE1C-156E-0669-C09447109C4C}") = "MagicText.Example", "MagicText.Example\MagicText.Example.csproj", "{66AF68D8-BE1C-156E-0669-C09447109C4C}"
+EndProject
+Project("{71462A2C-B553-97E7-9C74-1626AE657F23}") = "MagicText.BenchmarkTesting", "MagicText.BenchmarkTesting\MagicText.BenchmarkTesting.csproj", "{71462A2C-B553-97E7-9C74-1626AE657F23}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,11 +22,15 @@ Global
 		{66AF68D8-BE1C-156E-0669-C09447109C4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66AF68D8-BE1C-156E-0669-C09447109C4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66AF68D8-BE1C-156E-0669-C09447109C4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71462A2C-B553-97E7-9C74-1626AE657F23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71462A2C-B553-97E7-9C74-1626AE657F23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71462A2C-B553-97E7-9C74-1626AE657F23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71462A2C-B553-97E7-9C74-1626AE657F23}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {71462A2C-B553-97E7-9C74-1626AE657F23}
+		SolutionGuid = {69DA26F1-A5F5-FABD-9AAF-54F16956D89B}
 	EndGlobalSection
 EndGlobal

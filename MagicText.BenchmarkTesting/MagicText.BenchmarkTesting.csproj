@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<LangVersion>8.0</LangVersion>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>MagicText.BenchmarkTesting</RootNamespace>
+		<NeutralLanguage>en-GB</NeutralLanguage>
+		<ProjectGuid>71462A2C-B553-97E7-9C74-1626AE657F23</ProjectGuid>
+	</PropertyGroup>
+	<PropertyGroup>
+		<Authors>Davor Penzar</Authors>
+		<Description>Tests various ways of achieving the same results using the MagicText library.</Description>
+		<Copyright>Copyright (c) Davor Penzar 2022</Copyright>
+		<PackageProjectUrl>http://DavorPenzar.github.io/magic-text/</PackageProjectUrl>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>http://github.com/DavorPenzar/magic-text/</RepositoryUrl>
+		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="README.md" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\MagicText\MagicText.csproj" />
+	</ItemGroup>
+</Project>
