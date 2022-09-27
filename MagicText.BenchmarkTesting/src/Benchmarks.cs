@@ -4,7 +4,7 @@ using System;
 
 namespace MagicText.BenchmarkTesting
 {
-    internal sealed class Benchmarks
+    internal sealed class Benchmarks : Object
     {
         public Benchmarks() : base()
         {

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace MagicText.Example.BLL
 {
     /// <summary>Provides methods for downloading and simultaneously tokenising (<em>shattering</em>) text from online resources.</summary>
-    internal sealed class TextDownloader : IDisposable
+    internal sealed class TextDownloader : Object, IDisposable
     {
         private const string LoggerNullErrorMessage = "Logger cannot be null.";
         private const string ClientNullErrorMessage = "HTTP client cannot be null.";
@@ -85,7 +85,7 @@ namespace MagicText.Example.BLL
             ITokeniser tokeniser,
             MagicText.ShatteringOptions? shatteringOptions = null,
             Boolean disposeMembers = true
-        )
+        ) : base()
         {
             _disposeMembers = disposeMembers;
             _logger = logger ??
