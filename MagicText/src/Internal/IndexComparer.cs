@@ -73,51 +73,6 @@ namespace MagicText.Internal
             _tokens = tokens;
         }
 
-        /// <summary>Returns the hash code for the <c><paramref name="obj" /></c>.</summary>
-        /// <param name="obj">The index for which the hash code is to be returned.</param>
-        /// <returns>The hash code for the <c><paramref name="obj" /></c>.</returns>
-        public Int32 GetHashCode(Int32 obj) =>
-            obj.GetHashCode();
-
-        /// <summary>Returns the hash code for the <c><paramref name="obj" /></c>.</summary>
-        /// <param name="obj">The index for which the hash code is to be returned.</param>
-        /// <returns>The hash code for the <c><paramref name="obj" /></c>.</returns>
-        /// <exception cref="ArgumentException">The <c><paramref name="obj" /></c> parameter is not an <see cref="Int32" />.</exception>
-        public Int32 GetHashCode(Object? obj) =>
-            obj is Int32 objInt ? GetHashCode(objInt) : throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(obj));
-
-        /// <summary>Determines whether <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal.</summary>
-        /// <param name="x">The first index to compare.</param>
-        /// <param name="y">The second index to compare.</param>
-        /// <returns>If <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
-        public Boolean Equals(Int32 x, Int32 y) =>
-            (x == y);
-
-        /// <summary>Determines whether <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal.</summary>
-        /// <param name="x">The first <see cref="Object" /> to compare.</param>
-        /// <param name="y">The second <see cref="Object" /> to compare.</param>
-        /// <returns>If <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal as indices, <c>true</c>; <c>false</c> otherwise.</returns>
-        /// <exception cref="ArgumentException">
-        ///     <para>Either:</para>
-        ///     <list type="number">
-        ///         <item>the <c><paramref name="x" /></c> parameter is not an <see cref="Int32" />, or</item>
-        ///         <item>the <c><paramref name="y" /></c> parameter is not an <see cref="Int32" />.</item>
-        ///     </list>
-        /// </exception>
-        public new Boolean Equals(Object? x, Object? y)
-        {
-            if (!(x is Int32 xInt))
-            {
-                throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(x));
-            }
-            if (!(y is Int32 yInt))
-            {
-                throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(y));
-            }
-
-            return Equals(xInt, yInt);
-        }
-
         /// <summary>Compares <c><paramref name="x" /></c> and <c><paramref name="y" /></c>, and returns a value indicating whether one is less than, equal to or greater than the other.</summary>
         /// <param name="x">The first index to compare.</param>
         /// <param name="y">The second index to compare.</param>
@@ -185,5 +140,50 @@ namespace MagicText.Internal
 
             return Compare(xInt, yInt);
         }
+
+        /// <summary>Determines whether <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal.</summary>
+        /// <param name="x">The first index to compare.</param>
+        /// <param name="y">The second index to compare.</param>
+        /// <returns>If <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal, <c>true</c>; <c>false</c> otherwise.</returns>
+        public Boolean Equals(Int32 x, Int32 y) =>
+            (x == y);
+
+        /// <summary>Determines whether <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal.</summary>
+        /// <param name="x">The first <see cref="Object" /> to compare.</param>
+        /// <param name="y">The second <see cref="Object" /> to compare.</param>
+        /// <returns>If <c><paramref name="x" /></c> and <c><paramref name="y" /></c> are equal as indices, <c>true</c>; <c>false</c> otherwise.</returns>
+        /// <exception cref="ArgumentException">
+        ///     <para>Either:</para>
+        ///     <list type="number">
+        ///         <item>the <c><paramref name="x" /></c> parameter is not an <see cref="Int32" />, or</item>
+        ///         <item>the <c><paramref name="y" /></c> parameter is not an <see cref="Int32" />.</item>
+        ///     </list>
+        /// </exception>
+        public new Boolean Equals(Object? x, Object? y)
+        {
+            if (!(x is Int32 xInt))
+            {
+                throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(x));
+            }
+            if (!(y is Int32 yInt))
+            {
+                throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(y));
+            }
+
+            return Equals(xInt, yInt);
+        }
+
+        /// <summary>Returns the hash code for the <c><paramref name="obj" /></c>.</summary>
+        /// <param name="obj">The index for which the hash code is to be returned.</param>
+        /// <returns>The hash code for the <c><paramref name="obj" /></c>.</returns>
+        public Int32 GetHashCode(Int32 obj) =>
+            obj.GetHashCode();
+
+        /// <summary>Returns the hash code for the <c><paramref name="obj" /></c>.</summary>
+        /// <param name="obj">The index for which the hash code is to be returned.</param>
+        /// <returns>The hash code for the <c><paramref name="obj" /></c>.</returns>
+        /// <exception cref="ArgumentException">The <c><paramref name="obj" /></c> parameter is not an <see cref="Int32" />.</exception>
+        public Int32 GetHashCode(Object? obj) =>
+            obj is Int32 objInt ? GetHashCode(objInt) : throw new ArgumentException(ObjectNotInt32ErrorMessage, nameof(obj));
     }
 }
