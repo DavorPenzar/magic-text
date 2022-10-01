@@ -9,10 +9,10 @@ namespace MagicText
     ///     <para>Empty characters (tokens) (which are ignored if <see cref="ShatteringOptions.IgnoreEmptyTokens" /> is <c>true</c>) are considered those characters that yield <c>true</c> when converted to <see cref="String" />s via the <see cref="Char.ToString(Char)" /> method and checked via the <see cref="String.IsNullOrEmpty(String)" /> method.</para>
     /// </remarks>
     [CLSCompliant(true)]
-    public sealed class CharTokeniser : LineShatteringTokeniser
+    public sealed class ToCharsTokeniser : LineShatteringTokeniser
     {
         /// <summary>Creates a default tokeniser.</summary>
-        public CharTokeniser() : base()
+        public ToCharsTokeniser() : base()
         {
         }
 
