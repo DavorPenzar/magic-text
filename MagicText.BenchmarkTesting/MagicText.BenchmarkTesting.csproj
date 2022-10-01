@@ -26,6 +26,10 @@
 		<PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
 		<PackageReference Include="BenchmarkDotNet.Annotations" Version="0.13.2" />
 		<PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.2" />
+		<PackageReference Include="System.Linq" Version="4.3.0" />
+		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
+		<PackageReference Include="System.Net.Http" Version="4.3.4" /> <!-- Works with 4.3.0, but that version exposes a severe vulnerability: http://github.com/advisories/GHSA-7jgj-8wvc-jh57 -->
+		<PackageReference Include="System.Net.Primitives" Version="4.3.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\MagicText\MagicText.csproj" />

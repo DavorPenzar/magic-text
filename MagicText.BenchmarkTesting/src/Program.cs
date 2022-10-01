@@ -1,3 +1,5 @@
+using BenchmarkDotNet;
+using BenchmarkDotNet.Running;
 using System;
 
 namespace MagicText.BenchmarkTesting
@@ -9,6 +11,8 @@ namespace MagicText.BenchmarkTesting
 
         public static Int32 Main(String[]? args = null)
         {
+            BenchmarkRunner.Run<StreamBenchmarking>();
+
             return ExitSuccess;
         }
     }
