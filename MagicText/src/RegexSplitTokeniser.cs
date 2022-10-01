@@ -125,9 +125,6 @@ namespace MagicText
         ///     <para>Performance aside, the initial splitting is equivalent to calling the <see cref="System.Text.RegularExpressions.Regex.Split(String, String, RegexOptions)" /> method with the <c><paramref name="line" /></c> as the first argument, the <see cref="RegexTokeniser.Pattern" /> as the second and <see cref="RegexTokeniser.Options" /> as the third.</para>
         ///     <para>After splitting the <c><paramref name="line" /></c> at regular expression separator pattern matches, the transformation of tokens is done using the <see cref="TransformToken" /> function if it is set.</para>
         ///     <para>The returned enumerable might merely be a query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>). If multiple enumeration processes over the enumerable should be performed, it is advisable to convert it to a fully built container beforehand, such as a <see cref="List{T}" /> via the <see cref="List{T}.List(IEnumerable{T})" /> constructor or the <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.</para>
-        ///
-        ///     <h3>Notes to Implementers</h3>
-        ///     <para>This method cannot be overridden.</para>
         /// </remarks>
         protected override IEnumerable<String?> ShatterLine(String line)
         {

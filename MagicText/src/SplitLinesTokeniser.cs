@@ -57,9 +57,6 @@ namespace MagicText
         /// <exception cref="ArgumentNullException">The <c><paramref name="line" /></c> parameter is <c>null</c>.</exception>
         /// <remarks>
         ///     <para>The returned enumerable is merely a query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>). If multiple enumeration processes over the enumerable should be performed, it is advisable to convert it to a fully built container beforehand, such as a <see cref="List{T}" /> via the <see cref="List{T}.List(IEnumerable{T})" /> constructor or the <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.</para>
-        ///
-        ///     <h3>Notes to Implementers</h3>
-        ///     <para>This method cannot be overridden.</para>
         /// </remarks>
         protected override IEnumerable<String?> ShatterLine(String line)
         {

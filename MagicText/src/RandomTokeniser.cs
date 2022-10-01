@@ -130,9 +130,6 @@ namespace MagicText
         /// <remarks>
         ///     <para>The <c><paramref name="line" /></c> is shattered into tokens using the <see cref="BreakToken" /> function. The <see cref="BreakToken" /> function may be nondeterministic (and it generally is indeed nondeterministic, unless the <see cref="RandomTokeniser(Func{Int32, Int32, Int32, Boolean})" /> constructor was used with passing a deterministic function as the argument), therefore two different shattering operations of the same <c><paramref name="line" /></c> may yield different results.</para>
         ///     <para>The returned enumerable is merely a query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>). If the <see cref="BreakToken" /> is not a deterministic function, two distinct enumerators over the query may return different results. Furthermore, if multiple enumeration processes over the enumerable should be performed, it is advisable to convert it to a fully built container beforehand, such as a <see cref="List{T}" /> via the <see cref="List{T}.List(IEnumerable{T})" /> constructor or the <see cref="Enumerable.ToList{TSource}(IEnumerable{TSource})" /> extension method.</para>
-        ///
-        ///     <h3>Notes to Implementers</h3>
-        ///     <para>This method cannot be overridden.</para>
         /// </remarks>
         protected override IEnumerable<String> ShatterLine(String line)
         {
