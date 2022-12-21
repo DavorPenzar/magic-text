@@ -4,7 +4,7 @@
 
 ##  Setup
 
-After downloading the project, it is ready to run. Originally, it targets the [*.NET 6* framework](http://github.com/dotnet/core/blob/main/6.0/README.md), but this can be easily changed to as low as [*.NET Core 2.0*](http://github.com/dotnet/core/blob/main/2.0/README.md)) without changing the source code (other than the [`TargetFramework`](http://docs.microsoft.com/en-gb/dotnet/core/project-sdk/msbuild-props#targetframework) property in the [`MagicText.Example.csproj` project file](MagicText.Example.csproj)).
+After downloading the project, it is ready to run. Originally, it targets the [*.NET 7* framework](http://github.com/dotnet/core/blob/main/7.0/README.md), but this can be easily changed to as low as [*.NET Core 2.0*](http://github.com/dotnet/core/blob/main/2.0/README.md)) without changing the source code (other than the [`TargetFramework`](http://docs.microsoft.com/en-gb/dotnet/core/project-sdk/msbuild-props#targetframework) property in the [`MagicText.Example.csproj` project file](MagicText.Example.csproj)).
 
 ### Runtime Settings
 

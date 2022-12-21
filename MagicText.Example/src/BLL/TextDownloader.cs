@@ -228,7 +228,6 @@ namespace MagicText.Example.BLL
                             Convert.ToInt32(statusCode),
                             statusCode.ToString(),
                             stopwatch.ElapsedMilliseconds
-
                     );
 
 #if NET5_0_OR_GREATER

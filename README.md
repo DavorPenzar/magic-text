@@ -164,7 +164,7 @@ Do you know that there's a spark in
 
 ```
 
-**Nota bene.** The results above were obtained by running the code in a 64-bit version ([*x64*](http://en.wikipedia.org/wiki/X86-64)) of the [*.NET 6* framework](http://github.com/dotnet/core/blob/main/6.0/README.md) on [*Microsoft Windows 10*](http://microsoft.com/en-gb/windows/get-windows-10). Running the code in a different environment may yield different results&mdash;this has not been tested.
+**Nota bene.** The results above were obtained by running the code in a 64-bit version ([*x64*](http://en.wikipedia.org/wiki/X86-64)) of the [*.NET 7* framework](http://github.com/dotnet/core/blob/main/7.0/README.md) on [*Microsoft Windows 10*](http://microsoft.com/en-gb/windows/get-windows-10). Running the code in a different environment may yield different results&mdash;this has not been tested.
 
 ### Further Examples
 
@@ -372,7 +372,7 @@ Also, note that the [information theory](http://en.wikipedia.org/wiki/Informatio
 
 ### Even Further Examples
 
-The [`MagicText.Example`](MagicText.Example/) project targeted for [*.NET 6*](http://github.com/dotnet/core/blob/main/6.0/README.md) (but compatible with as low as [*.NET Core 2.0*](http://github.com/dotnet/core/blob/main/2.0/README.md)) is a fully-working project written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) that demonstrates how to use online sources to download an original text and use it for the generation of a new, random text.
+The [`MagicText.Example`](MagicText.Example/) project targeted for [*.NET 7*](http://github.com/dotnet/core/blob/main/7.0/README.md) (but compatible with as low as [*.NET Core 2.0*](http://github.com/dotnet/core/blob/main/2.0/README.md)) is a fully-working project written in [*C#*](http://docs.microsoft.com/en-gb/dotnet/csharp/) that demonstrates how to use online sources to download an original text and use it for the generation of a new, random text.
 
 ##  Remarks
 

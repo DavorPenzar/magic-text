@@ -127,11 +127,11 @@ namespace MagicText
             randomSeed = GetRandomSeed((Int32)((1073741827L * AssemblyInfo.InitialisationTimePoint.Ticks + 1073741789L) & (Int64)Int32.MaxValue));
         }
 
-        /// <summary>Gets a strictly positive random seed value constructed from a raw <see cref="Int32" /> <c><paramref name="value" /></c>.</summary>
+        /// <summary>Gets a strictly positive random seed value constructed from the raw <see cref="Int32" /> <c><paramref name="value" /></c>.</summary>
         /// <param name="value">The original <see cref="Int32" /> value.</param>
         /// <returns>The strictly positive random seed value defined by the raw <c><paramref name="value" /></c>.</returns>
         /// <remarks>
-        ///     <para>The strictly positive random seed value is obtained by taking the maximum of <c><paramref name="value" /></c>, its bitwise complement and 1.</para>
+        ///     <para>The strictly positive random seed value is obtained by taking the maximum of <c><paramref name="value" /></c>, its bitwise complement, and 1.</para>
         /// </remarks>
         private static Int32 GetRandomSeed(Int32 value)
         {
