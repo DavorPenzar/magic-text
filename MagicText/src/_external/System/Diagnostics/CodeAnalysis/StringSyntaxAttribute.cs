@@ -41,6 +41,10 @@ namespace System.Diagnostics.CodeAnalysis
             }
         }
 
+        public StringSyntaxAttribute(String syntax, Object? argument) : this(syntax, new Object?[] { argument })
+        {
+        }
+
         public StringSyntaxAttribute(String syntax) : this(syntax, Array.Empty<Object>())
         {
         }

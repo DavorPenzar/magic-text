@@ -436,7 +436,7 @@ namespace MagicText.Internal.Json
                 // Expand the array if needed.
                 if (size == array.Length)
                 {
-                    Buffering.Expand(ref array);
+                    ArrayLengthManipulation.Expand(ref array);
                 }
 
                 // Read the current item.
@@ -444,7 +444,7 @@ namespace MagicText.Internal.Json
             }
 
             // Trim the array.
-            Buffering.TrimExcess(ref array, size);
+            ArrayLengthManipulation.TrimExcess(ref array, size);
 
             // Return the array.
             return array;

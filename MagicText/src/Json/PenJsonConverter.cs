@@ -163,8 +163,8 @@ namespace MagicText.Json
 
             JsonConversionHelper.WriteBoolean(writer, convertName(nameof(Pen.Interned)), value.Interned, options);
             WriteStringComparer(writer, convertName(nameof(Pen.Comparer)), value.Comparer, defaultComparerConverter, options);
-            JsonConversionHelper.WriteStringArray(writer, convertName(nameof(Pen.Context)), value.Context?.AsBuffer()!, options);
-            JsonConversionHelper.WriteInt32Array(writer, convertName(nameof(Pen.Index)), value.Index?.AsBuffer(), options);
+            JsonConversionHelper.WriteStringArray(writer, convertName(nameof(Pen.Context)), value.Context?.ToArray()!, options);
+            JsonConversionHelper.WriteInt32Array(writer, convertName(nameof(Pen.Index)), value.Index?.ToArray(), options);
             JsonConversionHelper.WriteString(writer, convertName(nameof(Pen.SentinelToken)), value.SentinelToken, options);
         }
 

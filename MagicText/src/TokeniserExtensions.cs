@@ -1,4 +1,3 @@
-using MagicText.Internal.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -298,7 +297,7 @@ namespace MagicText
                 throw new ArgumentNullException(nameof(tokeniser), TokeniserNullErrorMessage);
             }
 
-            return tokeniser.Shatter(inputReader, options).AsBuffer();
+            return tokeniser.Shatter(inputReader, options).ToArray();
         }
 
         /// <summary>Shatters <c><paramref name="text" /></c> into a token <see cref="Array" />.</summary>
@@ -321,7 +320,7 @@ namespace MagicText
         ///     <para>This extension method is essentially the same as chaining the <see cref="TokeniserExtensions.Shatter(ITokeniser, String, ShatteringOptions)" /> extension method and the <see cref="Enumerable.ToArray{TSource}(IEnumerable{TSource})" /> extension method. However, it is still provided as a convenient single-call self-explanatory method.</para>
         /// </remarks>
         public static String?[] ShatterToArray(this ITokeniser tokeniser, String text, ShatteringOptions? options = null) =>
-            Shatter(tokeniser, text, options).AsBuffer();
+            Shatter(tokeniser, text, options).ToArray();
 
 #if NETSTANDARD2_1_OR_GREATER
 
@@ -347,7 +346,7 @@ namespace MagicText
         ///     <para>This extension method is essentially the same as chaining the <see cref="TokeniserExtensions.Shatter(ITokeniser, Stream, Encoding, ShatteringOptions)" /> extension method and the <see cref="Enumerable.ToArray{TSource}(IEnumerable{TSource})" /> extension method. However, it is still provided as a convenient single-call self-explanatory method.</para>
         /// </remarks>
         public static String?[] ShatterToArray(this ITokeniser tokeniser, Stream input, Encoding? encoding, ShatteringOptions? options = null) =>
-            Shatter(tokeniser, input, encoding, options).AsBuffer();
+            Shatter(tokeniser, input, encoding, options).ToArray();
 
 #else
 
@@ -374,7 +373,7 @@ namespace MagicText
         ///     <para>This extension method is essentially the same as chaining the <see cref="TokeniserExtensions.Shatter(ITokeniser, Stream, Encoding, ShatteringOptions)" /> extension method and the <see cref="Enumerable.ToArray{TSource}(IEnumerable{TSource})" /> extension method. However, it is still provided as a convenient single-call self-explanatory method.</para>
         /// </remarks>
         public static String?[] ShatterToArray(this ITokeniser tokeniser, Stream input, Encoding encoding, ShatteringOptions? options = null) =>
-            Shatter(tokeniser, input, encoding, options).AsBuffer();
+            Shatter(tokeniser, input, encoding, options).ToArray();
 
 #endif // NETSTANDARD2_1_OR_GREATER
 
@@ -418,7 +417,7 @@ namespace MagicText
         /// <exception cref="OperationCanceledException">The operation is cancelled via the <c><paramref name="cancellationToken" /></c>.</exception>
         /// <remarks>
         ///     <para>Since <see cref="String" />s are immutable and the encapsulated <see cref="StringReader" /> is not available outside of the method, the <c><paramref name="cancellationToken" /></c> parameter may be used to cancel the shattering operation without extra caution.</para>
-        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" /> dependent and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
+        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" />-dependent and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
         ///     <para>The returned asynchronous enumerable is merely an asynchronous query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>). If a fully built container is needed, consider using the 0 extension method instead to improve performance.</para>
         ///     <para>The exceptions thrown by the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method call are not caught.</para>
         /// </remarks>
@@ -462,7 +461,7 @@ namespace MagicText
         ///     <para>The <see cref="StreamReader" /> used in the method for reading from the <c><paramref name="input" /></c> is constructed with the standard library default buffer size, but other custom library defaults are used: byte order marks (BOM) are not looked for at the beginning of the <c><paramref name="input" /></c> and the <c><paramref name="input" /></c> is left open after disposing the <see cref="StreamReader" />. To control the settings of the <see cref="StreamReader" />, use the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method with a custom <see cref="StreamReader" /> instead.</para>
         ///     <para>The <c><paramref name="input" /></c> is neither disposed of nor closed in the method. This must be done manually <strong>after</strong> retrieving the tokens.</para>
         ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, the data having already been read from the <c><paramref name="input" /></c> may be irrecoverable after cancelling the operation.</para>
-        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" /> dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
+        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" />-dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
         ///     <para>The returned asynchronous enumerable is merely an asynchronous query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>). If a fully built container is needed, consider using the <see cref="ShatterToArrayAsync(ITokeniser, Stream, Encoding, ShatteringOptions, Boolean, Boolean, Action{OperationCanceledException}, CancellationToken)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after closing/disposing the <c><paramref name="input" /></c>.</para>
         ///     <para>The exceptions thrown by the <see cref="StreamReader(Stream, Encoding, Boolean, Int32, Boolean)" /> constructor call and the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method call are not caught.</para>
         /// </remarks>
@@ -512,7 +511,7 @@ namespace MagicText
         ///     <para>The <see cref="StreamReader" /> used in the method for reading from the <c><paramref name="input" /></c> is constructed with the standard library default buffer size, but other custom library defaults are used: byte order marks (BOM) are not looked for at the beginning of the <c><paramref name="input" /></c> and the <c><paramref name="input" /></c> is left open after disposing the <see cref="StreamReader" />. To control the settings of the <see cref="StreamReader" />, use the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method with a custom <see cref="StreamReader" /> instead.</para>
         ///     <para>The <c><paramref name="input" /></c> is neither disposed of nor closed in the method. This must be done manually <strong>after</strong> retrieving the tokens.</para>
         ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, the data having already been read from the <c><paramref name="input" /></c> may be irrecoverable after cancelling the operation.</para>
-        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" /> dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
+        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" />-dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
         ///     <para>The returned asynchronous enumerable is merely an asynchronous query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>). If a fully built container is needed, consider using the <see cref="ShatterToArrayAsync(ITokeniser, Stream, Encoding, ShatteringOptions, Boolean, Boolean, Action{OperationCanceledException}, CancellationToken)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after closing/disposing the <c><paramref name="input" /></c>.</para>
         ///     <para>The exceptions thrown by the <see cref="StreamReader(Stream, Encoding, Boolean, Int32, Boolean)" /> constructor call and the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method call are not caught.</para>
         /// </remarks>
@@ -564,7 +563,7 @@ namespace MagicText
         ///     <para>The <see cref="StreamReader" /> used in the method for reading from the <c><paramref name="input" /></c> is constructed with the standard library default <see cref="Encoding" /> and buffer size, but other custom library defaults are used: byte order marks (BOM) are not looked for at the beginning of the <c><paramref name="input" /></c> and the <c><paramref name="input" /></c> is left open after disposing the <see cref="StreamReader" />. To control the settings of the <see cref="StreamReader" />, use the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method with a custom <see cref="StreamReader" /> instead.</para>
         ///     <para>The <c><paramref name="input" /></c> is neither disposed of nor closed in the method. This must be done manually <strong>after</strong> retrieving the tokens.</para>
         ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, the data having already been read from the <c><paramref name="input" /></c> may be irrecoverable after cancelling the operation.</para>
-        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" /> dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
+        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" />-dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
         ///     <para>The returned asynchronous enumerable is merely an asynchronous query for enumerating tokens (also known as <a href="http://docs.microsoft.com/en-gb/dotnet/standard/linq/deferred-execution-lazy-evaluation#deferred-execution"><em>deferred execution</em></a>). If a fully built container is needed, consider using the <see cref="ShatterToArrayAsync(ITokeniser, Stream, ShatteringOptions, Boolean, Boolean, Action{OperationCanceledException}, CancellationToken)" /> extension method instead to improve performance and to avoid accidentally enumerating the query after closing/disposing the <c><paramref name="input" /></c>.</para>
         ///     <para>The exceptions thrown by the <see cref="StreamReader(Stream, Encoding, Boolean, Int32, Boolean)" /> constructor call and the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method call are not caught.</para>
         /// </remarks>
@@ -596,7 +595,7 @@ namespace MagicText
         /// <remarks>
         ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, if the <c><paramref name="inputReader" /></c> is a <see cref="StreamReader" />, the data having already been read from the underlying <see cref="Stream" /> may be irrecoverable after cancelling the operation.</para>
         ///     <para>If the <c><paramref name="throwExceptionOnCancellation" /></c> parameter is <c>false</c>, the list of tokens read up until the cancellation is returned if the shattering operation is cancelled. Additionally, if the <c><paramref name="interceptCancellationCallback" /></c> parameter is provided (is not <c>null</c>), it is invoked on the caught <see cref="OperationCanceledException" /> without throwing it (unless <c><paramref name="interceptCancellationCallback" /></c> throws it inself—this is out of the scope of this extension method).</para>
-        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" /> dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the resource provided by the <c><paramref name="inputReader" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
+        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" />-dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the resource provided by the <c><paramref name="inputReader" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
         ///     <para>The returned <see cref="Array" /> is a fully-built container and is therefore safe to enumerate even after disposing the <c><paramref name="inputReader" /></c>. However, as such it is impossible to enumerate it before the complete reading and shattering operation is finished.</para>
         ///     <para>The exceptions thrown by the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method call are not caught.</para>
         ///
@@ -610,19 +609,13 @@ namespace MagicText
                 throw new ArgumentNullException(nameof(tokeniser), TokeniserNullErrorMessage);
             }
 
-            Int32 count = 0;
-            String?[] tokens = Array.Empty<String>();
+            List<String?> tokens = new List<String?>();
 
             try
             {
                 await foreach (String? token in tokeniser.ShatterAsync(inputReader, options, continueTasksOnCapturedContext, cancellationToken).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
                 {
-                    if (count >= tokens.Length)
-                    {
-                        Buffering.Expand(ref tokens);
-                    }
-
-                    tokens[count++] = token;
+                    tokens.Add(token);
                 }
             }
             catch (OperationCanceledException exception) when (!throwExceptionOnCancellation)
@@ -630,9 +623,7 @@ namespace MagicText
                 interceptCancellationCallback?.Invoke(exception);
             }
 
-            Buffering.TrimExcess(ref tokens, count);
-
-            return tokens;
+            return tokens.ToArray();
         }
 
         /// <summary>Shatters <c><paramref name="text" /></c> into a token <see cref="Array" /> asynchronously.</summary>
@@ -655,7 +646,7 @@ namespace MagicText
         /// <remarks>
         ///     <para>Since <see cref="String" />s are immutable and the encapsulated <see cref="StringReader" /> is not available outside of the method, the <c><paramref name="cancellationToken" /></c> parameter may be used to cancel the shattering operation without extra caution.</para>
         ///     <para>If the <c><paramref name="throwExceptionOnCancellation" /></c> parameter is <c>false</c>, the list of tokens read up until the cancellation is returned if the shattering operation is cancelled. Additionally, if the <c><paramref name="interceptCancellationCallback" /></c> parameter is provided (is not <c>null</c>), it is invoked on the caught <see cref="OperationCanceledException" /> without throwing it (unless <c><paramref name="interceptCancellationCallback" /></c> throws it inself—this is out of the scope of this extension method).</para>
-        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" /> dependent and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
+        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" />-dependent and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
         ///     <para>The returned <see cref="Array" /> is a fully-built container.</para>
         ///     <para>The exceptions thrown by the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method call are not caught.</para>
         ///
@@ -664,19 +655,13 @@ namespace MagicText
         /// </remarks>
         public static async Task<String?[]> ShatterToArrayAsync(this ITokeniser tokeniser, String text, ShatteringOptions? options = null, Boolean continueTasksOnCapturedContext = false, Boolean throwExceptionOnCancellation = true, Action<OperationCanceledException>? interceptCancellationCallback = null, CancellationToken cancellationToken = default)
         {
-            Int32 count = 0;
-            String?[] tokens = Array.Empty<String>();
+            List<String?> tokens = new List<String?>();
 
             try
             {
                 await foreach (String? token in ShatterAsync(tokeniser, text, options, continueTasksOnCapturedContext, cancellationToken).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
                 {
-                    if (count >= tokens.Length)
-                    {
-                        Buffering.Expand(ref tokens);
-                    }
-
-                    tokens[count++] = token;
+                    tokens.Add(token);
                 }
             }
             catch (OperationCanceledException exception) when (!throwExceptionOnCancellation)
@@ -684,9 +669,7 @@ namespace MagicText
                 interceptCancellationCallback?.Invoke(exception);
             }
 
-            Buffering.TrimExcess(ref tokens, count);
-
-            return tokens;
+            return tokens.ToArray();
         }
 
 #if NETSTANDARD2_1_OR_GREATER
@@ -714,7 +697,7 @@ namespace MagicText
         ///     <para>The <c><paramref name="input" /></c> is neither disposed of nor closed in the method. This must be done manually <strong>after</strong> retrieving the tokens.</para>
         ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, the data having already been read from the <c><paramref name="input" /></c> may be irrecoverable after cancelling the operation.</para>
         ///     <para>If the <c><paramref name="throwExceptionOnCancellation" /></c> parameter is <c>false</c>, the list of tokens read up until the cancellation is returned if the shattering operation is cancelled. Additionally, if the <c><paramref name="interceptCancellationCallback" /></c> parameter is provided (is not <c>null</c>), it is invoked on the caught <see cref="OperationCanceledException" /> without throwing it (unless <c><paramref name="interceptCancellationCallback" /></c> throws it inself—this is out of the scope of this extension method).</para>
-        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" /> dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
+        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" />-dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
         ///     <para>The returned <see cref="Array" /> is a fully-built container and is therefore safe to enumerate even after disposing/closing the <c><paramref name="input" /></c>. However, as such it is impossible to enumerate it before the complete reading and shattering operation is finished.</para>
         ///     <para>The exceptions thrown by the <see cref="StreamReader(Stream, Encoding, Boolean, Int32, Boolean)" /> constructor call and the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method call are not caught.</para>
         ///
@@ -723,19 +706,13 @@ namespace MagicText
         /// </remarks>
         public static async Task<String?[]> ShatterToArrayAsync(this ITokeniser tokeniser, Stream input, Encoding? encoding, ShatteringOptions? options = null, Boolean continueTasksOnCapturedContext = false, Boolean throwExceptionOnCancellation = true, Action<OperationCanceledException>? interceptCancellationCallback = null, CancellationToken cancellationToken = default)
         {
-            Int32 count = 0;
-            String?[] tokens = Array.Empty<String>();
+            List<String?> tokens = new List<String?>();
 
             try
             {
                 await foreach (String? token in ShatterAsync(tokeniser, input, encoding, options, continueTasksOnCapturedContext, cancellationToken).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
                 {
-                    if (count >= tokens.Length)
-                    {
-                        Buffering.Expand(ref tokens);
-                    }
-
-                    tokens[count++] = token;
+                    tokens.Add(token);
                 }
             }
             catch (OperationCanceledException exception) when (!throwExceptionOnCancellation)
@@ -743,9 +720,7 @@ namespace MagicText
                 interceptCancellationCallback?.Invoke(exception);
             }
 
-            Buffering.TrimExcess(ref tokens, count);
-
-            return tokens;
+            return tokens.ToArray();
         }
 
 #else
@@ -774,7 +749,7 @@ namespace MagicText
         ///     <para>The <c><paramref name="input" /></c> is neither disposed of nor closed in the method. This must be done manually <strong>after</strong> retrieving the tokens.</para>
         ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, the data having already been read from the <c><paramref name="input" /></c> may be irrecoverable after cancelling the operation.</para>
         ///     <para>If the <c><paramref name="throwExceptionOnCancellation" /></c> parameter is <c>false</c>, the list of tokens read up until the cancellation is returned if the shattering operation is cancelled. Additionally, if the <c><paramref name="interceptCancellationCallback" /></c> parameter is provided (is not <c>null</c>), it is invoked on the caught <see cref="OperationCanceledException" /> without throwing it (unless <c><paramref name="interceptCancellationCallback" /></c> throws it inself—this is out of the scope of this extension method).</para>
-        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" /> dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
+        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" />-dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
         ///     <para>The returned <see cref="Array" /> is a fully-built container and is therefore safe to enumerate even after disposing/closing the <c><paramref name="input" /></c>. However, as such it is impossible to enumerate it before the complete reading and shattering operation is finished.</para>
         ///     <para>The exceptions thrown by the <see cref="StreamReader(Stream, Encoding, Boolean, Int32, Boolean)" /> constructor call and the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method call are not caught.</para>
         ///
@@ -783,19 +758,13 @@ namespace MagicText
         /// </remarks>
         public static async Task<String?[]> ShatterToArrayAsync(this ITokeniser tokeniser, Stream input, Encoding encoding, ShatteringOptions? options = null, Boolean continueTasksOnCapturedContext = false, Boolean throwExceptionOnCancellation = true, Action<OperationCanceledException>? interceptCancellationCallback = null, CancellationToken cancellationToken = default)
         {
-            Int32 count = 0;
-            String?[] tokens = Array.Empty<String>();
+            List<String?> tokens = new List<String?>();
 
             try
             {
                 await foreach (String? token in ShatterAsync(tokeniser, input, encoding, options, continueTasksOnCapturedContext, cancellationToken).WithCancellation(cancellationToken).ConfigureAwait(continueTasksOnCapturedContext))
                 {
-                    if (count >= tokens.Length)
-                    {
-                        Buffering.Expand(ref tokens);
-                    }
-
-                    tokens[count++] = token;
+                    tokens.Add(token);
                 }
             }
             catch (OperationCanceledException exception) when (!throwExceptionOnCancellation)
@@ -803,9 +772,7 @@ namespace MagicText
                 interceptCancellationCallback?.Invoke(exception);
             }
 
-            Buffering.TrimExcess(ref tokens, count);
-
-            return tokens;
+            return tokens.ToArray();
         }
 
 #endif // NETSTANDARD2_1_OR_GREATER
@@ -832,7 +799,7 @@ namespace MagicText
         ///     <para>The <c><paramref name="input" /></c> is neither disposed of nor closed in the method. This must be done manually <strong>after</strong> retrieving the tokens.</para>
         ///     <para>Although the method accepts a <c><paramref name="cancellationToken" /></c> to support cancelling the operation, this should be used with caution. For instance, the data having already been read from the <c><paramref name="input" /></c> may be irrecoverable after cancelling the operation.</para>
         ///     <para>If the <c><paramref name="throwExceptionOnCancellation" /></c> parameter is <c>false</c>, the list of tokens read up until the cancellation is returned if the shattering operation is cancelled. Additionally, if the <c><paramref name="interceptCancellationCallback" /></c> parameter is provided (is not <c>null</c>), it is invoked on the caught <see cref="OperationCanceledException" /> without throwing it (unless <c><paramref name="interceptCancellationCallback" /></c> throws it inself—this is out of the scope of this extension method).</para>
-        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" /> dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
+        ///     <para>Usually the default <c>false</c> value of the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter is desirable as it may optimise the asynchronous shattering process. However, in some cases the <c><paramref name="tokeniser" /></c>'s logic might be <see cref="SynchronizationContext" />-dependent and/or only the original <see cref="SynchronizationContext" /> might have reading access to the resource provided by the <c><paramref name="input" /></c>, and thus the <c><paramref name="continueTasksOnCapturedContext" /></c> parameter should be set to <c>true</c> to avoid errors.</para>
         ///     <para>The returned <see cref="Array" /> is a fully-built container and is therefore safe to enumerate even after disposing/closing the <c><paramref name="input" /></c>. However, as such it is impossible to enumerate it before the complete reading and shattering operation is finished.</para>
         ///     <para>The exceptions thrown by the <see cref="StreamReader(Stream, Encoding, Boolean, Int32, Boolean)" /> constructor call and the <see cref="ITokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> method call are not caught.</para>
         ///

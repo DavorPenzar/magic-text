@@ -31,7 +31,11 @@ namespace System.Diagnostics.CodeAnalysis
         {
         }
 
-        private MemberNotNullWhenAttribute() : this(false, Array.Empty<String>())
+        public MemberNotNullWhenAttribute(Boolean returnValue) : this(returnValue, Array.Empty<String>())
+        {
+        }
+
+        private MemberNotNullWhenAttribute() : this(false)
         {
         }
     }

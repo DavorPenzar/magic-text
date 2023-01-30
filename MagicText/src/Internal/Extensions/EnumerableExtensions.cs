@@ -24,9 +24,10 @@ namespace MagicText.Internal.Extensions
             source switch
             {
                 null => throw new ArgumentNullException(nameof(source), SourceNullErrorMessage),
+                TSource[] sourceArray => sourceArray,
                 IReadOnlyList<TSource> sourceReadOnlyList => sourceReadOnlyList,
                 IList<TSource> sourceList => new ReadOnlyCollection<TSource>(sourceList),
-                _ => Buffering.AsBuffer(source)
+                _ => source.ToArray()
             };
 
         /// <summary>Determines whether or not the <c><paramref name="source" /></c> contains an item of a <c><paramref name="type" /></c>.</summary>
@@ -108,37 +109,25 @@ namespace MagicText.Internal.Extensions
 
             comparer ??= Comparer<TSource>.Default;
 
-            Int32 count = 0;
-            TSource[] distinctItems = source switch
+            List<TSource> distinctItems = source switch
             {
-                ICollection<TSource> sourceCollection => new TSource[sourceCollection.Count],
-                IReadOnlyCollection<TSource> sourceReadOnlyCollection => new TSource[sourceReadOnlyCollection.Count],
-                _ => Array.Empty<TSource>()
+                ICollection<TSource> sourceCollection => new List<TSource>(sourceCollection.Count),
+                IReadOnlyCollection<TSource> sourceReadOnlyCollection => new List<TSource>(sourceReadOnlyCollection.Count),
+                _ => new List<TSource>()
             };
 
             foreach (TSource item in source)
             {
-                Int32 position = Array.BinarySearch(distinctItems, 0, count, item, comparer);
+                Int32 position = distinctItems.BinarySearch(item, comparer);
                 if (position >= 0)
                 {
                     continue;
                 }
 
-                position = ~position;
-
-                if (count >= distinctItems.Length - 1)
-                {
-                    Buffering.Expand(ref distinctItems);
-                }
-
-                Array.Copy(distinctItems, position, distinctItems, position + 1, count - position);
-                distinctItems[position] = item;
-                ++count;
+                distinctItems.Insert(~position, item);
             }
 
-            Buffering.TrimExcess(ref distinctItems, count);
-
-            return distinctItems;
+            return distinctItems.ToArray();
         }
 
         /// <summary>Extracts distinct items from the <c><paramref name="source" /></c> preserving their original order from the <c><paramref name="source" /></c>.</summary>

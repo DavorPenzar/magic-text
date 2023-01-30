@@ -28,7 +28,7 @@ namespace System.Diagnostics.CodeAnalysis
         {
         }
 
-        private MemberNotNullAttribute() : this(Array.Empty<String>())
+        public MemberNotNullAttribute() : this(Array.Empty<String>())
         {
         }
     }

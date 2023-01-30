@@ -63,7 +63,7 @@ namespace MagicText
         /// <returns>The internal <em>substring</em> separators.</returns>
         /// <remarks>
         ///     <para>Even if no explicit enumerable of <em>substring</em> separators were provided in the construction of the tokeniser, or an explicit <c>null</c> was passed to the constructor, the <see cref="Separator" /> property would not be <c>null</c>. Instead, it is going to be an empty <see cref="Array" /> of <see cref="String" />s. Furthermore, <c>null</c>s, empty <see cref="String" />s (<see cref="String.Empty" />) and duplicates are eliminated from the <see cref="Array" />—this improves performance of the splitting, but does not affect its behaviour (see documenrtation for <see cref="String.Split(String[], StringSplitOptions)" />).</para>
-        ///     <para>By default, it is guaranteed that the <see cref="Separator" /> are all mutually distinct and sorted ascendingly as compared by the <see cref="StringComparer.Ordinal" />. Furthermore, no element is <c>null</c> or empty Changing the values of the <see cref="Separator" /> shall cause inconsistent behaviour across multiple calls to the <see cref="ShatterLine(String)" />, <see cref="LineShatteringTokeniser.Shatter(TextReader, ShatteringOptions)" /> and <see cref="LineShatteringTokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> methods.</para>
+        ///     <para>By default, it is guaranteed that the <see cref="Separator" /> are all mutually distinct and and ordered by their first appearance in the <see cref="IEnumerable{TSource}" /> passed to the constructor. Furthermore, no element is <c>null</c> or empty. Changing the values of the <see cref="Separator" /> shall cause inconsistent behaviour across multiple calls to the <see cref="ShatterLine(String)" />, <see cref="LineShatteringTokeniser.Shatter(TextReader, ShatteringOptions)" /> and <see cref="LineShatteringTokeniser.ShatterAsync(TextReader, ShatteringOptions, Boolean, CancellationToken)" /> methods.</para>
         /// </remarks>
         private String[] Separator => _separator;
 
@@ -78,7 +78,7 @@ namespace MagicText
                 throw new ArgumentException(InvalidOptionsErrorMessage, nameof(options));
             }
 
-            _separator = (separator?.Where((new NegativePredicateWrapper<String?>(String.IsNullOrEmpty)).NegativePredicate).DistinctPreserveOrder(StringComparer.Ordinal).AsBuffer() ?? Array.Empty<String>())!; 
+            _separator = (separator?.Where((new NegativePredicateWrapper<String?>(String.IsNullOrEmpty)).NegativePredicate).DistinctPreserveOrder(StringComparer.Ordinal).ToArray() ?? Array.Empty<String>())!; 
             _options = options;
         }
 
@@ -137,8 +137,8 @@ namespace MagicText
         /// <returns>The internal <em>substring</em> separators.</returns>
         /// <remarks>
         ///     <para>Even if no explicit enumerable of <em>substring</em> separators were provided in the construction of the tokeniser, or an explicit <c>null</c> was passed to the constructor, the <see cref="Separator" /> property would not be <c>null</c>. Instead, it is going to be an empty <see cref="Array" /> of <see cref="String" />s. Furthermore, <c>null</c>s, empty <see cref="String" />s (<see cref="String.Empty" />) and duplicates are eliminated from the <see cref="Array" />—this improves performance of the splitting, but does not affect its behaviour (see documenrtation for <see cref="String.Split(String[], StringSplitOptions)" />).</para>
-        ///     <para>It is guaranteed that the returned separators are all mutually distinct and sorted ascendingly as compared by the <see cref="StringComparer.Ordinal" />.</para>
-        ///     <para>This method always creates a new <see cref="Array" /> of <see cref="String" />s and returns it. Changing the contents of the returned <see cref="Array" /> by any of the calls to this method shall affect neither the <see cref="StringSplitTokeniser" /> nor any subsequent calls to this method.</para>
+        ///     <para>It is guaranteed that the returned separators are all mutually distinct and ordered by their first appearance in the <see cref="IEnumerable{TSource}" /> passed to the constructor.</para>
+        ///     <para>This method always creates a new <see cref="Array" /> of <see cref="String" />s and returns it. Changing the contents of the returned <see cref="Array" /> by any of the calls to this method shall affect neither the <see cref="StringSplitTokeniser" /> nor any other <see cref="Array" />s returned by the calls to this method.</para>
         /// </remarks>
         public String[] GetSeparator()
         {
